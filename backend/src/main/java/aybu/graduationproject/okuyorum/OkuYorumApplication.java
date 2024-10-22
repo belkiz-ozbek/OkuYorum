@@ -1,4 +1,4 @@
-package OkuYorum.is.a.digital.platform.designed.to.help.users.manage.their.personal.libraries.and.share.books.within.their.community;
+package aybu.graduationproject.okuyorum;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
