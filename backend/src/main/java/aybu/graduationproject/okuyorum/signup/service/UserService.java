@@ -1,9 +1,9 @@
-package aybu.graduationproject.okuyorum.service;
+package aybu.graduationproject.okuyorum.signup.service;
 
+import aybu.graduationproject.okuyorum.signup.entity.User;
+import aybu.graduationproject.okuyorum.signup.repository.UserRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import aybu.graduationproject.okuyorum.entity.User;
-import aybu.graduationproject.okuyorum.repository.UserRepository;
 
 @Service
 public class UserService {

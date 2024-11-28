@@ -1,4 +1,4 @@
-package aybu.graduationproject.okuyorum.config;
+package aybu.graduationproject.okuyorum.signup.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

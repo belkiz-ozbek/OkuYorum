@@ -1,11 +1,11 @@
-package aybu.graduationproject.okuyorum.controller;
+package aybu.graduationproject.okuyorum.signup.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import aybu.graduationproject.okuyorum.entity.User;
-import aybu.graduationproject.okuyorum.service.UserService;
+import aybu.graduationproject.okuyorum.signup.entity.User;
+import aybu.graduationproject.okuyorum.signup.service.UserService;
 
 @RestController
 @RequestMapping("/api/auth")

@@ -1,8 +1,8 @@
-package aybu.graduationproject.okuyorum.repository;
+package aybu.graduationproject.okuyorum.signup.repository;
 
+import aybu.graduationproject.okuyorum.signup.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import aybu.graduationproject.okuyorum.entity.User;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {

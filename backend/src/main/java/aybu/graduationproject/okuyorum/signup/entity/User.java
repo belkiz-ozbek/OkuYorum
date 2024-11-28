@@ -1,4 +1,4 @@
-package aybu.graduationproject.okuyorum.entity;
+package aybu.graduationproject.okuyorum.signup.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
