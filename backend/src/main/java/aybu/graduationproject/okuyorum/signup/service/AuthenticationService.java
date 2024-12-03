@@ -6,14 +6,12 @@ import aybu.graduationproject.okuyorum.signup.dto.UserResponse;
 import aybu.graduationproject.okuyorum.signup.entity.User;
 import aybu.graduationproject.okuyorum.signup.enums.Role;
 import aybu.graduationproject.okuyorum.signup.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
-@RequiredArgsConstructor
 public class AuthenticationService {
 
     private final UserRepository userRepository;
@@ -23,6 +21,13 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
 
     private final PasswordEncoder passwordEncoder;
+
+    public AuthenticationService(UserRepository userRepository, JwtService jwtService, AuthenticationManager authenticationManager, PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.jwtService = jwtService;
+        this.authenticationManager = authenticationManager;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     public UserResponse save(UserDto userDto) {
         User user = User.builder()
