@@ -1,60 +1,83 @@
-"use client"
-
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { BookOpen } from 'lucide-react'
+import { BookOpen, Library, Search, Users } from 'lucide-react'
 
-export default function LoginPage() {
+export default function HomePage() {
   return (
-    <div className="min-h-screen flex flex-col">
-      <div className="flex-1 flex flex-col w-full px-4 py-8 sm:px-6 sm:py-12 lg:px-8 lg:py-24">
-        <div className="mx-auto max-w-md">
-          <div className="flex flex-col items-center space-y-2 text-center">
-            <Link href="/auth/homepage" className="flex items-center space-x-2">
-              <BookOpen className="h-8 w-8" />
-              <span className="text-2xl font-bold">OkuYorum</span>
-            </Link>
-            <h1 className="text-2xl font-semibold tracking-tight">Welcome back</h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              Enter your email and password to access your account
-            </p>
-          </div>
-          <div className="grid gap-6 mt-8">
-            <form>
-              <div className="grid gap-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    placeholder="name@example.com"
-                    type="email"
-                    autoCapitalize="none"
-                    autoComplete="email"
-                    autoCorrect="off"
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="password">Password</Label>
-                  <Input id="password" type="password" />
-                </div>
-                <Button className="w-full">Sign In</Button>
+    <div className="flex flex-col min-h-screen">
+      {/* Navigation */}
+      <header className="px-4 lg:px-6 h-14 flex items-center">
+        <Link className="flex items-center justify-center" href="#">
+          <BookOpen className="h-6 w-6" />
+          <span className="ml-2 text-lg font-semibold">OkuYorum</span>
+        </Link>
+        <nav className="ml-auto flex gap-4 sm:gap-6">
+          <Link className="text-sm font-medium hover:underline underline-offset-4" href="#">
+            Features
+          </Link>
+          <Link className="text-sm font-medium hover:underline underline-offset-4" href="#">
+            About
+          </Link>
+          <Link className="text-sm font-medium hover:underline underline-offset-4" href="/auth/login">
+            Login
+          </Link>
+          <Link className="text-sm font-medium hover:underline underline-offset-4" href="/auth/signup">
+            Sign Up
+          </Link>
+        </nav>
+      </header>
+      <main className="flex-1">
+        <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48">
+          <div className="container px-4 md:px-6">
+            <div className="flex flex-col items-center space-y-4 text-center">
+              <div className="space-y-2">
+                <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl/none">
+                  Your Digital Library Journey Starts Here
+                </h1>
+                <p className="mx-auto max-w-[700px] text-gray-500 md:text-xl dark:text-gray-400">
+                  Discover, share, and manage your books with our comprehensive digital library platform.
+                </p>
               </div>
-            </form>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <Link className="text-sm underline underline-offset-4" href="#">
-                  Forgot password?
-                </Link>
+              <div className="w-full max-w-sm space-y-2">
+                <div className="flex space-x-2">
+                  <Input placeholder="Search for books..." type="search" />
+                  <Button type="submit">
+                    <Search className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
-              <Link className="text-sm underline underline-offset-4" href="/auth/signup">
-                Don&apos;t have an account? Sign up
-              </Link>
             </div>
           </div>
-        </div>
-      </div>
+        </section>
+        <section className="w-full py-12 md:py-24 lg:py-32 bg-gray-100 dark:bg-gray-800">
+          <div className="container px-4 md:px-6">
+            <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="flex flex-col items-center space-y-4">
+                <Library className="h-12 w-12" />
+                <h2 className="text-xl font-bold">Digital Collection</h2>
+                <p className="text-center text-gray-500 dark:text-gray-400">
+                  Access thousands of books from your digital library anytime, anywhere.
+                </p>
+              </div>
+              <div className="flex flex-col items-center space-y-4">
+                <Users className="h-12 w-12" />
+                <h2 className="text-xl font-bold">Community Sharing</h2>
+                <p className="text-center text-gray-500 dark:text-gray-400">
+                  Connect with fellow readers and share your favorite books and reviews.
+                </p>
+              </div>
+              <div className="flex flex-col items-center space-y-4">
+                <BookOpen className="h-12 w-12" />
+                <h2 className="text-xl font-bold">Easy Management</h2>
+                <p className="text-center text-gray-500 dark:text-gray-400">
+                  Organize and track your reading progress with our intuitive tools.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
       <footer className="flex flex-col gap-2 sm:flex-row py-6 w-full shrink-0 items-center px-4 md:px-6 border-t">
         <p className="text-xs text-gray-500 dark:text-gray-400">© 2024 OkuYorum. All rights reserved.</p>
         <nav className="sm:ml-auto flex gap-4 sm:gap-6">
