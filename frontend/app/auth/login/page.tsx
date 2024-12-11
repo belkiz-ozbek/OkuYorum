@@ -1,69 +1,72 @@
-'use client';
+"use client"
 
-import React, { useState } from 'react';
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { BookOpen } from 'lucide-react'
 
-const LoginPage = () => {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-
-    const handleLogin = (e: React.FormEvent) => {
-        e.preventDefault();
-        console.log('Login Info:', { email, password });
-        alert('Giriş başarılı! (Simüle edildi)');
-    };
-
-    return (
-        <div className="relative h-screen flex justify-center items-center">
-            <div
-                className="absolute inset-0 bg-cover bg-center bg-no-repeat brightness-75 shadow-[inset_0_0_100px_rgba(0,0,0,0.5)]"
-                style={{
-                    backgroundImage: `url('/background.jpg')`,
-                }}
-            ></div>
-            <div className="absolute top-43 left-64 bg-white bg-opacity-80 p-8 rounded shadow-lg w-96">
-                <div className="text-center mb-6">
-                    <img src="/logo.png" alt="Logo" className="mx-auto w-24 mb-4" />
-                    <h1 className="text-xl font-bold">OKU/YORUM</h1>
+export default function LoginPage() {
+  return (
+    <div className="min-h-screen flex flex-col">
+      <div className="flex-1 flex flex-col w-full px-4 py-8 sm:px-6 sm:py-12 lg:px-8 lg:py-24">
+        <div className="mx-auto max-w-md">
+          <div className="flex flex-col items-center space-y-2 text-center">
+            <Link href="/auth/homepage" className="flex items-center space-x-2">
+              <BookOpen className="h-8 w-8" />
+              <span className="text-2xl font-bold">OkuYorum</span>
+            </Link>
+            <h1 className="text-2xl font-semibold tracking-tight">Welcome back</h1>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              Enter your email and password to access your account
+            </p>
+          </div>
+          <div className="grid gap-6 mt-8">
+            <form>
+              <div className="grid gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    placeholder="name@example.com"
+                    type="email"
+                    autoCapitalize="none"
+                    autoComplete="email"
+                    autoCorrect="off"
+                  />
                 </div>
-                <form onSubmit={handleLogin}>
-                    <div className="opacity-70 mb-4">
-                        <label htmlFor="email" className="block text-sm font-medium">
-                            Kullanıcı Adı/E-posta
-                        </label>
-                        <input
-                            id="email"
-                            type="email"
-                            placeholder="Email"
-                            className="border border-gray-300 p-2 w-full rounded"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            required
-                        />
-                    </div>
-                    <div className="mb-4 opacity-70">
-                        <label htmlFor="password" className="block text-sm font-medium">
-                            Şifre
-                        </label>
-                        <input
-                            id="password"
-                            type="password"
-                            placeholder="Password"
-                            className="border border-gray-300 p-2 w-full rounded"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                        />
-                    </div>
-                    <button
-                        type="submit"
-                        className="bg-red-500 text-white w-full py-2 rounded hover:bg-red-600"
-                    >
-                        Giriş
-                    </button>
-                </form>
+                <div className="grid gap-2">
+                  <Label htmlFor="password">Password</Label>
+                  <Input id="password" type="password" />
+                </div>
+                <Button className="w-full">Sign In</Button>
+              </div>
+            </form>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <Link className="text-sm underline underline-offset-4" href="#">
+                  Forgot password?
+                </Link>
+              </div>
+              <Link className="text-sm underline underline-offset-4" href="/auth/signup">
+                Don&apos;t have an account? Sign up
+              </Link>
             </div>
+          </div>
         </div>
-    );
-};
+      </div>
+      <footer className="flex flex-col gap-2 sm:flex-row py-6 w-full shrink-0 items-center px-4 md:px-6 border-t">
+        <p className="text-xs text-gray-500 dark:text-gray-400">© 2024 OkuYorum. All rights reserved.</p>
+        <nav className="sm:ml-auto flex gap-4 sm:gap-6">
+          <Link className="text-xs hover:underline underline-offset-4" href="#">
+            Terms of Service
+          </Link>
+          <Link className="text-xs hover:underline underline-offset-4" href="#">
+            Privacy
+          </Link>
+        </nav>
+      </footer>
+    </div>
+  )
+}
 
-export default LoginPage;
