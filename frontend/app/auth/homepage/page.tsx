@@ -1,106 +1,144 @@
-// pages/index.tsx
-import React from 'react';
+import Link from "next/link"
+import Image from "next/image"
+import { Button } from "@/components/ui/button"
+import { BookOpen, ArrowRight } from 'lucide-react'
 
-const HomePage = () => {
+export default function HomePage() {
   return (
-    <>
-      {/* Header Section */}
-      <header class='flex border-b py-3 px-4 sm:px-10 bg-white font-[sans-serif] min-h-[70px] tracking-wide relative z-50'>
-      <div class='flex flex-wrap items-center gap-5 w-full'>
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-rose-50 to-pink-100">
+      {/* Navigation */}
+      <header className="px-6 h-20 flex items-center max-w-7xl mx-auto">
+        <Link className="flex items-center justify-center" href="#">
+          <BookOpen className="h-6 w-6 text-purple-600" />
+          <span className="ml-2 text-lg font-semibold">OkuYorum</span>
+        </Link>
+        <nav className="ml-auto flex gap-8">
+          <Link className="text-sm font-medium text-gray-600 hover:text-purple-600" href="#">
+            Ana Sayfa
+          </Link>
+          <Link className="text-sm font-medium text-gray-600 hover:text-purple-600" href="#">
+            Hakkında
+          </Link>
+          <Link className="text-sm font-medium text-gray-600 hover:text-purple-600" href="#">
+            Millet Kıraathaneleri
+          </Link>
+          <Link className="text-sm font-medium text-gray-600 hover:text-purple-600" href="#">
+            İletişim
+          </Link>
+          <Link 
+            href="/auth/login"
+            className="px-4 py-2 rounded-full bg-white shadow-md text-sm font-medium text-purple-600 hover:bg-purple-50 transition-colors"
+          >
+            Giriş Yap
+          </Link>
+          <Link 
+            href="/auth/signup"
+            className="px-4 py-2 rounded-full bg-white shadow-md text-sm font-medium text-purple-600 hover:bg-purple-50 transition-colors"
+          >
+            Kayıt Ol
+          </Link>
+        </nav>
+      </header>
 
+      <main className="max-w-7xl mx-auto px-6">
+        {/* Hero Section */}
+        <div className="grid lg:grid-cols-2 gap-12 items-center py-12 lg:py-20">
+          <div className="space-y-8">
+            <div className="inline-block px-4 py-2 rounded-full bg-purple-100 text-purple-600 text-sm">
+              Oku, Yorum Yap, Paylaş
+            </div>
+            <h1 className="text-5xl lg:text-6xl font-bold tracking-tight text-gray-900">
+              Kendini Harika Bir Kitapta Keşfet
+            </h1>
+            <p className="text-lg text-gray-600 max-w-[500px]">
+              Dijital kütüphanemizde binlerce kitap sizi bekliyor. Okuma yolculuğunuza bugün başlayın.
+            </p>
+            <div className="flex gap-4">
+              <Button className="bg-purple-600 hover:bg-purple-700 text-white rounded-full px-8 py-6 text-lg">
+                Başlayın <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+              <Button variant="outline" className="rounded-full px-8 py-6 text-lg">
+                Daha Fazla
+              </Button>
+            </div>
+          </div>
 
-        <div id="collapseMenu"
-          class='max-lg:hidden lg:!block max-lg:w-full max-lg:fixed max-lg:before:fixed max-lg:before:bg-black max-lg:before:opacity-50 max-lg:before:inset-0 max-lg:before:z-50'>
-          <button id="toggleClose" class='lg:hidden fixed top-2 right-4 z-[100] rounded-full bg-white w-9 h-9 flex items-center justify-center border'>
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 fill-black" viewBox="0 0 320.591 320.591">
-              <path
-                d="M30.391 318.583a30.37 30.37 0 0 1-21.56-7.288c-11.774-11.844-11.774-30.973 0-42.817L266.643 10.665c12.246-11.459 31.462-10.822 42.921 1.424 10.362 11.074 10.966 28.095 1.414 39.875L51.647 311.295a30.366 30.366 0 0 1-21.256 7.288z"
-                data-original="#000000"></path>
-              <path
-                d="M287.9 318.583a30.37 30.37 0 0 1-21.257-8.806L8.83 51.963C-2.078 39.225-.595 20.055 12.143 9.146c11.369-9.736 28.136-9.736 39.504 0l259.331 257.813c12.243 11.462 12.876 30.679 1.414 42.922-.456.487-.927.958-1.414 1.414a30.368 30.368 0 0 1-23.078 7.288z"
-                data-original="#000000"></path>
-            </svg>
-          </button>
-
-          <ul
-            class='lg:flex lg:ml-14 lg:gap-x-5 max-lg:space-y-3 max-lg:fixed max-lg:bg-white max-lg:w-1/2 max-lg:min-w-[300px] max-lg:top-0 max-lg:left-0 max-lg:p-6 max-lg:h-full max-lg:shadow-md max-lg:overflow-auto z-50'>
-            <li class='mb-6 hidden max-lg:block'>
-              <a href="javascript:void(0)"><img src="https://readymadeui.com/readymadeui.svg" alt="logo" class='w-36' />
-              </a>
-            </li>
-            <li class='max-lg:border-b max-lg:py-3 px-3'>
-              <a href='javascript:void(0)'
-                class='lg:hover:text-[#007bff] text-[#007bff] block font-semibold text-[15px]'>Home</a>
-            </li>
-            <li class='max-lg:border-b max-lg:py-3 px-3'><a href='javascript:void(0)'
-              class='lg:hover:text-[#007bff] text-gray-800 block font-semibold text-[15px]'>Team</a>
-            </li>
-            <li class='max-lg:border-b max-lg:py-3 px-3'><a href='javascript:void(0)'
-              class='lg:hover:text-[#007bff] text-gray-800 block font-semibold text-[15px]'>Feature</a>
-            </li>
-            <li class='max-lg:border-b max-lg:py-3 px-3'><a href='javascript:void(0)'
-              class='lg:hover:text-[#007bff] text-gray-800 block font-semibold text-[15px]'>Blog</a>
-            </li>
-            <li class='max-lg:border-b max-lg:py-3 px-3'><a href='javascript:void(0)'
-              class='lg:hover:text-[#007bff] text-gray-800 block font-semibold text-[15px]'>About</a>
-            </li>
-          </ul>
         </div>
 
-        <button id="toggleOpen" class='lg:hidden ml-auto'>
-          <svg class="w-7 h-7" fill="#000" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-            <path fill-rule="evenodd"
-              d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
-              clip-rule="evenodd"></path>
-          </svg>
-        </button>
+        {/* Feature Cards */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 py-16">
+          <div className="group relative overflow-hidden rounded-3xl bg-pink-200/60 p-8 hover:bg-pink-200/80 transition-colors">
+            <div className="relative z-10 h-full flex flex-col">
+              <h3 className="text-xl font-bold mb-4">Trend Kitaplar</h3>
+              <p className="text-gray-600 mb-6">Bu Ayın Trend Kitaplarını Keşfedin</p>
+              <Button variant="ghost" className="w-fit group-hover:text-purple-600">
+                Keşfet <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </div>
+            <div className="absolute bottom-0 right-0 w-32 h-32">
+              <Image
+                src="/placeholder.svg"
+                alt="Trend Kitaplar"
+                fill
+                className="object-contain"
+              />
+            </div>
+          </div>
 
-        <div class='flex lg:ml-auto max-lg:w-full'>
-          <div
-            class='flex xl:w-80 max-xl:w-full bg-gray-100 px-4 py-3 rounded outline outline-transparent border focus-within:border-blue-600 focus-within:bg-transparent transition-all'>
-            <input type='text' placeholder='Search something...'
-              class='w-full text-sm bg-transparent rounded outline-none pr-2' />
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192.904 192.904" width="16px"
-              class="cursor-pointer fill-gray-400">
-              <path
-                d="m190.707 180.101-47.078-47.077c11.702-14.072 18.752-32.142 18.752-51.831C162.381 36.423 125.959 0 81.191 0 36.422 0 0 36.423 0 81.193c0 44.767 36.422 81.187 81.191 81.187 19.688 0 37.759-7.049 51.831-18.751l47.079 47.078a7.474 7.474 0 0 0 5.303 2.197 7.498 7.498 0 0 0 5.303-12.803zM15 81.193C15 44.694 44.693 15 81.191 15c36.497 0 66.189 29.694 66.189 66.193 0 36.496-29.692 66.187-66.189 66.187C44.693 147.38 15 117.689 15 81.193z">
-              </path>
-            </svg>
+          <div className="group relative overflow-hidden rounded-3xl bg-blue-900 p-8 text-white">
+            <div className="relative z-10 h-full flex flex-col">
+              <h3 className="text-xl font-bold mb-4">En İyi Koleksiyonumuz</h3>
+              <p className="text-blue-100 mb-6">Favori Kitaplarınızı Seçin</p>
+              <Button variant="ghost" className="w-fit text-white group-hover:text-blue-200">
+                Koleksiyonu Gör <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </div>
+            <div className="absolute bottom-0 right-0 w-32 h-32">
+              <Image
+                src="/placeholder.svg"
+                alt="Kitap Koleksiyonu"
+                fill
+                className="object-contain"
+              />
+            </div>
+          </div>
+
+          <div className="group relative overflow-hidden rounded-3xl bg-purple-100 p-8">
+            <div className="relative z-10 h-full flex flex-col">
+              <h3 className="text-xl font-bold mb-4">Özel Makalelerimiz</h3>
+              <p className="text-gray-600 mb-6">En Son Makaleleri Okuyun</p>
+              <Button variant="ghost" className="w-fit group-hover:text-purple-600">
+                Makaleleri Gör <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </div>
+            <div className="absolute bottom-0 right-0 w-32 h-32">
+              <Image
+                src="/placeholder.svg"
+                alt="Makaleler"
+                fill
+                className="object-contain"
+              />
+            </div>
           </div>
         </div>
-      </div>
-    </header>
+      </main>
 
-      {/* Main Content */}
-      <div className="relative h-screen flex justify-center items-center">
-        <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat brightness-75"
-          style={{
-            backgroundImage: `url('/background.jpg')`, 
-          }}
-        ></div>
-        <div className="absolute top-1/4 left-1/2 transform -translate-x-1/2 text-center text-white">
-          <h1 className="text-4xl font-bold mb-4">Welcome to OkuYorum</h1>
-          <p className="text-lg mb-6">Your platform for sharing and reviewing books</p>
-          <a href="/auth/login" className="bg-red-500 text-white px-6 py-2 rounded-lg hover:bg-red-600">
-            Start Reading
-          </a>
-        </div>
-      </div>
-
-      {/* Footer Section */}
-      <footer className="bg-gray-800 text-white p-4 mt-10">
-        <div className="max-w-screen-xl mx-auto text-center">
-          <p>&copy; 2024 OkuYorum. All rights reserved.</p>
-          <div className="mt-2">
-            <a href="/privacy-policy" className="hover:text-red-500">Privacy Policy</a> | 
-            <a href="/terms-of-service" className="hover:text-red-500"> Terms of Service</a>
+      <footer className="border-t border-gray-200 mt-20">
+        <div className="max-w-7xl mx-auto px-6 py-8">
+          <div className="flex flex-col sm:flex-row justify-between items-center">
+            <p className="text-sm text-gray-500">© 2024 OkuYorum. Tüm hakları saklıdır.</p>
+            <nav className="flex gap-6 mt-4 sm:mt-0">
+              <Link className="text-sm text-gray-500 hover:text-purple-600" href="#">
+                Kullanım Şartları
+              </Link>
+              <Link className="text-sm text-gray-500 hover:text-purple-600" href="#">
+                Gizlilik
+              </Link>
+            </nav>
           </div>
         </div>
       </footer>
-    </>
-  );
-};
-
-export default HomePage;
+    </div>
+  )
+}
 
