@@ -1,9 +1,7 @@
 import Link from "next/link"
-import Image from "next/image"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { BookOpen, ArrowRight, Search, Heart, Users, BookMarked, MessageSquare, Quote } from 'lucide-react'
-import { SearchForm } from "@/components/ui/Searchform"
+import {Button} from "@/components/ui/button"
+import {Input} from "@/components/ui/input"
+import {ArrowRight, BookMarked, BookOpen, Heart, MessageSquare, Search, Users} from 'lucide-react'
 
 type FeatureCardProps = {
   icon: React.ReactNode;
@@ -78,7 +76,8 @@ export default function HomePage() {
               </Button>
             </div>
           </div>
-            />
+          <div className="relative h-[500px]">
+            {/* Add an image or content for the right side of hero if needed */}
           </div>
         </div>
 
@@ -151,14 +150,14 @@ export default function HomePage() {
           <div className="grid md:grid-cols-2 gap-8">
             <div className="bg-white p-6 rounded-lg shadow-md">
               <h3 className="text-xl font-semibold mb-2">Yaklaşan Etkinlik</h3>
-              <p className="text-gray-600 mb-4">"Veba" - Albert Camus</p>
+              <p className="text-gray-600 mb-4">Veba - Albert Camus</p>
               <p className="text-sm text-gray-500">Tarih: 20 Ekim 2024, 19:00</p>
               <p className="text-sm text-gray-500">Yer: Çankaya Millet Kıraathanesi</p>
               <Button className="mt-4">Katıl</Button>
             </div>
             <div className="bg-white p-6 rounded-lg shadow-md">
               <h3 className="text-xl font-semibold mb-2">Popüler Tartışma</h3>
-              <p className="text-gray-600 mb-4">"Yüzyıllık Yalnızlık" üzerine düşünceler</p>
+              <p className="text-gray-600 mb-4">Yüzyıllık Yalnızlık üzerine düşünceler</p>
               <p className="text-sm text-gray-500">32 katılımcı, 78 yorum</p>
               <Button className="mt-4">Tartışmaya Katıl</Button>
             </div>
