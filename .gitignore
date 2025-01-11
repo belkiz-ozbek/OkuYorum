@@ -17,11 +17,8 @@ frontend/!.yarn/releases
 frontend/!.yarn/versions
 # testing
 frontend/coverage
-# next.js
-frontend/.next/
 frontend/out/
-# production
-# mis
+# misc
 frontend/.DS_Store
 frontend/*.pem
 # debug
