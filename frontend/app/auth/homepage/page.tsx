@@ -78,13 +78,6 @@ export default function HomePage() {
               </Button>
             </div>
           </div>
-          <div className="hidden lg:block">
-            <Image
-              src="/placeholder.svg?height=400&width=600"
-              alt="OkuYorum Hero"
-              width={600}
-              height={400}
-              className="rounded-lg shadow-lg"
             />
           </div>
         </div>
