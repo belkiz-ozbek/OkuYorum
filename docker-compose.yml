@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:13     # PostgreSQL imajı versiyonu
+    container_name: okuyorum_db # Container ismi
+    environment:
+      POSTGRES_USER: okuyorum    # PostgreSQL kullanıcı adı
+      POSTGRES_PASSWORD: okuyorum # PostgreSQL şifresi
+      POSTGRES_DB: okuyorum    # Oluşturulacak veritabanı adı
+    ports:
+      - "5433:5432"  # Localhost'ta 5433, container içinde 5432 portu
+    volumes:
+      - ~/DockerVolumes/okuyorum/postgres:/var/lib/postgresql/data # Veritabanı verilerinin saklanacağı volume
+      - ./create-dbs.sql:/docker-entrypoint-initdb.d/create-dbs.sql
+    restart: always
+    networks:
+      - my_network
+
+
+networks:
+  my_network:
+    driver: bridge
+
+
+
+
