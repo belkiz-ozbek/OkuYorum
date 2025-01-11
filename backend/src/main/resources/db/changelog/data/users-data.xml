@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
+
+    <changeSet id="20250111 15:24" author="belkiz.ozbek">
+        <insert tableName="users">
+            <column name="name_surname">Enfal Yetiş</column>
+            <column name="username">yetisenfal</column>
+            <!-- BCrypt ile şifrelenmiş "admin123" şifresi -->
+            <column name="password">$2a$10$X7F/REKxe4rUJ1g6.O/KKu1yXHD5.u5j/Y6Qj1yxWGR.Piv2HAkTy</column>
+            <column name="role">ADMIN</column>
+        </insert>
+        
+        <insert tableName="users">
+            <column name="name_surname">İlknur Yiğit</column>
+            <column name="username">yigitilknur</column>
+            <!-- BCrypt ile şifrelenmiş "user123" şifresi -->
+            <column name="password">$2a$10$VNjxuPxHV9QyJxKGYL/NWOgpE7mgR9pXJV.LPZqgX97yb0e6FlU4a</column>
+            <column name="role">USER</column>
+        </insert>
+        <insert tableName="users">
+            <column name="name_surname">Ayşenur Şirin</column>
+            <column name="username">sirinaysenur</column>
+            <!-- BCrypt ile şifrelenmiş "admin123" şifresi -->
+            <column name="password">$2a$10$X7F/REKxe4rUJ1g6.O/KKu1yXHD5.u5j/Y6Qj1yxWGR.Piv2HAkTy</column>
+            <column name="role">ADMIN</column>
+        </insert>
+        <insert tableName="users">
+            <column name="name_surname">Belkız Özbek</column>
+            <column name="username">ozbekbelkiz</column>
+            <!-- BCrypt ile şifrelenmiş "user123" şifresi -->
+            <column name="password">$2a$10$VNjxuPxHV9QyJxKGYL/NWOgpE7mgR9pXJV.LPZqgX97yb0e6FlU4a</column>
+            <column name="role">USER</column>
+        </insert>
+    </changeSet>
+</databaseChangeLog> 
