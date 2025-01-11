@@ -16,19 +16,19 @@ export default function SignUpPage() {
               <BookOpen className="h-8 w-8" />
               <span className="text-2xl font-bold">OkuYorum</span>
             </Link>
-            <h1 className="text-2xl font-semibold tracking-tight">Create an account</h1>
+            <h1 className="text-2xl font-semibold tracking-tight">Hesap Oluştur</h1>
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              Enter your information to get started with OkuYorum
+              OkuYorum'a başlamak için bilgilerinizi girin
             </p>
           </div>
           <div className="grid gap-6 mt-8">
             <form>
               <div className="grid gap-4">
                 <div className="grid gap-2">
-                  <Label htmlFor="name">Full Name</Label>
+                  <Label htmlFor="name">Ad Soyad</Label>
                   <Input
                     id="name"
-                    placeholder="John Doe"
+                    placeholder="Ahmet Yılmaz"
                     type="text"
                     autoCapitalize="words"
                     autoComplete="name"
@@ -36,10 +36,10 @@ export default function SignUpPage() {
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email">E-posta</Label>
                   <Input
                     id="email"
-                    placeholder="name@example.com"
+                    placeholder="isim@ornek.com"
                     type="email"
                     autoCapitalize="none"
                     autoComplete="email"
@@ -47,32 +47,32 @@ export default function SignUpPage() {
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password">Şifre</Label>
                   <Input id="password" type="password" />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="confirm-password">Confirm Password</Label>
+                  <Label htmlFor="confirm-password">Şifre Tekrar</Label>
                   <Input id="confirm-password" type="password" />
                 </div>
-                <Button className="w-full">Create Account</Button>
+                <Button className="w-full">Hesap Oluştur</Button>
               </div>
             </form>
             <div className="flex items-center justify-center">
               <Link className="text-sm underline underline-offset-4" href="/auth/login">
-                Already have an account? Sign in
+                Zaten hesabınız var mı? Giriş Yapın
               </Link>
             </div>
           </div>
         </div>
       </div>
       <footer className="flex flex-col gap-2 sm:flex-row py-6 w-full shrink-0 items-center px-4 md:px-6 border-t">
-        <p className="text-xs text-gray-500 dark:text-gray-400">© 2024 OkuYorum. All rights reserved.</p>
+        <p className="text-xs text-gray-500 dark:text-gray-400">© 2024 OkuYorum. Tüm hakları saklıdır.</p>
         <nav className="sm:ml-auto flex gap-4 sm:gap-6">
           <Link className="text-xs hover:underline underline-offset-4" href="#">
-            Terms of Service
+            Kullanım Şartları
           </Link>
           <Link className="text-xs hover:underline underline-offset-4" href="#">
-            Privacy
+            Gizlilik
           </Link>
         </nav>
       </footer>

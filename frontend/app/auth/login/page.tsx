@@ -16,19 +16,19 @@ export default function LoginPage() {
               <BookOpen className="h-8 w-8" />
               <span className="text-2xl font-bold">OkuYorum</span>
             </Link>
-            <h1 className="text-2xl font-semibold tracking-tight">Welcome back</h1>
+            <h1 className="text-2xl font-semibold tracking-tight">Tekrar Hoş Geldiniz</h1>
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              Enter your email and password to access your account
+              Hesabınıza erişmek için e-posta ve şifrenizi girin
             </p>
           </div>
           <div className="grid gap-6 mt-8">
             <form>
               <div className="grid gap-4">
                 <div className="grid gap-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email">E-posta</Label>
                   <Input
                     id="email"
-                    placeholder="name@example.com"
+                    placeholder="isim@ornek.com"
                     type="email"
                     autoCapitalize="none"
                     autoComplete="email"
@@ -36,33 +36,33 @@ export default function LoginPage() {
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password">Şifre</Label>
                   <Input id="password" type="password" />
                 </div>
-                <Button className="w-full">Sign In</Button>
+                <Button className="w-full">Giriş Yap</Button>
               </div>
             </form>
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
                 <Link className="text-sm underline underline-offset-4" href="#">
-                  Forgot password?
+                  Şifremi Unuttum
                 </Link>
               </div>
               <Link className="text-sm underline underline-offset-4" href="/auth/signup">
-                Don&apos;t have an account? Sign up
+                Hesabınız yok mu? Kayıt Olun
               </Link>
             </div>
           </div>
         </div>
       </div>
       <footer className="flex flex-col gap-2 sm:flex-row py-6 w-full shrink-0 items-center px-4 md:px-6 border-t">
-        <p className="text-xs text-gray-500 dark:text-gray-400">© 2024 OkuYorum. All rights reserved.</p>
+        <p className="text-xs text-gray-500 dark:text-gray-400">© 2024 OkuYorum. Tüm hakları saklıdır.</p>
         <nav className="sm:ml-auto flex gap-4 sm:gap-6">
           <Link className="text-xs hover:underline underline-offset-4" href="#">
-            Terms of Service
+            Kullanım Şartları
           </Link>
           <Link className="text-xs hover:underline underline-offset-4" href="#">
-            Privacy
+            Gizlilik
           </Link>
         </nav>
       </footer>
