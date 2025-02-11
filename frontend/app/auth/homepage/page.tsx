@@ -1,7 +1,9 @@
 import Link from "next/link"
-import {Button} from "@/components/ui/button"
-import {Input} from "@/components/ui/input"
-import {ArrowRight, BookMarked, BookOpen, Heart, MessageSquare, Search, Users} from 'lucide-react'
+import Image from "next/image"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { BookOpen, ArrowRight, Search, Heart, Users, BookMarked, MessageSquare, Quote } from 'lucide-react'
+
 
 type FeatureCardProps = {
   icon: React.ReactNode;
@@ -35,14 +37,11 @@ export default function HomePage() {
           <Link className="text-sm font-medium text-gray-600 hover:text-purple-600" href="/auth/library">
             Kütüphanem
           </Link>
-          <Link className="text-sm font-medium text-gray-600 hover:text-purple-600" href="/auth/donate">
+          <Link className="text-sm font-medium text-gray-600 hover:text-purple-600" href="/donate">
             Bağış Yap
           </Link>
           <Link className="text-sm font-medium text-gray-600 hover:text-purple-600" href="/auth/kiraathane">
             Millet Kıraathaneleri
-          </Link>
-          <Link className="text-sm font-medium text-gray-600 hover:text-purple-600" href="/about">
-            Hakkında
           </Link>
           <form className="relative">
             <Input
@@ -75,9 +74,6 @@ export default function HomePage() {
                 Daha Fazla Bilgi
               </Button>
             </div>
-          </div>
-          <div className="relative h-[500px]">
-            {/* Add an image or content for the right side of hero if needed */}
           </div>
         </div>
 
@@ -150,14 +146,14 @@ export default function HomePage() {
           <div className="grid md:grid-cols-2 gap-8">
             <div className="bg-white p-6 rounded-lg shadow-md">
               <h3 className="text-xl font-semibold mb-2">Yaklaşan Etkinlik</h3>
-              <p className="text-gray-600 mb-4">Veba - Albert Camus</p>
+              <p className="text-gray-600 mb-4">"Veba" - Albert Camus</p>
               <p className="text-sm text-gray-500">Tarih: 20 Ekim 2024, 19:00</p>
               <p className="text-sm text-gray-500">Yer: Çankaya Millet Kıraathanesi</p>
               <Button className="mt-4">Katıl</Button>
             </div>
             <div className="bg-white p-6 rounded-lg shadow-md">
               <h3 className="text-xl font-semibold mb-2">Popüler Tartışma</h3>
-              <p className="text-gray-600 mb-4">Yüzyıllık Yalnızlık üzerine düşünceler</p>
+              <p className="text-gray-600 mb-4">"Yüzyıllık Yalnızlık" üzerine düşünceler</p>
               <p className="text-sm text-gray-500">32 katılımcı, 78 yorum</p>
               <Button className="mt-4">Tartışmaya Katıl</Button>
             </div>
@@ -186,7 +182,7 @@ export default function HomePage() {
               <ul className="space-y-2">
                 <li><Link href="/auth/homepage" className="text-sm text-gray-600 hover:text-purple-600">Ana Sayfa</Link></li>
                 <li><Link href="/auth/library" className="text-sm text-gray-600 hover:text-purple-600">Kütüphanem</Link></li>
-                <li><Link href="/auth/donate" className="text-sm text-gray-600 hover:text-purple-600">Bağış Yap</Link></li>
+                <li><Link href="/donate" className="text-sm text-gray-600 hover:text-purple-600">Bağış Yap</Link></li>
                 <li><Link href="/auth/kiraathane" className="text-sm text-gray-600 hover:text-purple-600">Millet Kıraathaneleri</Link></li>
               </ul>
             </div>
