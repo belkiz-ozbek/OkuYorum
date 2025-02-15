@@ -3,34 +3,44 @@ package aybu.graduationproject.okuyorum.library.service;
 import aybu.graduationproject.okuyorum.library.dto.BookDto;
 import aybu.graduationproject.okuyorum.library.entity.Book;
 import aybu.graduationproject.okuyorum.library.repository.BookRepository;
+import aybu.graduationproject.okuyorum.signup.entity.User;
 import aybu.graduationproject.okuyorum.signup.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class BookService {
 
     private final BookRepository bookRepository;
     private final UserRepository userRepository;
+    private final GoogleBooksService googleBooksService;
 
-    public BookService(BookRepository bookRepository, UserRepository userRepository) {
+    public BookService(BookRepository bookRepository, UserRepository userRepository, GoogleBooksService googleBooksService) {
         this.bookRepository = bookRepository;
         this.userRepository = userRepository;
+        this.googleBooksService = googleBooksService;
     }
 
     public BookDto createBook(BookDto bookDto) {
-        Book book = new Book();
-        book.setTitle(bookDto.getTitle());
-        book.setAuthor(bookDto.getAuthor());
-        book.setSummary(bookDto.getSummary());
+        if (bookDto.getGoogleBooksId() != null) {
+            Optional<Book> existingBook = bookRepository.findByGoogleBooksId(bookDto.getGoogleBooksId());
+            if (existingBook.isPresent()) {
+                throw new IllegalArgumentException("This book is already in your library");
+            }
+        }
+
+        Book book = convertToEntity(bookDto);
         book.setUser(userRepository.findById(bookDto.getUserId())
                 .orElseThrow(() -> new EntityNotFoundException("User not found")));
-        
         Book savedBook = bookRepository.save(book);
         return convertToDto(savedBook);
     }
@@ -51,10 +61,7 @@ public class BookService {
         Book book = bookRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Book not found"));
         
-        book.setTitle(bookDto.getTitle());
-        book.setAuthor(bookDto.getAuthor());
-        book.setSummary(bookDto.getSummary());
-        
+        updateBookFromDto(book, bookDto);
         Book updatedBook = bookRepository.save(book);
         return convertToDto(updatedBook);
     }
@@ -79,6 +86,32 @@ public class BookService {
                 .map(this::convertToDto);
     }
 
+    public List<BookDto> createBooksFromGoogleIds(List<String> googleBookIds, Long userId) {
+        List<BookDto> addedBooks = new ArrayList<>();
+        List<String> existingIds = bookRepository.findByGoogleBooksIdIn(googleBookIds)
+                .stream()
+                .map(Book::getGoogleBooksId)
+                .collect(Collectors.toList());
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+
+        for (String googleId : googleBookIds) {
+            if (!existingIds.contains(googleId)) {
+                try {
+                    BookDto bookDto = googleBooksService.getBookById(googleId);
+                    bookDto.setUserId(userId);
+                    Book book = convertToEntity(bookDto);
+                    book.setUser(user);
+                    addedBooks.add(convertToDto(bookRepository.save(book)));
+                } catch (Exception e) {
+                    log.error("Error importing book with ID: " + googleId, e);
+                }
+            }
+        }
+        return addedBooks;
+    }
+
     private BookDto convertToDto(Book book) {
         BookDto dto = new BookDto();
         dto.setId(book.getId());
@@ -86,6 +119,31 @@ public class BookService {
         dto.setAuthor(book.getAuthor());
         dto.setSummary(book.getSummary());
         dto.setUserId(book.getUser().getId());
+        dto.setGoogleBooksId(book.getGoogleBooksId());
+        dto.setImageUrl(book.getImageUrl());
+        dto.setPublishedDate(book.getPublishedDate());
+        dto.setPageCount(book.getPageCount());
         return dto;
+    }
+
+    private Book convertToEntity(BookDto bookDto) {
+        Book book = new Book();
+        updateBookFromDto(book, bookDto);
+        return book;
+    }
+
+    private void updateBookFromDto(Book book, BookDto bookDto) {
+        book.setTitle(bookDto.getTitle());
+        book.setAuthor(bookDto.getAuthor());
+        book.setSummary(bookDto.getSummary());
+        book.setGoogleBooksId(bookDto.getGoogleBooksId());
+        book.setImageUrl(bookDto.getImageUrl());
+        book.setPublishedDate(formatPublishedDate(bookDto.getPublishedDate()));
+        book.setPageCount(bookDto.getPageCount());
+    }
+
+    private String formatPublishedDate(String publishedDate) {
+        if (publishedDate == null) return null;
+        return publishedDate.length() > 10 ? publishedDate.substring(0, 10) : publishedDate;
     }
 } 

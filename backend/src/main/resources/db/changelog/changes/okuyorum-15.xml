@@ -32,4 +32,13 @@
             </column>
         </createTable>
     </changeSet>
+
+    <changeSet id="20250215 10:30" author="belkiz.ozbek">
+        <addColumn tableName="books">
+            <column name="google_books_id" type="varchar(255)"/>
+            <column name="image_url" type="varchar(1000)"/>
+            <column name="published_date" type="varchar(255)"/>
+            <column name="page_count" type="integer"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog> 

@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface BookRepository extends JpaRepository<Book, Long> {
@@ -19,4 +20,8 @@ public interface BookRepository extends JpaRepository<Book, Long> {
            "LOWER(b.author) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
            "LOWER(b.summary) LIKE LOWER(CONCAT('%', :query, '%'))")
     Page<Book> searchBooks(@Param("query") String query, Pageable pageable);
+
+    Optional<Book> findByGoogleBooksId(String googleBooksId);
+
+    List<Book> findByGoogleBooksIdIn(List<String> googleBookIds);
 } 
