@@ -112,6 +112,13 @@ public class BookService {
         return addedBooks;
     }
 
+    public List<BookDto> quickSearchBooks(String query) {
+        return bookRepository.findByTitleStartingWithIgnoreCaseOrderById(query)
+            .stream()
+            .map(this::convertToDto)
+            .collect(Collectors.toList());
+    }
+
     private BookDto convertToDto(Book book) {
         BookDto dto = new BookDto();
         dto.setId(book.getId());

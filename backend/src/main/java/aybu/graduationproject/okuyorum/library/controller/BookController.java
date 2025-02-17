@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Collections;
 
 @RestController
 @RequestMapping("/api/books")
@@ -97,5 +98,13 @@ public class BookController {
             @RequestBody List<String> googleBookIds,
             @RequestParam Long userId) {
         return ResponseEntity.ok(bookService.createBooksFromGoogleIds(googleBookIds, userId));
+    }
+
+    @GetMapping("/quick-search")
+    public ResponseEntity<List<BookDto>> quickSearch(@RequestParam String query) {
+        if (query == null || query.trim().isEmpty()) {
+            return ResponseEntity.ok(Collections.emptyList());
+        }
+        return ResponseEntity.ok(bookService.quickSearchBooks(query.trim()));
     }
 } 

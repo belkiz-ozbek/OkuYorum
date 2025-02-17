@@ -24,4 +24,6 @@ public interface BookRepository extends JpaRepository<Book, Long> {
     Optional<Book> findByGoogleBooksId(String googleBooksId);
 
     List<Book> findByGoogleBooksIdIn(List<String> googleBookIds);
+
+    List<Book> findByTitleStartingWithIgnoreCaseOrderById(String title);
 } 
