@@ -6,7 +6,6 @@ import aybu.graduationproject.okuyorum.library.repository.BookRepository;
 import aybu.graduationproject.okuyorum.signup.entity.User;
 import aybu.graduationproject.okuyorum.signup.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -16,7 +15,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@Slf4j
 @Service
 public class BookService {
 
@@ -105,7 +103,7 @@ public class BookService {
                     book.setUser(user);
                     addedBooks.add(convertToDto(bookRepository.save(book)));
                 } catch (Exception e) {
-                    log.error("Error importing book with ID: " + googleId, e);
+                    System.err.println("Error importing book with ID: " + googleId + " - " + e.getMessage());
                 }
             }
         }
