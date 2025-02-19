@@ -1,29 +1,85 @@
+import type React from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import React from "react";
-import { BookOpen, ArrowRight, Search, Heart, Users, BookMarked, MessageSquare, Quote } from 'lucide-react'
-
+import { BookOpen, ArrowRight, Heart, Users, BookMarked, MessageSquare } from "lucide-react"
+import { SearchForm } from "@/components/ui/Searchform"
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
 
 type FeatureCardProps = {
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-};
+  icon: React.ReactNode
+  title: string
+  description: string
+}
 
 type StatCardProps = {
-  number: string;
-  label: string;
-};
+  number: string
+  label: string
+}
 
 type BookReviewCardProps = {
-  bookTitle: string;
-  author: string;
-  reviewerName: string;
-  rating: number;
-  review: string;
-};
+  bookTitle: string
+  author: string
+  reviewerName: string
+  rating: number
+  review: string
+}
+
+type FeaturedBookProps = {
+  title: string
+  author: string
+  coverUrl: string
+}
+
+type DonationRequestProps = {
+  libraryName: string
+  bookTitle: string
+  author: string
+  coverUrl: string
+}
+
+type ReadingGroupProps = {
+  name: string
+  members: number
+  currentBook: string
+}
+
+const FeaturedBook = ({ title, author, coverUrl }: FeaturedBookProps) => (
+  <div className="relative w-48 h-64 group">
+    <Image
+      src={coverUrl || "/placeholder.svg"}
+      alt={title}
+      layout="fill"
+      objectFit="cover"
+      className="rounded-lg shadow-lg"
+    />
+    <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4 rounded-lg">
+      <h3 className="text-white font-semibold">{title}</h3>
+      <p className="text-gray-300">{author}</p>
+    </div>
+  </div>
+)
+
+const DonationRequest = ({ libraryName, bookTitle, author, coverUrl }: DonationRequestProps) => (
+  <div className="bg-white p-6 rounded-lg shadow-md flex items-start space-x-4">
+    <Image src={coverUrl || "/placeholder.svg"} alt={bookTitle} width={80} height={120} className="rounded-md shadow" />
+    <div>
+      <h3 className="text-xl font-semibold mb-2">{libraryName}</h3>
+      <p className="text-gray-600 mb-1">İstenilen Kitap: {bookTitle}</p>
+      <p className="text-gray-600 mb-4">Yazar: {author}</p>
+      <Button>Bağış Yap</Button>
+    </div>
+  </div>  
+)
+
+const ReadingGroup = ({ name, members, currentBook }: ReadingGroupProps) => (
+  <div className="bg-white p-6 rounded-lg shadow-md">
+    <h3 className="text-xl font-semibold mb-2">{name}</h3>
+    <p className="text-gray-600 mb-2">{members} üye</p>
+    <p className="text-gray-600">Şu anki kitap: {currentBook}</p>
+    <Button className="mt-4">Gruba Katıl</Button>
+  </div>
+)
 
 export default function HomePage() {
   return (
@@ -44,14 +100,7 @@ export default function HomePage() {
           <Link className="text-sm font-medium text-gray-600 hover:text-purple-600" href="/auth/kiraathane">
             Millet Kıraathaneleri
           </Link>
-          <form className="relative">
-            <Input
-              type="search"
-              placeholder="Kitap veya yazar ara..."
-              className="w-64 pl-10 pr-4 py-2 rounded-full bg-white shadow-md text-sm"
-            />
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-          </form>
+          <SearchForm />
         </nav>
       </header>
 
@@ -63,7 +112,8 @@ export default function HomePage() {
               Kitaplarla Toplumu Birleştiriyoruz
             </h1>
             <p className="text-lg text-gray-600 max-w-[500px]">
-              Kişisel kütüphanenizi yönetin, kitap bağışlayın ve topluluk tartışmalarına katılın. OkuYorum ile okuma deneyiminizi zenginleştirin.
+              Kişisel kütüphanenizi yönetin, kitap bağışlayın ve topluluk tartışmalarına katılın. OkuYorum ile kitap
+              paylaşım deneyiminizi zenginleştirin.
             </p>
             <div className="flex gap-4">
               <Button asChild className="bg-purple-600 hover:bg-purple-700 text-white rounded-full px-8 py-6 text-lg">
@@ -76,6 +126,42 @@ export default function HomePage() {
               </Button>
             </div>
           </div>
+        </div>
+
+        {/* Featured Books Carousel */}
+        <div className="my-16">
+          <h2 className="text-3xl font-bold mb-6">Öne Çıkan Kitaplar</h2>
+          <Carousel className="w-full max-w-5xl mx-auto">
+            <CarouselContent>
+              {[
+                { title: "1984", author: "George Orwell", coverUrl: "/placeholder.svg?height=300&width=200" },
+                {
+                  title: "Suç ve Ceza",
+                  author: "Fyodor Dostoyevski",
+                  coverUrl: "/placeholder.svg?height=300&width=200",
+                },
+                {
+                  title: "Yüzyıllık Yalnızlık",
+                  author: "Gabriel García Márquez",
+                  coverUrl: "/placeholder.svg?height=300&width=200",
+                },
+                {
+                  title: "Küçük Prens",
+                  author: "Antoine de Saint-Exupéry",
+                  coverUrl: "/placeholder.svg?height=300&width=200",
+                },
+                { title: "Sefiller", author: "Victor Hugo", coverUrl: "/placeholder.svg?height=300&width=200" },
+              ].map((book, index) => (
+                <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
+                  <div className="p-1">
+                    <FeaturedBook {...book} />
+                  </div>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <CarouselPrevious />
+            <CarouselNext />
+          </Carousel>
         </div>
 
         {/* Feature Highlights */}
@@ -102,13 +188,44 @@ export default function HomePage() {
           />
         </div>
 
-        {/* Community Impact */}
-        <div className="bg-white rounded-lg shadow-lg p-8 my-16">
-          <h2 className="text-3xl font-bold mb-6 text-center">Toplum Üzerindeki Etkimiz</h2>
-          <div className="grid md:grid-cols-3 gap-8 text-center">
-            <StatCard number="5,000+" label="Bağışlanan Kitap" />
-            <StatCard number="10,000+" label="Aktif Kullanıcı" />
-            <StatCard number="500+" label="Haftalık Tartışma" />
+        {/* Donation Requests */}
+        <div className="my-16">
+          <h2 className="text-3xl font-bold mb-6">Bağış İstekleri</h2>
+          <div className="grid md:grid-cols-2 gap-8">
+            <DonationRequest
+              libraryName="Çankaya Mahalle Kütüphanesi"
+              bookTitle="Beyaz Diş"
+              author="Jack London"
+              coverUrl="/placeholder.svg?height=120&width=80"
+            />
+            <DonationRequest
+              libraryName="Atatürk İlkokulu Kütüphanesi"
+              bookTitle="Küçük Kara Balık"
+              author="Samed Behrengi"
+              coverUrl="/placeholder.svg?height=120&width=80"
+            />
+            <DonationRequest
+              libraryName="Keçiören Halk Kütüphanesi"
+              bookTitle="Nutuk"
+              author="Mustafa Kemal Atatürk"
+              coverUrl="/placeholder.svg?height=120&width=80"
+            />
+            <DonationRequest
+              libraryName="Mamak Gençlik Merkezi"
+              bookTitle="Şeker Portakalı"
+              author="José Mauro de Vasconcelos"
+              coverUrl="/placeholder.svg?height=120&width=80"
+            />
+          </div>
+        </div>
+
+        {/* Reading Groups */}
+        <div className="my-16">
+          <h2 className="text-3xl font-bold mb-6">Okuma Grupları</h2>
+          <div className="grid md:grid-cols-3 gap-8">
+            <ReadingGroup name="Bilim Kurgu Severler" members={42} currentBook="Dune - Frank Herbert" />
+            <ReadingGroup name="Klasik Edebiyat Kulübü" members={35} currentBook="Madam Bovary - Gustave Flaubert" />
+            <ReadingGroup name="Çağdaş Türk Edebiyatı" members={28} currentBook="Tutunamayanlar - Oğuz Atay" />
           </div>
         </div>
 
@@ -143,7 +260,9 @@ export default function HomePage() {
         {/* Millet Kıraathaneleri Section */}
         <div className="bg-purple-100 rounded-lg p-8 my-16">
           <h2 className="text-3xl font-bold mb-4 text-center">Millet Kıraathaneleri</h2>
-          <p className="text-lg mb-6 text-center">Kitap tartışmalarına katılın, yeni insanlarla tanışın ve okuma deneyiminizi paylaşın.</p>
+          <p className="text-lg mb-6 text-center">
+            Kitap tartışmalarına katılın, yeni insanlarla tanışın ve okuma deneyiminizi paylaşın.
+          </p>
           <div className="grid md:grid-cols-2 gap-8">
             <div className="bg-white p-6 rounded-lg shadow-md">
               <h3 className="text-xl font-semibold mb-2">Yaklaşan Etkinlik</h3>
@@ -161,10 +280,22 @@ export default function HomePage() {
           </div>
         </div>
 
+        {/* Community Impact - Moved down */}
+        <div className="bg-white rounded-lg shadow-lg p-8 my-16">
+          <h2 className="text-3xl font-bold mb-6 text-center">Toplum Üzerindeki Etkimiz</h2>
+          <div className="grid md:grid-cols-3 gap-8 text-center">
+            <StatCard number="5,000+" label="Bağışlanan Kitap" />
+            <StatCard number="10,000+" label="Aktif Kullanıcı" />
+            <StatCard number="500+" label="Haftalık Tartışma" />
+          </div>
+        </div>
+
         {/* Call to Action */}
         <div className="bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg p-8 my-16 text-center text-white">
-          <h2 className="text-3xl font-bold mb-4">Okuma Yolculuğunuza Bugün Başlayın</h2>
-          <p className="text-lg mb-6">Kişisel kütüphanenizi oluşturun, kitap bağışlayın ve toplulukla etkileşime geçin.</p>
+          <h2 className="text-3xl font-bold mb-4">Kitap Paylaşım Yolculuğunuza Bugün Başlayın</h2>
+          <p className="text-lg mb-6">
+            Kişisel kütüphanenizi oluşturun, kitap bağışlayın ve toplulukla etkileşime geçin.
+          </p>
           <Button asChild className="bg-white text-purple-600 hover:bg-gray-100 rounded-full px-8 py-4 text-lg">
             <Link href="/auth/signup">Ücretsiz Hesap Oluşturun</Link>
           </Button>
@@ -181,17 +312,41 @@ export default function HomePage() {
             <div>
               <h3 className="font-semibold mb-4">Hızlı Bağlantılar</h3>
               <ul className="space-y-2">
-                <li><Link href="/auth/homepage" className="text-sm text-gray-600 hover:text-purple-600">Ana Sayfa</Link></li>
-                <li><Link href="/auth/library" className="text-sm text-gray-600 hover:text-purple-600">Kütüphanem</Link></li>
-                <li><Link href="/donate" className="text-sm text-gray-600 hover:text-purple-600">Bağış Yap</Link></li>
-                <li><Link href="/auth/kiraathane" className="text-sm text-gray-600 hover:text-purple-600">Millet Kıraathaneleri</Link></li>
+                <li>
+                  <Link href="/auth/homepage" className="text-sm text-gray-600 hover:text-purple-600">
+                    Ana Sayfa
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/auth/library" className="text-sm text-gray-600 hover:text-purple-600">
+                    Kütüphanem
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/donate" className="text-sm text-gray-600 hover:text-purple-600">
+                    Bağış Yap
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/auth/kiraathane" className="text-sm text-gray-600 hover:text-purple-600">
+                    Millet Kıraathaneleri
+                  </Link>
+                </li>
               </ul>
             </div>
             <div>
               <h3 className="font-semibold mb-4">Yasal</h3>
               <ul className="space-y-2">
-                <li><Link href="/privacy" className="text-sm text-gray-600 hover:text-purple-600">Gizlilik Politikası</Link></li>
-                <li><Link href="/terms" className="text-sm text-gray-600 hover:text-purple-600">Kullanım Şartları</Link></li>
+                <li>
+                  <Link href="/privacy" className="text-sm text-gray-600 hover:text-purple-600">
+                    Gizlilik Politikası
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/terms" className="text-sm text-gray-600 hover:text-purple-600">
+                    Kullanım Şartları
+                  </Link>
+                </li>
               </ul>
             </div>
             <div>
@@ -200,7 +355,7 @@ export default function HomePage() {
               <p className="text-sm text-gray-600">+90 123 456 7890</p>
             </div>
           </div>
-          <div className="mt-8 pt-8 border-t border-gray-200">
+          <div className="mt-8 pt-8 border-t border-gray-200 text-center">
             <p className="text-sm text-gray-500 text-center">© 2024 OkuYorum. Tüm hakları saklıdır.</p>
           </div>
         </div>
@@ -212,9 +367,7 @@ export default function HomePage() {
 function FeatureCard({ icon, title, description }: FeatureCardProps) {
   return (
     <div className="bg-white p-6 rounded-lg shadow-md">
-      <div className="flex items-center justify-center mb-4">
-        {icon}
-      </div>
+      <div className="flex items-center justify-center mb-4">{icon}</div>
       <h3 className="text-xl font-semibold mb-2 text-center">{title}</h3>
       <p className="text-gray-600 text-center">{description}</p>
     </div>
