@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import React from "react";
 import { BookOpen, ArrowRight, Search, Heart, Users, BookMarked, MessageSquare, Quote } from 'lucide-react'
+import { SearchForm } from "@/components/ui/Searchform"
 
 
 type FeatureCardProps = {
@@ -44,14 +45,7 @@ export default function HomePage() {
           <Link className="text-sm font-medium text-gray-600 hover:text-purple-600" href="/auth/kiraathane">
             Millet Kıraathaneleri
           </Link>
-          <form className="relative">
-            <Input
-              type="search"
-              placeholder="Kitap veya yazar ara..."
-              className="w-64 pl-10 pr-4 py-2 rounded-full bg-white shadow-md text-sm"
-            />
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-          </form>
+          <SearchForm />
         </nav>
       </header>
 

@@ -20,6 +20,7 @@ public class Book {
     @Column(nullable = false)
     private String author;
 
+    @Column(columnDefinition = "TEXT")
     private String summary;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -33,6 +34,18 @@ public class Book {
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+    @Column(name = "google_books_id")
+    private String googleBooksId;
+    
+    @Column(name = "image_url", columnDefinition = "TEXT")
+    private String imageUrl;
+    
+    @Column(name = "published_date")
+    private String publishedDate;
+    
+    @Column(name = "page_count")
+    private Integer pageCount;
 
     // Getters and Setters
     public Long getId() {
@@ -81,5 +94,37 @@ public class Book {
 
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
+    }
+
+    public String getGoogleBooksId() {
+        return googleBooksId;
+    }
+
+    public void setGoogleBooksId(String googleBooksId) {
+        this.googleBooksId = googleBooksId;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
+    public String getPublishedDate() {
+        return publishedDate;
+    }
+
+    public void setPublishedDate(String publishedDate) {
+        this.publishedDate = publishedDate;
+    }
+
+    public Integer getPageCount() {
+        return pageCount;
+    }
+
+    public void setPageCount(Integer pageCount) {
+        this.pageCount = pageCount;
     }
 } 
