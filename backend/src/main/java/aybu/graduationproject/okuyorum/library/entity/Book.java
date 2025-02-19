@@ -20,6 +20,7 @@ public class Book {
     @Column(nullable = false)
     private String author;
 
+    @Column(columnDefinition = "TEXT")
     private String summary;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -37,7 +38,7 @@ public class Book {
     @Column(name = "google_books_id")
     private String googleBooksId;
     
-    @Column(name = "image_url")
+    @Column(name = "image_url", columnDefinition = "TEXT")
     private String imageUrl;
     
     @Column(name = "published_date")
