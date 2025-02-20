@@ -9,17 +9,17 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@radix-ui/react-form": "^0.1.0",
-    "@radix-ui/react-label": "^2.1.2",
-    "@radix-ui/react-slot": "^1.1.0",
-    "@radix-ui/react-toast": "^1.2.6",
-    "@types/next": "^8.0.7",
-    "class-variance-authority": "^0.7.1",
-    "lucide-react": "^0.468.0",
-    "next": "^15.0.3",
-    "react": "^19.0.0-rc-66855b96-20241106",
-    "react-dom": "^19.0.0-rc-66855b96-20241106",
-    "tailwind-merge": "^2.5.5"
+    "@radix-ui/react-form": "0.1.0",
+    "@radix-ui/react-label": "2.1.2",
+    "@radix-ui/react-slot": "1.1.0",
+    "@radix-ui/react-toast": "1.2.6",
+    "@types/next": "8.0.7",
+    "class-variance-authority": "0.7.1",
+    "lucide-react": "0.468.0",
+    "next": "15.0.3",
+    "react": "19.0.0-rc-66855b96-20241106",
+    "react-dom": "19.0.0-rc-66855b96-20241106",
+    "tailwind-merge": "2.5.5"
   },
   "devDependencies": {
     "@types/node": "^20",
