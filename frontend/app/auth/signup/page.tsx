@@ -11,18 +11,68 @@ export default function SignupPage() {
     username: '',
     email: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    nameSurname: ''
   })
   const [error, setError] = useState('')
   const router = useRouter()
+
+  // Email validasyon fonksiyonu
+  const isValidEmail = (email: string) => {
+    const validDomains = [
+      'gmail.com',
+      'hotmail.com',
+      'yahoo.com',
+      'outlook.com',
+      'icloud.com'
+    ]
+
+    // Email formatı kontrolü
+    const emailParts = email.split('@')
+    if (emailParts.length !== 2) return false
+
+    const [localPart, domain] = emailParts
+
+    // Local part kontrolü
+    if (localPart.length < 3 || localPart.length > 64) return false
+
+    // Domain kontrolü
+    if (!domain.includes('.')) return false
+
+    // Yaygın domainler için kontrol
+    if (validDomains.includes(domain.toLowerCase())) return true
+
+    // Diğer geçerli domain uzantıları için kontrol
+    const validTlds = ['.edu.tr', '.com.tr', '.org.tr', '.gov.tr', '.com', '.org', '.net']
+    return validTlds.some(tld => domain.toLowerCase().endsWith(tld))
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
 
     // Form validasyonu
-    if (!formData.username || !formData.email || !formData.password || !formData.confirmPassword) {
+    if (!formData.username || !formData.email || !formData.password || 
+        !formData.confirmPassword || !formData.nameSurname) {
       setError('Lütfen tüm alanları doldurun')
+      return
+    }
+
+    // Ad Soyad validasyonu
+    if (!/^[a-zA-ZğüşıöçĞÜŞİÖÇ\s]{2,50}$/.test(formData.nameSurname)) {
+      setError('Ad Soyad sadece harflerden oluşmalı ve 2-50 karakter uzunluğunda olmalıdır')
+      return
+    }
+
+    // Kullanıcı adı validasyonu
+    if (!/^[a-zA-Z0-9._-]{3,50}$/.test(formData.username)) {
+      setError('Kullanıcı adı sadece harf, rakam ve ._- karakterlerini içerebilir ve 3-50 karakter uzunluğunda olmalıdır')
+      return
+    }
+
+    // Email validasyonu
+    if (!isValidEmail(formData.email)) {
+      setError('Lütfen geçerli bir e-posta adresi girin')
       return
     }
 
@@ -37,7 +87,7 @@ export default function SignupPage() {
     }
 
     try {
-      const response = await fetch('http://localhost:8080/register', {
+      const response = await fetch('http://localhost:8080/api/auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -46,6 +96,7 @@ export default function SignupPage() {
           username: formData.username,
           email: formData.email,
           password: formData.password,
+          nameSurname: formData.nameSurname
         }),
       })
 
@@ -55,7 +106,7 @@ export default function SignupPage() {
         const data = await response.json()
         setError(data.message || 'Kayıt işlemi başarısız')
       }
-    } catch {
+    } catch (err) {
       setError('Bir hata oluştu. Lütfen tekrar deneyin.')
     }
   }
@@ -79,6 +130,21 @@ export default function SignupPage() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label htmlFor="nameSurname" className="block text-sm font-medium text-gray-700 mb-1">
+              Ad Soyad
+            </label>
+            <Input
+              type="text"
+              id="nameSurname"
+              name="nameSurname"
+              value={formData.nameSurname}
+              onChange={handleChange}
+              placeholder="Ad ve soyadınızı girin"
+              className="w-full"
+            />
+          </div>
+
           <div>
             <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
               Kullanıcı Adı

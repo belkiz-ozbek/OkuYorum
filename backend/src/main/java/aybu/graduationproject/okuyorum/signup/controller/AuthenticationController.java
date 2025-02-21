@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/login")
+@RequestMapping("/api/auth")
 public class AuthenticationController {
 
     private final AuthenticationService authenticationService;
@@ -17,13 +17,13 @@ public class AuthenticationController {
         this.authenticationService = authenticationService;
     }
 
-    @PostMapping("/save")
-    public ResponseEntity<UserResponse> save(@RequestBody UserDto userDto) {
-        return ResponseEntity.ok(authenticationService.save(userDto));
+    @PostMapping("/register")
+    public ResponseEntity<UserResponse> register(@RequestBody UserDto userDto) {
+        return ResponseEntity.ok(authenticationService.register(userDto));
     }
 
-    @PostMapping("/auth")
-    public ResponseEntity<UserResponse> auth(@RequestBody UserRequest userRequest) {
+    @PostMapping("/login")
+    public ResponseEntity<UserResponse> login(@RequestBody UserRequest userRequest) {
         return ResponseEntity.ok(authenticationService.auth(userRequest));
     }
 }

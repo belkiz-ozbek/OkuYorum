@@ -5,6 +5,10 @@ import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 
 import java.util.Collection;
 import java.util.List;
@@ -18,17 +22,30 @@ public class User implements UserDetails {
     private Long id;
 
     private String nameSurname;
+
+    @NotBlank(message = "Kullanıcı adı boş olamaz")
+    @Size(min = 3, max = 50, message = "Kullanıcı adı 3-50 karakter arasında olmalıdır")
+    @Pattern(regexp = "^[a-zA-Z0-9._-]+$", message = "Kullanıcı adı sadece harf, rakam ve ._- karakterlerini içerebilir")
+    @Column(unique = true)
     private String username;
+
     private String password;
+
+    @NotBlank(message = "E-posta adresi boş olamaz")
+    @Email(regexp = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$", 
+           message = "Geçerli bir e-posta adresi giriniz")
+    @Column(unique = true)
+    private String email;
 
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    public User(Long id, String nameSurname, String username, String password, Role role) {
+    public User(Long id, String nameSurname, String username, String password, String email, Role role) {
         this.id = id;
         this.nameSurname = nameSurname;
         this.username = username;
         this.password = password;
+        this.email = email;
         this.role = role;
     }
 
@@ -106,6 +123,14 @@ public class User implements UserDetails {
         this.role = role;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
     public boolean equals(final Object o) {
         if (o == this) return true;
         if (!(o instanceof User)) return false;
@@ -159,6 +184,7 @@ public class User implements UserDetails {
         private String nameSurname;
         private String username;
         private String password;
+        private String email;
         private Role role;
 
         UserBuilder() {
@@ -184,13 +210,18 @@ public class User implements UserDetails {
             return this;
         }
 
+        public UserBuilder email(String email) {
+            this.email = email;
+            return this;
+        }
+
         public UserBuilder role(Role role) {
             this.role = role;
             return this;
         }
 
         public User build() {
-            return new User(this.id, this.nameSurname, this.username, this.password, this.role);
+            return new User(this.id, this.nameSurname, this.username, this.password, this.email, this.role);
         }
 
         public String toString() {
