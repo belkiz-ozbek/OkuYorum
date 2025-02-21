@@ -7,8 +7,10 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 export default function LoginPage() {
-  const [username, setUsername] = useState('ozbekbelkiz')
-  const [password, setPassword] = useState('user123')
+  const [formData, setFormData] = useState({
+    identifier: '', // email veya kullanıcı adı için
+    password: '',
+  })
   const [error, setError] = useState('')
   const router = useRouter()
 
@@ -16,15 +18,21 @@ export default function LoginPage() {
     e.preventDefault()
     setError('')
 
+    // Form validasyonu
+    if (!formData.identifier || !formData.password) {
+      setError('Lütfen tüm alanları doldurun')
+      return
+    }
+
     try {
-      const response = await fetch('http://localhost:8080/login/auth', {
+      const response = await fetch('http://localhost:8080/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          username,
-          password,
+          identifier: formData.identifier,
+          password: formData.password,
         }),
       })
 
@@ -32,65 +40,80 @@ export default function LoginPage() {
         const data = await response.json()
         // Token'ı localStorage'a kaydet
         localStorage.setItem('token', data.token)
-        // Başarılı girişten sonra ana sayfaya yönlendir
-        router.push('/auth/homepage')
+        router.push('/dashboard') // veya ana sayfaya yönlendir
       } else {
-        setError('Kullanıcı adı veya şifre hatalı')
+        const data = await response.json()
+        setError(data.message || 'Giriş başarısız')
       }
     } catch {
       setError('Bir hata oluştu. Lütfen tekrar deneyin.')
     }
   }
 
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData(prev => ({
+      ...prev,
+      [e.target.name]: e.target.value
+    }))
+  }
+
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-gray-100">
-      <div className="w-full max-w-md p-6 bg-white rounded-lg shadow-md">
-        <h2 className="text-2xl font-bold mb-4">Giriş Yap</h2>
+    <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-pink-50 via-rose-50 to-pink-100">
+      <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-md">
+        <h2 className="text-2xl font-bold mb-6 text-gray-800">Giriş Yap</h2>
+        
         {error && (
-          <div className="mb-4 p-2 bg-red-100 text-red-600 rounded">
+          <div className="mb-4 p-3 bg-red-100 text-red-600 rounded-md text-sm">
             {error}
           </div>
         )}
-        <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <label htmlFor="username" className="block text-gray-700 font-bold mb-2">
-              Kullanıcı Adı
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label htmlFor="identifier" className="block text-sm font-medium text-gray-700 mb-1">
+              E-posta veya Kullanıcı Adı
             </label>
-            <Input 
-              type="text" 
-              id="username" 
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="Kullanıcı adınızı girin" 
+            <Input
+              type="text"
+              id="identifier"
+              name="identifier"
+              value={formData.identifier}
+              onChange={handleChange}
+              placeholder="E-posta veya kullanıcı adınızı girin"
+              className="w-full"
             />
           </div>
-          <div className="mb-4">
-            <label htmlFor="password" className="block text-gray-700 font-bold mb-2">
+
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
               Şifre
             </label>
-            <Input 
-              type="password" 
-              id="password" 
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Şifrenizi girin" 
+            <Input
+              type="password"
+              id="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              placeholder="Şifrenizi girin"
+              className="w-full"
             />
           </div>
-          <Button type="submit" className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded">
+
+          <Button type="submit" className="w-full bg-purple-600 hover:bg-purple-700">
             Giriş Yap
           </Button>
         </form>
-        <div className="mt-4 text-center space-y-2">
-          <div>
+
+        <div className="mt-6 text-center space-y-2">
+          <p className="text-sm text-gray-600">
+            Hesabınız yok mu?{' '}
             <Link href="/auth/signup" className="text-purple-600 hover:underline">
-              Hesap oluştur
+              Kayıt olun
             </Link>
-          </div>
-          <div>
-            <Link href="/auth/homepage" className="text-purple-600 hover:underline">
-              Ana sayfaya dön
-            </Link>
-          </div>
+          </p>
+          <Link href="/auth/homepage" className="text-sm text-purple-600 hover:underline block">
+            Ana sayfaya dön
+          </Link>
         </div>
       </div>
     </div>
