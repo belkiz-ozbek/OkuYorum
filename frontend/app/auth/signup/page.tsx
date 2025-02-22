@@ -15,6 +15,7 @@ export default function SignupPage() {
     nameSurname: ''
   })
   const [error, setError] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
 
   // Email validasyon fonksiyonu
@@ -50,44 +51,21 @@ export default function SignupPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
-
-    // Form validasyonu
-    if (!formData.username || !formData.email || !formData.password || 
-        !formData.confirmPassword || !formData.nameSurname) {
-      setError('Lütfen tüm alanları doldurun')
-      return
-    }
-
-    // Ad Soyad validasyonu
-    if (!/^[a-zA-ZğüşıöçĞÜŞİÖÇ\s]{2,50}$/.test(formData.nameSurname)) {
-      setError('Ad Soyad sadece harflerden oluşmalı ve 2-50 karakter uzunluğunda olmalıdır')
-      return
-    }
-
-    // Kullanıcı adı validasyonu
-    if (!/^[a-zA-Z0-9._-]{3,50}$/.test(formData.username)) {
-      setError('Kullanıcı adı sadece harf, rakam ve ._- karakterlerini içerebilir ve 3-50 karakter uzunluğunda olmalıdır')
-      return
-    }
-
-    // Email validasyonu
-    if (!isValidEmail(formData.email)) {
-      setError('Lütfen geçerli bir e-posta adresi girin')
-      return
-    }
-
-    if (formData.password !== formData.confirmPassword) {
-      setError('Şifreler eşleşmiyor')
-      return
-    }
-
-    if (formData.password.length < 6) {
-      setError('Şifre en az 6 karakter olmalıdır')
-      return
-    }
+    setIsLoading(true)
 
     try {
-      const response = await fetch('http://localhost:8080/api/auth/register', {
+      // Form validasyonları
+      if (!formData.username || !formData.email || !formData.password || 
+          !formData.confirmPassword || !formData.nameSurname) {
+        throw new Error('Lütfen tüm alanları doldurun')
+      }
+
+      if (formData.password !== formData.confirmPassword) {
+        throw new Error('Şifreler eşleşmiyor')
+      }
+
+      // Backend'e ön kayıt isteği
+      const response = await fetch('http://localhost:8080/api/auth/pre-register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -100,14 +78,19 @@ export default function SignupPage() {
         }),
       })
 
-      if (response.ok) {
-        router.push('/auth/login')
-      } else {
-        const data = await response.json()
-        setError(data.message || 'Kayıt işlemi başarısız')
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Kayıt işlemi başarısız')
       }
-    } catch (err) {
-      setError('Bir hata oluştu. Lütfen tekrar deneyin.')
+
+      // Doğrulama sayfasına yönlendir
+      router.push(`/auth/verify?tokenId=${data.tempToken}`)
+
+    } catch (err: any) {
+      setError(err.message || 'Bir hata oluştu')
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -142,6 +125,7 @@ export default function SignupPage() {
               onChange={handleChange}
               placeholder="Ad ve soyadınızı girin"
               className="w-full"
+              disabled={isLoading}
             />
           </div>
 
@@ -157,6 +141,7 @@ export default function SignupPage() {
               onChange={handleChange}
               placeholder="Kullanıcı adınızı girin"
               className="w-full"
+              disabled={isLoading}
             />
           </div>
 
@@ -172,6 +157,7 @@ export default function SignupPage() {
               onChange={handleChange}
               placeholder="E-posta adresinizi girin"
               className="w-full"
+              disabled={isLoading}
             />
           </div>
 
@@ -187,6 +173,7 @@ export default function SignupPage() {
               onChange={handleChange}
               placeholder="Şifrenizi girin"
               className="w-full"
+              disabled={isLoading}
             />
           </div>
 
@@ -202,11 +189,16 @@ export default function SignupPage() {
               onChange={handleChange}
               placeholder="Şifrenizi tekrar girin"
               className="w-full"
+              disabled={isLoading}
             />
           </div>
 
-          <Button type="submit" className="w-full bg-purple-600 hover:bg-purple-700">
-            Kayıt Ol
+          <Button 
+            type="submit" 
+            className="w-full bg-purple-600 hover:bg-purple-700"
+            disabled={isLoading}
+          >
+            {isLoading ? 'İşleniyor...' : 'Kayıt Ol'}
           </Button>
         </form>
 
@@ -217,9 +209,6 @@ export default function SignupPage() {
               Giriş yapın
             </Link>
           </p>
-          <Link href="/auth/homepage" className="text-sm text-purple-600 hover:underline block">
-            Ana sayfaya dön
-          </Link>
         </div>
       </div>
     </div>

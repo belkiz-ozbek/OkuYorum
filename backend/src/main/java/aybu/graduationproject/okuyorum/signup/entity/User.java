@@ -40,6 +40,8 @@ public class User implements UserDetails {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    private boolean enabled = false; // varsayılan olarak false
+
     public User(Long id, String nameSurname, String username, String password, String email, Role role) {
         this.id = id;
         this.nameSurname = nameSurname;
@@ -88,7 +90,7 @@ public class User implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true; // Kullanıcı aktif durumda
+        return enabled;
     }
 
     public Long getId() {
@@ -129,6 +131,10 @@ public class User implements UserDetails {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 
     public boolean equals(final Object o) {
@@ -186,6 +192,7 @@ public class User implements UserDetails {
         private String password;
         private String email;
         private Role role;
+        private boolean enabled;
 
         UserBuilder() {
         }
@@ -220,12 +227,25 @@ public class User implements UserDetails {
             return this;
         }
 
+        public UserBuilder enabled(boolean enabled) {
+            this.enabled = enabled;
+            return this;
+        }
+
         public User build() {
-            return new User(this.id, this.nameSurname, this.username, this.password, this.email, this.role);
+            User user = new User();
+            user.id = this.id;
+            user.nameSurname = this.nameSurname;
+            user.username = this.username;
+            user.password = this.password;
+            user.email = this.email;
+            user.role = this.role;
+            user.enabled = this.enabled;
+            return user;
         }
 
         public String toString() {
-            return "User.UserBuilder(id=" + this.id + ", nameSurname=" + this.nameSurname + ", username=" + this.username + ", password=" + this.password + ", role=" + this.role + ")";
+            return "User.UserBuilder(id=" + this.id + ", nameSurname=" + this.nameSurname + ", username=" + this.username + ", password=" + this.password + ", role=" + this.role + ", enabled=" + this.enabled + ")";
         }
     }
 }

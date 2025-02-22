@@ -8,7 +8,7 @@ import { useRouter } from 'next/navigation'
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({
-    identifier: '', // email veya kullanıcı adı için
+    identifier: '',
     password: '',
   })
   const [error, setError] = useState('')
@@ -18,35 +18,34 @@ export default function LoginPage() {
     e.preventDefault()
     setError('')
 
-    // Form validasyonu
     if (!formData.identifier || !formData.password) {
       setError('Lütfen tüm alanları doldurun')
       return
     }
 
     try {
-      const response = await fetch('http://localhost:8080/login', {
+      const response = await fetch('http://localhost:8080/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          identifier: formData.identifier,
+          username: formData.identifier,
           password: formData.password,
         }),
       })
 
       if (response.ok) {
         const data = await response.json()
-        // Token'ı localStorage'a kaydet
         localStorage.setItem('token', data.token)
-        router.push('/dashboard') // veya ana sayfaya yönlendir
+        router.push('/auth/homepage')
       } else {
-        const data = await response.json()
-        setError(data.message || 'Giriş başarısız')
+        const errorData = await response.json()
+        setError(errorData.message || 'Giriş başarısız')
       }
-    } catch {
+    } catch (error) {
       setError('Bir hata oluştu. Lütfen tekrar deneyin.')
+      console.error('Login error:', error)
     }
   }
 
