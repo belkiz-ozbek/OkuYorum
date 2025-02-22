@@ -5,6 +5,10 @@ import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 
 import java.util.Collection;
 import java.util.List;
@@ -18,17 +22,32 @@ public class User implements UserDetails {
     private Long id;
 
     private String nameSurname;
+
+    @NotBlank(message = "Kullanıcı adı boş olamaz")
+    @Size(min = 3, max = 50, message = "Kullanıcı adı 3-50 karakter arasında olmalıdır")
+    @Pattern(regexp = "^[a-zA-Z0-9._-]+$", message = "Kullanıcı adı sadece harf, rakam ve ._- karakterlerini içerebilir")
+    @Column(unique = true)
     private String username;
+
     private String password;
+
+    @NotBlank(message = "E-posta adresi boş olamaz")
+    @Email(regexp = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$", 
+           message = "Geçerli bir e-posta adresi giriniz")
+    @Column(unique = true)
+    private String email;
 
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    public User(Long id, String nameSurname, String username, String password, Role role) {
+    private boolean enabled = false; // varsayılan olarak false
+
+    public User(Long id, String nameSurname, String username, String password, String email, Role role) {
         this.id = id;
         this.nameSurname = nameSurname;
         this.username = username;
         this.password = password;
+        this.email = email;
         this.role = role;
     }
 
@@ -71,7 +90,7 @@ public class User implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true; // Kullanıcı aktif durumda
+        return enabled;
     }
 
     public Long getId() {
@@ -104,6 +123,18 @@ public class User implements UserDetails {
 
     public void setRole(Role role) {
         this.role = role;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 
     public boolean equals(final Object o) {
@@ -159,7 +190,9 @@ public class User implements UserDetails {
         private String nameSurname;
         private String username;
         private String password;
+        private String email;
         private Role role;
+        private boolean enabled;
 
         UserBuilder() {
         }
@@ -184,17 +217,35 @@ public class User implements UserDetails {
             return this;
         }
 
+        public UserBuilder email(String email) {
+            this.email = email;
+            return this;
+        }
+
         public UserBuilder role(Role role) {
             this.role = role;
             return this;
         }
 
+        public UserBuilder enabled(boolean enabled) {
+            this.enabled = enabled;
+            return this;
+        }
+
         public User build() {
-            return new User(this.id, this.nameSurname, this.username, this.password, this.role);
+            User user = new User();
+            user.id = this.id;
+            user.nameSurname = this.nameSurname;
+            user.username = this.username;
+            user.password = this.password;
+            user.email = this.email;
+            user.role = this.role;
+            user.enabled = this.enabled;
+            return user;
         }
 
         public String toString() {
-            return "User.UserBuilder(id=" + this.id + ", nameSurname=" + this.nameSurname + ", username=" + this.username + ", password=" + this.password + ", role=" + this.role + ")";
+            return "User.UserBuilder(id=" + this.id + ", nameSurname=" + this.nameSurname + ", username=" + this.username + ", password=" + this.password + ", role=" + this.role + ", enabled=" + this.enabled + ")";
         }
     }
 }
