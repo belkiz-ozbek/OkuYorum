@@ -1,11 +1,12 @@
 "use client"
 
+import React from 'react'
 import Link from 'next/link'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useState, useMemo, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { BookOpen, User, Mail, Lock, UserCircle, ArrowRight, Sparkles, CheckCircle2 } from 'lucide-react'
+import { BookOpen, User, Mail, Lock, UserCircle, ArrowRight, Sparkles, CheckCircle2, BookMarked, Bookmark } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 // Email validasyon fonksiyonu
@@ -58,6 +59,8 @@ export default function SignupPage() {
     top: `${Math.floor(Math.random() * 100)}%`,
     left: `${Math.floor(Math.random() * 100)}%`,
   }))
+
+  const icons = [BookOpen, BookMarked, Bookmark]
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -163,22 +166,25 @@ export default function SignupPage() {
       {/* Yıldız Efektleri */}
       {mounted && starPositions.map((position, i) => (
         <motion.div
-          key={`star-${i}`}
+          key={`icon-${i}`}
           className="absolute"
           style={position}
           initial={{ opacity: 0, scale: 0 }}
           animate={{
-            opacity: [0, 0.7, 0],
+            opacity: [0, 0.4, 0],
             scale: [0, 1, 0],
+            rotate: [0, 20, 0]
           }}
           transition={{
-            duration: 3,
+            duration: 5,
             repeat: Infinity,
-            delay: i * 0.2,
+            delay: i * 0.4,
             ease: "easeInOut"
           }}
         >
-          <Sparkles className="w-3 h-3 text-purple-300" />
+          {React.createElement(icons[i % icons.length], {
+            className: "w-5 h-5 text-purple-300/50"
+          })}
         </motion.div>
       ))}
 

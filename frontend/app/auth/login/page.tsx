@@ -1,11 +1,12 @@
 "use client"
 
+import React from 'react'
 import Link from 'next/link'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useState, useMemo, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { BookOpen, Lock, User, ArrowRight, Sparkles, BookOpenCheck } from 'lucide-react'
+import { BookOpen, BookMarked, Bookmark, User, Lock, ArrowRight, Sparkles, BookOpenCheck } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 export default function LoginPage() {
@@ -63,6 +64,8 @@ export default function LoginPage() {
     left: `${Math.floor(Math.random() * 100)}%`,
   }))
 
+  const icons = [BookOpen, BookMarked, Bookmark]
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-purple-100 via-rose-50 to-pink-50 relative overflow-hidden">
       {/* Zarif Arka Plan Desenleri */}
@@ -71,25 +74,28 @@ export default function LoginPage() {
         <div className="absolute w-[400px] h-[400px] rounded-full bg-rose-200/30 blur-3xl bottom-0 right-0 animate-pulse delay-700" />
       </div>
 
-      {/* Yıldız efektlerini sadece client-side'da render et */}
+      {/* Floating Book Icons - Signup ile aynı yapı */}
       {mounted && starPositions.map((position, i) => (
         <motion.div
-          key={`star-${i}`}
+          key={`icon-${i}`}
           className="absolute"
           style={position}
           initial={{ opacity: 0, scale: 0 }}
           animate={{
-            opacity: [0, 0.7, 0],
+            opacity: [0, 0.4, 0],
             scale: [0, 1, 0],
+            rotate: [0, 20, 0]
           }}
           transition={{
-            duration: 3,
+            duration: 5,
             repeat: Infinity,
-            delay: i * 0.2,
+            delay: i * 0.4,
             ease: "easeInOut"
           }}
         >
-          <Sparkles className="w-3 h-3 text-purple-300" />
+          {React.createElement(icons[i % icons.length], {
+            className: "w-5 h-5 text-purple-300/50"
+          })}
         </motion.div>
       ))}
 
