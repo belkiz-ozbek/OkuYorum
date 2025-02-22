@@ -5,8 +5,36 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { BookOpen, User, Mail, Lock, UserCircle } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { BookOpen, User, Mail, Lock, UserCircle, ArrowRight, Sparkles, CheckCircle2 } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+
+// Email validasyon fonksiyonu
+const validateEmail = (email: string): boolean => {
+  const validDomains = [
+    'gmail.com',
+    'hotmail.com',
+    'yahoo.com',
+    'outlook.com'
+  ]
+
+  if (!email.includes('@')) return false
+
+  const [localPart, domain] = email.split('@')
+
+  // Basit email validasyonları
+  if (!localPart || !domain) return false
+  if (localPart.length < 3 || localPart.length > 64) return false
+
+  // Domain kontrolü
+  if (!domain.includes('.')) return false
+
+  // Yaygın domainler için kontrol
+  if (validDomains.includes(domain.toLowerCase())) return true
+
+  // Diğer geçerli domain uzantıları için kontrol
+  const validTlds = ['.edu.tr', '.com.tr', '.org.tr', '.gov.tr', '.com', '.org', '.net']
+  return validTlds.some(tld => domain.toLowerCase().endsWith(tld))
+}
 
 export default function SignupPage() {
   const [formData, setFormData] = useState({
@@ -18,37 +46,8 @@ export default function SignupPage() {
   })
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [showSuccess, setShowSuccess] = useState(false)
   const router = useRouter()
-
-  // Email validasyon fonksiyonu
-  const isValidEmail = (email: string) => {
-    const validDomains = [
-      'gmail.com',
-      'hotmail.com',
-      'yahoo.com',
-      'outlook.com',
-      'icloud.com'
-    ]
-
-    // Email formatı kontrolü
-    const emailParts = email.split('@')
-    if (emailParts.length !== 2) return false
-
-    const [localPart, domain] = emailParts
-
-    // Local part kontrolü
-    if (localPart.length < 3 || localPart.length > 64) return false
-
-    // Domain kontrolü
-    if (!domain.includes('.')) return false
-
-    // Yaygın domainler için kontrol
-    if (validDomains.includes(domain.toLowerCase())) return true
-
-    // Diğer geçerli domain uzantıları için kontrol
-    const validTlds = ['.edu.tr', '.com.tr', '.org.tr', '.gov.tr', '.com', '.org', '.net']
-    return validTlds.some(tld => domain.toLowerCase().endsWith(tld))
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -57,17 +56,19 @@ export default function SignupPage() {
 
     try {
       // Form validasyonları
-      if (!formData.username || !formData.email || !formData.password || 
-          !formData.confirmPassword || !formData.nameSurname) {
+      if (!formData.username || !formData.email || !formData.password || !formData.confirmPassword || !formData.nameSurname) {
         throw new Error('Lütfen tüm alanları doldurun')
+      }
+
+      if (!validateEmail(formData.email)) {
+        throw new Error('Geçersiz email adresi')
       }
 
       if (formData.password !== formData.confirmPassword) {
         throw new Error('Şifreler eşleşmiyor')
       }
 
-      // Backend'e ön kayıt isteği
-      const response = await fetch('http://localhost:8080/api/auth/pre-register', {
+      const response = await fetch('http://localhost:8080/api/auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -76,7 +77,7 @@ export default function SignupPage() {
           username: formData.username,
           email: formData.email,
           password: formData.password,
-          nameSurname: formData.nameSurname
+          nameSurname: formData.nameSurname,
         }),
       })
 
@@ -86,8 +87,10 @@ export default function SignupPage() {
         throw new Error(data.message || 'Kayıt işlemi başarısız')
       }
 
-      // Doğrulama sayfasına yönlendir
-      router.push(`/auth/verify?tokenId=${data.tempToken}`)
+      setShowSuccess(true)
+      setTimeout(() => {
+        router.push(`/auth/verify?tokenId=${data.tempToken}`)
+      }, 2000)
 
     } catch (err: any) {
       setError(err.message || 'Bir hata oluştu')
@@ -96,211 +99,233 @@ export default function SignupPage() {
     }
   }
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData(prev => ({
-      ...prev,
-      [e.target.name]: e.target.value
-    }))
-  }
+  const formFields = [
+    {
+      icon: UserCircle,
+      name: 'nameSurname',
+      label: 'Ad Soyad',
+      type: 'text',
+      placeholder: 'Adınız ve soyadınız',
+      delay: 0.2
+    },
+    {
+      icon: User,
+      name: 'username',
+      label: 'Kullanıcı Adı',
+      type: 'text',
+      placeholder: 'Kullanıcı adınız',
+      delay: 0.3
+    },
+    {
+      icon: Mail,
+      name: 'email',
+      label: 'E-posta',
+      type: 'email',
+      placeholder: 'E-posta adresiniz',
+      delay: 0.4
+    },
+    {
+      icon: Lock,
+      name: 'password',
+      label: 'Şifre',
+      type: 'password',
+      placeholder: '••••••••',
+      delay: 0.5
+    },
+    {
+      icon: Lock,
+      name: 'confirmPassword',
+      label: 'Şifre Tekrar',
+      type: 'password',
+      placeholder: '••••••••',
+      delay: 0.6
+    }
+  ]
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 via-pink-50 to-rose-50 relative overflow-hidden py-12">
-      {/* Animasyonlu arka plan desenleri */}
-      <motion.div
-        className="absolute top-0 right-0 w-72 h-72 bg-purple-200 rounded-full mix-blend-multiply filter blur-xl opacity-70"
-        animate={{
-          x: [0, -100, 0],
-          y: [0, 50, 0],
-        }}
-        transition={{
-          duration: 12,
-          repeat: Infinity,
-          ease: "linear"
-        }}
-      />
-      <motion.div
-        className="absolute bottom-0 left-0 w-72 h-72 bg-rose-200 rounded-full mix-blend-multiply filter blur-xl opacity-70"
-        animate={{
-          x: [0, 100, 0],
-          y: [0, -50, 0],
-        }}
-        transition={{
-          duration: 10,
-          repeat: Infinity,
-          ease: "linear"
-        }}
-      />
+    <div className="min-h-screen flex items-center justify-center bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-purple-100 via-rose-50 to-pink-50 relative overflow-hidden py-8">
+      {/* Zarif Arka Plan Desenleri */}
+      <div className="absolute inset-0 w-full h-full opacity-30">
+        <div className="absolute w-[600px] h-[600px] rounded-full bg-purple-200/30 blur-3xl -top-32 -left-20 animate-pulse" />
+        <div className="absolute w-[500px] h-[500px] rounded-full bg-rose-200/30 blur-3xl bottom-0 right-0 animate-pulse delay-1000" />
+      </div>
+
+      {/* İnce Yıldız Efektleri */}
+      {[...Array(15)].map((_, i) => (
+        <motion.div
+          key={`star-${i}`}
+          className="absolute"
+          style={{
+            top: `${Math.random() * 100}%`,
+            left: `${Math.random() * 100}%`,
+          }}
+          initial={{ opacity: 0, scale: 0 }}
+          animate={{
+            opacity: [0, 0.7, 0],
+            scale: [0, 1, 0],
+          }}
+          transition={{
+            duration: 3,
+            repeat: Infinity,
+            delay: i * 0.2,
+            ease: "easeInOut"
+          }}
+        >
+          <Sparkles className="w-3 h-3 text-purple-300" />
+        </motion.div>
+      ))}
 
       <div className="w-full max-w-md relative z-10">
-        {/* Logo Animasyonu */}
+        {/* Zarif Logo Animasyonu */}
         <motion.div 
-          className="text-center mb-8"
-          initial={{ y: -50, opacity: 0 }}
+          className="text-center mb-10"
+          initial={{ y: -30, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.5 }}
+          transition={{ duration: 1, ease: "easeOut" }}
         >
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-white shadow-md mb-4">
-            <BookOpen className="w-10 h-10 text-purple-600" />
-          </div>
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">OkuYorum</h1>
-          <p className="text-gray-600">Kitap okuma serüvenine başla</p>
+          <motion.div 
+            className="inline-flex items-center justify-center w-24 h-24 rounded-[2rem] bg-white/80 shadow-lg mb-6 relative overflow-hidden backdrop-blur-sm"
+            whileHover={{ scale: 1.03, rotate: 3 }}
+            transition={{ type: "spring", stiffness: 400, damping: 15 }}
+          >
+            <motion.div
+              className="absolute inset-0 bg-gradient-to-br from-purple-100/50 to-rose-100/50"
+              animate={{ rotate: [0, 360] }}
+              transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+            />
+            <BookOpen className="w-12 h-12 text-purple-600/90 relative z-10" />
+          </motion.div>
+          <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-rose-500 mb-3">
+            OkuYorum
+          </h1>
+          <p className="text-gray-600/90 text-lg font-light">
+            Yeni bir okuma macerası başlıyor
+          </p>
         </motion.div>
 
-        {/* Kayıt Kartı */}
-        <motion.div 
-          className="bg-white/90 backdrop-blur-lg rounded-3xl shadow-2xl p-8 border border-purple-100"
-          initial={{ y: 50, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-        >
-          <h2 className="text-2xl font-semibold text-gray-800 mb-6">Yeni Hesap Oluştur</h2>
-          
-          {error && (
-            <motion.div 
-              className="mb-6 p-4 bg-red-50 border border-red-100 text-red-600 rounded-lg text-sm"
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
+        {/* Kayıt Formu */}
+        <AnimatePresence mode="wait">
+          {showSuccess ? (
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white/70 backdrop-blur-xl rounded-[2rem] shadow-xl p-12 border border-white/20"
             >
-              {error}
+              <motion.div
+                animate={{ rotate: [0, 360] }}
+                transition={{ duration: 1 }}
+                className="mx-auto w-16 h-16 mb-6 text-purple-500"
+              >
+                <CheckCircle2 className="w-full h-full" />
+              </motion.div>
+              <h2 className="text-2xl font-medium text-gray-800 mb-4">Harika!</h2>
+              <p className="text-gray-600">E-posta doğrulama adımına geçiliyor...</p>
+            </motion.div>
+          ) : (
+            <motion.div 
+              className="bg-white/70 backdrop-blur-xl rounded-[2rem] shadow-xl p-10 border border-white/20"
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 20, opacity: 0 }}
+              transition={{ duration: 0.7 }}
+            >
+              <form onSubmit={handleSubmit} className="space-y-5">
+                {error && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="p-3 rounded-lg bg-red-50 border border-red-100 text-red-600 text-sm"
+                  >
+                    {error}
+                  </motion.div>
+                )}
+
+                {formFields.map((field, index) => (
+                  <motion.div
+                    key={field.name}
+                    initial={{ x: index % 2 === 0 ? -20 : 20, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: field.delay }}
+                  >
+                    <label className="block text-sm font-medium text-gray-700/90 mb-2">
+                      {field.label}
+                    </label>
+                    <div className="relative group">
+                      <field.icon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 transition-colors duration-300 group-hover:text-purple-500" />
+                      <Input
+                        type={field.type}
+                        name={field.name}
+                        value={formData[field.name as keyof typeof formData]}
+                        onChange={(e) => setFormData(prev => ({
+                          ...prev,
+                          [field.name]: e.target.value
+                        }))}
+                        className="pl-11 h-12 bg-white/50 border-gray-200 focus:border-purple-300 focus:ring-purple-200 rounded-xl transition-all duration-300"
+                        placeholder={field.placeholder}
+                      />
+                    </div>
+                  </motion.div>
+                ))}
+
+                <motion.div
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.7 }}
+                  className="pt-2"
+                >
+                  <Button 
+                    type="submit" 
+                    className="w-full h-12 bg-gradient-to-r from-purple-600 to-rose-500 hover:from-purple-700 hover:to-rose-600 text-white rounded-xl font-medium transition-all duration-300 group"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <motion.div
+                        className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full"
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                      />
+                    ) : (
+                      <span className="flex items-center justify-center gap-2">
+                        Kayıt Ol
+                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
+                      </span>
+                    )}
+                  </Button>
+                </motion.div>
+              </form>
+
+              <motion.div 
+                className="mt-8 text-center"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.8 }}
+              >
+                <p className="text-gray-600">
+                  Zaten hesabınız var mı?{' '}
+                  <Link 
+                    href="/auth/login" 
+                    className="text-purple-600 hover:text-purple-700 font-medium transition-colors duration-300"
+                  >
+                    Giriş Yapın
+                  </Link>
+                </p>
+              </motion.div>
             </motion.div>
           )}
-
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div className="relative">
-              <label htmlFor="nameSurname" className="block text-sm font-medium text-gray-700 mb-2">
-                Ad Soyad
-              </label>
-              <div className="relative">
-                <UserCircle className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <Input
-                  type="text"
-                  id="nameSurname"
-                  name="nameSurname"
-                  value={formData.nameSurname}
-                  onChange={handleChange}
-                  className="w-full pl-11 bg-white/60 border-purple-100 focus:border-purple-300 focus:ring-purple-300 transition-all duration-200"
-                  placeholder="Adınız ve soyadınız"
-                />
-              </div>
-            </div>
-
-            <div className="relative">
-              <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
-                Kullanıcı Adı
-              </label>
-              <div className="relative">
-                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <Input
-                  type="text"
-                  id="username"
-                  name="username"
-                  value={formData.username}
-                  onChange={handleChange}
-                  className="w-full pl-11 bg-white/60 border-purple-100 focus:border-purple-300 focus:ring-purple-300 transition-all duration-200"
-                  placeholder="Kullanıcı adınız"
-                />
-              </div>
-            </div>
-
-            <div className="relative">
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                E-posta
-              </label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <Input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  className="w-full pl-11 bg-white/60 border-purple-100 focus:border-purple-300 focus:ring-purple-300 transition-all duration-200"
-                  placeholder="E-posta adresiniz"
-                />
-              </div>
-            </div>
-
-            <div className="relative">
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                Şifre
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <Input
-                  type="password"
-                  id="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  className="w-full pl-11 bg-white/60 border-purple-100 focus:border-purple-300 focus:ring-purple-300 transition-all duration-200"
-                  placeholder="Şifreniz"
-                />
-              </div>
-            </div>
-
-            <div className="relative">
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
-                Şifre Tekrar
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <Input
-                  type="password"
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  className="w-full pl-11 bg-white/60 border-purple-100 focus:border-purple-300 focus:ring-purple-300 transition-all duration-200"
-                  placeholder="Şifrenizi tekrar girin"
-                />
-              </div>
-            </div>
-
-            <motion.div
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <Button 
-                type="submit" 
-                className="w-full bg-purple-600 hover:bg-purple-700 transition-all duration-200 py-6 text-lg font-semibold rounded-xl"
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                    className="w-6 h-6 border-2 border-white border-t-transparent rounded-full"
-                  />
-                ) : (
-                  'Kayıt Ol'
-                )}
-              </Button>
-            </motion.div>
-          </form>
-
-          <div className="mt-8 text-center">
-            <p className="text-gray-600">
-              Zaten hesabınız var mı?{' '}
-              <Link 
-                href="/auth/login" 
-                className="text-purple-600 hover:text-purple-700 font-medium hover:underline transition-colors duration-200"
-              >
-                Giriş Yapın
-              </Link>
-            </p>
-          </div>
-        </motion.div>
+        </AnimatePresence>
 
         {/* Alt Bilgi */}
         <motion.div 
           className="text-center mt-8"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.4 }}
+          transition={{ delay: 0.9 }}
         >
           <Link 
             href="/auth/homepage" 
-            className="text-sm text-gray-500 hover:text-purple-600 transition-colors duration-200"
+            className="text-sm text-gray-500 hover:text-purple-600 transition-colors duration-300"
           >
             Ana Sayfaya Dön
           </Link>
