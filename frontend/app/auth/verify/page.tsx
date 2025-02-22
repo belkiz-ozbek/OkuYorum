@@ -55,10 +55,9 @@ export default function VerifyPage() {
       
       // Başarılı toast göster
       toast({
-        title: "Hesap Doğrulandı!",
-        description: "Hesabınız başarıyla doğrulandı. Giriş sayfasına yönlendiriliyorsunuz...",
-        variant: "success",
-        duration: 3000,
+        variant: "default",
+        title: "Başarılı!",
+        description: "Email doğrulaması başarıyla tamamlandı. Login sayfasına yönlendiriliyorsunuz."
       })
 
       // 3 saniye sonra yönlendir
@@ -66,14 +65,15 @@ export default function VerifyPage() {
         router.push('/auth/login')
       }, 3000)
 
-    } catch (err: any) {
+    } catch (error: unknown) {
       // Hata toast'u göster
       toast({
-        title: "Hata!",
-        description: err.message || 'Bir hata oluştu',
         variant: "destructive",
+        title: "Hata!",
+        description: "Doğrulama kodu geçersiz veya süresi dolmuş."
       })
-      setError(err.message || 'Bir hata oluştu')
+      
+      setError(error instanceof Error ? error.message : 'Bir hata oluştu')
     } finally {
       setIsLoading(false)
     }
