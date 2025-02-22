@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { BookOpen, User, Mail, Lock, UserCircle, ArrowRight, Sparkles, CheckCircle2 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -48,14 +48,16 @@ export default function SignupPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
   const router = useRouter()
+  const [mounted, setMounted] = useState(false)
 
-  // Yıldızların pozisyonlarını useMemo ile sabitliyoruz
-  const starPositions = useMemo(() => {
-    return Array.from({ length: 15 }).map(() => ({
-      top: `${Math.floor(Math.random() * 100)}%`,
-      left: `${Math.floor(Math.random() * 100)}%`,
-    }))
+  useEffect(() => {
+    setMounted(true)
   }, [])
+
+  const starPositions = Array.from({ length: 15 }).map(() => ({
+    top: `${Math.floor(Math.random() * 100)}%`,
+    left: `${Math.floor(Math.random() * 100)}%`,
+  }))
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -159,7 +161,7 @@ export default function SignupPage() {
       </div>
 
       {/* Yıldız Efektleri */}
-      {starPositions.map((position, i) => (
+      {mounted && starPositions.map((position, i) => (
         <motion.div
           key={`star-${i}`}
           className="absolute"
