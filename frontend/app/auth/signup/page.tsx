@@ -81,17 +81,12 @@ export default function SignupPage() {
         throw new Error('Şifreler eşleşmiyor')
       }
 
-      const response = await fetch('http://localhost:8080/api/auth/register', {
+      const response = await fetch('http://localhost:8080/api/auth/pre-register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          username: formData.username,
-          email: formData.email,
-          password: formData.password,
-          nameSurname: formData.nameSurname,
-        }),
+        body: JSON.stringify(formData)
       })
 
       const data = await response.json()
