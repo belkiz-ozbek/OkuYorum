@@ -39,7 +39,7 @@
             <column name="username">ozbekbelkiz</column>
             <!-- BCrypt ile şifrelenmiş "user123" şifresi -->
             <column name="password">$2a$10$JBTAjIbacxVcjR5Y18g0BOATnnKc.nTMsF6/8aSEjZpUKuUZWWkdW</column>
-            <column name="role">USER</column>
+            <column name="role">ADMIN</column>
             <column name="enabled">true</column>
             <column name="email">foomail.okuyorum@gmail.com</column>
         </insert>

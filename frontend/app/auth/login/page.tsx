@@ -8,8 +8,8 @@ import { useRouter } from 'next/navigation'
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({
-    identifier: '',
-    password: '',
+    identifier: 'ozbekbelkiz',
+    password: 'admin123',
   })
   const [error, setError] = useState('')
   const router = useRouter()
