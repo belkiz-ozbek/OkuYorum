@@ -53,7 +53,7 @@ export default function SearchPage() {
 
         // API'den gelen veriyi kontrol et ve dönüştür
         const formattedBooks: Book[] = data.content ? data.content.map((book: any) => ({
-          id: book.googleBooksId || book.id,
+          id: book.id || book.googleBooksId,
           title: book.title,
           author: book.author,
           imageUrl: book.imageUrl,

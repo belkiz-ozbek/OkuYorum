@@ -7,4 +7,5 @@
 
     <!-- Veri değişiklik dosyalarını buraya include edeceğiz -->
     <include file="db/changelog/data/users-data.xml"/>
+    <include file="db/changelog/data/book-data.xml"/>
 </databaseChangeLog> 
