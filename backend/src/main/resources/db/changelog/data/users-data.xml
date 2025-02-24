@@ -6,6 +6,7 @@
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
 
     <changeSet id="20250111 15:24" author="belkiz.ozbek">
+
         <insert tableName="users">
             <column name="name_surname">Enfal Yetiş</column>
             <column name="username">yetisenfal</column>
@@ -17,15 +18,6 @@
         </insert>
 
         <insert tableName="users">
-            <column name="name_surname">İlknur Yiğit</column>
-            <column name="username">yigitilknur</column>
-            <!-- BCrypt ile şifrelenmiş "user123" şifresi -->
-            <column name="password">$2a$10$JBTAjIbacxVcjR5Y18g0BOATnnKc.nTMsF6/8aSEjZpUKuUZWWkdW</column>
-            <column name="role">USER</column>
-            <column name="enabled">true</column>
-            <column name="email">foomail.okuyorum@gmail.com</column>
-        </insert>
-        <insert tableName="users">
             <column name="name_surname">Ayşenur Şirin</column>
             <column name="username">sirinaysenur</column>
             <!-- BCrypt ile şifrelenmiş "admin123" şifresi -->
@@ -34,14 +26,6 @@
             <column name="enabled">true</column>
             <column name="email">foomail.okuyorum@gmail.com</column>
         </insert>
-        <insert tableName="users">
-            <column name="name_surname">Belkız Özbek</column>
-            <column name="username">ozbekbelkiz</column>
-            <!-- BCrypt ile şifrelenmiş "user123" şifresi -->
-            <column name="password">$2a$10$JBTAjIbacxVcjR5Y18g0BOATnnKc.nTMsF6/8aSEjZpUKuUZWWkdW</column>
-            <column name="role">ADMIN</column>
-            <column name="enabled">true</column>
-            <column name="email">foomail.okuyorum@gmail.com</column>
-        </insert>
+
     </changeSet>
 </databaseChangeLog>
