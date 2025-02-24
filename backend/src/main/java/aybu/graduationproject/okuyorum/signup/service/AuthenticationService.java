@@ -24,6 +24,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.regex.Pattern;
 import aybu.graduationproject.okuyorum.signup.dto.AuthenticationRequest;
 import aybu.graduationproject.okuyorum.signup.dto.AuthenticationResponse;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.BadCredentialsException;
+import java.util.Optional;
 
 @Service
 public class AuthenticationService {
@@ -54,32 +58,43 @@ public class AuthenticationService {
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
         try {
-            Authentication authentication = authenticationManager.authenticate(
+            // Önce kullanıcının var olup olmadığını kontrol et
+            Optional<User> userOptional = userRepository.findByUsername(request.getUsername());
+            if (userOptional.isEmpty()) {
+                throw new UsernameNotFoundException("Kullanıcı bulunamadı");
+            }
+
+            User user = userOptional.get();
+            
+            // Kullanıcı hesabının aktif olup olmadığını kontrol et
+            if (!user.isEnabled()) {
+                throw new DisabledException("Hesap aktif değil");
+            }
+
+            // Spring Security authentication işlemi
+            authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                     request.getUsername(),
                     request.getPassword()
                 )
             );
 
-            User user = (User) authentication.getPrincipal();
-            
-            if (!user.isEnabled()) {
-                return AuthenticationResponse.builder()
-                    .message("Hesabınız henüz aktif değil. Lütfen email doğrulamasını yapın.")
+            // JWT token oluştur
+            String jwtToken = jwtService.generateToken(user);
+
+            return AuthenticationResponse.builder()
+                    .token(jwtToken)
+                    .message("Giriş başarılı")
                     .build();
-            }
 
-            String token = jwtService.generateToken(user);
-            
-            return AuthenticationResponse.builder()
-                .token(token)
-                .message("Giriş başarılı")
-                .build();
-
-        } catch (AuthenticationException e) {
-            return AuthenticationResponse.builder()
-                .message("Kullanıcı adı veya şifre hatalı")
-                .build();
+        } catch (UsernameNotFoundException e) {
+            throw new BadCredentialsException("Kullanıcı adı bulunamadı");
+        } catch (DisabledException e) {
+            throw new BadCredentialsException("Hesap aktif değil");
+        } catch (BadCredentialsException e) {
+            throw new BadCredentialsException("Kullanıcı adı veya şifre hatalı");
+        } catch (Exception e) {
+            throw new BadCredentialsException("Giriş işlemi başarısız");
         }
     }
 

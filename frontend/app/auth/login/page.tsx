@@ -8,11 +8,13 @@ import { useState, useMemo, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { BookOpen, BookMarked, Bookmark, User, Lock, ArrowRight, Sparkles, BookOpenCheck } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useToast } from "@/components/ui/use-toast"
 
 export default function LoginPage() {
+  const { toast } = useToast()
   const [formData, setFormData] = useState({
-    identifier: 'ozbekbelkiz',
-    password: 'admin123',
+    identifier: '',
+    password: '',
   })
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -24,38 +26,85 @@ export default function LoginPage() {
     setMounted(true)
   }, [])
 
+  // Form validasyon fonksiyonu
+  const validateForm = () => {
+    if (!formData.identifier.trim()) {
+      setError('Kullanıcı adı boş olamaz')
+      return false
+    }
+    if (!formData.password.trim()) {
+      setError('Şifre boş olamaz')
+      return false
+    }
+    if (formData.password.length < 6) {
+      setError('Şifre en az 6 karakter olmalıdır')
+      return false
+    }
+    return true
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+
+    // Form validasyonunu kontrol et
+    if (!validateForm()) {
+        return
+    }
+
     setIsLoading(true)
 
     try {
-      const response = await fetch('http://localhost:8080/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          username: formData.identifier,
-          password: formData.password,
-        }),
-      })
+        const response = await fetch('http://localhost:8080/api/auth/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                username: formData.identifier,
+                password: formData.password,
+            }),
+        })
 
-      if (response.ok) {
-        const data = await response.json()
+        let data
+        try {
+            data = await response.json()
+        } catch (e) {
+            // JSON parse hatası durumunda
+            throw new Error('Kullanıcı adı veya şifre hatalı')
+        }
+
+        if (!response.ok) {
+            throw new Error(data?.message || 'Kullanıcı adı veya şifre hatalı')
+        }
+
+        if (!data?.token) {
+            throw new Error('Kullanıcı adı veya şifre hatalı')
+        }
+
+        toast({
+            title: "Başarılı!",
+            description: "Giriş başarılı. Yönlendiriliyorsunuz...",
+            duration: 3000,
+        })
         setShowSuccess(true)
         localStorage.setItem('token', data.token)
+        
         setTimeout(() => {
-          router.push('/auth/homepage')
+            router.push('/auth/homepage')
         }, 1500)
-      } else {
-        const errorData = await response.json()
-        setError(errorData.message || 'Giriş başarısız')
-      }
-    } catch (error) {
-      setError('Bir hata oluştu. Lütfen tekrar deneyin.')
+
+    } catch (error: any) {
+        toast({
+            variant: "destructive",
+            title: "Hata!",
+            description: "Kullanıcı adı veya şifre hatalı",
+            duration: 3000,
+        })
+        setError('Kullanıcı adı veya şifre hatalı')
+        setShowSuccess(false)
     } finally {
-      setIsLoading(false)
+        setIsLoading(false)
     }
   }
 
@@ -154,6 +203,20 @@ export default function LoginPage() {
               exit={{ y: 20, opacity: 0 }}
               transition={{ duration: 0.7 }}
             >
+              {/* Hata mesajı alanı */}
+              <AnimatePresence mode="wait">
+                {error && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="p-3 mb-4 rounded-lg bg-red-50 border border-red-100 text-red-600 text-sm"
+                  >
+                    {error}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
               <form onSubmit={handleSubmit} className="space-y-6">
                 <motion.div
                   initial={{ x: -20, opacity: 0 }}
@@ -169,7 +232,10 @@ export default function LoginPage() {
                       type="text"
                       name="identifier"
                       value={formData.identifier}
-                      onChange={(e) => setFormData(prev => ({ ...prev, identifier: e.target.value }))}
+                      onChange={(e) => {
+                        setFormData(prev => ({ ...prev, identifier: e.target.value }))
+                        setError('') // Input değiştiğinde hata mesajını temizle
+                      }}
                       className="pl-11 h-12 bg-white/50 border-gray-200 focus:border-purple-300 focus:ring-purple-200 rounded-xl transition-all duration-300"
                       placeholder="Kullanıcı adınızı girin"
                     />
@@ -190,7 +256,10 @@ export default function LoginPage() {
                       type="password"
                       name="password"
                       value={formData.password}
-                      onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
+                      onChange={(e) => {
+                        setFormData(prev => ({ ...prev, password: e.target.value }))
+                        setError('') // Input değiştiğinde hata mesajını temizle
+                      }}
                       className="pl-11 h-12 bg-white/50 border-gray-200 focus:border-purple-300 focus:ring-purple-200 rounded-xl transition-all duration-300"
                       placeholder="••••••••"
                     />

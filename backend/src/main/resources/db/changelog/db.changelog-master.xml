@@ -5,6 +5,9 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
 
+    <!-- Add defaultSchemaName attribute -->
+    <property name="defaultSchemaName" value="public"/>
+
     <!-- Schema değişikliklerini buraya include edeceğiz -->
     <include file="/db/changelog/changes/okuyorum-14.xml"/>
     <include file="/db/changelog/changes/okuyorum-15.xml"/>
