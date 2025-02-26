@@ -1,13 +1,24 @@
 "use client"
 
-import Link from 'next/link'
-import { BookOpen } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
+import Link from 'next/link'
+import Image from 'next/image'
+import { BookOpen } from 'lucide-react'
 
 // Kitap tipi tanımlama
 type Book = {
   id: string;
+  title: string;
+  author: string;
+  imageUrl?: string;
+  publishedDate?: string;
+}
+
+// Define a type for the API response
+type ApiBookResponse = {
+  id?: string;
+  googleBooksId?: string;
   title: string;
   author: string;
   imageUrl?: string;
@@ -52,7 +63,7 @@ export default function SearchPage() {
         console.log('--------------------')
 
         // API'den gelen veriyi kontrol et ve dönüştür
-        const formattedBooks: Book[] = data.content ? data.content.map((book: any) => ({
+        const formattedBooks: Book[] = data.content ? data.content.map((book: ApiBookResponse) => ({
           id: book.id || book.googleBooksId,
           title: book.title,
           author: book.author,
@@ -95,7 +106,7 @@ export default function SearchPage() {
       </header>
 
       <main className="max-w-4xl mx-auto px-6 py-12">
-        <h1 className="text-3xl font-bold mb-8">"{query}" için arama sonuçları</h1>
+        <h1 className="text-3xl font-bold mb-8">&ldquo;{query}&rdquo; için arama sonuçları</h1>
 
         {loading && (
           <div className="text-center py-8">
@@ -125,11 +136,15 @@ export default function SearchPage() {
             >
               <div className="flex items-start gap-4">
                 {book.imageUrl && (
-                  <img 
-                    src={book.imageUrl} 
-                    alt={book.title}
-                    className="w-24 h-36 object-cover rounded"
-                  />
+                  <div className="relative h-32 w-24 flex-shrink-0">
+                    <Image 
+                      src={book.imageUrl} 
+                      alt={book.title}
+                      fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      className="object-cover rounded"
+                    />
+                  </div>
                 )}
                 <div>
                   <h2 className="text-xl font-semibold mb-2">{book.title}</h2>

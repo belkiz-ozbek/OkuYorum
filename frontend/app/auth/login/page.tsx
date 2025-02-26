@@ -4,9 +4,9 @@ import React from 'react'
 import Link from 'next/link'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { BookOpen, BookMarked, Bookmark, User, Lock, ArrowRight, Sparkles, BookOpenCheck } from 'lucide-react'
+import { BookOpen, BookMarked, Bookmark, User, Lock, ArrowRight, BookOpenCheck } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useToast } from "@/components/ui/use-toast"
 
@@ -47,7 +47,6 @@ export default function LoginPage() {
     e.preventDefault()
     setError('')
 
-    // Form validasyonunu kontrol et
     if (!validateForm()) {
         return
     }
@@ -59,7 +58,9 @@ export default function LoginPage() {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'Accept': 'application/json'
             },
+            credentials: 'include',
             body: JSON.stringify({
                 username: formData.identifier,
                 password: formData.password,
@@ -69,7 +70,7 @@ export default function LoginPage() {
         let data
         try {
             data = await response.json()
-        } catch (e) {
+        } catch {
             // JSON parse hatası durumunda
             throw new Error('Kullanıcı adı veya şifre hatalı')
         }
@@ -94,7 +95,7 @@ export default function LoginPage() {
             router.push('/auth/homepage')
         }, 1500)
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         toast({
             variant: "destructive",
             title: "Hata!",

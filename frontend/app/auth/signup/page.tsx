@@ -4,9 +4,9 @@ import React from 'react'
 import Link from 'next/link'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { BookOpen, User, Mail, Lock, UserCircle, ArrowRight, Sparkles, CheckCircle2, BookMarked, Bookmark } from 'lucide-react'
+import { BookOpen, User, Mail, Lock, UserCircle, ArrowRight, CheckCircle2, BookMarked, Bookmark } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 // Email validasyon fonksiyonu
@@ -100,8 +100,8 @@ export default function SignupPage() {
         router.push(`/auth/verify?tokenId=${data.tempToken}`)
       }, 2000)
 
-    } catch (err: any) {
-      setError(err.message || 'Bir hata oluştu')
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Bir hata oluştu')
     } finally {
       setIsLoading(false)
     }
