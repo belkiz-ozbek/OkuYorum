@@ -74,14 +74,14 @@ export default function DonatePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-purple-100">
       <header className="px-6 h-20 flex items-center justify-between max-w-7xl mx-auto">
-        <Link href="/" className="flex items-center justify-center">
+        <Link href="/auth/homepage" className="flex items-center justify-center">
           <BookOpen className="h-6 w-6 text-purple-600" />
           <span className="ml-2 text-lg font-semibold">OkuYorum</span>
         </Link>
         <nav>
           <ul className="flex space-x-4">
             <li>
-              <Link href="/" className="text-purple-600 hover:text-purple-800">
+              <Link href="/auth/homepage" className="text-purple-600 hover:text-purple-800">
                 Ana Sayfa
               </Link>
             </li>

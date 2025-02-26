@@ -105,7 +105,7 @@ export default function HomePage() {
             <Library className="w-4 h-4 mr-1" />
             Kitaplığım
           </Link>
-          <Link className="text-sm font-medium text-gray-600 hover:text-purple-600 flex items-center" href="/discover">
+          <Link className="text-sm font-medium text-gray-600 hover:text-purple-600 flex items-center" href="/features/discover">
             <Compass className="w-4 h-4 mr-1" />
             Keşfet
           </Link>
@@ -116,7 +116,7 @@ export default function HomePage() {
             <Users className="w-4 h-4 mr-1" />
             Millet Kıraathaneleri
           </Link>
-          <Link className="text-sm font-medium text-gray-600 hover:text-purple-600 flex items-center" href="/donate">
+          <Link className="text-sm font-medium text-gray-600 hover:text-purple-600 flex items-center" href="/features/donate">
             <Heart className="w-4 h-4 mr-1" />
             Bağış Yap
           </Link>
@@ -352,7 +352,7 @@ export default function HomePage() {
                   </Link>
                 </li>
                 <li>
-                  <Link href="/donate" className="text-sm text-gray-600 hover:text-purple-600">
+                  <Link href="/features/donate" className="text-sm text-gray-600 hover:text-purple-600">
                     Bağış Yap
                   </Link>
                 </li>
