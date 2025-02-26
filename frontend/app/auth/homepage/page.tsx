@@ -84,46 +84,46 @@ const ReadingGroup = ({ name, members, currentBook }: ReadingGroupProps) => (
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 via-rose-50 to-pink-100">
-      {/* Navigation */}
-      <header className="px-6 h-20 flex items-center max-w-7xl mx-auto">
-        <Link className="flex items-center justify-center" href="/auth/homepage">
-          <BookOpen className="h-6 w-6 text-purple-600" />
-          <span className="ml-2 text-lg font-semibold">OkuYorum</span>
-        </Link>
-        <nav className="ml-auto flex items-center gap-4">
-          <Link
-            className="text-sm font-medium text-gray-600 hover:text-purple-600 flex items-center"
-            href="/profile"
-          >
-            <User className="w-4 h-4 mr-1" />
-            Profil
+      {/* Navigation - Sticky özelliği eklendi */}
+      <header className="sticky top-0 z-50 bg-white shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+          <Link className="flex items-center justify-center" href="/auth/homepage">
+            <BookOpen className="h-6 w-6 text-purple-600" />
+            <span className="ml-2 text-lg font-semibold">OkuYorum</span>
           </Link>
-          <Link
-            className="text-sm font-medium text-gray-600 hover:text-purple-600 flex items-center"
-            href="/library"
-          >
-            <Library className="w-4 h-4 mr-1" />
-            Kitaplığım
-          </Link>
-          <Link className="text-sm font-medium text-gray-600 hover:text-purple-600 flex items-center" href="/features/discover">
-            <Compass className="w-4 h-4 mr-1" />
-            Keşfet
-          </Link>
-          <Link
-            className="text-sm font-medium text-gray-600 hover:text-purple-600 flex items-center"
-            href="/kiraathane"
-          >
-            <Users className="w-4 h-4 mr-1" />
-            Millet Kıraathaneleri
-          </Link>
-          <Link className="text-sm font-medium text-gray-600 hover:text-purple-600 flex items-center" href="/features/donate">
-            <Heart className="w-4 h-4 mr-1" />
-            Bağış Yap
-          </Link>
-          <SearchForm />
-        </nav>
+          <nav className="flex items-center gap-4">
+            <Link className="text-sm font-medium text-gray-600 hover:text-purple-600 flex items-center" href="/profile">
+              <User className="w-4 h-4 mr-1" />
+              Profil
+            </Link>
+            <Link className="text-sm font-medium text-gray-600 hover:text-purple-600 flex items-center" href="/library">
+              <Library className="w-4 h-4 mr-1" />
+              Kitaplığım
+            </Link>
+            <Link
+              className="text-sm font-medium text-gray-600 hover:text-purple-600 flex items-center"
+              href="/discover"
+            >
+              <Compass className="w-4 h-4 mr-1" />
+              Keşfet
+            </Link>
+            <Link
+              className="text-sm font-medium text-gray-600 hover:text-purple-600 flex items-center"
+              href="/kiraathane"
+            >
+              <Users className="w-4 h-4 mr-1" />
+              Millet Kıraathaneleri
+            </Link>
+            <Link className="text-sm font-medium text-gray-600 hover:text-purple-600 flex items-center" href="/donate">
+              <Heart className="w-4 h-4 mr-1" />
+              Bağış Yap
+            </Link>
+            <SearchForm />
+          </nav>
+        </div>
       </header>
 
+      {/* Ana içerik - değişiklik yok */}
       <main className="max-w-7xl mx-auto px-6">
         {/* Hero Section */}
         <div className="grid lg:grid-cols-2 gap-12 items-center py-12 lg:py-20">
@@ -331,6 +331,7 @@ export default function HomePage() {
         </div>
       </main>
 
+      {/* Footer - değişiklik yok */}
       <footer className="bg-gray-100 mt-20">
         <div className="max-w-7xl mx-auto px-6 py-12">
           <div className="grid md:grid-cols-4 gap-8">
@@ -352,7 +353,7 @@ export default function HomePage() {
                   </Link>
                 </li>
                 <li>
-                  <Link href="/features/donate" className="text-sm text-gray-600 hover:text-purple-600">
+                  <Link href="/donate" className="text-sm text-gray-600 hover:text-purple-600">
                     Bağış Yap
                   </Link>
                 </li>
