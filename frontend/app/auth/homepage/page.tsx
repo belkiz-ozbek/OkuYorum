@@ -49,9 +49,8 @@ const FeaturedBook = ({ title, author, coverUrl }: FeaturedBookProps) => (
     <Image
       src={coverUrl || "/placeholder.svg"}
       alt={title}
-      layout="fill"
-      objectFit="cover"
-      className="rounded-lg shadow-lg"
+      fill
+      className="rounded-lg shadow-lg object-cover"
     />
     <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4 rounded-lg">
       <h3 className="text-white font-semibold">{title}</h3>

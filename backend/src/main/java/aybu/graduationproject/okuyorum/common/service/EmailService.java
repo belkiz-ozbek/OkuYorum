@@ -129,4 +129,153 @@ public class EmailService {
             // Email gönderimi başarısız olsa bile bağış işleminin devam etmesini sağlıyoruz
         }
     }
+
+    /**
+     * Bağış durumu güncellendiğinde kullanıcıya bildirim gönderir
+     */
+    public void sendDonationStatusUpdateEmail(String toEmail, Donation donation) {
+        try {
+            if (toEmail == null || toEmail.trim().isEmpty()) {
+                logger.error("Email adresi boş olamaz");
+                return;
+            }
+
+            String statusText = getStatusText(donation.getStatus());
+            String statusDescription = getStatusDescription(donation.getStatus());
+
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom(fromEmail);
+            message.setTo(toEmail);
+            message.setSubject("Bağış Durumu Güncellendi: " + statusText);
+            
+            StringBuilder emailContent = new StringBuilder();
+            emailContent.append(String.format(
+                "Sayın bağışçımız,\n\n" +
+                "\"%s\" kitabı için bağışınızın durumu güncellendi.\n\n" +
+                "Güncel Durum: %s\n" +
+                "%s\n\n",
+                donation.getBookTitle(),
+                statusText,
+                statusDescription
+            ));
+            
+            // Takip bilgileri varsa ekle
+            if (donation.getTrackingCode() != null && !donation.getTrackingCode().isEmpty()) {
+                emailContent.append(String.format("Takip Kodu: %s\n", donation.getTrackingCode()));
+            }
+            
+            if (donation.getDeliveryMethod() != null && !donation.getDeliveryMethod().isEmpty()) {
+                emailContent.append(String.format("Teslimat Yöntemi: %s\n", donation.getDeliveryMethod()));
+            }
+            
+            if (donation.getEstimatedDeliveryDate() != null) {
+                emailContent.append(String.format("Tahmini Teslimat Tarihi: %s\n", 
+                    donation.getEstimatedDeliveryDate().toLocalDate().toString()));
+            }
+            
+            if (donation.getStatusNote() != null && !donation.getStatusNote().isEmpty()) {
+                emailContent.append(String.format("\nNot: %s\n", donation.getStatusNote()));
+            }
+            
+            emailContent.append("\nBağışınızın durumunu web sitemizden de takip edebilirsiniz.\n\n" +
+                "Saygılarımızla,\nOkuYorum Ekibi");
+            
+            message.setText(emailContent.toString());
+            
+            mailSender.send(message);
+            logger.info("Bağış durum güncelleme emaili gönderildi: {}", toEmail);
+        } catch (MailException e) {
+            logger.error("Email gönderimi sırasında hata oluştu: {}", e.getMessage());
+        }
+    }
+    
+    /**
+     * Bağış takip bilgileri güncellendiğinde kullanıcıya bildirim gönderir
+     */
+    public void sendDonationTrackingUpdateEmail(String toEmail, Donation donation) {
+        try {
+            if (toEmail == null || toEmail.trim().isEmpty()) {
+                logger.error("Email adresi boş olamaz");
+                return;
+            }
+
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom(fromEmail);
+            message.setTo(toEmail);
+            message.setSubject("Bağış Takip Bilgileri Güncellendi");
+            
+            StringBuilder emailContent = new StringBuilder();
+            emailContent.append(String.format(
+                "Sayın bağışçımız,\n\n" +
+                "\"%s\" kitabı için bağışınızın takip bilgileri güncellendi.\n\n",
+                donation.getBookTitle()
+            ));
+            
+            // Takip bilgilerini ekle
+            emailContent.append("Güncel Takip Bilgileri:\n");
+            
+            if (donation.getTrackingCode() != null && !donation.getTrackingCode().isEmpty()) {
+                emailContent.append(String.format("Takip Kodu: %s\n", donation.getTrackingCode()));
+            }
+            
+            if (donation.getDeliveryMethod() != null && !donation.getDeliveryMethod().isEmpty()) {
+                emailContent.append(String.format("Teslimat Yöntemi: %s\n", donation.getDeliveryMethod()));
+            }
+            
+            if (donation.getEstimatedDeliveryDate() != null) {
+                emailContent.append(String.format("Tahmini Teslimat Tarihi: %s\n", 
+                    donation.getEstimatedDeliveryDate().toLocalDate().toString()));
+            }
+            
+            if (donation.getHandlerName() != null && !donation.getHandlerName().isEmpty()) {
+                emailContent.append(String.format("İlgilenen Görevli: %s\n", donation.getHandlerName()));
+            }
+            
+            emailContent.append("\nBağışınızın durumunu web sitemizden de takip edebilirsiniz.\n\n" +
+                "Saygılarımızla,\nOkuYorum Ekibi");
+            
+            message.setText(emailContent.toString());
+            
+            mailSender.send(message);
+            logger.info("Bağış takip bilgileri güncelleme emaili gönderildi: {}", toEmail);
+        } catch (MailException e) {
+            logger.error("Email gönderimi sırasında hata oluştu: {}", e.getMessage());
+        }
+    }
+    
+    /**
+     * Bağış durumuna göre metin açıklaması döndürür
+     */
+    private String getStatusText(aybu.graduationproject.okuyorum.donation.entity.DonationStatus status) {
+        return switch (status) {
+            case PENDING -> "Beklemede";
+            case APPROVED -> "Onaylandı";
+            case PREPARING -> "Hazırlanıyor";
+            case READY_FOR_PICKUP -> "Teslim Almaya Hazır";
+            case IN_TRANSIT -> "Taşınıyor";
+            case DELIVERED -> "Teslim Edildi";
+            case RECEIVED_BY_RECIPIENT -> "Alıcı Tarafından Alındı";
+            case COMPLETED -> "Tamamlandı";
+            case REJECTED -> "Reddedildi";
+            case CANCELLED -> "İptal Edildi";
+        };
+    }
+    
+    /**
+     * Bağış durumuna göre detaylı açıklama döndürür
+     */
+    private String getStatusDescription(aybu.graduationproject.okuyorum.donation.entity.DonationStatus status) {
+        return switch (status) {
+            case PENDING -> "Bağışınız şu anda inceleme aşamasındadır. En kısa sürede değerlendirilecektir.";
+            case APPROVED -> "Bağışınız onaylandı ve işleme alındı. Kitaplarınız hazırlanmaya başlanacak.";
+            case PREPARING -> "Kitaplarınız şu anda hazırlanıyor ve paketleniyor.";
+            case READY_FOR_PICKUP -> "Kitaplarınız paketlendi ve teslim almaya hazır.";
+            case IN_TRANSIT -> "Kitaplarınız şu anda alıcıya doğru yolda.";
+            case DELIVERED -> "Kitaplarınız teslim noktasına ulaştı.";
+            case RECEIVED_BY_RECIPIENT -> "Kitaplarınız alıcı tarafından teslim alındı.";
+            case COMPLETED -> "Bağış süreci başarıyla tamamlandı. Katkınız için teşekkür ederiz!";
+            case REJECTED -> "Bağışınız bazı nedenlerden dolayı kabul edilemedi. Detaylı bilgi için lütfen bizimle iletişime geçin.";
+            case CANCELLED -> "Bağışınız iptal edildi.";
+        };
+    }
 } 

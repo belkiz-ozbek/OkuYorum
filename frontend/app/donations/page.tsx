@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useToast } from "@/components/ui/use-toast"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/Card"
 import { BookOpen, MapPin, User, Package, Calendar, Search } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/select"
 
 type Donation = {
+  id?: number
   bookTitle: string
   author: string
   genre: string
@@ -26,6 +27,7 @@ type Donation = {
   institutionName: string
   donationType: string
   createdAt: string
+  status?: string
 }
 
 const conditionMap = {
@@ -84,8 +86,20 @@ export default function DonationsPage() {
         }
 
         const data = await response.json()
-        setDonations(data)
+        console.log("Fetched donations:", data)
+        
+        // Her bağışın ID'sinin olduğundan emin ol
+        const validatedDonations = data.map((donation: any, index: number) => {
+          if (!donation.id) {
+            console.warn(`Donation at index ${index} has no ID, using index+1 as fallback`)
+            return { ...donation, id: index + 1 }
+          }
+          return donation
+        })
+        
+        setDonations(validatedDonations)
       } catch (error: unknown) {
+        console.error("Bağışlar yüklenirken hata oluştu:", error || "Unknown error")
         toast({
           title: "Hata",
           description: error instanceof Error ? error.message : "Bağışlar yüklenirken bir hata oluştu",
@@ -230,6 +244,29 @@ export default function DonationsPage() {
                         <span>{new Date(donation.createdAt).toLocaleDateString('tr-TR')}</span>
                       </div>
                     </CardContent>
+                    <CardFooter className="pt-0 pb-4">
+                      <Link href={`/donations/${donation.id}`} className="w-full">
+                        <Button 
+                          variant="outline" 
+                          className="w-full border-purple-200 text-purple-700 hover:bg-purple-50"
+                          onClick={(e) => {
+                            if (!donation.id) {
+                              e.preventDefault()
+                              e.stopPropagation()
+                              toast({
+                                title: "Hata",
+                                description: "Bağış ID'si bulunamadı",
+                                variant: "destructive"
+                              })
+                            } else {
+                              console.log("Navigating to donation detail:", donation.id)
+                            }
+                          }}
+                        >
+                          Detayları Görüntüle
+                        </Button>
+                      </Link>
+                    </CardFooter>
                   </Card>
                 ))}
               </div>

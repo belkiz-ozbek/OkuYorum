@@ -1,5 +1,5 @@
 import type React from "react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { MapPin } from "lucide-react"
 import { Button } from "./button"
 
@@ -9,13 +9,32 @@ type Location = {
 }
 
 type MapSelectorProps = {
-  onLocationSelect: (location: Location) => void
+  onLocationSelect?: (location: Location) => void
+  location?: Location
+  setLocation?: (location: Location) => void
+  readOnly?: boolean
+  error?: string
 }
 
-export function MapSelector({ onLocationSelect }: MapSelectorProps) {
+export function MapSelector({ 
+  onLocationSelect, 
+  location, 
+  setLocation, 
+  readOnly = false,
+  error
+}: MapSelectorProps) {
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null)
 
+  // Sync with external location if provided
+  useEffect(() => {
+    if (location && location.lat !== 0 && location.lng !== 0) {
+      setSelectedLocation(location)
+    }
+  }, [location])
+
   const handleMapClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (readOnly) return
+
     // In a real implementation, this would use the Google Maps API
     // For now, we'll just use the click coordinates as a simulation
     const rect = event.currentTarget.getBoundingClientRect()
@@ -28,25 +47,46 @@ export function MapSelector({ onLocationSelect }: MapSelectorProps) {
     }
 
     setSelectedLocation(newLocation)
-    onLocationSelect(newLocation)
+    
+    // Call the appropriate callback
+    if (onLocationSelect) {
+      onLocationSelect(newLocation)
+    }
+    
+    if (setLocation) {
+      setLocation(newLocation)
+    }
   }
 
   const handleUseCurrentLocation = () => {
+    if (readOnly) return
+
     // In a real implementation, this would use the browser's geolocation API
     // For now, we'll just use a fixed location as a simulation
     const currentLocation = { lat: 41.0082, lng: 28.9784 } // Istanbul coordinates
     setSelectedLocation(currentLocation)
-    onLocationSelect(currentLocation)
+    
+    // Call the appropriate callback
+    if (onLocationSelect) {
+      onLocationSelect(currentLocation)
+    }
+    
+    if (setLocation) {
+      setLocation(currentLocation)
+    }
   }
 
   return (
     <div className="space-y-4">
-      <div className="w-full h-64 bg-gray-200 relative cursor-pointer" onClick={handleMapClick}>
+      <div 
+        className={`w-full h-64 bg-gray-200 relative cursor-pointer ${readOnly ? 'cursor-default' : 'cursor-pointer'} ${error ? 'border-2 border-red-500' : ''}`} 
+        onClick={handleMapClick}
+      >
         {/* This would be replaced with an actual Google Map */}
         <div className="absolute inset-0 flex items-center justify-center text-gray-500">
-          Harita Burada Görüntülenecek
+          {readOnly ? "Seçilen Konum" : "Harita Burada Görüntülenecek"}
         </div>
-        {selectedLocation && (
+        {selectedLocation && selectedLocation.lat !== 0 && selectedLocation.lng !== 0 && (
           <MapPin
             className="absolute text-red-500"
             style={{
@@ -56,10 +96,18 @@ export function MapSelector({ onLocationSelect }: MapSelectorProps) {
           />
         )}
       </div>
-      <Button onClick={handleUseCurrentLocation} variant="outline" className="w-full">
-        Mevcut Konumumu Kullan
-      </Button>
-      {selectedLocation && (
+      
+      {!readOnly && (
+        <Button onClick={handleUseCurrentLocation} variant="outline" className="w-full">
+          Mevcut Konumumu Kullan
+        </Button>
+      )}
+      
+      {error && (
+        <p className="text-sm text-red-500">{error}</p>
+      )}
+      
+      {selectedLocation && selectedLocation.lat !== 0 && selectedLocation.lng !== 0 && (
         <p className="text-sm text-gray-600">
           Seçilen Konum: {selectedLocation.lat.toFixed(4)}°N, {selectedLocation.lng.toFixed(4)}°E
         </p>

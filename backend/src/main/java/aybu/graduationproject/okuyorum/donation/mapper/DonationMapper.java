@@ -21,6 +21,14 @@ public class DonationMapper {
         donation.setRecipientName(dto.getRecipientName());
         donation.setAddress(dto.getAddress());
         donation.setDonationType(dto.getDonationType());
+        
+        // Takip bilgileri
+        if (dto.getStatusNote() != null) donation.setStatusNote(dto.getStatusNote());
+        if (dto.getTrackingCode() != null) donation.setTrackingCode(dto.getTrackingCode());
+        if (dto.getDeliveryMethod() != null) donation.setDeliveryMethod(dto.getDeliveryMethod());
+        if (dto.getEstimatedDeliveryDate() != null) donation.setEstimatedDeliveryDate(dto.getEstimatedDeliveryDate());
+        if (dto.getHandlerName() != null) donation.setHandlerName(dto.getHandlerName());
+        
         return donation;
     }
 
@@ -40,6 +48,15 @@ public class DonationMapper {
         dto.setDonationType(entity.getDonationType());
         dto.setCreatedAt(entity.getCreatedAt());
         dto.setStatus(entity.getStatus());
+        
+        // Takip bilgileri
+        dto.setStatusUpdatedAt(entity.getStatusUpdatedAt());
+        dto.setStatusNote(entity.getStatusNote());
+        dto.setTrackingCode(entity.getTrackingCode());
+        dto.setDeliveryMethod(entity.getDeliveryMethod());
+        dto.setEstimatedDeliveryDate(entity.getEstimatedDeliveryDate());
+        dto.setHandlerName(entity.getHandlerName());
+        
         return dto;
     }
 } 

@@ -18,6 +18,14 @@ public class DonationDto {
     private String donationType;
     private LocalDateTime createdAt;
     private DonationStatus status;
+    
+    // Takip bilgileri
+    private LocalDateTime statusUpdatedAt;
+    private String statusNote;
+    private String trackingCode;
+    private String deliveryMethod;
+    private LocalDateTime estimatedDeliveryDate;
+    private String handlerName;
 
     // Getter ve Setter metodları
     public String getBookTitle() {
@@ -130,5 +138,53 @@ public class DonationDto {
 
     public void setStatus(DonationStatus status) {
         this.status = status;
+    }
+    
+    public LocalDateTime getStatusUpdatedAt() {
+        return statusUpdatedAt;
+    }
+
+    public void setStatusUpdatedAt(LocalDateTime statusUpdatedAt) {
+        this.statusUpdatedAt = statusUpdatedAt;
+    }
+
+    public String getStatusNote() {
+        return statusNote;
+    }
+
+    public void setStatusNote(String statusNote) {
+        this.statusNote = statusNote;
+    }
+
+    public String getTrackingCode() {
+        return trackingCode;
+    }
+
+    public void setTrackingCode(String trackingCode) {
+        this.trackingCode = trackingCode;
+    }
+
+    public String getDeliveryMethod() {
+        return deliveryMethod;
+    }
+
+    public void setDeliveryMethod(String deliveryMethod) {
+        this.deliveryMethod = deliveryMethod;
+    }
+
+    public LocalDateTime getEstimatedDeliveryDate() {
+        return estimatedDeliveryDate;
+    }
+
+    public void setEstimatedDeliveryDate(LocalDateTime estimatedDeliveryDate) {
+        this.estimatedDeliveryDate = estimatedDeliveryDate;
+    }
+
+    public String getHandlerName() {
+        return handlerName;
+    }
+
+    public void setHandlerName(String handlerName) {
+        this.handlerName = handlerName;
     }
 } 

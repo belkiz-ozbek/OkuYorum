@@ -91,4 +91,78 @@ public class DonationController {
                 }});
         }
     }
+    
+    /**
+     * Belirli bir bağışın detaylarını getirir
+     */
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getDonationDetails(@PathVariable Long id) {
+        try {
+            DonationDto donation = donationService.getDonationDetails(id);
+            return ResponseEntity.ok(donation);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                .body(new HashMap<String, String>() {{
+                    put("error", "Bağış detayları alınırken bir hata oluştu: " + e.getMessage());
+                }});
+        }
+    }
+    
+    /**
+     * Bağış durumunu günceller
+     */
+    @PutMapping("/{id}/status")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> updateDonationStatus(
+            @PathVariable Long id,
+            @RequestBody Map<String, Object> statusUpdate) {
+        try {
+            String statusStr = (String) statusUpdate.get("status");
+            String statusNote = (String) statusUpdate.get("statusNote");
+            
+            if (statusStr == null) {
+                return ResponseEntity.badRequest()
+                    .body(new HashMap<String, String>() {{
+                        put("error", "Durum bilgisi gereklidir");
+                    }});
+            }
+            
+            aybu.graduationproject.okuyorum.donation.entity.DonationStatus newStatus;
+            try {
+                newStatus = aybu.graduationproject.okuyorum.donation.entity.DonationStatus.valueOf(statusStr);
+            } catch (IllegalArgumentException e) {
+                return ResponseEntity.badRequest()
+                    .body(new HashMap<String, String>() {{
+                        put("error", "Geçersiz durum değeri: " + statusStr);
+                    }});
+            }
+            
+            DonationDto updatedDonation = donationService.updateDonationStatus(id, newStatus, statusNote);
+            return ResponseEntity.ok(updatedDonation);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                .body(new HashMap<String, String>() {{
+                    put("error", "Bağış durumu güncellenirken bir hata oluştu: " + e.getMessage());
+                }});
+        }
+    }
+    
+    /**
+     * Bağış takip bilgilerini günceller
+     */
+    @PutMapping("/{id}/tracking")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> updateDonationTracking(
+            @PathVariable Long id,
+            @RequestBody DonationDto trackingInfo) {
+        try {
+            DonationDto updatedDonation = donationService.updateDonationTracking(id, trackingInfo);
+            return ResponseEntity.ok(updatedDonation);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                .body(new HashMap<String, String>() {{
+                    put("error", "Bağış takip bilgileri güncellenirken bir hata oluştu: " + e.getMessage());
+                }});
+        }
+    }
 } 

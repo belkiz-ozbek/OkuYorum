@@ -119,4 +119,117 @@ public class DonationService {
         stats.put("individual", donationRepository.countByDonationType("individual"));
         return stats;
     }
+    
+    /**
+     * Bağış durumunu günceller ve ilgili takip bilgilerini ekler
+     */
+    @Transactional
+    public DonationDto updateDonationStatus(Long donationId, DonationStatus newStatus, String statusNote) {
+        Donation donation = donationRepository.findById(donationId)
+            .orElseThrow(() -> new RuntimeException("Bağış bulunamadı: " + donationId));
+        
+        // Yetki kontrolü
+        User currentUser = userService.getCurrentUser();
+        if (!donation.getUser().getId().equals(currentUser.getId()) && !userService.isAdmin()) {
+            throw new RuntimeException("Bu bağışı güncelleme yetkiniz yok");
+        }
+        
+        donation.setStatus(newStatus);
+        donation.setStatusNote(statusNote);
+        donation.setStatusUpdatedAt(LocalDateTime.now());
+        
+        // Durum değişikliğine göre email bildirimleri gönder
+        try {
+            emailService.sendDonationStatusUpdateEmail(donation.getUser().getEmail(), donation);
+        } catch (Exception e) {
+            log.error("Durum güncelleme emaili gönderilemedi: " + e.getMessage());
+        }
+        
+        return donationMapper.toDto(donationRepository.save(donation));
+    }
+    
+    /**
+     * Bağış takip bilgilerini günceller
+     */
+    @Transactional
+    public DonationDto updateDonationTracking(Long donationId, DonationDto trackingInfo) {
+        Donation donation = donationRepository.findById(donationId)
+            .orElseThrow(() -> new RuntimeException("Bağış bulunamadı: " + donationId));
+        
+        // Yetki kontrolü - sadece admin kullanıcılar takip bilgilerini güncelleyebilir
+        if (!userService.isAdmin()) {
+            throw new RuntimeException("Takip bilgilerini güncelleme yetkiniz yok");
+        }
+        
+        if (trackingInfo.getTrackingCode() != null) {
+            donation.setTrackingCode(trackingInfo.getTrackingCode());
+        }
+        
+        if (trackingInfo.getDeliveryMethod() != null) {
+            donation.setDeliveryMethod(trackingInfo.getDeliveryMethod());
+        }
+        
+        if (trackingInfo.getEstimatedDeliveryDate() != null) {
+            donation.setEstimatedDeliveryDate(trackingInfo.getEstimatedDeliveryDate());
+        }
+        
+        if (trackingInfo.getHandlerName() != null) {
+            donation.setHandlerName(trackingInfo.getHandlerName());
+        }
+        
+        donation.setStatusUpdatedAt(LocalDateTime.now());
+        
+        // Takip bilgileri güncellendiğinde email bildirimi gönder
+        try {
+            emailService.sendDonationTrackingUpdateEmail(donation.getUser().getEmail(), donation);
+        } catch (Exception e) {
+            log.error("Takip bilgileri güncelleme emaili gönderilemedi: " + e.getMessage());
+        }
+        
+        return donationMapper.toDto(donationRepository.save(donation));
+    }
+    
+    /**
+     * Belirli bir bağışın detaylı bilgilerini getirir
+     */
+    public DonationDto getDonationDetails(Long donationId) {
+        Donation donation = donationRepository.findById(donationId)
+            .orElseThrow(() -> new RuntimeException("Bağış bulunamadı: " + donationId));
+        
+        // Yetki kontrolü
+        User currentUser = userService.getCurrentUser();
+        if (!donation.getUser().getId().equals(currentUser.getId()) && !userService.isAdmin()) {
+            throw new RuntimeException("Bu bağışın detaylarını görüntüleme yetkiniz yok");
+        }
+        
+        return donationMapper.toDto(donation);
+    }
+    
+    /**
+     * Bağış durumuna göre tahmini teslim süresi hesaplar
+     */
+    public LocalDateTime calculateEstimatedDeliveryDate(DonationStatus status, String donationType) {
+        LocalDateTime now = LocalDateTime.now();
+        
+        // Bağış türüne ve durumuna göre tahmini süre hesapla
+        switch (status) {
+            case APPROVED:
+                return now.plusDays(2); // Onaylandıktan 2 gün sonra hazırlanmış olur
+            case PREPARING:
+                return now.plusDays(3); // Hazırlanmaya başladıktan 3 gün sonra teslimata hazır olur
+            case READY_FOR_PICKUP:
+                return now.plusDays(1); // Teslimata hazır olduktan 1 gün sonra taşınmaya başlar
+            case IN_TRANSIT:
+                // Bağış türüne göre taşıma süresi değişir
+                if ("schools".equals(donationType)) {
+                    return now.plusDays(5); // Okullara 5 gün içinde ulaşır
+                } else if ("libraries".equals(donationType)) {
+                    return now.plusDays(4); // Kütüphanelere 4 gün içinde ulaşır
+                } else {
+                    return now.plusDays(3); // Bireylere 3 gün içinde ulaşır
+                }
+            default:
+                return now.plusWeeks(1); // Varsayılan olarak 1 hafta
+        }
+    }
 } 

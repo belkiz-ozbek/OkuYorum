@@ -36,6 +36,14 @@ public class Donation {
 
     @Enumerated(EnumType.STRING)
     private DonationStatus status = DonationStatus.PENDING;
+    
+    // Takip bilgileri
+    private LocalDateTime statusUpdatedAt;
+    private String statusNote;
+    private String trackingCode;
+    private String deliveryMethod;
+    private LocalDateTime estimatedDeliveryDate;
+    private String handlerName; // Bağışı işleyen görevli
 
     // Getter ve Setter metodları
     public Long getId() {
@@ -164,5 +172,54 @@ public class Donation {
 
     public void setStatus(DonationStatus status) {
         this.status = status;
+        this.statusUpdatedAt = LocalDateTime.now();
+    }
+    
+    public LocalDateTime getStatusUpdatedAt() {
+        return statusUpdatedAt;
+    }
+
+    public void setStatusUpdatedAt(LocalDateTime statusUpdatedAt) {
+        this.statusUpdatedAt = statusUpdatedAt;
+    }
+
+    public String getStatusNote() {
+        return statusNote;
+    }
+
+    public void setStatusNote(String statusNote) {
+        this.statusNote = statusNote;
+    }
+
+    public String getTrackingCode() {
+        return trackingCode;
+    }
+
+    public void setTrackingCode(String trackingCode) {
+        this.trackingCode = trackingCode;
+    }
+
+    public String getDeliveryMethod() {
+        return deliveryMethod;
+    }
+
+    public void setDeliveryMethod(String deliveryMethod) {
+        this.deliveryMethod = deliveryMethod;
+    }
+
+    public LocalDateTime getEstimatedDeliveryDate() {
+        return estimatedDeliveryDate;
+    }
+
+    public void setEstimatedDeliveryDate(LocalDateTime estimatedDeliveryDate) {
+        this.estimatedDeliveryDate = estimatedDeliveryDate;
+    }
+
+    public String getHandlerName() {
+        return handlerName;
+    }
+
+    public void setHandlerName(String handlerName) {
+        this.handlerName = handlerName;
     }
 } 
