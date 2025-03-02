@@ -168,10 +168,15 @@ export default function DonationsPage() {
               value={filters.status}
               onValueChange={(value: Status) => setFilters({ ...filters, status: value })}
             >
-              <option value="all">Tüm Durumlar</option>
-              <option value="pending">Beklemede</option>
-              <option value="approved">Onaylandı</option>
-              <option value="completed">Tamamlandı</option>
+              <SelectTrigger>
+                <SelectValue placeholder="Tüm Durumlar" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tüm Durumlar</SelectItem>
+                <SelectItem value="pending">Beklemede</SelectItem>
+                <SelectItem value="approved">Onaylandı</SelectItem>
+                <SelectItem value="completed">Tamamlandı</SelectItem>
+              </SelectContent>
             </Select>
           </div>
         </div>

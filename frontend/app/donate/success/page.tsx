@@ -5,7 +5,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { motion } from "framer-motion"
 import confetti from 'canvas-confetti'
-import { useEffect, useState, useRef } from "react"
+import { useEffect, useState, useRef, useCallback } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card"
 import { Spinner } from "@/components/ui/spinner"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
@@ -14,15 +14,17 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import QRCode from 'qrcode'
 import Image from 'next/image'
 
-type DonationDetails = {
+type DonationData = {
   bookTitle: string;
   author: string;
+  description?: string;
   genre: string;
   condition: string;
   quantity: number;
   donationType: string;
-  institutionName: string;
-  recipientName: string;
+  institutionName?: string;
+  recipientName?: string;
+  address?: string;
 }
 
 type DonationStats = {
@@ -54,7 +56,7 @@ const genreMap = {
 
 export default function DonationSuccessPage() {
   const [userName, setUserName] = useState<string>("")
-  const [donationDetails, setDonationDetails] = useState<DonationDetails | null>(null)
+  const [donationDetails, setDonationDetails] = useState<DonationData | null>(null)
   const [stats, setStats] = useState<DonationStats>({
     totalDonations: 0,
     totalRecipients: 0,
@@ -73,7 +75,7 @@ export default function DonationSuccessPage() {
     setUserName(storedUserName.replace(/"/g, ''))
     
     // Bağış detaylarını localStorage'dan al
-    const details: DonationDetails = {
+    const details: DonationData = {
       bookTitle: localStorage.getItem('draft_bookTitle') || "",
       author: localStorage.getItem('draft_author') || "",
       genre: localStorage.getItem('draft_genre') || "",
@@ -81,7 +83,8 @@ export default function DonationSuccessPage() {
       quantity: Number(localStorage.getItem('draft_quantity')) || 1,
       donationType: localStorage.getItem('draft_donationType') || "",
       institutionName: localStorage.getItem('draft_institutionName') || "",
-      recipientName: localStorage.getItem('draft_recipientName') || ""
+      recipientName: localStorage.getItem('draft_recipientName') || "",
+      address: localStorage.getItem('draft_address') || ""
     }
     
     if (details.bookTitle) {
@@ -240,7 +243,7 @@ export default function DonationSuccessPage() {
   }
 
   // Sertifika oluşturma ve önizleme fonksiyonu
-  const generateCertificate = async (forDownload = false) => {
+  const generateCertificate = useCallback(async (forDownload = false) => {
     const canvas = canvasRef.current || document.createElement('canvas')
     const ctx = canvas.getContext('2d')
     if (!ctx) return
@@ -365,7 +368,7 @@ export default function DonationSuccessPage() {
       ctx.beginPath()
       ctx.moveTo(120, rectY + radius)
       ctx.lineTo(120, rectY + rectHeight - radius)
-      ctx.arcTo(120, rectY + rectHeight, 120 + radius, rectY + rectHeight, radius)
+      ctx.arcTo(120 + radius, rectY + rectHeight, 120 + radius, rectY + rectHeight, radius)
       ctx.lineTo(canvas.width - 120 - radius, rectY + rectHeight)
       ctx.arcTo(canvas.width - 120, rectY + rectHeight, canvas.width - 120, rectY + rectHeight - radius, radius)
       ctx.lineTo(canvas.width - 120, rectY + radius)
@@ -417,7 +420,7 @@ export default function DonationSuccessPage() {
         // Detay kutusu arka planı
         ctx.fillStyle = colors.light + '80' // %50 opaklık
         ctx.beginPath()
-        ctx.roundRect(300, 1300, canvas.width - 600, 600, 20)
+        ctx.rect(300, 1300, canvas.width - 600, 600)
         ctx.fill()
         
         // Detay başlığı
@@ -467,15 +470,16 @@ export default function DonationSuccessPage() {
           }
         })
         
-        const qrImage = new Image()
+        // Image constructor'ını window üzerinden çağırıyoruz
+        const qrImage = new window.Image() as HTMLImageElement
         qrImage.src = qrDataUrl
         
-        await new Promise((resolve) => {
+        await new Promise<void>((resolve) => {
           qrImage.onload = () => {
             // QR kod arka planı
             ctx.fillStyle = '#FFFFFF'
             ctx.beginPath()
-            ctx.roundRect(canvas.width - 450, canvas.height - 450, 350, 350, 10)
+            ctx.rect(canvas.width - 450, canvas.height - 450, 350, 350)
             ctx.fill()
             
             // QR kodu çiz
@@ -487,7 +491,7 @@ export default function DonationSuccessPage() {
             ctx.textAlign = 'center'
             ctx.fillText('Bağış hikayemi görüntüle', canvas.width - 275, canvas.height - 460)
             
-            resolve(null)
+            resolve()
           }
         })
       } catch (error) {
@@ -533,7 +537,7 @@ export default function DonationSuccessPage() {
     } else {
       setCertificatePreview(canvas.toDataURL('image/png'))
     }
-  }
+  }, [donationDetails, userName, certificateTheme])
 
   // Sayfa yüklendiğinde sertifika önizlemesini oluştur
   useEffect(() => {
@@ -621,7 +625,7 @@ export default function DonationSuccessPage() {
                   </div>
                   <div className="flex items-center gap-2 text-gray-700">
                     <Package className="h-4 w-4 text-purple-600" />
-                    <span className="font-medium">Durum:</span> {conditionMap[donationDetails.condition as keyof typeof conditionMap] || donationDetails.condition}
+                    <span className="font-medium">Durum: </span> {conditionMap[donationDetails.condition as keyof typeof conditionMap] || donationDetails.condition}
                   </div>
                   <div className="flex items-center gap-2 text-gray-700">
                     <BookOpen className="h-4 w-4 text-purple-600" />

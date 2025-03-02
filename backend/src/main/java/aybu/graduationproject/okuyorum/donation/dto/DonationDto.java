@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import aybu.graduationproject.okuyorum.donation.entity.DonationStatus;
 
 public class DonationDto {
+    private Long id;
+    private Long userId;
     private String bookTitle;
     private String author;
     private String genre;
@@ -28,6 +30,22 @@ public class DonationDto {
     private String handlerName;
 
     // Getter ve Setter metodları
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
     public String getBookTitle() {
         return bookTitle;
     }

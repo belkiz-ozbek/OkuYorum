@@ -34,6 +34,10 @@ public class DonationMapper {
 
     public DonationDto toDto(Donation entity) {
         DonationDto dto = new DonationDto();
+        dto.setId(entity.getId());
+        if (entity.getUser() != null) {
+            dto.setUserId(entity.getUser().getId());
+        }
         dto.setBookTitle(entity.getBookTitle());
         dto.setAuthor(entity.getAuthor());
         dto.setGenre(entity.getGenre());

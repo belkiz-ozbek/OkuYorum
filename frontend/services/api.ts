@@ -1,26 +1,29 @@
 import axios from 'axios'
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api'
+// API temel URL'sini ayarla
+const baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'
 
-// Tarayıcı ortamında olup olmadığımızı kontrol et
-const isBrowser = typeof window !== 'undefined'
-
+// Axios instance oluştur
 export const api = axios.create({
-  baseURL: API_URL,
+  baseURL,
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true, // CORS için cookie'leri gönder
 })
 
-// Request interceptor
+// İstek interceptor'ı
 api.interceptors.request.use(
   (config) => {
     try {
-      // Tarayıcı ortamında değilsek (SSR sırasında), token ekleme
-      if (isBrowser) {
+      // Token varsa ekle
+      if (typeof window !== 'undefined') {
         const token = localStorage.getItem('token')
         if (token) {
+          console.log(`Token found for request to ${config.url}: ${token.substring(0, 15)}...`);
           config.headers.Authorization = `Bearer ${token}`
+        } else {
+          console.log(`No token found for request to ${config.url}`);
         }
       }
       return config
@@ -35,22 +38,50 @@ api.interceptors.request.use(
   }
 )
 
-// Response interceptor
+// Yanıt interceptor'ı
 api.interceptors.response.use(
   (response) => {
     return response
   },
-  (error) => {
-    try {
-      // Tarayıcı ortamında 401 hatası alırsak kullanıcıyı login sayfasına yönlendir
-      if (isBrowser && error?.response?.status === 401) {
-        // Token expired or invalid
-        localStorage.removeItem('token')
-        window.location.href = '/auth/login'
+  async (error) => {
+    console.error("API Error:", error.response?.status, error.config?.url);
+    
+    const originalRequest = error.config
+    
+    // 401 Unauthorized hatası ve token refresh denememiş ise
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true
+      
+      try {
+        // Token yenileme isteği
+        if (typeof window !== 'undefined') {
+          const refreshToken = localStorage.getItem('refreshToken')
+          if (refreshToken) {
+            try {
+              const response = await axios.post(`${baseURL}/api/auth/refresh-token`, {
+                refreshToken,
+              })
+              
+              if (response.data.token) {
+                localStorage.setItem('token', response.data.token)
+                api.defaults.headers.common.Authorization = `Bearer ${response.data.token}`
+                return api(originalRequest)
+              }
+            } catch (refreshError) {
+              console.error("Error refreshing token:", refreshError)
+            }
+          }
+          
+          // Token yenilenemezse veya refresh token yoksa oturumu kapat
+          localStorage.removeItem('token')
+          localStorage.removeItem('refreshToken')
+          window.location.href = '/auth/login'
+        }
+      } catch (refreshError) {
+        return Promise.reject(refreshError)
       }
-    } catch (interceptorError) {
-      console.error("Response interceptor error:", interceptorError)
     }
+    
     return Promise.reject(error)
   }
 ) 

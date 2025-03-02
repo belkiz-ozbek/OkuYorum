@@ -25,6 +25,10 @@ type BookInfo = {
   coverUrl?: string
 }
 
+export interface BookSearchProps {
+  action: (book: BookInfo) => void
+}
+
 const popularBooks: BookInfo[] = [
   { 
     title: "1984", 
@@ -88,11 +92,7 @@ const popularBooks: BookInfo[] = [
   }
 ]
 
-interface BookSearchProps {
-  onSelect: (book: BookInfo) => void
-}
-
-export function BookSearch({ onSelect }: BookSearchProps) {
+export function BookSearch({ action }: BookSearchProps) {
   const [open, setOpen] = React.useState(false)
   const [value, setValue] = React.useState("")
   const [searchTerm, setSearchTerm] = React.useState("")
@@ -193,7 +193,7 @@ export function BookSearch({ onSelect }: BookSearchProps) {
                   key={book.title}
                   onSelect={() => {
                     setValue(book.title)
-                    onSelect(book)
+                    action(book)
                     setOpen(false)
                   }}
                   className={cn(

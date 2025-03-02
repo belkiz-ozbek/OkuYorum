@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation'
 import { BookOpen, BookMarked, Bookmark, User, Lock, ArrowRight, BookOpenCheck } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useToast } from "@/components/ui/use-toast"
+import { UserService } from '@/services/UserService'
 
 export default function LoginPage() {
   const { toast } = useToast()
@@ -54,30 +55,24 @@ export default function LoginPage() {
     setIsLoading(true)
 
     try {
+        // Doğrudan API çağrısı yapalım
         const response = await fetch('http://localhost:8080/api/auth/login', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Accept': 'application/json'
             },
-            credentials: 'include',
             body: JSON.stringify({
                 username: formData.identifier,
                 password: formData.password,
             }),
-        })
-
-        let data
-        try {
-            data = await response.json()
-        } catch {
-            // JSON parse hatası durumunda
-            throw new Error('Kullanıcı adı veya şifre hatalı')
-        }
+        });
 
         if (!response.ok) {
-            throw new Error(data?.message || 'Kullanıcı adı veya şifre hatalı')
+            throw new Error('Kullanıcı adı veya şifre hatalı');
         }
+
+        const data = await response.json();
+        console.log('Login response:', data);
 
         if (!data?.token) {
             throw new Error('Kullanıcı adı veya şifre hatalı')
@@ -96,6 +91,7 @@ export default function LoginPage() {
         }, 1500)
 
     } catch (error: unknown) {
+        console.error('Login error:', error);
         toast({
             variant: "destructive",
             title: "Hata!",

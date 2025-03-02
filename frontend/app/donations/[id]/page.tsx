@@ -74,13 +74,21 @@ export default function DonationDetailPage() {
             }, 2000)
           } else if (err.response.status === 403) {
             errorMessage = "Bu bağışı görüntüleme yetkiniz bulunmamaktadır."
+          } else if (err.response.status === 400) {
+            // 400 Bad Request durumunda daha açıklayıcı mesaj
+            if (err.response.data && err.response.data.error) {
+              errorMessage = err.response.data.error;
+            } else {
+              errorMessage = "Bu bağış mevcut değil. Lütfen önce bir bağış oluşturun.";
+            }
           }
         }
         
         setError(errorMessage)
         
         // Kritik hatalarda kullanıcıyı bilgilendir
-        if (err && (err.message === "Geçersiz bağış ID'si" || err.message === "Bağış ID'si belirtilmemiş")) {
+        if (err && (err.message === "Geçersiz bağış ID'si" || err.message === "Bağış ID'si belirtilmemiş" || 
+            (err.response && err.response.status === 400))) {
           toast({
             title: "Hata",
             description: errorMessage,

@@ -1,3 +1,5 @@
+"use client"
+
 import type React from "react"
 import { useState, useEffect } from "react"
 import { MapPin } from "lucide-react"
@@ -9,6 +11,7 @@ type Location = {
 }
 
 type MapSelectorProps = {
+  action?: (location: Location) => void
   onLocationSelect?: (location: Location) => void
   location?: Location
   setLocation?: (location: Location) => void
@@ -17,7 +20,8 @@ type MapSelectorProps = {
 }
 
 export function MapSelector({ 
-  onLocationSelect, 
+  action, 
+  onLocationSelect,
   location, 
   setLocation, 
   readOnly = false,
@@ -49,6 +53,10 @@ export function MapSelector({
     setSelectedLocation(newLocation)
     
     // Call the appropriate callback
+    if (action) {
+      action(newLocation)
+    }
+    
     if (onLocationSelect) {
       onLocationSelect(newLocation)
     }
@@ -67,6 +75,10 @@ export function MapSelector({
     setSelectedLocation(currentLocation)
     
     // Call the appropriate callback
+    if (action) {
+      action(currentLocation)
+    }
+    
     if (onLocationSelect) {
       onLocationSelect(currentLocation)
     }

@@ -6,6 +6,7 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Timeline, TimelineItem } from "@/components/ui/timeline"
+import React from "react"
 
 // Bağış durumları için tip tanımlaması
 export type DonationStatus = 
@@ -49,52 +50,52 @@ export const statusMap: Record<DonationStatus, { label: string, color: string, i
   PENDING: { 
     label: "Beklemede", 
     color: "bg-yellow-500", 
-    icon: <Clock className="h-4 w-4" /> 
+    icon: <Clock className="h-4 w-4" key="icon-pending" /> 
   },
   APPROVED: { 
     label: "Onaylandı", 
     color: "bg-blue-500", 
-    icon: <CheckCircle className="h-4 w-4" /> 
+    icon: <CheckCircle className="h-4 w-4" key="icon-approved" /> 
   },
   PREPARING: { 
     label: "Hazırlanıyor", 
     color: "bg-blue-600", 
-    icon: <Package className="h-4 w-4" /> 
+    icon: <Package className="h-4 w-4" key="icon-preparing" /> 
   },
   READY_FOR_PICKUP: { 
     label: "Teslim Almaya Hazır", 
     color: "bg-indigo-500", 
-    icon: <CheckCircle className="h-4 w-4" /> 
+    icon: <CheckCircle className="h-4 w-4" key="icon-ready-for-pickup" /> 
   },
   IN_TRANSIT: { 
     label: "Taşınıyor", 
     color: "bg-purple-500", 
-    icon: <Truck className="h-4 w-4" /> 
+    icon: <Truck className="h-4 w-4" key="icon-in-transit" /> 
   },
   DELIVERED: { 
     label: "Teslim Edildi", 
     color: "bg-green-500", 
-    icon: <CheckCircle className="h-4 w-4" /> 
+    icon: <CheckCircle className="h-4 w-4" key="icon-delivered" /> 
   },
   RECEIVED_BY_RECIPIENT: { 
     label: "Alıcı Tarafından Alındı", 
     color: "bg-green-600", 
-    icon: <User className="h-4 w-4" /> 
+    icon: <User className="h-4 w-4" key="icon-received-by-recipient" /> 
   },
   COMPLETED: { 
     label: "Tamamlandı", 
     color: "bg-green-700", 
-    icon: <CheckCircle className="h-4 w-4" /> 
+    icon: <CheckCircle className="h-4 w-4" key="icon-completed" /> 
   },
   REJECTED: { 
     label: "Reddedildi", 
     color: "bg-red-500", 
-    icon: <AlertCircle className="h-4 w-4" /> 
+    icon: <AlertCircle className="h-4 w-4" key="icon-rejected" /> 
   },
   CANCELLED: { 
     label: "İptal Edildi", 
     color: "bg-gray-500", 
-    icon: <AlertCircle className="h-4 w-4" /> 
+    icon: <AlertCircle className="h-4 w-4" key="icon-cancelled" /> 
   }
 }
 
@@ -185,7 +186,7 @@ export default function DonationInfo({ donation }: DonationInfoProps) {
             >
               {donation.status && statusMap[donation.status] 
                 ? statusMap[donation.status].icon 
-                : <Info className="h-4 w-4" />}
+                : <Info className="h-4 w-4" key="info-icon" />}
               {donation.status && statusMap[donation.status] 
                 ? statusMap[donation.status].label 
                 : 'Bilinmiyor'}
@@ -208,7 +209,7 @@ export default function DonationInfo({ donation }: DonationInfoProps) {
               <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-4">
                 <div className="flex">
                   <div className="flex-shrink-0">
-                    <Info className="h-5 w-5 text-blue-500" />
+                    <Info className="h-5 w-5 text-blue-500" key="status-note-info" />
                   </div>
                   <div className="ml-3">
                     <p className="text-sm text-blue-700">{donation.statusNote}</p>
@@ -232,7 +233,7 @@ export default function DonationInfo({ donation }: DonationInfoProps) {
           {(donation.trackingCode || donation.deliveryMethod || donation.estimatedDeliveryDate) && (
             <div className="border rounded-lg p-4 bg-gray-50 mb-6">
               <h3 className="text-lg font-medium text-gray-800 mb-3 flex items-center">
-                <Truck className="mr-2 h-5 w-5 text-purple-600" />
+                <Truck className="mr-2 h-5 w-5 text-purple-600" key="tracking-truck-icon" />
                 Takip Bilgileri
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -276,7 +277,7 @@ export default function DonationInfo({ donation }: DonationInfoProps) {
                   key={status}
                   title={statusMap[status].label}
                   description={statusDescriptions[status]}
-                  icon={statusMap[status].icon}
+                  icon={React.cloneElement(statusMap[status].icon as React.ReactElement, { key: `timeline-icon-${status}` })}
                   isActive={donation.status === status}
                   isCompleted={donation.status && statusOrder.indexOf(donation.status) >= statusOrder.indexOf(status)}
                   isLast={index === statusHistory.length - 1}
@@ -291,7 +292,7 @@ export default function DonationInfo({ donation }: DonationInfoProps) {
       <Card className="mb-8 border-none shadow-md overflow-hidden">
         <CardHeader className="bg-gradient-to-r from-purple-100 to-pink-100 border-b border-purple-100">
           <CardTitle className="text-xl text-purple-800 flex items-center">
-            <BookOpen className="mr-2 h-5 w-5 text-purple-600" />
+            <BookOpen className="mr-2 h-5 w-5 text-purple-600" key="book-info-icon" />
             Kitap Bilgileri
           </CardTitle>
         </CardHeader>
@@ -342,7 +343,7 @@ export default function DonationInfo({ donation }: DonationInfoProps) {
       <Card className="mb-8 border-none shadow-md overflow-hidden">
         <CardHeader className="bg-gradient-to-r from-purple-100 to-pink-100 border-b border-purple-100">
           <CardTitle className="text-xl text-purple-800 flex items-center">
-            <User className="mr-2 h-5 w-5 text-purple-600" />
+            <User className="mr-2 h-5 w-5 text-purple-600" key="recipient-info-icon" />
             Alıcı Bilgileri
           </CardTitle>
         </CardHeader>

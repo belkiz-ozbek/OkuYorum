@@ -94,6 +94,10 @@ public class DonationService {
 
     private DonationDto convertToDto(Donation donation) {
         DonationDto dto = new DonationDto();
+        dto.setId(donation.getId());
+        if (donation.getUser() != null) {
+            dto.setUserId(donation.getUser().getId());
+        }
         dto.setBookTitle(donation.getBookTitle());
         dto.setAuthor(donation.getAuthor());
         dto.setGenre(donation.getGenre());
@@ -107,6 +111,16 @@ public class DonationService {
         dto.setAddress(donation.getAddress());
         dto.setDonationType(donation.getDonationType());
         dto.setCreatedAt(donation.getCreatedAt());
+        dto.setStatus(donation.getStatus());
+        
+        // Takip bilgileri
+        dto.setStatusUpdatedAt(donation.getStatusUpdatedAt());
+        dto.setStatusNote(donation.getStatusNote());
+        dto.setTrackingCode(donation.getTrackingCode());
+        dto.setDeliveryMethod(donation.getDeliveryMethod());
+        dto.setEstimatedDeliveryDate(donation.getEstimatedDeliveryDate());
+        dto.setHandlerName(donation.getHandlerName());
+        
         return dto;
     }
 

@@ -3,6 +3,8 @@ package aybu.graduationproject.okuyorum.donation.entity;
 import aybu.graduationproject.okuyorum.signup.entity.User;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "donations")
@@ -14,6 +16,10 @@ public class Donation {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
+
+    @OneToOne
+    @JoinColumn(name = "request_id")
+    private DonationRequest request;
 
     private String bookTitle;
     private String author;
@@ -44,6 +50,9 @@ public class Donation {
     private String deliveryMethod;
     private LocalDateTime estimatedDeliveryDate;
     private String handlerName; // Bağışı işleyen görevli
+
+    @OneToMany(mappedBy = "donation", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<DonationTracking> trackingHistory = new ArrayList<>();
 
     // Getter ve Setter metodları
     public Long getId() {
@@ -173,6 +182,16 @@ public class Donation {
     public void setStatus(DonationStatus status) {
         this.status = status;
         this.statusUpdatedAt = LocalDateTime.now();
+        
+        // Yeni bir takip kaydı oluştur
+        DonationTracking tracking = new DonationTracking();
+        tracking.setStatus(status);
+        tracking.setNotes(status.getDescription());
+        tracking.setCreatedAt(LocalDateTime.now());
+        tracking.setUpdatedAt(LocalDateTime.now());
+        tracking.setCreatedBy(1L); // Varsayılan olarak sistem kullanıcısı
+        tracking.setCreatedByName("Sistem");
+        this.addTracking(tracking);
     }
     
     public LocalDateTime getStatusUpdatedAt() {
@@ -221,5 +240,31 @@ public class Donation {
 
     public void setHandlerName(String handlerName) {
         this.handlerName = handlerName;
+    }
+
+    public DonationRequest getRequest() {
+        return request;
+    }
+
+    public void setRequest(DonationRequest request) {
+        this.request = request;
+    }
+
+    public List<DonationTracking> getTrackingHistory() {
+        return trackingHistory;
+    }
+
+    public void setTrackingHistory(List<DonationTracking> trackingHistory) {
+        this.trackingHistory = trackingHistory;
+    }
+
+    public void addTracking(DonationTracking tracking) {
+        trackingHistory.add(tracking);
+        tracking.setDonation(this);
+    }
+
+    public void removeTracking(DonationTracking tracking) {
+        trackingHistory.remove(tracking);
+        tracking.setDonation(null);
     }
 } 

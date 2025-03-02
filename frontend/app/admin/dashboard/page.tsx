@@ -8,14 +8,12 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card"
 import { useToast } from "@/components/ui/use-toast"
-import { Donation, DonationStatus, statusMap } from "@/components/donations/DonationInfo"
 import { BookOpen, Users, Package, AlertCircle, ChevronRight, BarChart3, Settings, BookMarked } from "lucide-react"
 import Link from "next/link"
 
 export default function AdminDashboardPage() {
   const router = useRouter()
   const { toast } = useToast()
-  const [donations, setDonations] = useState<Donation[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isAdmin, setIsAdmin] = useState(false)
@@ -43,8 +41,9 @@ export default function AdminDashboardPage() {
           })
           router.push('/')
         }
-      } catch (err: any) {
-        console.error("Admin kontrolü yapılırken hata oluştu:", err || "Unknown error")
+      } catch (err: unknown) {
+        const errorMessage = err instanceof Error ? err.message : "Unknown error"
+        console.error("Admin kontrolü yapılırken hata oluştu:", errorMessage)
         toast({
           title: "Hata",
           description: "Yetki kontrolü yapılırken bir hata oluştu. Ana sayfaya yönlendiriliyorsunuz.",
@@ -65,7 +64,6 @@ export default function AdminDashboardPage() {
         setLoading(true)
         const response = await DonationService.getDonations()
         const donationsData = response.data
-        setDonations(donationsData)
         
         // İstatistikleri hesapla
         const newStats = {
@@ -76,8 +74,9 @@ export default function AdminDashboardPage() {
           rejected: donationsData.filter(d => d.status === "REJECTED" || d.status === "CANCELLED").length
         }
         setStats(newStats)
-      } catch (err: any) {
-        console.error("Error fetching donations:", err || "Unknown error")
+      } catch (err: unknown) {
+        const errorMessage = err instanceof Error ? err.message : "Unknown error"
+        console.error("Error fetching donations:", errorMessage)
         setError("Bağışlar yüklenirken bir hata oluştu.")
         toast({
           title: "Hata",

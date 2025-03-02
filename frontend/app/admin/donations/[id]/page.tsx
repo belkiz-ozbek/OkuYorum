@@ -162,6 +162,11 @@ export default function AdminDonationDetailPage() {
     
     try {
       setUpdatingStatus(true)
+      console.log("Updating donation status:", {
+        donationId: donation.id,
+        status: status,
+        statusNote: statusNote
+      });
       await DonationService.updateDonationStatus(donation.id!, status, statusNote || undefined)
       
       toast({

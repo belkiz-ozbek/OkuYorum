@@ -119,7 +119,15 @@ export default function DonatePage() {
   const [recipientName, setRecipientName] = useLocalStorage('draft_recipientName', '')
   const [address, setAddress] = useLocalStorage('draft_address', '')
   const [showConfirmModal, setShowConfirmModal] = useState(false)
-  const [pendingDonation, setPendingDonation] = useState<DonationData | null>(null)
+  const [pendingDonation, setPendingDonation] = useState<DonationData>({
+    bookTitle: '',
+    author: '',
+    description: '',
+    genre: 'fiction',
+    condition: 'new',
+    quantity: 1,
+    donationType: 'schools'
+  })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { errors, setErrors, validateBookInfo, validateRecipientInfo, clearErrors } = useFormValidation()
   const [isPageLoading, setIsPageLoading] = useState(true)
@@ -429,7 +437,7 @@ export default function DonatePage() {
                 <div className="mb-8">
                   <Label className="text-lg font-medium mb-2">Hızlı Kitap Seçimi</Label>
                   <BookSearch 
-                    onSelect={(book) => {
+                    action={(book) => {
                       setBookTitle(book.title)
                       setAuthor(book.author)
                       setGenre(book.genre as BookGenre)
@@ -601,7 +609,7 @@ export default function DonatePage() {
                       })}
                       <div>
                         <Label>Konum</Label>
-                        <MapSelector onLocationSelect={setLocation} />
+                        <MapSelector action={setLocation} />
                       </div>
                     </>
                   )}
@@ -704,7 +712,7 @@ export default function DonatePage() {
                         <div className="h-[300px] rounded-lg overflow-hidden border border-gray-200 shadow-sm">
                           <MapSelector 
                             location={location} 
-                            setLocation={setLocation} 
+                            action={setLocation} 
                             error={errors.location}
                           />
                         </div>
@@ -838,7 +846,7 @@ export default function DonatePage() {
                             <div className="h-[150px] rounded-lg overflow-hidden border border-gray-200">
                               <MapSelector 
                                 location={location} 
-                                setLocation={setLocation}
+                                action={setLocation}
                                 readOnly={true}
                               />
                             </div>
@@ -920,8 +928,8 @@ export default function DonatePage() {
   )
 
   const handleInputChange = (setter: React.Dispatch<React.SetStateAction<string>>) => {
-    return (e: React.ChangeEvent<HTMLInputElement>) => setter(e.target.value)
-  }
+    return (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setter(e.target.value);
+  };
 
   if (isPageLoading) {
     return (
