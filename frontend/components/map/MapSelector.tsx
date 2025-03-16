@@ -4,11 +4,21 @@ import { useEffect, useRef, useState } from 'react';
 import { Loader } from '@googlemaps/js-api-loader';
 import { MapPin } from 'lucide-react';
 
+interface Location {
+    lat: number;
+    lng: number;
+}
+
 interface MapSelectorProps {
-    action?: (location: { lat: number; lng: number }) => void;
-    onLocationSelect?: (location: { lat: number; lng: number }) => void;
-    initialLocation?: { lat: number; lng: number };
+    action?: (location: Location) => void;
+    onLocationSelect?: (location: Location) => void;
+    initialLocation?: Location;
     height?: string;
+}
+
+interface GeolocationError {
+    code: number;
+    message: string;
 }
 
 export function MapSelector({ 
@@ -26,7 +36,7 @@ export function MapSelector({
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
                 (position) => {
-                    const currentLocation = {
+                    const currentLocation: Location = {
                         lat: position.coords.latitude,
                         lng: position.coords.longitude
                     };
@@ -44,8 +54,8 @@ export function MapSelector({
                         }
                     }
                 },
-                (error) => {
-                    console.error('Konum alınamadı:', error);
+                (error: GeolocationError) => {
+                    console.error('Konum alınamadı:', error.message);
                 }
             );
         }
