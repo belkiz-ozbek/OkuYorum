@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation"
 import { DonationService } from "@/services/DonationService"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, Edit, Trash, Send } from "lucide-react"
+import { ArrowLeft, Edit, Trash, Send, CheckCircle, Loader2 } from "lucide-react"
 import Link from "next/link"
 import DonationInfo, { Donation, DonationStatus } from "@/components/donations/DonationInfo"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card"
@@ -16,6 +16,34 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/components/ui/use-toast"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { UserService } from "@/services/UserService"
+
+const statusGroups = [
+  {
+    title: "İşlem Aşamaları",
+    statuses: [
+      { value: "PENDING", label: "Beklemede", icon: "⏳", color: "bg-yellow-100 text-yellow-800" },
+      { value: "APPROVED", label: "Onaylandı", icon: "✅", color: "bg-green-100 text-green-800" },
+      { value: "PREPARING", label: "Hazırlanıyor", icon: "📦", color: "bg-blue-100 text-blue-800" },
+      { value: "READY_FOR_PICKUP", label: "Teslim Almaya Hazır", icon: "🔄", color: "bg-purple-100 text-purple-800" }
+    ]
+  },
+  {
+    title: "Teslimat Aşamaları",
+    statuses: [
+      { value: "IN_TRANSIT", label: "Taşınıyor", icon: "🚚", color: "bg-indigo-100 text-indigo-800" },
+      { value: "DELIVERED", label: "Teslim Edildi", icon: "📬", color: "bg-teal-100 text-teal-800" },
+      { value: "RECEIVED_BY_RECIPIENT", label: "Alıcı Teslim Aldı", icon: "🤝", color: "bg-cyan-100 text-cyan-800" },
+      { value: "COMPLETED", label: "Tamamlandı", icon: "🎉", color: "bg-emerald-100 text-emerald-800" }
+    ]
+  },
+  {
+    title: "Diğer Durumlar",
+    statuses: [
+      { value: "REJECTED", label: "Reddedildi", icon: "❌", color: "bg-red-100 text-red-800" },
+      { value: "CANCELLED", label: "İptal Edildi", icon: "🚫", color: "bg-gray-100 text-gray-800" }
+    ]
+  }
+];
 
 export default function AdminDonationDetailPage() {
   const params = useParams()
@@ -341,48 +369,77 @@ export default function AdminDonationDetailPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleStatusUpdate} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="status">Durum</Label>
-                  <Select 
-                    value={status} 
-                    onValueChange={(value) => setStatus(value as DonationStatus)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Durum seçin" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="PENDING">Beklemede</SelectItem>
-                      <SelectItem value="APPROVED">Onaylandı</SelectItem>
-                      <SelectItem value="PREPARING">Hazırlanıyor</SelectItem>
-                      <SelectItem value="READY_FOR_PICKUP">Teslim Almaya Hazır</SelectItem>
-                      <SelectItem value="IN_TRANSIT">Taşınıyor</SelectItem>
-                      <SelectItem value="DELIVERED">Teslim Edildi</SelectItem>
-                      <SelectItem value="RECEIVED_BY_RECIPIENT">Alıcı Tarafından Alındı</SelectItem>
-                      <SelectItem value="COMPLETED">Tamamlandı</SelectItem>
-                      <SelectItem value="REJECTED">Reddedildi</SelectItem>
-                      <SelectItem value="CANCELLED">İptal Edildi</SelectItem>
-                    </SelectContent>
-                  </Select>
+              <form onSubmit={handleStatusUpdate} className="space-y-6">
+                <div className="space-y-4">
+                  {statusGroups.map((group, idx) => (
+                    <div key={idx} className="rounded-lg border p-4 bg-white shadow-sm">
+                      <h3 className="text-lg font-semibold mb-3 text-gray-700">{group.title}</h3>
+                      <div className="grid grid-cols-2 gap-3">
+                        {group.statuses.map((statusOption) => (
+                          <button
+                            key={statusOption.value}
+                            type="button"
+                            onClick={() => setStatus(statusOption.value as DonationStatus)}
+                            className={`flex items-center justify-between p-3 rounded-lg border transition-all ${
+                              status === statusOption.value 
+                              ? `${statusOption.color} border-2 border-current shadow-md` 
+                              : 'border-gray-200 hover:border-gray-300 bg-white'
+                            }`}
+                          >
+                            <span className="flex items-center gap-2">
+                              <span className="text-xl">{statusOption.icon}</span>
+                              <span className="font-medium">{statusOption.label}</span>
+                            </span>
+                            {status === statusOption.value && (
+                              <span className="text-current">
+                                <CheckCircle className="h-5 w-5" />
+                              </span>
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="statusNote">Durum Notu</Label>
-                  <Textarea
-                    id="statusNote"
-                    placeholder="Durum hakkında ek bilgi girin"
-                    value={statusNote}
-                    onChange={(e) => setStatusNote(e.target.value)}
-                  />
+
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="statusNote" className="text-base font-medium">
+                      Durum Notu
+                    </Label>
+                    <Textarea
+                      id="statusNote"
+                      placeholder="Durum hakkında ek bilgi girin (isteğe bağlı)"
+                      value={statusNote || ''}
+                      onChange={(e) => setStatusNote(e.target.value)}
+                      className="mt-1 min-h-[100px]"
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-end gap-4">
+                    <Button
+                      type="submit"
+                      disabled={!status || updatingStatus}
+                      className={`w-full md:w-auto ${
+                        !status 
+                        ? 'bg-gray-100 text-gray-400' 
+                        : 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white hover:from-purple-700 hover:to-indigo-700'
+                      }`}
+                    >
+                      {updatingStatus ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Güncelleniyor...
+                        </>
+                      ) : (
+                        <>
+                          <Send className="mr-2 h-4 w-4" />
+                          Durumu Güncelle
+                        </>
+                      )}
+                    </Button>
+                  </div>
                 </div>
-                
-                <Button 
-                  type="submit" 
-                  className="w-full"
-                  disabled={updatingStatus || !status}
-                >
-                  {updatingStatus ? "Güncelleniyor..." : "Durumu Güncelle"}
-                </Button>
               </form>
             </CardContent>
           </Card>

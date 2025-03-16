@@ -601,46 +601,15 @@ export default function DonatePage() {
                     {renderInput("description", "Açıklama (Opsiyonel)", description, handleInputChange(setDescription))}
                   </div>
 
-                  {(donationType === "schools" || donationType === "libraries") && (
-                    <>
-                      {renderInput("institutionName", "Okul / Kütüphane Adı", institutionName, handleInputChange(setInstitutionName), {
-                        required: true,
-                        placeholder: donationType === "schools" ? "Örn: Atatürk İlkokulu" : "Örn: Halk Kütüphanesi"
-                      })}
-                      <div>
-                        <Label>Konum</Label>
-                        <MapSelector action={setLocation} />
-                      </div>
-                    </>
-                  )}
-
-                  {donationType === "individual" && (
-                    <>
-                      {renderInput("recipientName", "Alıcı Adı (İsteğe Bağlı)", recipientName, handleInputChange(setRecipientName))}
-                      <p className="text-sm text-gray-500 mt-1">
-                        Belirli bir kişiye bağış yapıyorsanız adını yazabilirsiniz
-                      </p>
-                      {renderInput("address", "Adres (Şehir/Semt)", address, handleInputChange(setAddress), {
-                        required: true,
-                        placeholder: "Şehir/Semt"
-                      })}
-                    </>
-                  )}
-
                   <Button 
                     type="submit" 
                     className="w-full"
                     disabled={isSubmitting}
                   >
-                    {isSubmitting ? (
+                    {isSubmitting && (
                       <>
                         <span className="mr-2">Bağış Kaydediliyor</span>
                         <Loader2 className="h-4 w-4 animate-spin" />
-                      </>
-                    ) : (
-                      <>
-                        İleri
-                        <ChevronRight className="w-4 h-4" />
                       </>
                     )}
                   </Button>

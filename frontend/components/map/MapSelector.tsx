@@ -19,6 +19,37 @@ export function MapSelector({
 }: MapSelectorProps) {
     const mapRef = useRef<HTMLDivElement>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [mapInstance, setMapInstance] = useState<google.maps.Map | null>(null);
+    const [markerInstance, setMarkerInstance] = useState<google.maps.Marker | null>(null);
+
+    const handleUseCurrentLocation = () => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const currentLocation = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+
+                    if (mapInstance && markerInstance) {
+                        mapInstance.setCenter(currentLocation);
+                        markerInstance.setPosition(currentLocation);
+                        
+                        if (action) {
+                            action(currentLocation);
+                        }
+                        
+                        if (onLocationSelect) {
+                            onLocationSelect(currentLocation);
+                        }
+                    }
+                },
+                (error) => {
+                    console.error('Konum alınamadı:', error);
+                }
+            );
+        }
+    };
 
     useEffect(() => {
         const initMap = async () => {
@@ -32,7 +63,7 @@ export function MapSelector({
                 
                 if (!mapRef.current) return;
 
-                const mapInstance = new google.maps.Map(mapRef.current, {
+                const map = new google.maps.Map(mapRef.current, {
                     center: initialLocation,
                     zoom: 12,
                     mapTypeControl: false,
@@ -40,16 +71,19 @@ export function MapSelector({
                     fullscreenControl: false,
                 });
 
-                const markerInstance = new google.maps.Marker({
+                const marker = new google.maps.Marker({
                     position: initialLocation,
-                    map: mapInstance,
+                    map: map,
                     draggable: true,
                     animation: google.maps.Animation.DROP,
                 });
 
+                setMapInstance(map);
+                setMarkerInstance(marker);
+
                 // Marker sürüklendiğinde konum güncelle
-                markerInstance.addListener('dragend', () => {
-                    const position = markerInstance.getPosition();
+                marker.addListener('dragend', () => {
+                    const position = marker.getPosition();
                     if (position) {
                         const newLocation = {
                             lat: position.lat(),
@@ -67,9 +101,9 @@ export function MapSelector({
                 });
 
                 // Haritaya tıklandığında marker'ı taşı
-                mapInstance.addListener('click', (e: google.maps.MapMouseEvent) => {
+                map.addListener('click', (e: google.maps.MapMouseEvent) => {
                     if (e.latLng) {
-                        markerInstance.setPosition(e.latLng);
+                        marker.setPosition(e.latLng);
                         const newLocation = {
                             lat: e.latLng.lat(),
                             lng: e.latLng.lng(),
@@ -110,16 +144,26 @@ export function MapSelector({
     }, [initialLocation, action, onLocationSelect]);
 
     return (
-        <div className="relative w-full" style={{ height }}>
-            {isLoading && (
-                <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
-                    <div className="flex items-center space-x-2 text-sm text-gray-500">
-                        <MapPin className="h-5 w-5 animate-bounce" />
-                        <span>Harita yükleniyor...</span>
+        <div className="space-y-4">
+            <div className="relative w-full" style={{ height }}>
+                {isLoading && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
+                        <div className="flex items-center space-x-2 text-sm text-gray-500">
+                            <MapPin className="h-5 w-5 animate-bounce" />
+                            <span>Harita yükleniyor...</span>
+                        </div>
                     </div>
-                </div>
-            )}
-            <div ref={mapRef} className="h-full w-full" />
+                )}
+                <div ref={mapRef} className="h-full w-full rounded-lg" />
+            </div>
+            
+            <button
+                onClick={handleUseCurrentLocation}
+                className="w-full py-2 px-4 bg-white border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-colors duration-200 flex items-center justify-center gap-2"
+            >
+                <MapPin className="h-4 w-4" />
+                Mevcut Konumumu Kullan
+            </button>
         </div>
     );
 } 

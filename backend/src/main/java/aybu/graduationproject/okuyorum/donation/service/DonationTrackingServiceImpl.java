@@ -1,5 +1,6 @@
 package aybu.graduationproject.okuyorum.donation.service;
 
+import aybu.graduationproject.okuyorum.common.service.EmailService;
 import aybu.graduationproject.okuyorum.donation.dto.DonationTrackingDto;
 import aybu.graduationproject.okuyorum.donation.entity.Donation;
 import aybu.graduationproject.okuyorum.donation.entity.DonationStatus;
@@ -12,6 +13,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.time.Month;
@@ -24,15 +27,19 @@ public class DonationTrackingServiceImpl implements DonationTrackingService {
     private final DonationRepository donationRepository;
     private final DonationTrackingRepository trackingRepository;
     private final DonationTrackingMapper trackingMapper;
+    private final EmailService emailService;
+    private static final Logger logger = LoggerFactory.getLogger(DonationTrackingServiceImpl.class);
 
     @Autowired
     public DonationTrackingServiceImpl(
             DonationRepository donationRepository,
             DonationTrackingRepository trackingRepository,
-            DonationTrackingMapper trackingMapper) {
+            DonationTrackingMapper trackingMapper,
+            EmailService emailService) {
         this.donationRepository = donationRepository;
         this.trackingRepository = trackingRepository;
         this.trackingMapper = trackingMapper;
+        this.emailService = emailService;
     }
 
     @Override
@@ -57,6 +64,7 @@ public class DonationTrackingServiceImpl implements DonationTrackingService {
         // Update the donation status
         donation.setStatus(newStatus);
         donation.setStatusUpdatedAt(LocalDateTime.now());
+        donation.setStatusNote(notes);
         donationRepository.save(donation);
         
         // Create a tracking record
@@ -70,6 +78,15 @@ public class DonationTrackingServiceImpl implements DonationTrackingService {
         tracking.setCreatedByName(currentUsername);
         
         DonationTracking savedTracking = trackingRepository.save(tracking);
+
+        // Send email notification
+        try {
+            emailService.sendDonationStatusUpdateEmail(donation.getUser().getEmail(), donation);
+            logger.info("Durum güncelleme emaili gönderildi: {}", donation.getUser().getEmail());
+        } catch (Exception e) {
+            logger.error("Durum güncelleme emaili gönderilemedi: {}", e.getMessage());
+        }
+        
         return trackingMapper.toDto(savedTracking);
     }
 
