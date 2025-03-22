@@ -1,10 +1,19 @@
+"use client"
+
 import type React from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/form/button"
 import { BookOpen, ArrowRight, Heart, Users, BookMarked, MessageSquare, User, Library, Compass } from "lucide-react"
 import { SearchForm } from "@/components/ui/form/search-form"
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/layout/carousel"
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/layout/carousel"
+import { motion } from "framer-motion"
 
 type FeatureCardProps = {
   icon: React.ReactNode
@@ -81,6 +90,40 @@ const ReadingGroup = ({ name, members, currentBook }: ReadingGroupProps) => (
   </div>
 )
 
+function FeatureCard({ icon, title, description }: FeatureCardProps) {
+  return (
+    <div className="bg-white p-6 rounded-lg shadow-md">
+      <div className="flex items-center justify-center mb-4">{icon}</div>
+      <h3 className="text-xl font-semibold mb-2 text-center">{title}</h3>
+      <p className="text-gray-600 text-center">{description}</p>
+    </div>
+  )
+}
+
+function StatCard({ number, label }: StatCardProps) {
+  return (
+    <div>
+      <p className="text-4xl font-bold text-purple-600">{number}</p>
+      <p className="text-gray-600">{label}</p>
+    </div>
+  )
+}
+
+function BookReviewCard({ bookTitle, author, reviewerName, rating, review }: BookReviewCardProps) {
+  return (
+    <div className="bg-white p-6 rounded-lg shadow-md">
+      <h3 className="text-xl font-semibold mb-2">{bookTitle}</h3>
+      <p className="text-gray-600 mb-2">{author}</p>
+      <div className="flex items-center mb-2">
+        <span className="text-yellow-400 mr-1">★</span>
+        <span>{rating}</span>
+      </div>
+      <p className="text-sm text-gray-500 mb-2">Yorumlayan: {reviewerName}</p>
+      <p className="text-gray-700">{review}</p>
+    </div>
+  )
+}
+
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 via-rose-50 to-pink-100">
@@ -92,11 +135,17 @@ export default function HomePage() {
             <span className="ml-2 text-lg font-semibold">OkuYorum</span>
           </Link>
           <nav className="ml-auto flex items-center gap-4">
-            <Link className="text-sm font-medium text-gray-600 hover:text-purple-600 flex items-center" href="/features/profile">
+            <Link
+              className="text-sm font-medium text-gray-600 hover:text-purple-600 flex items-center"
+              href="/features/profile"
+            >
               <User className="w-4 h-4 mr-1" />
               Profil
             </Link>
-            <Link className="text-sm font-medium text-gray-600 hover:text-purple-600 flex items-center" href="/features/library">
+            <Link
+              className="text-sm font-medium text-gray-600 hover:text-purple-600 flex items-center"
+              href="/features/library"
+            >
               <Library className="w-4 h-4 mr-1" />
               Kitaplığım
             </Link>
@@ -114,7 +163,10 @@ export default function HomePage() {
               <Users className="w-4 h-4 mr-1" />
               Millet Kıraathaneleri
             </Link>
-            <Link className="text-sm font-medium text-gray-600 hover:text-purple-600 flex items-center" href="/features/donate">
+            <Link
+              className="text-sm font-medium text-gray-600 hover:text-purple-600 flex items-center"
+              href="/features/donate"
+            >
               <Heart className="w-4 h-4 mr-1" />
               Bağış Yap
             </Link>
@@ -145,14 +197,133 @@ export default function HomePage() {
               </Button>
             </div>
           </div>
-          <div className="relative h-[400px] w-full">
-            <Image
-              src="/placeholder.svg?height=400&width=600"
-              alt="Kitap paylaşan insanlar"
-              layout="fill"
-              objectFit="cover"
-              className="rounded-lg shadow-2xl"
-            />
+          
+          <div className="relative h-[400px] w-full bg-gradient-to-br from-pink-50 to-purple-100 rounded-lg shadow-2xl overflow-hidden">
+            <div className="absolute inset-0 flex items-center justify-center">
+              {/* Central glowing circle */}
+              <div className="relative">
+                <div className="absolute -inset-12 bg-purple-200 rounded-full blur-xl opacity-70"></div>
+                <div className="relative z-10 w-24 h-24 bg-white rounded-full shadow-xl flex items-center justify-center">
+                  <BookOpen className="h-12 w-12 text-purple-600" />
+                </div>
+              </div>
+
+              {/* Animated orbital paths - daha belirgin */}
+              {[140, 180, 220, 260, 300].map((size, index) => (
+                <motion.div
+                  key={`orbit-${index}`}
+                  className="absolute border-2 border-purple-300/70 rounded-full"
+                  style={{
+                    width: size * 2,
+                    height: size * 2,
+                  }}
+                  initial={{ opacity: 0, scale: 0.8, rotate: 0 }}
+                  animate={{
+                    opacity: [0.5, 0.7, 0.5],
+                    scale: 1,
+                    rotate: 360,
+                  }}
+                  transition={{
+                    duration: 20 + index * 5,
+                    repeat: Number.POSITIVE_INFINITY,
+                    ease: "linear",
+                    delay: index * 0.5,
+                  }}
+                />
+              ))}
+
+              {/* Sadece hareket eden ikonlar */}
+              {[
+                {
+                  delay: 0,
+                  orbitSize: 140,
+                  speed: 20,
+                  icon: BookOpen,
+                  color: "text-purple-600",
+                  bgColor: "bg-purple-100",
+                },
+                { delay: 2, orbitSize: 180, speed: 25, icon: Heart, color: "text-rose-500", bgColor: "bg-rose-100" },
+                {
+                  delay: 4,
+                  orbitSize: 220,
+                  speed: 30,
+                  icon: BookMarked,
+                  color: "text-blue-500",
+                  bgColor: "bg-blue-100",
+                },
+                {
+                  delay: 6,
+                  orbitSize: 260,
+                  speed: 35,
+                  icon: MessageSquare,
+                  color: "text-green-500",
+                  bgColor: "bg-green-100",
+                },
+                { delay: 8, orbitSize: 300, speed: 40, icon: Users, color: "text-amber-500", bgColor: "bg-amber-100" },
+              ].map((item, index) => (
+                <motion.div
+                  key={`orbiting-${index}`}
+                  className={`absolute rounded-xl shadow-lg p-4 ${item.bgColor}`}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 1, delay: index * 0.3 }}
+                >
+                  <motion.div
+                    animate={{
+                      x: [
+                        item.orbitSize * Math.cos(0 + item.delay),
+                        item.orbitSize * Math.cos(Math.PI / 2 + item.delay),
+                        item.orbitSize * Math.cos(Math.PI + item.delay),
+                        item.orbitSize * Math.cos((Math.PI * 3) / 2 + item.delay),
+                        item.orbitSize * Math.cos(Math.PI * 2 + item.delay),
+                      ],
+                      y: [
+                        item.orbitSize * Math.sin(0 + item.delay),
+                        item.orbitSize * Math.sin(Math.PI / 2 + item.delay),
+                        item.orbitSize * Math.sin(Math.PI + item.delay),
+                        item.orbitSize * Math.sin((Math.PI * 3) / 2 + item.delay),
+                        item.orbitSize * Math.sin(Math.PI * 2 + item.delay),
+                      ],
+                    }}
+                    transition={{
+                      duration: item.speed,
+                      repeat: Number.POSITIVE_INFINITY,
+                      ease: "linear",
+                    }}
+                  >
+                    <item.icon className={`h-10 w-10 ${item.color}`} />
+                  </motion.div>
+                </motion.div>
+              ))}
+
+              {/* Floating particles */}
+              {Array.from({ length: 20 }).map((_, index) => (
+                <motion.div
+                  key={`particle-${index}`}
+                  className="absolute bg-white rounded-full opacity-70"
+                  style={{
+                    width: Math.random() * 6 + 2,
+                    height: Math.random() * 6 + 2,
+                  }}
+                  initial={{
+                    x: Math.random() * 800 - 400,
+                    y: Math.random() * 800 - 400,
+                    opacity: 0,
+                  }}
+                  animate={{
+                    x: Math.random() * 800 - 400,
+                    y: Math.random() * 800 - 400,
+                    opacity: [0, 0.7, 0],
+                    scale: [0, 1, 0],
+                  }}
+                  transition={{
+                    duration: Math.random() * 10 + 10,
+                    repeat: Number.POSITIVE_INFINITY,
+                    delay: Math.random() * 5,
+                  }}
+                />
+              ))}
+            </div>
           </div>
         </div>
 
@@ -392,36 +563,3 @@ export default function HomePage() {
   )
 }
 
-function FeatureCard({ icon, title, description }: FeatureCardProps) {
-  return (
-    <div className="bg-white p-6 rounded-lg shadow-md">
-      <div className="flex items-center justify-center mb-4">{icon}</div>
-      <h3 className="text-xl font-semibold mb-2 text-center">{title}</h3>
-      <p className="text-gray-600 text-center">{description}</p>
-    </div>
-  )
-}
-
-function StatCard({ number, label }: StatCardProps) {
-  return (
-    <div>
-      <p className="text-4xl font-bold text-purple-600">{number}</p>
-      <p className="text-gray-600">{label}</p>
-    </div>
-  )
-}
-
-function BookReviewCard({ bookTitle, author, reviewerName, rating, review }: BookReviewCardProps) {
-  return (
-    <div className="bg-white p-6 rounded-lg shadow-md">
-      <h3 className="text-xl font-semibold mb-2">{bookTitle}</h3>
-      <p className="text-gray-600 mb-2">{author}</p>
-      <div className="flex items-center mb-2">
-        <span className="text-yellow-400 mr-1">★</span>
-        <span>{rating}</span>
-      </div>
-      <p className="text-sm text-gray-500 mb-2">Yorumlayan: {reviewerName}</p>
-      <p className="text-gray-700">{review}</p>
-    </div>
-  )
-}
