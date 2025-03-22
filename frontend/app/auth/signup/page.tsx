@@ -2,8 +2,8 @@
 
 import React from 'react'
 import Link from 'next/link'
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/form/button"
+import { Input } from "@/components/ui/form/input"
 import { useState, useMemo, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { BookOpen, User, Mail, Lock, UserCircle, ArrowRight, Sparkles, CheckCircle2, BookMarked, Bookmark } from 'lucide-react'

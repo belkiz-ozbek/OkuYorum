@@ -3,12 +3,12 @@
 import { useState } from "react"
 import Link from "next/link"
 import { BookOpen, Heart, MessageCircle, Share2, User, Search, Star, BookmarkPlus, PlusCircle } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Card, CardContent } from "@/components/ui/Card"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/form/button"
+import { Input } from "@/components/ui/form/input"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/layout/tabs"
+import { Card, CardContent } from "@/components/ui/layout/Card"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/layout/avatar"
+import { Badge } from "@/components/ui/layout/badge"
 
 type ContentItem = {
   id: string

@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { useToast } from "@/components/ui/use-toast"
+import { Button } from "@/components/ui/form/button"
+import { Input } from "@/components/ui/form/input"
+import { useToast } from "@/components/ui/feedback/use-toast"
 
 export default function VerifyPage() {
   const [verificationCode, setVerificationCode] = useState('')

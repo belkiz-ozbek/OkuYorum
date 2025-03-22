@@ -1,19 +1,19 @@
 "use client"
 
-import { DialogTrigger } from "@/components/ui/dialog"
-import AddBookForm from "@/components/ui/AddBookForm"
+import { DialogTrigger } from "@/components/ui/layout/dialog"
+import AddBookForm from "@/components/ui/form/add-book-form"
 
 import { useState, useEffect } from "react"
 import Image from "next/image"
 import { motion, AnimatePresence } from "framer-motion"
 import { BookOpen, Plus, Star, Search, Grid, List } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent } from "@/components/ui/Card"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { DialogFooter } from "@/components/ui/dialog"
+import { Button } from "@/components/ui/form/button"
+import { Input } from "@/components/ui/form/input"
+import { Card, CardContent } from "@/components/ui/layout/Card"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/form/select"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/layout/tabs"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/layout/dialog"
+import { DialogFooter } from "@/components/ui/layout/dialog"
 
 type Book = {
   id: string

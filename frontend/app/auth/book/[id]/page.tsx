@@ -4,7 +4,7 @@ import { BookOpen, Quote, Calendar, BookText, Heart, Share2, Bookmark, Star, Use
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { use } from 'react'
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/form/button"
 
 type Book = {
     id: number;

@@ -3,10 +3,10 @@
 import type React from "react"
 
 import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { DialogFooter } from "@/components/ui/dialog"
+import { Button } from "@/components/ui/form/button"
+import { Input } from "@/components/ui/form/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/form/select"
+import { DialogFooter } from "@/components/ui/layout/dialog"
 
 type Book = {
   id: string

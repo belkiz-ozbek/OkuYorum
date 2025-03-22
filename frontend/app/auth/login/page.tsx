@@ -2,13 +2,13 @@
 
 import React from 'react'
 import Link from 'next/link'
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/form/button"
+import { Input } from "@/components/ui/form/input"
 import { useState, useMemo, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { BookOpen, BookMarked, Bookmark, User, Lock, ArrowRight, Sparkles, BookOpenCheck } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useToast } from "@/components/ui/use-toast"
+import { useToast } from "@/components/ui/feedback/use-toast"
 
 export default function LoginPage() {
   const { toast } = useToast()

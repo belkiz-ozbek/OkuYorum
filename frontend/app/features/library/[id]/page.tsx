@@ -5,9 +5,9 @@ import { useParams } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
 import { BookOpen, Star, ArrowLeft } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Progress } from "@/components/ui/progress"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card"
+import { Button } from "@/components/ui/form/button"
+import { Progress } from "@/components/ui/layout/progress"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/layout/Card"
 
 type Book = {
   id: string

@@ -6,11 +6,11 @@ import { useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { BookOpen, Camera, Calendar, Star, Book, MessageSquare, Quote, Zap } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Progress } from "@/components/ui/progress"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card"
+import { Button } from "@/components/ui/form/button"
+import { Input } from "@/components/ui/form/input"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/layout/tabs"
+import { Progress } from "@/components/ui/layout/progress"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/layout/Card"
 
 type UserProfile = {
   name: string
