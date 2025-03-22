@@ -92,7 +92,7 @@ export default function HomePage() {
             <span className="ml-2 text-lg font-semibold">OkuYorum</span>
           </Link>
           <nav className="flex items-center gap-4">
-            <Link className="text-sm font-medium text-gray-600 hover:text-purple-600 flex items-center" href="/profile">
+            <Link className="text-sm font-medium text-gray-600 hover:text-purple-600 flex items-center" href="/features/profile">
               <User className="w-4 h-4 mr-1" />
               Profil
             </Link>
