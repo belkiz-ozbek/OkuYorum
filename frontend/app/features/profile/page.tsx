@@ -276,39 +276,41 @@ export default function ProfilePage() {
           />
 
           {/* Floating Edit Button */}
-          <div className="absolute bottom-4 right-4">
-            <div className="relative">
-              <Button
-                onClick={() => setShowEditMenu(!showEditMenu)}
-                className="rounded-full bg-purple-600 hover:bg-purple-700 shadow-lg"
-                size="icon"
-              >
-                <Edit className="h-5 w-5" />
-              </Button>
+        </div>
 
-              {showEditMenu && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="absolute right-0 bottom-12 bg-white rounded-lg shadow-lg p-2 w-48"
-                >
-                  <div className="flex flex-col space-y-1">
-                    <Button variant="ghost" className="justify-start text-sm" onClick={() => toggleEdit("header")}>
-                      <Camera className="mr-2 h-4 w-4" /> Kapak Fotoğrafı
-                    </Button>
-                    <Button variant="ghost" className="justify-start text-sm" onClick={() => toggleEdit("profile")}>
-                      <User className="mr-2 h-4 w-4" /> Profil Fotoğrafı
-                    </Button>
-                    <Button variant="ghost" className="justify-start text-sm" onClick={() => toggleEdit("info")}>
-                      <Edit className="mr-2 h-4 w-4" /> Profil Bilgileri
-                    </Button>
-                    <Button variant="ghost" className="justify-start text-sm" onClick={() => toggleEdit("bio")}>
-                      <MessageSquare className="mr-2 h-4 w-4" /> Hakkımda
-                    </Button>
-                  </div>
-                </motion.div>
-              )}
-            </div>
+        {/* Floating Edit Button - Profil kartının dışına taşındı */}
+        <div className="flex justify-end mb-6 relative z-10">
+          <div className="relative">
+            <Button
+              onClick={() => setShowEditMenu(!showEditMenu)}
+              className="rounded-full bg-purple-300 hover:bg-purple-400 shadow-lg"
+              size="sm"
+            >
+              <Edit className="h-3.5 w-3.5 mr-1" /> Düzenle
+            </Button>
+
+            {showEditMenu && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="absolute right-0 top-10 bg-white rounded-lg shadow-lg p-2 w-48 z-20"
+              >
+                <div className="flex flex-col space-y-1">
+                  <Button variant="ghost" className="justify-start text-sm" onClick={() => toggleEdit("header")}>
+                    <Camera className="mr-2 h-4 w-4" /> Kapak Fotoğrafı
+                  </Button>
+                  <Button variant="ghost" className="justify-start text-sm" onClick={() => toggleEdit("profile")}>
+                    <User className="mr-2 h-4 w-4" /> Profil Fotoğrafı
+                  </Button>
+                  <Button variant="ghost" className="justify-start text-sm" onClick={() => toggleEdit("info")}>
+                    <Edit className="mr-2 h-4 w-4" /> Profil Bilgileri
+                  </Button>
+                  <Button variant="ghost" className="justify-start text-sm" onClick={() => toggleEdit("bio")}>
+                    <MessageSquare className="mr-2 h-4 w-4" /> Hakkımda
+                  </Button>
+                </div>
+              </motion.div>
+            )}
           </div>
         </div>
 
@@ -399,8 +401,8 @@ export default function ProfilePage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
             <Card className="overflow-hidden border-none shadow-md hover:shadow-lg transition-shadow h-[250px]">
-              <div className="bg-gradient-to-r from-purple-500 to-purple-700 p-4">
-                <CardTitle className="text-white flex items-center">
+              <div className="bg-gradient-to-r from-purple-200 to-purple-400 p-4">
+                <CardTitle className="text-gray-700 flex items-center">
                   <Star className="mr-2 h-5 w-5" /> Okur Puanı
                 </CardTitle>
               </div>
@@ -417,8 +419,8 @@ export default function ProfilePage() {
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
             <Card className="overflow-hidden border-none shadow-md hover:shadow-lg transition-shadow h-[250px]">
-              <div className="bg-gradient-to-r from-blue-500 to-blue-700 p-4">
-                <CardTitle className="text-white flex items-center">
+              <div className="bg-gradient-to-r from-blue-200 to-blue-400 p-4">
+                <CardTitle className="text-gray-700 flex items-center">
                   <Zap className="mr-2 h-5 w-5" /> Okuma Serisi
                 </CardTitle>
               </div>
@@ -437,8 +439,8 @@ export default function ProfilePage() {
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
             <Card className="overflow-hidden border-none shadow-md hover:shadow-lg transition-shadow h-[250px]">
-              <div className="bg-gradient-to-r from-green-500 to-green-700 p-4">
-                <CardTitle className="text-white flex items-center">
+              <div className="bg-gradient-to-r from-green-200 to-green-400 p-4">
+                <CardTitle className="text-gray-700 flex items-center">
                   <Award className="mr-2 h-5 w-5" /> Yıllık Hedef
                 </CardTitle>
               </div>
@@ -464,8 +466,8 @@ export default function ProfilePage() {
           className="mb-8"
         >
           <Card className="overflow-hidden border-none shadow-md">
-            <div className="bg-gradient-to-r from-indigo-500 to-indigo-700 p-4">
-              <CardTitle className="text-white flex items-center">
+            <div className="bg-gradient-to-r from-indigo-200 to-indigo-400 p-4">
+              <CardTitle className="text-gray-700 flex items-center">
                 <BarChart3 className="mr-2 h-5 w-5" /> Okuma Aktivitesi
               </CardTitle>
             </div>
@@ -474,13 +476,13 @@ export default function ProfilePage() {
                 {readingActivity.map((item, index) => (
                   <div key={index} className="flex flex-col items-center">
                     <div
-                      className="w-12 bg-indigo-500 hover:bg-indigo-600 transition-all rounded-t-md"
+                      className="w-12 bg-indigo-300 hover:bg-indigo-400 transition-all rounded-t-md"
                       style={{
                         height: `${(item.books / getMaxBooks()) * 180}px`,
                       }}
                     ></div>
                     <p className="mt-2 text-xs font-medium">{item.month}</p>
-                    <p className="text-sm font-bold text-indigo-600">{item.books}</p>
+                    <p className="text-sm font-bold text-indigo-400">{item.books}</p>
                   </div>
                 ))}
               </div>
@@ -496,8 +498,8 @@ export default function ProfilePage() {
           className="mb-8"
         >
           <Card className="overflow-hidden border-none shadow-md">
-            <div className="bg-gradient-to-r from-amber-500 to-amber-700 p-4">
-              <CardTitle className="text-white flex items-center">
+            <div className="bg-gradient-to-r from-amber-200 to-amber-400 p-4">
+              <CardTitle className="text-gray-700 flex items-center">
                 <Award className="mr-2 h-5 w-5" /> Başarılar
               </CardTitle>
             </div>
@@ -514,7 +516,7 @@ export default function ProfilePage() {
                     <p className="text-xs text-gray-600 mb-2">{achievement.description}</p>
                     <Progress
                       value={achievement.progress}
-                      className={`h-2 w-full bg-gray-200 ${achievement.progress === 100 ? "[&>div]:bg-green-500" : "[&>div]:bg-amber-500"}`}
+                      className={`h-2 w-full bg-gray-200 ${achievement.progress === 100 ? "[&>div]:bg-green-300" : "[&>div]:bg-amber-300"}`}
                     />
                     <p className="mt-1 text-xs font-medium text-gray-700">%{achievement.progress}</p>
                   </motion.div>
@@ -532,8 +534,8 @@ export default function ProfilePage() {
           className="mb-8"
         >
           <Card className="overflow-hidden border-none shadow-md">
-            <div className="bg-gradient-to-r from-pink-500 to-pink-700 p-4">
-              <CardTitle className="text-white flex items-center">
+            <div className="bg-gradient-to-r from-pink-200 to-pink-400 p-4">
+              <CardTitle className="text-gray-700 flex items-center">
                 <Users className="mr-2 h-5 w-5" /> Arkadaşlar
               </CardTitle>
             </div>
@@ -574,8 +576,8 @@ export default function ProfilePage() {
           className="mb-8"
         >
           <Card className="overflow-hidden border-none shadow-md">
-            <div className="bg-gradient-to-r from-cyan-500 to-cyan-700 p-4">
-              <CardTitle className="text-white flex items-center">
+            <div className="bg-gradient-to-r from-cyan-200 to-cyan-400 p-4">
+              <CardTitle className="text-gray-700 flex items-center">
                 <BookMarked className="mr-2 h-5 w-5" /> Sizin İçin Öneriler
               </CardTitle>
             </div>
@@ -610,25 +612,25 @@ export default function ProfilePage() {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8 }}>
           <Tabs defaultValue="library" className="mb-8" onValueChange={setActiveTab}>
             <TabsList className="grid w-full grid-cols-7 bg-white/50 backdrop-blur-sm rounded-lg p-1">
-              <TabsTrigger value="library" className={activeTab === "library" ? "bg-purple-600 text-white" : ""}>
+              <TabsTrigger value="library" className={activeTab === "library" ? "bg-purple-300 text-gray-700" : ""}>
                 Kitaplık
               </TabsTrigger>
-              <TabsTrigger value="wall" className={activeTab === "wall" ? "bg-purple-600 text-white" : ""}>
+              <TabsTrigger value="wall" className={activeTab === "wall" ? "bg-purple-300 text-gray-700" : ""}>
                 Duvar
               </TabsTrigger>
-              <TabsTrigger value="reviews" className={activeTab === "reviews" ? "bg-purple-600 text-white" : ""}>
+              <TabsTrigger value="reviews" className={activeTab === "reviews" ? "bg-purple-300 text-gray-700" : ""}>
                 İncelemeler
               </TabsTrigger>
-              <TabsTrigger value="quotes" className={activeTab === "quotes" ? "bg-purple-600 text-white" : ""}>
+              <TabsTrigger value="quotes" className={activeTab === "quotes" ? "bg-purple-300 text-gray-700" : ""}>
                 Alıntılar
               </TabsTrigger>
-              <TabsTrigger value="posts" className={activeTab === "posts" ? "bg-purple-600 text-white" : ""}>
+              <TabsTrigger value="posts" className={activeTab === "posts" ? "bg-purple-300 text-gray-700" : ""}>
                 İletiler
               </TabsTrigger>
-              <TabsTrigger value="goals" className={activeTab === "goals" ? "bg-purple-600 text-white" : ""}>
+              <TabsTrigger value="goals" className={activeTab === "goals" ? "bg-purple-300 text-gray-700" : ""}>
                 Hedefler
               </TabsTrigger>
-              <TabsTrigger value="comments" className={activeTab === "comments" ? "bg-purple-600 text-white" : ""}>
+              <TabsTrigger value="comments" className={activeTab === "comments" ? "bg-purple-300 text-gray-700" : ""}>
                 Yorumlar
               </TabsTrigger>
             </TabsList>
