@@ -92,29 +92,29 @@ export default function HomePage() {
             <span className="ml-2 text-lg font-semibold">OkuYorum</span>
           </Link>
           <nav className="ml-auto flex items-center gap-4">
-            <Link className="text-sm font-medium text-gray-600 hover:text-purple-600 flex items-center" href="/profile">
+            <Link className="text-sm font-medium text-gray-600 hover:text-purple-600 flex items-center" href="/features/profile">
               <User className="w-4 h-4 mr-1" />
               Profil
             </Link>
-            <Link className="text-sm font-medium text-gray-600 hover:text-purple-600 flex items-center" href="/library">
+            <Link className="text-sm font-medium text-gray-600 hover:text-purple-600 flex items-center" href="/features/library">
               <Library className="w-4 h-4 mr-1" />
               Kitaplığım
             </Link>
             <Link
               className="text-sm font-medium text-gray-600 hover:text-purple-600 flex items-center"
-              href="/discover"
+              href="/features/discover"
             >
               <Compass className="w-4 h-4 mr-1" />
               Keşfet
             </Link>
             <Link
               className="text-sm font-medium text-gray-600 hover:text-purple-600 flex items-center"
-              href="/kiraathane"
+              href="/features/kiraathane"
             >
               <Users className="w-4 h-4 mr-1" />
               Millet Kıraathaneleri
             </Link>
-            <Link className="text-sm font-medium text-gray-600 hover:text-purple-600 flex items-center" href="/donate">
+            <Link className="text-sm font-medium text-gray-600 hover:text-purple-600 flex items-center" href="/features/donate">
               <Heart className="w-4 h-4 mr-1" />
               Bağış Yap
             </Link>
@@ -346,17 +346,17 @@ export default function HomePage() {
                   </Link>
                 </li>
                 <li>
-                  <Link href="/library" className="text-sm text-gray-600 hover:text-purple-600">
+                  <Link href="/features/library" className="text-sm text-gray-600 hover:text-purple-600">
                     Kütüphanem
                   </Link>
                 </li>
                 <li>
-                  <Link href="/donate" className="text-sm text-gray-600 hover:text-purple-600">
+                  <Link href="features/donate" className="text-sm text-gray-600 hover:text-purple-600">
                     Bağış Yap
                   </Link>
                 </li>
                 <li>
-                  <Link href="/kiraathane" className="text-sm text-gray-600 hover:text-purple-600">
+                  <Link href="/features/kiraathane" className="text-sm text-gray-600 hover:text-purple-600">
                     Millet Kıraathaneleri
                   </Link>
                 </li>
