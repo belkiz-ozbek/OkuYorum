@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/form/label"
 import { useToast } from "@/components/ui/feedback/use-toast"
 import { Toaster } from "@/components/ui/feedback/toaster"
 import { MapSelector } from "@/components/ui/form/map-selector"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/layout/Card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/layout/card"
 
 type DonationType = "schools" | "libraries" | "individual"
 type BookCondition = "new" | "likeNew" | "used" | "old"

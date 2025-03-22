@@ -7,7 +7,7 @@ import Image from "next/image"
 import { BookOpen, Star, ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/form/button"
 import { Progress } from "@/components/ui/layout/progress"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/layout/Card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/layout/card"
 
 type Book = {
   id: string

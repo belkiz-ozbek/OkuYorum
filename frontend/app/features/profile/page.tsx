@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/form/button"
 import { Input } from "@/components/ui/form/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/layout/tabs"
 import { Progress } from "@/components/ui/layout/progress"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/layout/Card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/layout/card"
 
 type UserProfile = {
   name: string
