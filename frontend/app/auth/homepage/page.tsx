@@ -197,7 +197,7 @@ export default function HomePage() {
               </Button>
             </div>
           </div>
-          
+
           <div className="relative h-[400px] w-full bg-gradient-to-br from-pink-50 to-purple-100 rounded-lg shadow-2xl overflow-hidden">
             <div className="absolute inset-0 flex items-center justify-center">
               {/* Central glowing circle */}
@@ -325,6 +325,42 @@ export default function HomePage() {
               ))}
             </div>
           </div>
+        </div>
+
+        {/* Featured Books Carousel */}
+        <div className="my-16">
+          <h2 className="text-3xl font-bold mb-6">Öne Çıkan Kitaplar</h2>
+          <Carousel className="w-full max-w-5xl mx-auto">
+            <CarouselContent>
+              {[
+                { title: "1984", author: "George Orwell", coverUrl: "/placeholder.svg?height=300&width=200" },
+                {
+                  title: "Suç ve Ceza",
+                  author: "Fyodor Dostoyevski",
+                  coverUrl: "/placeholder.svg?height=300&width=200",
+                },
+                {
+                  title: "Yüzyıllık Yalnızlık",
+                  author: "Gabriel García Márquez",
+                  coverUrl: "/placeholder.svg?height=300&width=200",
+                },
+                {
+                  title: "Küçük Prens",
+                  author: "Antoine de Saint-Exupéry",
+                  coverUrl: "/placeholder.svg?height=300&width=200",
+                },
+                { title: "Sefiller", author: "Victor Hugo", coverUrl: "/placeholder.svg?height=300&width=200" },
+              ].map((book, index) => (
+                <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
+                  <div className="p-1">
+                    <FeaturedBook {...book} />
+                  </div>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <CarouselPrevious />
+            <CarouselNext />
+          </Carousel>
         </div>
 
         {/* Featured Books Carousel */}
