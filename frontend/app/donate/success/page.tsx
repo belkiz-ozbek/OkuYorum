@@ -70,25 +70,54 @@ export default function DonationSuccessPage() {
   
   // Kullanıcı bilgilerini ve bağış detaylarını al
   useEffect(() => {
-    // Kullanıcı adını localStorage'dan al
-    const storedUserName = localStorage.getItem('userName') || ""
-    setUserName(storedUserName.replace(/"/g, ''))
-    
-    // Bağış detaylarını localStorage'dan al
-    const details: DonationData = {
-      bookTitle: localStorage.getItem('draft_bookTitle') || "",
-      author: localStorage.getItem('draft_author') || "",
-      genre: localStorage.getItem('draft_genre') || "",
-      condition: localStorage.getItem('draft_condition') || "",
-      quantity: Number(localStorage.getItem('draft_quantity')) || 1,
-      donationType: localStorage.getItem('draft_donationType') || "",
-      institutionName: localStorage.getItem('draft_institutionName') || "",
-      recipientName: localStorage.getItem('draft_recipientName') || "",
-      address: localStorage.getItem('draft_address') || ""
-    }
-    
-    if (details.bookTitle) {
-      setDonationDetails(details)
+    try {
+      // Kullanıcı adını localStorage'dan al
+      const storedUserName = localStorage.getItem('userName') || ""
+      const cleanUserName = storedUserName.replace(/"/g, '')
+      console.log('Kullanıcı adı yüklendi:', cleanUserName)
+      setUserName(cleanUserName)
+      
+      // Bağış detaylarını localStorage'dan al
+      const details: DonationData = {
+        bookTitle: localStorage.getItem('draft_bookTitle') || "",
+        author: localStorage.getItem('draft_author') || "",
+        genre: localStorage.getItem('draft_genre') || "",
+        condition: localStorage.getItem('draft_condition') || "",
+        quantity: Number(localStorage.getItem('draft_quantity')) || 1,
+        donationType: localStorage.getItem('draft_donationType') || "",
+        institutionName: localStorage.getItem('draft_institutionName') || "",
+        recipientName: localStorage.getItem('draft_recipientName') || "",
+        address: localStorage.getItem('draft_address') || ""
+      }
+      
+      console.log('Bağış detayları yüklendi:', details)
+      
+      if (details.bookTitle) {
+        setDonationDetails(details)
+      } else {
+        console.warn('Bağış detayları eksik')
+        // Varsayılan değerler ile devam et
+        setDonationDetails({
+          bookTitle: "Örnek Kitap",
+          author: "Örnek Yazar",
+          genre: "fiction",
+          condition: "new",
+          quantity: 1,
+          donationType: "schools"
+        })
+      }
+    } catch (error) {
+      console.error('Veri yükleme hatası:', error)
+      // Hata durumunda varsayılan değerler ile devam et
+      setUserName("Değerli Bağışçı")
+      setDonationDetails({
+        bookTitle: "Örnek Kitap",
+        author: "Örnek Yazar",
+        genre: "fiction",
+        condition: "new",
+        quantity: 1,
+        donationType: "schools"
+      })
     }
   }, [])
 
@@ -96,54 +125,50 @@ export default function DonationSuccessPage() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
+        // Varsayılan değerler ile başla
+        setStats({
+          totalDonations: 1234,
+          totalRecipients: 5678,
+          isLoading: true
+        })
+
         const token = localStorage.getItem('token')
         if (!token) {
-          console.error("Token bulunamadı")
-          setStats(prev => ({ ...prev, isLoading: false, totalDonations: 1234, totalRecipients: 5678 }))
+          console.warn("Token bulunamadı, varsayılan değerler kullanılıyor")
+          setStats(prev => ({ ...prev, isLoading: false }))
           return
         }
 
         const response = await fetch('http://localhost:8080/api/donations/stats', {
           headers: {
-            'Authorization': `Bearer ${token.replace(/"/g, '')}`
-          }
+            'Authorization': `Bearer ${token.replace(/"/g, '')}`,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          credentials: 'include'
         })
 
-        // Önce response'un text olarak alınması
-        const responseText = await response.text()
-        
-        // JSON olarak parse etmeyi dene
-        let data
-        try {
-          data = JSON.parse(responseText)
-        } catch {
-          console.error("API yanıtı geçerli bir JSON değil:", responseText)
-          throw new Error("API yanıtı geçerli bir JSON değil")
+        if (response.status === 403) {
+          console.warn("Yetkilendirme hatası, varsayılan değerler kullanılıyor")
+          setStats(prev => ({ ...prev, isLoading: false }))
+          return
         }
-        
-        if (response.ok) {
-          setStats({
-            totalDonations: data.totalDonations || 0,
-            totalRecipients: data.totalRecipients || 0,
-            isLoading: false
-          })
-        } else {
-          console.error("API yanıtı başarısız:", data)
-          // Varsayılan değerleri göster
-          setStats({
-            totalDonations: 1234, // Varsayılan değer
-            totalRecipients: 5678, // Varsayılan değer
-            isLoading: false
-          })
+
+        if (!response.ok) {
+          console.warn("API yanıtı başarısız:", response.status)
+          setStats(prev => ({ ...prev, isLoading: false }))
+          return
         }
-      } catch (error) {
-        console.error("İstatistikler alınırken hata oluştu:", error)
-        // Hata durumunda varsayılan değerler göster
+
+        const data = await response.json()
         setStats({
-          totalDonations: 1234, // Varsayılan değer
-          totalRecipients: 5678, // Varsayılan değer
+          totalDonations: data.totalDonations || 1234,
+          totalRecipients: data.totalRecipients || 5678,
           isLoading: false
         })
+      } catch (error) {
+        console.error("İstatistikler alınırken hata oluştu:", error)
+        setStats(prev => ({ ...prev, isLoading: false }))
       }
     }
 
@@ -244,9 +269,17 @@ export default function DonationSuccessPage() {
 
   // Sertifika oluşturma ve önizleme fonksiyonu
   const generateCertificate = useCallback(async (forDownload = false) => {
-    const canvas = canvasRef.current || document.createElement('canvas')
+    const canvas = canvasRef.current
+    if (!canvas) {
+      console.error('Canvas elementi bulunamadı')
+      return
+    }
+
     const ctx = canvas.getContext('2d')
-    if (!ctx) return
+    if (!ctx) {
+      console.error('Canvas context oluşturulamadı')
+      return
+    }
 
     // Canvas boyutlarını ayarla (A4 boyutu)
     canvas.width = 2480 // 210mm - 300dpi
@@ -255,106 +288,57 @@ export default function DonationSuccessPage() {
     // Tema renklerini ayarla
     const themeColors = {
       purple: {
-        primary: '#9333ea', // purple-600
-        secondary: '#ec4899', // pink-600
-        light: '#f3e8ff', // purple-100
-        text: '#6b21a8', // purple-800
+        primary: '#9333ea',
+        secondary: '#ec4899',
+        light: '#f3e8ff',
+        text: '#6b21a8',
         gradient: ['#9333ea20', '#ec489920']
       },
       blue: {
-        primary: '#2563eb', // blue-600
-        secondary: '#0ea5e9', // sky-500
-        light: '#dbeafe', // blue-100
-        text: '#1e40af', // blue-800
+        primary: '#2563eb',
+        secondary: '#0ea5e9',
+        light: '#dbeafe',
+        text: '#1e40af',
         gradient: ['#2563eb20', '#0ea5e920']
       },
       green: {
-        primary: '#059669', // emerald-600
-        secondary: '#10b981', // green-500
-        light: '#d1fae5', // emerald-100
-        text: '#065f46', // emerald-800
+        primary: '#059669',
+        secondary: '#10b981',
+        light: '#d1fae5',
+        text: '#065f46',
         gradient: ['#05966920', '#10b98120']
       }
     }
 
     const colors = themeColors[certificateTheme]
 
-    // Arka plan
-    ctx.fillStyle = '#ffffff'
-    ctx.fillRect(0, 0, canvas.width, canvas.height)
+    try {
+      // Arka plan
+      ctx.fillStyle = '#ffffff'
+      ctx.fillRect(0, 0, canvas.width, canvas.height)
 
-    // Filigran arka planı
-    const drawWatermark = () => {
+      // Filigran arka planı
       ctx.save()
       ctx.globalAlpha = 0.03
       ctx.translate(canvas.width / 2, canvas.height / 2)
-      ctx.rotate(-Math.PI / 12) // Hafif açı
-      
-      // Logo yerine büyük bir kitap ikonu
+      ctx.rotate(-Math.PI / 12)
       ctx.font = '800px Arial'
       ctx.fillStyle = colors.primary
       ctx.textAlign = 'center'
       ctx.textBaseline = 'middle'
       ctx.fillText('📚', 0, 0)
-      
       ctx.restore()
-    }
-    drawWatermark()
 
-    // Dekoratif kenarlık
-    const drawBorder = () => {
-      // Dış kenarlık
+      // Dekoratif kenarlık
       ctx.strokeStyle = colors.primary
       ctx.lineWidth = 20
       ctx.strokeRect(40, 40, canvas.width - 80, canvas.height - 80)
       
-      // İç kenarlık (ince çizgi)
       ctx.strokeStyle = colors.secondary
       ctx.lineWidth = 2
       ctx.strokeRect(80, 80, canvas.width - 160, canvas.height - 160)
-      
-      // Köşe süslemeleri
-      
-      // Sol üst köşe
-      ctx.beginPath()
-      ctx.moveTo(40, 140)
-      ctx.lineTo(40, 40)
-      ctx.lineTo(140, 40)
-      ctx.lineWidth = 40
-      ctx.strokeStyle = colors.secondary
-      ctx.stroke()
-      
-      // Sağ üst köşe
-      ctx.beginPath()
-      ctx.moveTo(canvas.width - 140, 40)
-      ctx.lineTo(canvas.width - 40, 40)
-      ctx.lineTo(canvas.width - 40, 140)
-      ctx.lineWidth = 40
-      ctx.strokeStyle = colors.secondary
-      ctx.stroke()
-      
-      // Sol alt köşe
-      ctx.beginPath()
-      ctx.moveTo(40, canvas.height - 140)
-      ctx.lineTo(40, canvas.height - 40)
-      ctx.lineTo(140, canvas.height - 40)
-      ctx.lineWidth = 40
-      ctx.strokeStyle = colors.secondary
-      ctx.stroke()
-      
-      // Sağ alt köşe
-      ctx.beginPath()
-      ctx.moveTo(canvas.width - 140, canvas.height - 40)
-      ctx.lineTo(canvas.width - 40, canvas.height - 40)
-      ctx.lineTo(canvas.width - 40, canvas.height - 140)
-      ctx.lineWidth = 40
-      ctx.strokeStyle = colors.secondary
-      ctx.stroke()
-    }
-    drawBorder()
 
-    // Gradient başlık arka planı
-    const drawHeader = () => {
+      // Başlık
       const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0)
       gradient.addColorStop(0, colors.gradient[0])
       gradient.addColorStop(1, colors.gradient[1])
@@ -376,33 +360,25 @@ export default function DonationSuccessPage() {
       ctx.lineTo(120 + radius, rectY)
       ctx.arcTo(120, rectY, 120, rectY + radius, radius)
       ctx.closePath()
-      
       ctx.fill()
-      
-      // Başlık
+
+      // Başlık metni
       ctx.font = 'bold 120px Arial'
       ctx.fillStyle = colors.primary
       ctx.textAlign = 'center'
       ctx.fillText('Bağış Sertifikası', canvas.width / 2, 400)
       
-      // Alt başlık
       ctx.font = '60px Arial'
       ctx.fillStyle = colors.text
       ctx.fillText('Oku-Yorum Platformu', canvas.width / 2, 500)
-    }
-    drawHeader()
 
-    // Teşekkür mesajı
-    const drawMessage = () => {
-      // İsim
+      // İsim ve teşekkür metni
       ctx.font = 'bold 80px Arial'
-      ctx.fillStyle = '#1f2937' // gray-800
-      ctx.textAlign = 'center'
+      ctx.fillStyle = '#1f2937'
       ctx.fillText(`Sayın ${userName}`, canvas.width / 2, 800)
       
-      // Teşekkür metni
       ctx.font = '60px Arial'
-      ctx.fillStyle = '#4b5563' // gray-600
+      ctx.fillStyle = '#4b5563'
       const message = [
         'Toplumsal okuma kültürüne yaptığınız değerli katkılardan dolayı',
         'teşekkür ederiz. Bağışladığınız kitaplar, yeni okuyucularıyla',
@@ -411,25 +387,19 @@ export default function DonationSuccessPage() {
       message.forEach((line, index) => {
         ctx.fillText(line, canvas.width / 2, 1000 + (index * 100))
       })
-    }
-    drawMessage()
 
-    // Bağış detayları
-    const drawDetails = () => {
+      // Bağış detayları
       if (donationDetails) {
-        // Detay kutusu arka planı
-        ctx.fillStyle = colors.light + '80' // %50 opaklık
+        ctx.fillStyle = colors.light + '80'
         ctx.beginPath()
         ctx.rect(300, 1300, canvas.width - 600, 600)
         ctx.fill()
         
-        // Detay başlığı
         ctx.font = 'bold 60px Arial'
         ctx.fillStyle = colors.text
         ctx.textAlign = 'center'
         ctx.fillText('Bağış Detayları', canvas.width / 2, 1380)
         
-        // Çizgi
         ctx.beginPath()
         ctx.moveTo(400, 1420)
         ctx.lineTo(canvas.width - 400, 1420)
@@ -437,9 +407,8 @@ export default function DonationSuccessPage() {
         ctx.lineWidth = 2
         ctx.stroke()
         
-        // Detaylar
         ctx.font = '50px Arial'
-        ctx.fillStyle = '#6b7280' // gray-500
+        ctx.fillStyle = '#6b7280'
         ctx.textAlign = 'left'
         const details = [
           `Kitap: ${donationDetails.bookTitle}`,
@@ -454,95 +423,81 @@ export default function DonationSuccessPage() {
           ctx.fillText(detail, 400, 1500 + (index * 80))
         })
       }
-    }
-    drawDetails()
 
-    // QR Kod
-    const drawQRCode = async () => {
-      try {
-        const shareUrl = getShareUrl()
-        const qrDataUrl = await QRCode.toDataURL(shareUrl, {
-          width: 300,
-          margin: 1,
-          color: {
-            dark: colors.primary,
-            light: '#FFFFFF'
-          }
-        })
-        
-        // Image constructor'ını window üzerinden çağırıyoruz
-        const qrImage = new window.Image() as HTMLImageElement
-        qrImage.src = qrDataUrl
-        
-        await new Promise<void>((resolve) => {
-          qrImage.onload = () => {
-            // QR kod arka planı
-            ctx.fillStyle = '#FFFFFF'
-            ctx.beginPath()
-            ctx.rect(canvas.width - 450, canvas.height - 450, 350, 350)
-            ctx.fill()
-            
-            // QR kodu çiz
-            ctx.drawImage(qrImage, canvas.width - 425, canvas.height - 425, 300, 300)
-            
-            // QR kod açıklaması
-            ctx.font = '30px Arial'
-            ctx.fillStyle = colors.text
-            ctx.textAlign = 'center'
-            ctx.fillText('Bağış hikayemi görüntüle', canvas.width - 275, canvas.height - 460)
-            
-            resolve()
-          }
-        })
-      } catch (error) {
-        console.error('QR kod oluşturma hatası:', error)
-      }
-    }
-    await drawQRCode()
+      // QR kod
+      const shareUrl = getShareUrl()
+      const qrDataUrl = await QRCode.toDataURL(shareUrl, {
+        width: 300,
+        margin: 1,
+        color: {
+          dark: colors.primary,
+          light: '#FFFFFF'
+        }
+      })
+      
+      const qrImage = new window.Image()
+      qrImage.src = qrDataUrl
+      
+      await new Promise<void>((resolveQr) => {
+        qrImage.onload = () => {
+          ctx.fillStyle = '#FFFFFF'
+          ctx.beginPath()
+          ctx.rect(canvas.width - 450, canvas.height - 450, 350, 350)
+          ctx.fill()
+          
+          ctx.drawImage(qrImage, canvas.width - 425, canvas.height - 425, 300, 300)
+          
+          ctx.font = '30px Arial'
+          ctx.fillStyle = colors.text
+          ctx.textAlign = 'center'
+          ctx.fillText('Bağış hikayemi görüntüle', canvas.width - 275, canvas.height - 460)
+          
+          resolveQr()
+        }
+        qrImage.onerror = () => resolveQr()
+      })
 
-    // Sertifika numarası ve tarih
-    const drawFooter = () => {
-      // Sertifika numarası
+      // Sertifika numarası ve tarih
       const certNumber = `SN: ${Date.now().toString().slice(-8)}`
       ctx.font = '40px Arial'
-      ctx.fillStyle = '#9ca3af' // gray-400
+      ctx.fillStyle = '#9ca3af'
       ctx.textAlign = 'left'
       ctx.fillText(certNumber, 150, canvas.height - 150)
       
-      // Platform bilgisi
-      ctx.font = '40px Arial'
-      ctx.fillStyle = '#9ca3af' // gray-400
       ctx.textAlign = 'center'
       ctx.fillText('www.okuyorum.com', canvas.width / 2, canvas.height - 150)
       
-      // Tarih
-      ctx.font = '40px Arial'
-      ctx.fillStyle = '#9ca3af' // gray-400
       ctx.textAlign = 'right'
       ctx.fillText(new Date().toLocaleDateString('tr-TR'), canvas.width - 150, canvas.height - 150)
-    }
-    drawFooter()
 
-    // Sertifikayı indir veya önizleme için döndür
-    if (forDownload) {
-      const link = document.createElement('a')
-      link.download = `okuyorum-bagis-sertifikasi-${new Date().getTime()}.png`
-      link.href = canvas.toDataURL('image/png')
-      link.click()
-      
+      // Sertifikayı indir veya önizleme için döndür
+      if (forDownload) {
+        const link = document.createElement('a')
+        link.download = `okuyorum-bagis-sertifikasi-${new Date().getTime()}.png`
+        link.href = canvas.toDataURL('image/png')
+        link.click()
+        
+        toast({
+          title: "Sertifika indirildi",
+          description: "Bağış sertifikanız başarıyla indirildi",
+        })
+      } else {
+        const preview = canvas.toDataURL('image/png')
+        setCertificatePreview(preview)
+      }
+    } catch (error) {
+      console.error('Sertifika oluşturma hatası:', error)
       toast({
-        title: "Sertifika indirildi",
-        description: "Bağış sertifikanız başarıyla indirildi",
+        title: "Hata",
+        description: "Sertifika oluşturulurken bir hata oluştu",
+        variant: "destructive"
       })
-    } else {
-      setCertificatePreview(canvas.toDataURL('image/png'))
     }
-  }, [donationDetails, userName, certificateTheme])
+  }, [donationDetails, userName, certificateTheme, getShareUrl])
 
   // Sayfa yüklendiğinde sertifika önizlemesini oluştur
   useEffect(() => {
     if (donationDetails && userName) {
-      // Kullanıcı bilgileri yüklendiğinde sertifika önizlemesini oluştur
       generateCertificate(false)
     }
   }, [donationDetails, userName, certificateTheme, generateCertificate])
@@ -721,50 +676,63 @@ export default function DonationSuccessPage() {
                 <span>Sertifika</span>
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-4xl">
+            <DialogContent className="max-w-3xl">
               <DialogHeader>
                 <DialogTitle className="text-center text-xl font-bold text-purple-800">Bağış Sertifikanız</DialogTitle>
               </DialogHeader>
               
               <div className="flex flex-col space-y-4">
                 {/* Sertifika Önizleme */}
-                <div className="relative border-2 border-purple-100 rounded-lg overflow-hidden shadow-lg">
+                <div className="relative border-2 border-purple-100 rounded-lg overflow-hidden shadow-lg bg-white mx-auto w-full max-w-2xl">
                   {certificatePreview ? (
-                    <div className="relative w-full h-auto">
+                    <div className="relative aspect-[1/1.414] w-full max-h-[60vh]">
                       <Image 
                         src={certificatePreview} 
                         alt="Bağış Sertifikası" 
-                        width={800}
-                        height={1131}
-                        className="w-full h-auto"
+                        fill
+                        className="object-contain"
+                        priority
+                        onError={() => {
+                          console.error('Sertifika görüntüsü yüklenemedi')
+                          toast({
+                            title: "Hata",
+                            description: "Sertifika görüntüsü yüklenemedi. Lütfen tekrar deneyin.",
+                            variant: "destructive"
+                          })
+                        }}
                       />
                     </div>
                   ) : (
-                    <div className="flex justify-center items-center h-96">
-                      <Spinner size="lg" />
+                    <div className="flex flex-col justify-center items-center h-[60vh] space-y-4">
+                      <Spinner size="lg" className="text-purple-600" />
+                      <p className="text-sm text-gray-500">Sertifikanız hazırlanıyor...</p>
                     </div>
                   )}
                   
                   {/* Gizli Canvas */}
-                  <canvas ref={canvasRef} className="hidden" />
+                  <canvas 
+                    ref={canvasRef} 
+                    className="hidden"
+                    style={{ width: '2480px', height: '3508px' }}
+                  />
                 </div>
                 
                 {/* Tema Seçenekleri */}
                 <div className="flex justify-center space-x-4 pt-2">
                   <button 
-                    className={`w-8 h-8 rounded-full border-2 ${certificateTheme === 'purple' ? 'border-gray-800 ring-2 ring-purple-300' : 'border-gray-300'}`}
+                    className={`w-8 h-8 rounded-full border-2 transition-all ${certificateTheme === 'purple' ? 'border-gray-800 ring-2 ring-purple-300 scale-110' : 'border-gray-300'}`}
                     style={{ backgroundColor: '#9333ea' }}
                     onClick={() => setCertificateTheme('purple')}
                     aria-label="Mor tema"
                   />
                   <button 
-                    className={`w-8 h-8 rounded-full border-2 ${certificateTheme === 'blue' ? 'border-gray-800 ring-2 ring-blue-300' : 'border-gray-300'}`}
+                    className={`w-8 h-8 rounded-full border-2 transition-all ${certificateTheme === 'blue' ? 'border-gray-800 ring-2 ring-blue-300 scale-110' : 'border-gray-300'}`}
                     style={{ backgroundColor: '#2563eb' }}
                     onClick={() => setCertificateTheme('blue')}
                     aria-label="Mavi tema"
                   />
                   <button 
-                    className={`w-8 h-8 rounded-full border-2 ${certificateTheme === 'green' ? 'border-gray-800 ring-2 ring-green-300' : 'border-gray-300'}`}
+                    className={`w-8 h-8 rounded-full border-2 transition-all ${certificateTheme === 'green' ? 'border-gray-800 ring-2 ring-green-300 scale-110' : 'border-gray-300'}`}
                     style={{ backgroundColor: '#059669' }}
                     onClick={() => setCertificateTheme('green')}
                     aria-label="Yeşil tema"

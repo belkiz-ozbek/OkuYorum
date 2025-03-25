@@ -105,6 +105,104 @@ type DonationData = {
   address?: string;
 }
 
+const DonationTypeDetails = ({ type }: { type: DonationType }) => {
+  const details = {
+    schools: {
+      title: "Okullara Bağış",
+      description: "Eğitimi destekleyin, öğrencilerin hayatlarına dokunun.",
+      process: [
+        "Bağışınız onaylandıktan sonra en yakın okula yönlendirilir",
+        "Okul kütüphanesine yerleştirilir",
+        "Öğrenciler kitaplardan faydalanmaya başlar",
+        "Size düzenli olarak etki raporu gönderilir"
+      ],
+      stats: {
+        donations: "500+",
+        schools: "50+",
+        students: "10,000+"
+      },
+      icon: <School className="h-5 w-5 text-purple-600" />,
+      color: "purple"
+    },
+    libraries: {
+      title: "Kütüphanelere Bağış",
+      description: "Toplum kütüphanelerini zenginleştirin, bilgiye erişimi artırın.",
+      process: [
+        "Bağışınız en yakın halk kütüphanesine yönlendirilir",
+        "Kütüphane envanterine eklenir",
+        "Tüm okuyucuların erişimine açılır",
+        "Düzenli etki raporları alırsınız"
+      ],
+      stats: {
+        donations: "300+",
+        libraries: "25+",
+        readers: "5,000+"
+      },
+      icon: <Library className="h-5 w-5 text-emerald-600" />,
+      color: "emerald"
+    },
+    individual: {
+      title: "Bireye Bağış",
+      description: "Doğrudan bir kişinin hayatına dokunun, okuma sevgisi aşılayın.",
+      process: [
+        "İhtiyaç sahibi okuyucu ile eşleştirilirsiniz",
+        "Kitaplar güvenli şekilde teslim edilir",
+        "Okuyucudan geri bildirim alırsınız",
+        "Yeni bir dostluk başlar"
+      ],
+      stats: {
+        donations: "400+",
+        recipients: "200+",
+        matches: "350+"
+      },
+      icon: <User className="h-5 w-5 text-orange-600" />,
+      color: "orange"
+    }
+  }
+
+  const detail = details[type]
+  const bgColor = `bg-${detail.color}-50`
+  const borderColor = `border-${detail.color}-100`
+  const textColor = `text-${detail.color}-600`
+
+  return (
+    <div className="w-[300px] p-4 bg-white rounded-lg">
+      <div className="flex items-center gap-3 mb-4">
+        <div className={cn("p-2 rounded-lg", bgColor)}>
+          {detail.icon}
+        </div>
+        <div>
+          <h3 className="font-medium text-gray-900">{detail.title}</h3>
+          <p className="text-sm text-gray-500">{detail.description}</p>
+        </div>
+      </div>
+
+      <div className={cn("rounded-lg p-4 mb-4", bgColor, "border", borderColor)}>
+        <h4 className="font-medium text-gray-900 mb-2">Bağış Süreci</h4>
+        <ul className="space-y-2">
+          {detail.process.map((step, index) => (
+            <li key={index} className="flex items-start gap-2 text-sm text-gray-600">
+              <div className={cn("w-5 h-5 rounded-full flex items-center justify-center mt-0.5 bg-white", textColor)}>
+                {index + 1}
+              </div>
+              {step}
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div className="grid grid-cols-3 gap-2">
+        {Object.entries(detail.stats).map(([key, value]) => (
+          <div key={key} className="text-center p-2 rounded-lg bg-gray-50 border border-gray-100">
+            <div className="font-semibold text-gray-900">{value}</div>
+            <div className="text-xs text-gray-500 capitalize">{key}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 export default function DonatePage() {
   const [currentStep, setCurrentStep] = useState(0)
   const [donationType, setDonationType] = useState<DonationType>("schools")
@@ -304,124 +402,151 @@ export default function DonatePage() {
     switch (currentStep) {
       case 0:
         return (
-          <FadeIn className="grid md:grid-cols-3 gap-8">
-            <Card 
-              className={`group relative overflow-hidden border-2 transition-all duration-500 ease-out ${
-                donationType === "schools" 
-                  ? "border-purple-400 shadow-purple-200/50 shadow-lg" 
-                  : "border-transparent hover:border-purple-200"
-              }`}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 px-4 md:px-0">
+            <div 
+              className={cn(
+                "group relative overflow-hidden rounded-2xl transition-all duration-500 ease-out cursor-pointer",
+                "bg-white hover:shadow-xl transform hover:-translate-y-1",
+                donationType === "schools" ? "ring-2 ring-purple-500" : "hover:ring-2 hover:ring-purple-200"
+              )}
+              onClick={() => setDonationType("schools")}
             >
-              <div className={`absolute inset-0 transition-all duration-500 ${
-                donationType === "schools"
-                  ? "bg-gradient-to-br from-blue-500/90 to-purple-600/90"
-                  : "bg-gradient-to-br from-blue-500/70 to-purple-600/70 group-hover:from-blue-500/80 group-hover:to-purple-600/80"
-              }`} />
-              
-              <CardHeader className="relative">
-                <CardTitle className="flex items-center text-white">
-                  <School className={`mr-2 transition-transform duration-500 ${
-                    donationType === "schools" ? "scale-110" : "group-hover:scale-110"
-                  }`} />
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-50 to-pink-50 opacity-50" />
+              <div className="relative p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="bg-purple-100 rounded-xl p-3 transition-transform duration-500 group-hover:scale-110">
+                    <School className="h-6 w-6 text-purple-600" />
+                  </div>
+                  {donationType === "schools" && (
+                    <div className="flex items-center">
+                      <span className="text-sm font-medium text-purple-600 mr-2">Seçildi</span>
+                      <div className="bg-purple-100 rounded-full p-1">
+                        <Check className="h-4 w-4 text-purple-600" />
+                      </div>
+                    </div>
+                  )}
+                </div>
+                
+                <h3 className="text-xl font-semibold text-gray-900 mb-2 group-hover:text-purple-700">
                   Okullara Bağış
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="relative">
-                <p className="text-white/90">Eğitimi destekleyin, öğrencilerin hayatlarına dokunun.</p>
-              </CardContent>
-              <CardFooter className="relative">
-                <Button 
-                  variant="outline"
-                  onClick={() => setDonationType("schools")}
-                  className={`w-full border-2 transition-all duration-500 ${
-                    donationType === "schools"
-                      ? "bg-white text-purple-600 border-white hover:bg-white/90"
-                      : "bg-transparent text-white border-white/50 hover:border-white hover:bg-white hover:text-purple-600"
-                  }`}
-                >
-                  {donationType === "schools" ? "Seçildi" : "Seç"}
-                </Button>
-              </CardFooter>
-            </Card>
+                </h3>
+                <p className="text-gray-600 text-sm leading-relaxed mb-4">
+                  Eğitimi destekleyin, öğrencilerin hayatlarına dokunun.
+                </p>
+                
+                <Popover>
+                  <PopoverTrigger>
+                    <div className={cn(
+                      "flex items-center text-sm font-medium",
+                      donationType === "schools" ? "text-purple-600" : "text-gray-500"
+                    )}>
+                      <span>Detaylar</span>
+                      <ArrowRight className="h-4 w-4 ml-1 transition-transform group-hover:translate-x-1" />
+                    </div>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[300px] p-0 bg-white border border-gray-200 shadow-lg">
+                    <DonationTypeDetails type="schools" />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
 
-            <Card 
-              className={`group relative overflow-hidden border-2 transition-all duration-500 ease-out ${
-                donationType === "libraries" 
-                  ? "border-teal-400 shadow-teal-200/50 shadow-lg" 
-                  : "border-transparent hover:border-teal-200"
-              }`}
+            <div 
+              className={cn(
+                "group relative overflow-hidden rounded-2xl transition-all duration-500 ease-out cursor-pointer",
+                "bg-white hover:shadow-xl transform hover:-translate-y-1",
+                donationType === "libraries" ? "ring-2 ring-emerald-500" : "hover:ring-2 hover:ring-emerald-200"
+              )}
+              onClick={() => setDonationType("libraries")}
             >
-              <div className={`absolute inset-0 transition-all duration-500 ${
-                donationType === "libraries"
-                  ? "bg-gradient-to-br from-green-500/90 to-teal-600/90"
-                  : "bg-gradient-to-br from-green-500/70 to-teal-600/70 group-hover:from-green-500/80 group-hover:to-teal-600/80"
-              }`} />
-              
-              <CardHeader className="relative">
-                <CardTitle className="flex items-center text-white">
-                  <Library className={`mr-2 transition-transform duration-500 ${
-                    donationType === "libraries" ? "scale-110" : "group-hover:scale-110"
-                  }`} />
+              <div className="absolute inset-0 bg-gradient-to-br from-emerald-50 to-teal-50 opacity-50" />
+              <div className="relative p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="bg-emerald-100 rounded-xl p-3 transition-transform duration-500 group-hover:scale-110">
+                    <Library className="h-6 w-6 text-emerald-600" />
+                  </div>
+                  {donationType === "libraries" && (
+                    <div className="flex items-center">
+                      <span className="text-sm font-medium text-emerald-600 mr-2">Seçildi</span>
+                      <div className="bg-emerald-100 rounded-full p-1">
+                        <Check className="h-4 w-4 text-emerald-600" />
+                      </div>
+                    </div>
+                  )}
+                </div>
+                
+                <h3 className="text-xl font-semibold text-gray-900 mb-2 group-hover:text-emerald-700">
                   Kütüphanelere Bağış
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="relative">
-                <p className="text-white/90">Toplum kütüphanelerini zenginleştirin, bilgiye erişimi artırın.</p>
-              </CardContent>
-              <CardFooter className="relative">
-                <Button 
-                  variant="outline"
-                  onClick={() => setDonationType("libraries")}
-                  className={`w-full border-2 transition-all duration-500 ${
-                    donationType === "libraries"
-                      ? "bg-white text-purple-600 border-white hover:bg-white/90"
-                      : "bg-transparent text-white border-white/50 hover:border-white hover:bg-white hover:text-purple-600"
-                  }`}
-                >
-                  {donationType === "libraries" ? "Seçildi" : "Seç"}
-                </Button>
-              </CardFooter>
-            </Card>
+                </h3>
+                <p className="text-gray-600 text-sm leading-relaxed mb-4">
+                  Toplum kütüphanelerini zenginleştirin, bilgiye erişimi artırın.
+                </p>
+                
+                <Popover>
+                  <PopoverTrigger>
+                    <div className={cn(
+                      "flex items-center text-sm font-medium",
+                      donationType === "libraries" ? "text-emerald-600" : "text-gray-500"
+                    )}>
+                      <span>Detaylar</span>
+                      <ArrowRight className="h-4 w-4 ml-1 transition-transform group-hover:translate-x-1" />
+                    </div>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[300px] p-0 bg-white border border-gray-200 shadow-lg">
+                    <DonationTypeDetails type="libraries" />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
 
-            <Card 
-              className={`group relative overflow-hidden border-2 transition-all duration-500 ease-out ${
-                donationType === "individual" 
-                  ? "border-red-400 shadow-red-200/50 shadow-lg" 
-                  : "border-transparent hover:border-red-200"
-              }`}
+            <div 
+              className={cn(
+                "group relative overflow-hidden rounded-2xl transition-all duration-500 ease-out cursor-pointer",
+                "bg-white hover:shadow-xl transform hover:-translate-y-1",
+                donationType === "individual" ? "ring-2 ring-orange-500" : "hover:ring-2 hover:ring-orange-200"
+              )}
+              onClick={() => setDonationType("individual")}
             >
-              <div className={`absolute inset-0 transition-all duration-500 ${
-                donationType === "individual"
-                  ? "bg-gradient-to-br from-orange-500/90 to-red-600/90"
-                  : "bg-gradient-to-br from-orange-500/70 to-red-600/70 group-hover:from-orange-500/80 group-hover:to-red-600/80"
-              }`} />
-              
-              <CardHeader className="relative">
-                <CardTitle className="flex items-center text-white">
-                  <User className={`mr-2 transition-transform duration-500 ${
-                    donationType === "individual" ? "scale-110" : "group-hover:scale-110"
-                  }`} />
+              <div className="absolute inset-0 bg-gradient-to-br from-orange-50 to-red-50 opacity-50" />
+              <div className="relative p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="bg-orange-100 rounded-xl p-3 transition-transform duration-500 group-hover:scale-110">
+                    <User className="h-6 w-6 text-orange-600" />
+                  </div>
+                  {donationType === "individual" && (
+                    <div className="flex items-center">
+                      <span className="text-sm font-medium text-orange-600 mr-2">Seçildi</span>
+                      <div className="bg-orange-100 rounded-full p-1">
+                        <Check className="h-4 w-4 text-orange-600" />
+                      </div>
+                    </div>
+                  )}
+                </div>
+                
+                <h3 className="text-xl font-semibold text-gray-900 mb-2 group-hover:text-orange-700">
                   Bireye Bağış
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="relative">
-                <p className="text-white/90">Doğrudan bir kişinin hayatına dokunun, okuma sevgisi aşılayın.</p>
-              </CardContent>
-              <CardFooter className="relative">
-                <Button 
-                  variant="outline"
-                  onClick={() => setDonationType("individual")}
-                  className={`w-full border-2 transition-all duration-500 ${
-                    donationType === "individual"
-                      ? "bg-white text-purple-600 border-white hover:bg-white/90"
-                      : "bg-transparent text-white border-white/50 hover:border-white hover:bg-white hover:text-purple-600"
-                  }`}
-                >
-                  {donationType === "individual" ? "Seçildi" : "Seç"}
-                </Button>
-              </CardFooter>
-            </Card>
-          </FadeIn>
+                </h3>
+                <p className="text-gray-600 text-sm leading-relaxed mb-4">
+                  Doğrudan bir kişinin hayatına dokunun, okuma sevgisi aşılayın.
+                </p>
+                
+                <Popover>
+                  <PopoverTrigger>
+                    <div className={cn(
+                      "flex items-center text-sm font-medium",
+                      donationType === "individual" ? "text-orange-600" : "text-gray-500"
+                    )}>
+                      <span>Detaylar</span>
+                      <ArrowRight className="h-4 w-4 ml-1 transition-transform group-hover:translate-x-1" />
+                    </div>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[300px] p-0 bg-white border border-gray-200 shadow-lg">
+                    <DonationTypeDetails type="individual" />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
+          </div>
         )
       case 1:
         return (
@@ -962,39 +1087,58 @@ export default function DonatePage() {
           </div>
         </div>
 
-        <div className="mb-12 bg-white rounded-xl p-6 shadow-sm">
-          <div className="flex items-center justify-between max-w-3xl mx-auto">
-            {STEPS.map((step, index) => (
-              <div key={step.title} className="flex items-center">
-                <div className={`
-                  flex flex-col items-center
-                  ${index <= currentStep ? 'text-purple-600' : 'text-gray-400'}
-                `}>
-                  <div className={`
-                    w-12 h-12 rounded-full flex items-center justify-center
-                    transition-all duration-300
-                    ${index < currentStep ? 'bg-purple-100 text-purple-600' : 
-                      index === currentStep ? 'bg-purple-600 text-white ring-4 ring-purple-100' : 
-                      'bg-gray-100'}
-                  `}>
+        <div className="mb-12">
+          <div className="relative">
+            <div className="absolute top-1/2 left-4 right-4 md:left-0 md:right-0 h-1 bg-gray-200 -translate-y-1/2" />
+            <div 
+              className="absolute top-1/2 left-4 md:left-0 h-1 bg-gradient-to-r from-purple-500 to-pink-500 -translate-y-1/2 transition-all duration-500" 
+              style={{ width: `${(currentStep / (STEPS.length - 1)) * 100}%` }} 
+            />
+            
+            <div className="relative flex justify-between max-w-4xl mx-auto px-4 md:px-0">
+              {STEPS.map((step, index) => (
+                <div 
+                  key={step.title} 
+                  className={cn(
+                    "flex flex-col items-center relative min-w-[100px]",
+                    index <= currentStep ? "text-purple-600" : "text-gray-400",
+                    index < currentStep && "cursor-pointer"
+                  )}
+                  onClick={() => {
+                    if (index < currentStep) {
+                      setCurrentStep(index)
+                    }
+                  }}
+                >
+                  <div className={cn(
+                    "w-10 h-10 md:w-14 md:h-14 rounded-full flex items-center justify-center transition-all duration-300 relative mb-8",
+                    index < currentStep ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white" : 
+                    index === currentStep ? "bg-white border-4 border-purple-500 text-purple-600" : 
+                    "bg-white border-4 border-gray-200 text-gray-400 group-hover:border-gray-300"
+                  )}>
                     {index < currentStep ? (
-                      <CheckCircle className="w-6 h-6" />
+                      <CheckCircle className="w-5 h-5 md:w-6 md:h-6" />
                     ) : (
-                      <span className="font-semibold">{index + 1}</span>
+                      <>
+                        <span className="font-semibold text-base md:text-lg">{index + 1}</span>
+                        {index === currentStep && (
+                          <div className="absolute -top-1 -right-1 -bottom-1 -left-1 rounded-full border-4 border-purple-200 animate-pulse" />
+                        )}
+                      </>
                     )}
                   </div>
-                  <span className="text-sm mt-2 font-medium">{step.title}</span>
-                  <span className="text-xs text-gray-500 mt-0.5 max-w-[120px] text-center">{step.description}</span>
+                  
+                  <div className={cn(
+                    "flex flex-col items-center text-center transition-all duration-300",
+                    "w-32",
+                    index <= currentStep ? "opacity-100" : "opacity-60"
+                  )}>
+                    <span className="font-semibold text-xs md:text-sm mb-1">{step.title}</span>
+                    <span className="text-[10px] md:text-xs text-gray-500 leading-tight">{step.description}</span>
+                  </div>
                 </div>
-                {index < STEPS.length - 1 && (
-                  <div className={`
-                    w-24 h-1 mx-4
-                    transition-all duration-300
-                    ${index < currentStep ? 'bg-purple-400' : 'bg-gray-200'}
-                  `} />
-                )}
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
 
