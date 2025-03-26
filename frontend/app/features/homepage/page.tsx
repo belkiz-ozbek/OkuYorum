@@ -132,7 +132,7 @@ export default function HomePage() {
       <header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-sm shadow-sm">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center">
 
-          <Link className="flex items-center justify-center" href="/auth/homepage">
+          <Link className="flex items-center justify-center" href="/features/homepage">
             <BookOpen className="h-6 w-6 text-purple-600" />
             <span className="ml-2 text-lg font-semibold">OkuYorum</span>
           </Link>
@@ -533,7 +533,7 @@ export default function HomePage() {
               <h3 className="font-semibold mb-4">Hızlı Bağlantılar</h3>
               <ul className="space-y-2">
                 <li>
-                  <Link href="/auth/homepage" className="text-sm text-gray-600 hover:text-purple-600">
+                  <Link href="/features/homepage" className="text-sm text-gray-600 hover:text-purple-600">
                     Ana Sayfa
                   </Link>
                 </li>
