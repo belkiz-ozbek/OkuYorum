@@ -6,7 +6,9 @@ import { BookOpen, Heart, MessageCircle, Share2, User, Search, Star, BookmarkPlu
 import { Button } from "@/components/ui/form/button"
 import { Input } from "@/components/ui/form/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/layout/tabs"
-import { Card, CardContent } from "@/components/ui/layout/card"
+import { Card, CardContent } from "@/components/ui/layout/Card"
+import { Users,Library, Compass } from "lucide-react"
+import { SearchForm } from "@/components/ui/form/search-form"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/layout/avatar"
 import { Badge } from "@/components/ui/layout/badge"
 
@@ -170,29 +172,51 @@ export default function DiscoverPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-purple-100">
-      <header className="bg-white shadow-sm sticky top-0 z-10">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
-          <Link href="/auth/homepage" className="flex items-center">
+<header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-sm shadow-sm">
+        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center">
+
+          <Link className="flex items-center justify-center" href="/features/homepage">
             <BookOpen className="h-6 w-6 text-purple-600" />
-            <span className="ml-2 text-lg font-semibold text-gray-900">OkuYorum</span>
+            <span className="ml-2 text-lg font-semibold">OkuYorum</span>
           </Link>
-          <div className="flex items-center space-x-4">
-            <div className="relative">
-              <Input
-                type="search"
-                placeholder="Ara..."
-                className="pl-10 pr-4 py-2 rounded-full bg-gray-100 focus:bg-white w-64"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-            </div>
-            <Button asChild variant="ghost" size="icon">
-              <Link href="/profile">
-                <User className="h-5 w-5" />
-              </Link>
-            </Button>
-          </div>
+          <nav className="ml-auto flex items-center gap-4">
+            <Link
+              className="text-sm font-medium text-gray-600 hover:text-purple-600 flex items-center"
+              href="/features/profile"
+            >
+              <User className="w-4 h-4 mr-1" />
+              Profil
+            </Link>
+            <Link
+              className="text-sm font-medium text-gray-600 hover:text-purple-600 flex items-center"
+              href="/features/library"
+            >
+              <Library className="w-4 h-4 mr-1" />
+              Kitaplığım
+            </Link>
+            <Link
+              className="text-sm font-medium text-gray-600 hover:text-purple-600 flex items-center"
+              href="/features/discover"
+            >
+              <Compass className="w-4 h-4 mr-1" />
+              Keşfet
+            </Link>
+            <Link
+              className="text-sm font-medium text-gray-600 hover:text-purple-600 flex items-center"
+              href="/features/kiraathane"
+            >
+              <Users className="w-4 h-4 mr-1" />
+              Millet Kıraathaneleri
+            </Link>
+            <Link
+              className="text-sm font-medium text-gray-600 hover:text-purple-600 flex items-center"
+              href="/features/donate"
+            >
+              <Heart className="w-4 h-4 mr-1" />
+              Bağış Yap
+            </Link>
+            <SearchForm />
+          </nav>
         </div>
       </header>
 
