@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="300" height="300" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+  <!-- Kitap Gölgesi -->
+  <path d="M50 80 C50 60, 250 60, 250 80 L250 220 C250 200, 50 200, 50 220 Z" fill="#8D6E63" opacity="0.2"/>
+  
+  <!-- Ana Kitap -->
+  <path d="M50 70 C50 50, 250 50, 250 70 L250 210 C250 190, 50 190, 50 210 Z" fill="#5D4037"/>
+  
+  <!-- Kitap Sayfaları -->
+  <path d="M60 65 C60 45, 240 45, 240 65 L240 205 C240 185, 60 185, 60 205 Z" fill="#F9F5EB"/>
+  
+  <!-- Yıldız -->
+  <path d="M150 40 L157 62 L180 62 L161 76 L169 98 L150 84 L131 98 L139 76 L120 62 L143 62 Z" fill="#FFD700"/>
+  
+  <!-- Okuyorum Yazısı -->
+  <text x="150" y="250" font-family="Segoe UI, Arial" font-size="32" font-weight="bold" text-anchor="middle" fill="#5D4037">Okuyorum</text>
+  
+  <!-- Slogan -->
+  <text x="150" y="275" font-family="Segoe UI, Arial" font-size="14" font-style="italic" text-anchor="middle" fill="#8D6E63">Kitaplarla dolu bir dünya...</text>
+</svg> 

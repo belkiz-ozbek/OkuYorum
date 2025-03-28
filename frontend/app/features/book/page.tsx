@@ -1,7 +1,8 @@
 "use client"
 
-import { BookOpen, Quote, Calendar, BookText, Heart, Share2, Bookmark, Star, Users, Eye, MessageSquare, ChevronRight, Sparkles, Clock, Award } from 'lucide-react'
+import { BookOpen, Quote, Calendar, BookText, Heart, Share2, Bookmark, Users, MessageSquare, ChevronRight, Sparkles, Clock, Award } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useEffect, useState } from 'react'
 import { use } from 'react'
 import { Button } from "@/components/ui/form/button"
@@ -144,9 +145,11 @@ export default function BookPage({ params }: PageProps) {
                                 {/* Kitap Görseli - Daha yumuşak gölgeler */}
                                 <div className="relative group">
                                     {book.imageUrl ? (
-                                        <img
+                                        <Image
                                             src={book.imageUrl}
                                             alt={book.title}
+                                            width={256}
+                                            height={384}
                                             className="w-64 h-96 object-cover rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)]
                         transform group-hover:scale-[1.02] transition-all duration-500"
                                         />

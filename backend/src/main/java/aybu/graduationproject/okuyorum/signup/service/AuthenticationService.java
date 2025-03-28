@@ -28,6 +28,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.BadCredentialsException;
 import java.util.Optional;
+import aybu.graduationproject.okuyorum.common.service.EmailService;
 
 @Service
 public class AuthenticationService {

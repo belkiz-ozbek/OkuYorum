@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/form/input"
 import { Button } from "@/components/ui/form/button"
 import { Search } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 
 type QuickSearchResult = {
     id: number;
@@ -104,11 +105,15 @@ export function SearchForm() {
                                 onClick={() => setShowResults(false)}
                             >
                                 {result.imageUrl && (
-                                    <img
-                                        src={result.imageUrl}
-                                        alt={result.title}
-                                        className="w-12 h-16 object-cover rounded"
-                                    />
+                                    <div className="relative w-12 h-16 flex-shrink-0">
+                                        <Image
+                                            src={result.imageUrl}
+                                            alt={result.title}
+                                            fill
+                                            sizes="48px"
+                                            className="object-cover rounded"
+                                        />
+                                    </div>
                                 )}
                                 <div className="flex-1 min-w-0">
                                     <p className="text-sm font-medium text-gray-900 truncate">{result.title}</p>

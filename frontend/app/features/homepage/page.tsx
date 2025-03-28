@@ -58,9 +58,8 @@ const FeaturedBook = ({ title, author, coverUrl }: FeaturedBookProps) => (
     <Image
       src={coverUrl || "/placeholder.svg"}
       alt={title}
-      layout="fill"
-      objectFit="cover"
-      className="rounded-lg shadow-lg"
+      fill
+      className="rounded-lg shadow-lg object-cover"
     />
     <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4 rounded-lg">
       <h3 className="text-white font-semibold">{title}</h3>
@@ -511,14 +510,14 @@ export default function HomePage() {
           <div className="grid md:grid-cols-2 gap-8">
             <div className="bg-white p-6 rounded-lg shadow-md">
               <h3 className="text-xl font-semibold mb-2">Yaklaşan Etkinlik</h3>
-              <p className="text-gray-600 mb-4">"Veba" - Albert Camus</p>
+              <p className="text-gray-600 mb-4">&quot;Veba&quot; - Albert Camus</p>
               <p className="text-sm text-gray-500">Tarih: 20 Ekim 2024, 19:00</p>
               <p className="text-sm text-gray-500">Yer: Çankaya Millet Kıraathanesi</p>
               <Button className="mt-4">Katıl</Button>
             </div>
             <div className="bg-white p-6 rounded-lg shadow-md">
               <h3 className="text-xl font-semibold mb-2">Popüler Tartışma</h3>
-              <p className="text-gray-600 mb-4">"Yüzyıllık Yalnızlık" üzerine düşünceler</p>
+              <p className="text-gray-600 mb-4">&quot;Yüzyıllık Yalnızlık&quot; üzerine düşünceler</p>
               <p className="text-sm text-gray-500">32 katılımcı, 78 yorum</p>
               <Button className="mt-4">Tartışmaya Katıl</Button>
             </div>
