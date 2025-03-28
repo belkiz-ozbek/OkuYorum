@@ -3,7 +3,7 @@
 import type React from "react"
 import { useState, useEffect } from "react"
 import { MapPin } from "lucide-react"
-import { Button } from "./button"
+import {Button} from "@/components/ui/form/button";
 
 type Location = {
   lat: number

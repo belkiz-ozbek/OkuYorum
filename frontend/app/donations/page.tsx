@@ -1,13 +1,11 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useToast } from "@/components/ui/use-toast"
+import { useToast } from "@/components/ui/feedback/use-toast"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/Card"
 import { BookOpen, MapPin, User, Package, Calendar, Search } from "lucide-react"
 import Link from "next/link"
-import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Input } from "@/components/ui/input"
 import {
   Select,
   SelectContent,
@@ -15,6 +13,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import {Button} from "@/components/ui/form/button";
+import {Input} from "@/components/ui/form/input";
 
 type Donation = {
   id?: number
@@ -89,6 +89,7 @@ export default function DonationsPage() {
         console.log("Fetched donations:", data)
         
         // Her bağışın ID'sinin olduğundan emin ol
+        //ts-ignore
         const validatedDonations = data.map((donation: any, index: number) => {
           if (!donation.id) {
             console.warn(`Donation at index ${index} has no ID, using index+1 as fallback`)

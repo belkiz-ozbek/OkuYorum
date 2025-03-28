@@ -165,7 +165,7 @@ export default function HomePage() {
             </Link>
             <Link
               className="text-sm font-medium text-gray-600 hover:text-purple-600 flex items-center"
-              href="/features/donate"
+              href="/donate"
             >
               <Heart className="w-4 h-4 mr-1" />
               Bağış Yap

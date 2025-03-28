@@ -2,17 +2,17 @@
 
 import { CheckCircle, BookOpen, ArrowRight, Heart, Share2, User, Package, Calendar, MapPin, Facebook, Twitter, Linkedin, Mail, Copy, Check, Download, Award, X } from "lucide-react"
 import Link from "next/link"
-import { Button } from "@/components/ui/button"
 import { motion } from "framer-motion"
 import confetti from 'canvas-confetti'
 import { useEffect, useState, useRef, useCallback } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card"
 import { Spinner } from "@/components/ui/spinner"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { useToast } from "@/components/ui/use-toast"
+import { useToast } from "@/components/ui/feedback/use-toast"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog"
-import QRCode from 'qrcode'
 import Image from 'next/image'
+import {Button} from "@/components/ui/form/button";
+import QRCode from 'qrcode';
 
 type DonationData = {
   bookTitle: string;

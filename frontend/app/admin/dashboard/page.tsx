@@ -5,11 +5,11 @@ import { useRouter } from "next/navigation"
 import { UserService } from "@/services/UserService"
 import { DonationService } from "@/services/DonationService"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card"
-import { useToast } from "@/components/ui/use-toast"
+import { useToast } from "@/components/ui/feedback/use-toast"
 import { BookOpen, Users, Package, AlertCircle, ChevronRight, BarChart3, Settings, BookMarked } from "lucide-react"
 import Link from "next/link"
+import {Button} from "@/components/ui/form/button";
 
 export default function AdminDashboardPage() {
   const router = useRouter()

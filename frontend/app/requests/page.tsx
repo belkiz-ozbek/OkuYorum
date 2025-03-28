@@ -1,16 +1,16 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import {useEffect, useState} from 'react';
 import Link from 'next/link';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { DonationRequest, RequestType, requestTypeMap, requestStatusMap } from '@/types/donationRequest';
-import { RequestService } from '@/services/requestService';
-import { Badge } from '@/components/ui/badge';
-import { School, Library, User, BookOpen, MapPin, Calendar } from 'lucide-react';
-import { format } from 'date-fns';
-import { tr } from 'date-fns/locale';
+import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/Card';
+import {Button} from '@/components/ui/form/button';
+import {Tabs, TabsList, TabsTrigger} from '@/components/ui/tabs';
+import {DonationRequest, requestStatusMap, RequestType, requestTypeMap} from '@/types/donationRequest';
+import {RequestService} from '@/services/requestService';
+import {Badge} from '@/components/ui/badge';
+import {BookOpen, Calendar, Library, MapPin, School, User} from 'lucide-react';
+import {format} from 'date-fns';
+import {tr} from 'date-fns/locale';
 
 export default function RequestsPage() {
     const [requests, setRequests] = useState<DonationRequest[]>([]);
@@ -37,11 +37,11 @@ export default function RequestsPage() {
     const getRequestIcon = (type: RequestType) => {
         switch (type) {
             case 'SCHOOLS':
-                return <School className="h-5 w-5" />;
+                return <School className="h-5 w-5"/>;
             case 'LIBRARIES':
-                return <Library className="h-5 w-5" />;
+                return <Library className="h-5 w-5"/>;
             default:
-                return <User className="h-5 w-5" />;
+                return <User className="h-5 w-5"/>;
         }
     };
 
@@ -64,12 +64,12 @@ export default function RequestsPage() {
             <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as typeof activeTab)}>
                 <TabsList className="mb-4">
                     <TabsTrigger value="all" className="flex items-center gap-2">
-                        <BookOpen className="h-4 w-4" />
+                        <BookOpen className="h-4 w-4"/>
                         Tümü
                     </TabsTrigger>
                     {Object.entries(requestTypeMap).map(([value, label]) => (
-                        <TabsTrigger 
-                            key={value} 
+                        <TabsTrigger
+                            key={value}
                             value={value}
                             className="flex items-center gap-2"
                         >
@@ -105,26 +105,26 @@ export default function RequestsPage() {
                                 <CardContent>
                                     <div className="space-y-2 text-sm">
                                         <div className="flex items-center text-muted-foreground">
-                                            <User className="h-4 w-4 mr-2" />
+                                            <User className="h-4 w-4 mr-2"/>
                                             <span>{request.requesterName}</span>
                                         </div>
-                                        
+
                                         {request.address && (
                                             <div className="flex items-center text-muted-foreground">
-                                                <MapPin className="h-4 w-4 mr-2" />
+                                                <MapPin className="h-4 w-4 mr-2"/>
                                                 <span>{request.address}</span>
                                             </div>
                                         )}
-                                        
+
                                         {request.createdAt && (
                                             <div className="flex items-center text-muted-foreground">
-                                                <Calendar className="h-4 w-4 mr-2" />
+                                                <Calendar className="h-4 w-4 mr-2"/>
                                                 <span>
-                                                    {format(new Date(request.createdAt), 'PPP', { locale: tr })}
+                                                    {format(new Date(request.createdAt), 'PPP', {locale: tr})}
                                                 </span>
                                             </div>
                                         )}
-                                        
+
                                         <div className="mt-4">
                                             <Badge variant="outline">
                                                 {request.quantity} adet
@@ -144,9 +144,9 @@ export default function RequestsPage() {
 
                 {!isLoading && requests.length === 0 && (
                     <div className="text-center py-12">
-                        <BookOpen className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                        <BookOpen className="mx-auto h-12 w-12 text-gray-400 mb-4"/>
                         <h3 className="text-xl font-semibold text-gray-600 mb-2">
-                            {activeTab === 'all' 
+                            {activeTab === 'all'
                                 ? 'Henüz bağış talebi bulunmuyor'
                                 : `${requestTypeMap[activeTab]} türünde talep bulunmuyor`}
                         </h3>

@@ -1,30 +1,44 @@
 "use client"
 
 import type React from "react"
-
-import { useState, useEffect } from "react"
+import {useEffect, useState} from "react"
 import Link from "next/link"
 import {
-  BookOpen, ArrowRight, BookHeart, CheckCircle, Gift,
-  School, Library, User, ChevronRight, ChevronLeft, BookMarked,
-  Loader2, Check, ChevronsUpDown, Home, Info, Mail, Users
+  ArrowRight,
+  BookHeart,
+  BookMarked,
+  BookOpen,
+  Check,
+  CheckCircle,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsUpDown,
+  Gift,
+  Home,
+  Info,
+  Library,
+  Loader2,
+  Mail,
+  School,
+  User,
+  Users
 } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { useToast } from "@/components/ui/use-toast"
-import { Toaster } from "@/components/ui/toaster"
-import { MapSelector } from "@/components/ui/MapSelector"
-import { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent } from "@/components/ui/Card"
-import { ConfirmationModal } from "@/components/ui/ConfirmationModal"
-import { useRouter } from "next/navigation"
-import { FadeIn } from "@/components/ui/fade-in"
-import { useFormValidation } from "@/hooks/useFormValidation"
-import { Spinner } from "@/components/ui/spinner"
-import { cn } from "@/lib/utils"
-import { useLocalStorage } from '@/hooks/useLocalStorage'
-import { BookSearch } from "@/components/ui/book-search"
-import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover"
+import {useToast} from "@/components/ui/feedback/use-toast"
+import {MapSelector} from "@/components/ui/MapSelector"
+import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/Card"
+import {ConfirmationModal} from "@/components/ui/ConfirmationModal"
+import {useRouter} from "next/navigation"
+import {FadeIn} from "@/components/ui/fade-in"
+import {useFormValidation} from "@/hooks/useFormValidation"
+import {Spinner} from "@/components/ui/spinner"
+import {cn} from "@/lib/utils"
+import {useLocalStorage} from '@/hooks/useLocalStorage'
+import {BookSearch} from "@/components/ui/book-search"
+import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover"
+import {Toaster} from "@/components/ui/feedback/toaster";
+import {Button} from "@/components/ui/form/button";
+import {Label} from "@/components/ui/form/label";
+import {Input} from "@/components/ui/form/input";
 
 type DonationType = "schools" | "libraries" | "individual"
 type BookCondition = "new" | "likeNew" | "used" | "old"

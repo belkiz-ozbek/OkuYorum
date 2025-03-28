@@ -4,11 +4,11 @@ import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { DonationService } from "@/services/DonationService"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Button } from "@/components/ui/button"
 import { ArrowLeft } from "lucide-react"
 import Link from "next/link"
 import DonationInfo, { Donation } from "@/components/donations/DonationInfo"
-import { useToast } from "@/components/ui/use-toast"
+import {useToast} from "@/components/ui/feedback/use-toast";
+import {Button} from "@/components/ui/form/button";
 
 export default function DonationDetailPage() {
   const params = useParams()
