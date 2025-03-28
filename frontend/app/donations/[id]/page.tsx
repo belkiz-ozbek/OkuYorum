@@ -50,6 +50,7 @@ export default function DonationDetailPage() {
         
         console.log("Donation data received:", response.data)
         setDonation(response.data)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (err: any) {
         console.error("Error fetching donation:", err || "Unknown error")
         

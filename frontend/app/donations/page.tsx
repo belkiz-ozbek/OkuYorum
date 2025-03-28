@@ -89,7 +89,7 @@ export default function DonationsPage() {
         console.log("Fetched donations:", data)
         
         // Her bağışın ID'sinin olduğundan emin ol
-        //ts-ignore
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const validatedDonations = data.map((donation: any, index: number) => {
           if (!donation.id) {
             console.warn(`Donation at index ${index} has no ID, using index+1 as fallback`)
