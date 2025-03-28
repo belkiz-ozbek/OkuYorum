@@ -49,7 +49,7 @@ export default function NotFound() {
               asChild
               className="bg-gradient-to-r from-purple-600 to-rose-500 hover:from-purple-700 hover:to-rose-600 text-white rounded-xl font-medium transition-all duration-300 px-8 py-6 text-lg group"
             >
-              <Link href="/auth/homepage">
+              <Link href="/features/homepage">
                 Ana Sayfaya Dön{" "}
                 <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform duration-300" />
               </Link>
