@@ -130,7 +130,8 @@ export default function HomePage() {
       {/* Navigation */}
       <header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-sm shadow-sm">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center">
-          <Link className="flex items-center justify-center" href="/auth/homepage">
+
+          <Link className="flex items-center justify-center" href="/features/homepage">
             <BookOpen className="h-6 w-6 text-purple-600" />
             <span className="ml-2 text-lg font-semibold">OkuYorum</span>
           </Link>
@@ -186,15 +187,19 @@ export default function HomePage() {
               Kişisel kütüphanenizi yönetin, kitap bağışlayın ve topluluk tartışmalarına katılın. OkuYorum ile kitap
               paylaşım deneyiminizi zenginleştirin.
             </p>
+
             <div className="flex gap-4">
+
               <Button asChild className="bg-purple-600 hover:bg-purple-700 text-white rounded-full px-8 py-6 text-lg">
                 <Link href="/auth/signup">
                   Hemen Başlayın <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
+
               <Button variant="outline" className="rounded-full px-8 py-6 text-lg">
                 Daha Fazla Bilgi
               </Button>
+
             </div>
           </div>
 
@@ -208,7 +213,7 @@ export default function HomePage() {
                 </div>
               </div>
 
-              {/* Animated orbital paths - daha belirgin */}
+              {/* Animated orbital paths */}
               {[140, 180, 220, 260, 300].map((size, index) => (
                 <motion.div
                   key={`orbit-${index}`}
@@ -333,7 +338,9 @@ export default function HomePage() {
           <Carousel className="w-full max-w-5xl mx-auto">
             <CarouselContent>
               {[
-                { title: "1984", author: "George Orwell", coverUrl: "/placeholder.svg?height=300&width=200" },
+                { title: "1984", 
+                  author: "George Orwell", 
+                  coverUrl: "/placeholder.svg?height=300&width=200" },
                 {
                   title: "Suç ve Ceza",
                   author: "Fyodor Dostoyevski",
@@ -349,7 +356,10 @@ export default function HomePage() {
                   author: "Antoine de Saint-Exupéry",
                   coverUrl: "/placeholder.svg?height=300&width=200",
                 },
-                { title: "Sefiller", author: "Victor Hugo", coverUrl: "/placeholder.svg?height=300&width=200" },
+                { 
+                  title: "Sefiller", 
+                  author: "Victor Hugo", 
+                  coverUrl: "/placeholder.svg?height=300&width=200" },
               ].map((book, index) => (
                 <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
                   <div className="p-1">
@@ -548,7 +558,7 @@ export default function HomePage() {
               <h3 className="font-semibold mb-4">Hızlı Bağlantılar</h3>
               <ul className="space-y-2">
                 <li>
-                  <Link href="/auth/homepage" className="text-sm text-gray-600 hover:text-purple-600">
+                  <Link href="/features/homepage" className="text-sm text-gray-600 hover:text-purple-600">
                     Ana Sayfa
                   </Link>
                 </li>
