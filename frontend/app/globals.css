@@ -1,21 +1,151 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
+  --background: #f5f3ff;
   --foreground: #171717;
+  --card: #ffffff;
+  --card-foreground: #171717;
+  --popover: #ffffff;
+  --popover-foreground: #171717;
+  --primary: #8E2DE2;
+  --primary-gradient: linear-gradient(135deg, #8E2DE2, #4A00E0);
+  --primary-foreground: #ffffff;
+  --secondary: #f3f4f6;
+  --secondary-foreground: #171717;
+  --muted: #f3f4f6;
+  --muted-foreground: #6b7280;
+  --accent: #f3f4f6;
+  --accent-foreground: #171717;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: #e5e7eb;
+  --input: #e5e7eb;
+  --ring: #8E2DE2;
+  --radius: 0.5rem;
+  --navbar-bg: rgba(245, 243, 255, 0.8);
+  --navbar-border: rgba(231, 231, 231, 0.3);
+  --navbar-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  --navbar-blur: 12px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+[data-theme="dark"] {
+  --background: #0f0a1f;
+  --foreground: #fafafa;
+  --card: #1a1625;
+  --card-foreground: #fafafa;
+  --popover: #1a1625;
+  --popover-foreground: #fafafa;
+  --primary: #8E2DE2;
+  --primary-gradient: linear-gradient(135deg, #8E2DE2, #4A00E0);
+  --primary-foreground: #fafafa;
+  --secondary: #27272a;
+  --secondary-foreground: #fafafa;
+  --muted: #27272a;
+  --muted-foreground: #a1a1aa;
+  --accent: #27272a;
+  --accent-foreground: #fafafa;
+  --destructive: #7f1d1d;
+  --destructive-foreground: #fafafa;
+  --border: #333333;
+  --input: #222222;
+  --ring: #8E2DE2;
+  --navbar-bg: rgba(26, 22, 37, 0.8);
+  --navbar-border: rgba(51, 51, 51, 0.3);
+  --navbar-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Poppins', sans-serif;
   }
 }
 
-body {
+/* Smooth Transitions */
+* {
+  transition: all 0.3s ease-in-out;
+}
+
+/* Typography */
+body, h1, h2, h3, h4, h5, h6 {
+  font-family: 'Poppins', sans-serif;
+  letter-spacing: -0.02em;
+}
+
+p {
+  line-height: 1.8;
   color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Button Styles */
+.btn {
+  @apply transition-all duration-300 ease-in-out;
+}
+
+.btn:hover {
+  @apply transform scale-105;
+}
+
+/* Navbar Styles */
+.navbar {
+  @apply backdrop-blur transition-all duration-300;
+  background: var(--navbar-bg);
+  box-shadow: var(--navbar-shadow);
+  backdrop-filter: blur(var(--navbar-blur));
+  border-bottom: 1px solid var(--navbar-border);
+}
+
+.navbar-link {
+  @apply flex items-center gap-2 px-3 py-2 rounded-lg text-muted-foreground hover:text-primary transition-all duration-300;
+}
+
+.navbar-link:hover {
+  @apply bg-muted bg-opacity-50 scale-105;
+}
+
+.navbar-icon {
+  @apply transition-all duration-300 opacity-80 group-hover:opacity-100;
+}
+
+/* Dark mode adjustments */
+[data-theme="dark"] .navbar-link:hover {
+  @apply bg-muted bg-opacity-20;
+}
+
+[data-theme="dark"] .navbar-icon {
+  @apply brightness-110;
+}
+
+/* Icon Animations */
+.icon-hover {
+  @apply transition-all duration-300 ease-in-out hover:scale-105 hover:drop-shadow-lg;
+}
+
+/* Dark Mode Icon Adjustments */
+[data-theme="dark"] .icon {
+  @apply opacity-90 hover:opacity-100;
+}
+
+/* Hero Section Animation */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeInUp {
+  animation: fadeInUp 0.6s ease-out forwards;
 }

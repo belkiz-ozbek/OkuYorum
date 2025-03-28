@@ -14,7 +14,11 @@ type QuickSearchResult = {
     imageUrl?: string;
 }
 
-export function SearchForm() {
+interface SearchFormProps {
+    isScrolled?: boolean;
+}
+
+export function SearchForm({ isScrolled = false }: SearchFormProps) {
     const [searchQuery, setSearchQuery] = useState('')
     const [quickResults, setQuickResults] = useState<QuickSearchResult[]>([])
     const [showResults, setShowResults] = useState(false)
@@ -78,16 +82,22 @@ export function SearchForm() {
                     <Input
                         type="search"
                         placeholder="Kitap ara..."
-                        className="w-96 pl-10 pr-4 py-2 rounded-full bg-white shadow-md text-sm"
+                        className={`transition-all duration-300 pl-10 pr-4 py-2 rounded-full bg-white shadow-md ${
+                            isScrolled ? 'w-72 text-xs' : 'w-96 text-sm'
+                        }`}
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         onFocus={() => setShowResults(true)}
                     />
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Search className={`absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 transition-all duration-300 ${
+                        isScrolled ? 'h-3.5 w-3.5' : 'h-4 w-4'
+                    }`} />
                 </div>
                 <Button
                     type="submit"
-                    className="ml-2 rounded-full bg-purple-600 hover:bg-purple-700 text-white"
+                    className={`ml-2 rounded-full bg-purple-600 hover:bg-purple-700 text-white transition-all duration-300 ${
+                        isScrolled ? 'text-xs py-1 px-3' : 'text-sm py-2 px-4'
+                    }`}
                     size="sm"
                 >
                     Ara
@@ -95,7 +105,9 @@ export function SearchForm() {
             </form>
 
             {showResults && quickResults.length > 0 && (
-                <div className="absolute z-50 w-96 mt-2 bg-white rounded-lg shadow-lg border border-gray-200 max-h-[80vh] overflow-y-auto">
+                <div className={`absolute z-50 mt-2 bg-white rounded-lg shadow-lg border border-gray-200 max-h-[80vh] overflow-y-auto transition-all duration-300 ${
+                    isScrolled ? 'w-72' : 'w-96'
+                }`}>
                     <div className="grid grid-cols-1 gap-2 p-2">
                         {quickResults.map((result) => (
                             <Link
@@ -105,19 +117,25 @@ export function SearchForm() {
                                 onClick={() => setShowResults(false)}
                             >
                                 {result.imageUrl && (
-                                    <div className="relative w-12 h-16 flex-shrink-0">
+                                    <div className={`relative flex-shrink-0 transition-all duration-300 ${
+                                        isScrolled ? 'w-10 h-14' : 'w-12 h-16'
+                                    }`}>
                                         <Image
                                             src={result.imageUrl}
                                             alt={result.title}
                                             fill
-                                            sizes="48px"
+                                            sizes={isScrolled ? "40px" : "48px"}
                                             className="object-cover rounded"
                                         />
                                     </div>
                                 )}
                                 <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-medium text-gray-900 truncate">{result.title}</p>
-                                    <p className="text-xs text-gray-500 truncate">{result.author}</p>
+                                    <p className={`font-medium text-gray-900 truncate transition-all duration-300 ${
+                                        isScrolled ? 'text-xs' : 'text-sm'
+                                    }`}>{result.title}</p>
+                                    <p className={`text-gray-500 truncate transition-all duration-300 ${
+                                        isScrolled ? 'text-[10px]' : 'text-xs'
+                                    }`}>{result.author}</p>
                                 </div>
                             </Link>
                         ))}
