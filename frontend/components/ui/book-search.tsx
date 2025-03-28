@@ -3,7 +3,6 @@
 import * as React from "react"
 import { Check, ChevronsUpDown, Search, Book, User } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
 import Image from 'next/image'
 import {
   Command,
@@ -17,6 +16,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
+import {Button} from "@/components/ui/form/button";
 
 type BookInfo = {
   title: string

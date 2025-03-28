@@ -3,13 +3,13 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { DonationRequest, requestTypeMap, requestStatusMap } from '@/types/donationRequest';
 import { RequestService } from '@/services/requestService';
 import { School, Library, User, BookOpen, MapPin, Calendar } from 'lucide-react';
 import { format } from 'date-fns';
 import { tr } from 'date-fns/locale';
+import {Button} from "@/components/ui/form/button";
 
 export default function MyRequestsPage() {
     const [requests, setRequests] = useState<DonationRequest[]>([]);

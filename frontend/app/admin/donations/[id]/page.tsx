@@ -4,17 +4,17 @@ import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { DonationService } from "@/services/DonationService"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Button } from "@/components/ui/button"
 import { ArrowLeft, Edit, Trash, Send, CheckCircle, Loader2 } from "lucide-react"
 import Link from "next/link"
 import DonationInfo, { Donation, DonationStatus } from "@/components/donations/DonationInfo"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card"
-import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { useToast } from "@/components/ui/use-toast"
+import { useToast } from "@/components/ui/feedback/use-toast"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { UserService } from "@/services/UserService"
+import {Button} from "@/components/ui/form/button";
+import {Label} from "@radix-ui/react-label";
+import {Input} from "@/components/ui/form/input";
 
 const statusGroups = [
   {
@@ -80,6 +80,7 @@ export default function AdminDonationDetailPage() {
           })
           router.push('/donations')
         }
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (err: any) {
         console.error("Admin kontrolü yapılırken hata oluştu:", err || "Unknown error")
         toast({
@@ -138,6 +139,7 @@ export default function AdminDonationDetailPage() {
         if (donationData.deliveryMethod) setDeliveryMethod(donationData.deliveryMethod)
         if (donationData.estimatedDeliveryDate) setEstimatedDeliveryDate(donationData.estimatedDeliveryDate.split('T')[0])
         if (donationData.handlerName) setHandlerName(donationData.handlerName)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (err: any) {
         console.error("Error fetching donation:", err || "Unknown error")
         
@@ -204,6 +206,7 @@ export default function AdminDonationDetailPage() {
       // Bağış bilgilerini yeniden yükle
       const response = await DonationService.getDonationById(donation.id!)
       setDonation(response.data)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       console.error("Error updating donation status:", err || "Unknown error")
       toast({
@@ -242,6 +245,7 @@ export default function AdminDonationDetailPage() {
       // Bağış bilgilerini yeniden yükle
       const response = await DonationService.getDonationById(donation.id!)
       setDonation(response.data)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       console.error("Error updating tracking info:", err || "Unknown error")
       toast({
@@ -267,6 +271,7 @@ export default function AdminDonationDetailPage() {
       })
       
       router.push('/admin/donations')
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       console.error("Error deleting donation:", err || "Unknown error")
       toast({
