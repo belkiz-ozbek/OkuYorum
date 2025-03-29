@@ -8,7 +8,17 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Progress } from "@/components/ui/progress"
-import {Bookmark, BookMarked, BookOpen, CheckCircle2, Eye, EyeOff, Mail, User, UserCircle} from "lucide-react";
+import { Bookmark, BookMarked, BookOpen, CheckCircle2, Eye, EyeOff, Mail, User, UserCircle, Lock, ArrowRight } from "lucide-react"
+import { LucideIcon } from 'lucide-react'
+
+interface FormField {
+    icon: LucideIcon;
+    name: string;
+    label: string;
+    type: string;
+    placeholder: string;
+    delay: number;
+}
 
 // Email validasyon fonksiyonu
 const validateEmail = (email: string): boolean => {
@@ -126,7 +136,7 @@ export default function SignupPage() {
     setPasswordStrength(calculatePasswordStrength(e.target.value))
   }
 
-  const formFields = [
+  const formFields: FormField[] = [
     {
       icon: UserCircle,
       name: 'nameSurname',
@@ -273,41 +283,44 @@ export default function SignupPage() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
-                    className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-xl p-8 border border-purple-100/30"
+                    className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-xl p-8 border border-purple-100/30 hover:shadow-2xl transition-all duration-300"
                 >
                   <form onSubmit={handleSubmit} className="space-y-6">
-                    {/* eslint-disable-next-line @typescript-eslint/no-unused-vars */}
-                    {formFields.map((field, index) => (
+                    {formFields.map((field) => {
+                      const Icon = field.icon;
+                      return (
                         <motion.div
-                            key={field.name}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: field.delay }}
-                            className="space-y-2"
+                          key={field.name}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: field.delay }}
+                          className="space-y-2 group"
                         >
                           <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                            <Icon className="w-4 h-4 text-purple-500 group-hover:text-purple-600 transition-colors duration-200" />
                             {field.label}
                           </label>
                           <div className="relative">
                             <Input
-                                type={field.type === 'password' ? 
-                                  (field.name === 'password' ? (showPassword ? 'text' : 'password') : 
-                                   field.name === 'confirmPassword' ? (showConfirmPassword ? 'text' : 'password') : 
-                                   field.type) : 
-                                  field.type}
-                                name={field.name}
-                                value={formData[field.name as keyof typeof formData]}
-                                onChange={field.name === 'password' ? handlePasswordChange : (e) => setFormData(prev => ({ ...prev, [field.name]: e.target.value }))}
-                                placeholder={field.placeholder}
-                                className="w-full pl-10 pr-12 py-3 rounded-xl border-gray-200 focus:border-purple-500 focus:ring-purple-500 transition-all duration-200 placeholder:text-gray-400"
+                              type={field.type === 'password' ? 
+                                (field.name === 'password' ? (showPassword ? 'text' : 'password') : 
+                                field.name === 'confirmPassword' ? (showConfirmPassword ? 'text' : 'password') : 
+                                field.type) : 
+                                field.type}
+                              name={field.name}
+                              value={formData[field.name as keyof typeof formData]}
+                              onChange={field.name === 'password' ? handlePasswordChange : (e) => setFormData(prev => ({ ...prev, [field.name]: e.target.value }))}
+                              placeholder={field.placeholder}
+                              className="w-full pl-10 pr-12 py-3 rounded-xl border-gray-200 focus:border-purple-500 focus:ring-purple-500 transition-all duration-200 placeholder:text-gray-400 hover:border-purple-300"
                             />
+                            <Icon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 group-hover:text-purple-500 transition-colors duration-200" />
                             {field.type === 'password' && (
                               <button
                                 type="button"
                                 onClick={() => field.name === 'password' ? 
                                   setShowPassword(prev => !prev) : 
                                   setShowConfirmPassword(prev => !prev)}
-                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors duration-200"
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-purple-500 transition-colors duration-200"
                               >
                                 {field.name === 'password' ? 
                                   (showPassword ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />) :
@@ -324,31 +337,35 @@ export default function SignupPage() {
                             </div>
                           )}
                         </motion.div>
-                    ))}
+                      );
+                    })}
 
                     {error && (
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            className="text-red-500 text-sm bg-red-50 p-3 rounded-lg"
-                        >
-                          {error}
-                        </motion.div>
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="text-red-500 text-sm bg-red-50 p-3 rounded-lg"
+                      >
+                        {error}
+                      </motion.div>
                     )}
 
                     <Button
-                        type="submit"
-                        disabled={isLoading}
-                        className="w-full py-3 rounded-xl bg-gradient-to-r from-purple-600 to-rose-500 hover:from-purple-700 hover:to-rose-600 text-white font-medium shadow-lg shadow-purple-500/20 transition-all duration-200"
+                      type="submit"
+                      disabled={isLoading}
+                      className="w-full py-3 rounded-xl bg-gradient-to-r from-purple-600 to-rose-500 hover:from-purple-700 hover:to-rose-600 text-white font-medium shadow-lg shadow-purple-500/20 transition-all duration-200 hover:shadow-xl hover:shadow-purple-500/30 group"
                     >
                       {isLoading ? (
-                          <motion.div
-                              animate={{ rotate: 360 }}
-                              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                              className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
-                          />
+                        <motion.div
+                          animate={{ rotate: 360 }}
+                          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                          className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
+                        />
                       ) : (
-                          'Kayıt Ol'
+                        <span className="flex items-center justify-center gap-2">
+                          Kayıt Ol
+                          <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" />
+                        </span>
                       )}
                     </Button>
 

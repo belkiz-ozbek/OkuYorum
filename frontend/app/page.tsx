@@ -134,12 +134,10 @@ export default function LoginPage() {
         <div className="min-h-screen flex items-center justify-center bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-purple-50/80 via-rose-50/80 to-pink-50/80 relative overflow-hidden py-8">
             {/* Enhanced Background Elements */}
             <div className="absolute inset-0 w-full h-full opacity-30">
-                <div
-                    className="absolute w-[800px] h-[800px] rounded-full bg-purple-100/40 blur-3xl -top-40 -left-20 animate-pulse"/>
-                <div
-                    className="absolute w-[600px] h-[600px] rounded-full bg-rose-100/30 blur-3xl bottom-0 right-0 animate-pulse delay-700"/>
-                <div
-                    className="absolute w-[300px] h-[300px] rounded-full bg-pink-100/30 blur-3xl top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 animate-pulse delay-1000"/>
+                <div className="absolute w-[800px] h-[800px] rounded-full bg-purple-100/40 blur-3xl -top-40 -left-20 animate-pulse" />
+                <div className="absolute w-[600px] h-[600px] rounded-full bg-rose-100/30 blur-3xl bottom-0 right-0 animate-pulse delay-700" />
+                <div className="absolute w-[300px] h-[300px] rounded-full bg-pink-100/30 blur-3xl top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 animate-pulse delay-1000" />
+                <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-5" />
             </div>
 
             {/* Refined Floating Icons */}
@@ -148,7 +146,7 @@ export default function LoginPage() {
                     key={`icon-${i}`}
                     className="absolute"
                     style={position}
-                    initial={{opacity: 0, scale: 0}}
+                    initial={{ opacity: 0, scale: 0 }}
                     animate={{
                         opacity: [0, 0.2, 0],
                         scale: [0, 1, 0],
@@ -233,22 +231,22 @@ export default function LoginPage() {
                         </motion.div>
                     ) : (
                         <motion.div
-                            initial={{opacity: 0, y: 20}}
-                            animate={{opacity: 1, y: 0}}
-                            exit={{opacity: 0, y: -20}}
-                            className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-xl p-8 border border-purple-100/30"
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -20 }}
+                            className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-xl p-8 border border-purple-100/30 hover:shadow-2xl transition-all duration-300"
                         >
                             <form onSubmit={handleSubmit} className="space-y-6">
                                 {formFields.map((field) => (
                                     <motion.div
                                         key={field.name}
-                                        initial={{opacity: 0, y: 20}}
-                                        animate={{opacity: 1, y: 0}}
-                                        transition={{delay: field.delay}}
-                                        className="space-y-2"
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: field.delay }}
+                                        className="space-y-2 group"
                                     >
                                         <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                                            <field.icon className="w-4 h-4 text-purple-500" />
+                                            <field.icon className="w-4 h-4 text-purple-500 group-hover:text-purple-600 transition-colors duration-200" />
                                             {field.label}
                                         </label>
                                         <div className="relative">
@@ -261,14 +259,14 @@ export default function LoginPage() {
                                                     [field.name]: e.target.value
                                                 }))}
                                                 placeholder={field.placeholder}
-                                                className="w-full pl-10 pr-12 py-3 rounded-xl border-gray-200 focus:border-purple-500 focus:ring-purple-500 transition-all duration-200 placeholder:text-gray-400"
+                                                className="w-full pl-10 pr-12 py-3 rounded-xl border-gray-200 focus:border-purple-500 focus:ring-purple-500 transition-all duration-200 placeholder:text-gray-400 hover:border-purple-300"
                                             />
-                                            <field.icon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                                            <field.icon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 group-hover:text-purple-500 transition-colors duration-200" />
                                             {field.type === 'password' && (
                                                 <button
                                                     type="button"
                                                     onClick={() => setShowPassword(prev => !prev)}
-                                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors duration-200"
+                                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-purple-500 transition-colors duration-200"
                                                 >
                                                     {showPassword ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
                                                 </button>
@@ -290,16 +288,19 @@ export default function LoginPage() {
                                 <Button
                                     type="submit"
                                     disabled={isLoading}
-                                    className="w-full py-3 rounded-xl bg-gradient-to-r from-purple-600 to-rose-500 hover:from-purple-700 hover:to-rose-600 text-white font-medium shadow-lg shadow-purple-500/20 transition-all duration-200"
+                                    className="w-full py-3 rounded-xl bg-gradient-to-r from-purple-600 to-rose-500 hover:from-purple-700 hover:to-rose-600 text-white font-medium shadow-lg shadow-purple-500/20 transition-all duration-200 hover:shadow-xl hover:shadow-purple-500/30 group"
                                 >
                                     {isLoading ? (
                                         <motion.div
-                                            animate={{rotate: 360}}
-                                            transition={{duration: 1, repeat: Infinity, ease: "linear"}}
+                                            animate={{ rotate: 360 }}
+                                            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                                             className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
                                         />
                                     ) : (
-                                        'Giriş Yap'
+                                        <span className="flex items-center justify-center gap-2">
+                                            Giriş Yap
+                                            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" />
+                                        </span>
                                     )}
                                 </Button>
 
