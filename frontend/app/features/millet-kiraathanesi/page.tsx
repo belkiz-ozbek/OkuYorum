@@ -4,8 +4,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Card } from '@/components/ui/Card';
 import { SearchForm } from "@/components/ui/form/search-form";
-import React, { useState, useEffect } from 'react';
-import {BookOpen, Compass, Library, Moon, Sun, User, Users} from "lucide-react";
+import { useState, useEffect } from 'react';
+import { BookOpen, Moon, Sun, Library, Compass, Users, Heart, User } from 'lucide-react';
 
 export default function MilletKiraathanesi() {
   const [isScrolled, setIsScrolled] = useState(false);
