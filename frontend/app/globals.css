@@ -104,24 +104,24 @@ p {
 }
 
 .navbar-link {
-  @apply flex items-center gap-2 px-3 py-2 rounded-lg text-muted-foreground hover:text-primary transition-all duration-300;
-}
-
-.navbar-link:hover {
-  @apply bg-muted bg-opacity-50 scale-105;
+  @apply flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-gray-100/10 transition-colors;
 }
 
 .navbar-icon {
-  @apply transition-all duration-300 opacity-80 group-hover:opacity-100;
+  @apply text-gray-600 transition-colors group-hover:text-primary;
 }
 
-/* Dark mode adjustments */
-[data-theme="dark"] .navbar-link:hover {
-  @apply bg-muted bg-opacity-20;
+/* Dark mode styles */
+[data-theme='dark'] .navbar {
+  @apply bg-gray-900/60 border-gray-800/20;
 }
 
-[data-theme="dark"] .navbar-icon {
-  @apply brightness-110;
+[data-theme='dark'] .navbar-icon {
+  @apply text-gray-400;
+}
+
+[data-theme='dark'] .navbar-link:hover {
+  @apply bg-gray-800/10;
 }
 
 /* Icon Animations */
