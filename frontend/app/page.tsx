@@ -5,7 +5,7 @@ import Link from 'next/link'
 import {Button} from "@/components/ui/form/button"
 import {Input} from "@/components/ui/form/input"
 import {useRouter} from 'next/navigation'
-import {ArrowRight, Bookmark, BookMarked, BookOpen, BookOpenCheck, Lock, User} from 'lucide-react'
+import {ArrowRight, Bookmark, BookMarked, BookOpen, BookOpenCheck, Lock, User, Eye, EyeOff} from 'lucide-react'
 import {AnimatePresence, motion} from 'framer-motion'
 import {useToast} from "@/components/ui/feedback/use-toast";
 
@@ -18,6 +18,7 @@ export default function LoginPage() {
     const [error, setError] = useState('')
     const [isLoading, setIsLoading] = useState(false)
     const [showSuccess, setShowSuccess] = useState(false)
+    const [showPassword, setShowPassword] = useState(false)
     const router = useRouter()
     const [mounted, setMounted] = useState(false)
 
@@ -110,9 +111,27 @@ export default function LoginPage() {
 
     const icons = [BookOpen, BookMarked, Bookmark]
 
+    const formFields = [
+        {
+            icon: User,
+            name: 'identifier',
+            label: 'Kullanıcı Adı',
+            type: 'text',
+            placeholder: 'Kullanıcı adınız',
+            delay: 0.2
+        },
+        {
+            icon: Lock,
+            name: 'password',
+            label: 'Şifre',
+            type: 'password',
+            placeholder: '••••••••',
+            delay: 0.3
+        }
+    ]
+
     return (
-        <div
-            className="min-h-screen flex items-center justify-center bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-purple-50/80 via-rose-50/80 to-pink-50/80 relative overflow-hidden">
+        <div className="min-h-screen flex items-center justify-center bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-purple-50/80 via-rose-50/80 to-pink-50/80 relative overflow-hidden py-8">
             {/* Enhanced Background Elements */}
             <div className="absolute inset-0 w-full h-full opacity-30">
                 <div
@@ -167,7 +186,7 @@ export default function LoginPage() {
                             transition: {duration: 0.3}
                         }}
                     >
-                        <BookOpen className="w-16 h-16 text-purple-500/80"/>
+                        <BookOpen className="w-16 h-16 text-purple-600" />
                     </motion.div>
                     <motion.div
                         className="space-y-3"
@@ -214,119 +233,83 @@ export default function LoginPage() {
                         </motion.div>
                     ) : (
                         <motion.div
-                            className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-xl p-12 border border-purple-100/30"
-                            initial={{y: 20, opacity: 0}}
-                            animate={{y: 0, opacity: 1}}
-                            exit={{y: 20, opacity: 0}}
-                            transition={{duration: 0.7}}
+                            initial={{opacity: 0, y: 20}}
+                            animate={{opacity: 1, y: 0}}
+                            exit={{opacity: 0, y: -20}}
+                            className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-xl p-8 border border-purple-100/30"
                         >
-                            {/* Error Message Area */}
-                            <AnimatePresence mode="wait">
+                            <form onSubmit={handleSubmit} className="space-y-6">
+                                {formFields.map((field) => (
+                                    <motion.div
+                                        key={field.name}
+                                        initial={{opacity: 0, y: 20}}
+                                        animate={{opacity: 1, y: 0}}
+                                        transition={{delay: field.delay}}
+                                        className="space-y-2"
+                                    >
+                                        <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                                            <field.icon className="w-4 h-4 text-purple-500" />
+                                            {field.label}
+                                        </label>
+                                        <div className="relative">
+                                            <Input
+                                                type={field.type === 'password' ? (showPassword ? 'text' : 'password') : field.type}
+                                                name={field.name}
+                                                value={formData[field.name as keyof typeof formData]}
+                                                onChange={(e) => setFormData(prev => ({
+                                                    ...prev,
+                                                    [field.name]: e.target.value
+                                                }))}
+                                                placeholder={field.placeholder}
+                                                className="w-full pl-10 pr-12 py-3 rounded-xl border-gray-200 focus:border-purple-500 focus:ring-purple-500 transition-all duration-200 placeholder:text-gray-400"
+                                            />
+                                            <field.icon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                                            {field.type === 'password' && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setShowPassword(prev => !prev)}
+                                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors duration-200"
+                                                >
+                                                    {showPassword ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
+                                                </button>
+                                            )}
+                                        </div>
+                                    </motion.div>
+                                ))}
+
                                 {error && (
                                     <motion.div
-                                        initial={{opacity: 0, y: -10}}
-                                        animate={{opacity: 1, y: 0}}
-                                        exit={{opacity: 0, y: -10}}
-                                        className="p-4 mb-6 rounded-2xl bg-red-50 border border-red-100 text-red-600 text-sm"
+                                        initial={{opacity: 0}}
+                                        animate={{opacity: 1}}
+                                        className="text-red-500 text-sm bg-red-50 p-3 rounded-lg"
                                     >
                                         {error}
                                     </motion.div>
                                 )}
-                            </AnimatePresence>
 
-                            <form onSubmit={handleSubmit} className="space-y-8">
-                                <motion.div
-                                    initial={{x: -20, opacity: 0}}
-                                    animate={{x: 0, opacity: 1}}
-                                    transition={{delay: 0.2}}
+                                <Button
+                                    type="submit"
+                                    disabled={isLoading}
+                                    className="w-full py-3 rounded-xl bg-gradient-to-r from-purple-600 to-rose-500 hover:from-purple-700 hover:to-rose-600 text-white font-medium shadow-lg shadow-purple-500/20 transition-all duration-200"
                                 >
-                                    <label className="block text-sm font-medium text-purple-700/90 mb-2">
-                                        Kullanıcı Adı
-                                    </label>
-                                    <div className="relative group">
-                                        <User
-                                            className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-purple-400 transition-colors duration-300 group-hover:text-purple-600"/>
-                                        <Input
-                                            type="text"
-                                            name="identifier"
-                                            value={formData.identifier}
-                                            onChange={(e) => {
-                                                setFormData(prev => ({...prev, identifier: e.target.value}))
-                                                setError('') // Input değiştiğinde hata mesajını temizle
-                                            }}
-                                            className="pl-11 h-12 bg-white/80 border-purple-100 focus:border-purple-200 focus:ring-purple-100 rounded-xl transition-all duration-300"
-                                            placeholder="Kullanıcı adınızı girin"
+                                    {isLoading ? (
+                                        <motion.div
+                                            animate={{rotate: 360}}
+                                            transition={{duration: 1, repeat: Infinity, ease: "linear"}}
+                                            className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
                                         />
-                                    </div>
-                                </motion.div>
+                                    ) : (
+                                        'Giriş Yap'
+                                    )}
+                                </Button>
 
-                                <motion.div
-                                    initial={{x: 20, opacity: 0}}
-                                    animate={{x: 0, opacity: 1}}
-                                    transition={{delay: 0.3}}
-                                >
-                                    <label className="block text-sm font-medium text-purple-700/90 mb-2">
-                                        Şifre
-                                    </label>
-                                    <div className="relative group">
-                                        <Lock
-                                            className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-purple-400 transition-colors duration-300 group-hover:text-purple-600"/>
-                                        <Input
-                                            type="password"
-                                            name="password"
-                                            value={formData.password}
-                                            onChange={(e) => {
-                                                setFormData(prev => ({...prev, password: e.target.value}))
-                                                setError('') // Input değiştiğinde hata mesajını temizle
-                                            }}
-                                            className="pl-11 h-12 bg-white/80 border-purple-100 focus:border-purple-200 focus:ring-purple-100 rounded-xl transition-all duration-300"
-                                            placeholder="••••••••"
-                                        />
-                                    </div>
-                                </motion.div>
-
-                                <motion.div
-                                    initial={{y: 20, opacity: 0}}
-                                    animate={{y: 0, opacity: 1}}
-                                    transition={{delay: 0.4}}
-                                >
-                                    <Button
-                                        type="submit"
-                                        className="w-full h-12 bg-gradient-to-r from-purple-600 to-rose-500 hover:from-purple-700 hover:to-rose-600 text-white rounded-xl font-medium transition-all duration-300 group"
-                                        disabled={isLoading}
-                                    >
-                                        {isLoading ? (
-                                            <motion.div
-                                                className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full"
-                                                animate={{rotate: 360}}
-                                                transition={{duration: 1, repeat: Infinity, ease: "linear"}}
-                                            />
-                                        ) : (
-                                            <span className="flex items-center justify-center gap-2">
-                        Giriş Yap
-                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300"/>
-                      </span>
-                                        )}
-                                    </Button>
-                                </motion.div>
-                            </form>
-
-                            <motion.div
-                                className="mt-8 text-center"
-                                initial={{opacity: 0}}
-                                animate={{opacity: 1}}
-                                transition={{delay: 0.5}}
-                            >
-                                <p className="text-sm text-gray-500/80">
+                                <p className="text-center text-sm text-gray-600">
                                     Hesabınız yok mu?{' '}
-                                    <Link
-                                        href="/auth/signup"
-                                        className="text-purple-600 hover:text-purple-700 font-medium transition-all duration-300 hover:underline underline-offset-4"
-                                    >
-                                        Kayıt Olun
+                                    <Link href="/auth/signup" className="text-purple-600 hover:text-purple-700 font-medium">
+                                        Kayıt Ol
                                     </Link>
                                 </p>
-                            </motion.div>
+                            </form>
                         </motion.div>
                     )}
                 </AnimatePresence>
@@ -336,7 +319,7 @@ export default function LoginPage() {
                     className="text-center mt-8"
                     initial={{opacity: 0}}
                     animate={{opacity: 1}}
-                    transition={{delay: 0.6}}
+                    transition={{delay: 0.9}}
                 >
                     <Link
                         href="/auth/homepage"
