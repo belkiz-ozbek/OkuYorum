@@ -6,9 +6,9 @@ import { Button } from "@/components/ui/form/button"
 import { Input } from "@/components/ui/form/input"
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { BookOpen, User, Mail, Lock, UserCircle, ArrowRight, CheckCircle2, BookMarked, Bookmark, Eye, EyeOff } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Progress } from "@/components/ui/progress"
+import {Bookmark, BookMarked, BookOpen, CheckCircle2, Eye, EyeOff, Mail, User, UserCircle} from "lucide-react";
 
 // Email validasyon fonksiyonu
 const validateEmail = (email: string): boolean => {
@@ -276,6 +276,7 @@ export default function SignupPage() {
                     className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-xl p-8 border border-purple-100/30"
                 >
                   <form onSubmit={handleSubmit} className="space-y-6">
+                    {/* eslint-disable-next-line @typescript-eslint/no-unused-vars */}
                     {formFields.map((field, index) => (
                         <motion.div
                             key={field.name}
@@ -285,7 +286,6 @@ export default function SignupPage() {
                             className="space-y-2"
                         >
                           <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                            <field.icon className="w-4 h-4 text-purple-500" />
                             {field.label}
                           </label>
                           <div className="relative">
@@ -301,7 +301,6 @@ export default function SignupPage() {
                                 placeholder={field.placeholder}
                                 className="w-full pl-10 pr-12 py-3 rounded-xl border-gray-200 focus:border-purple-500 focus:ring-purple-500 transition-all duration-200 placeholder:text-gray-400"
                             />
-                            <field.icon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
                             {field.type === 'password' && (
                               <button
                                 type="button"
