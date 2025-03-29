@@ -371,7 +371,7 @@ export default function SignupPage() {
 
                     <p className="text-center text-sm text-gray-600">
                       Zaten hesabınız var mı?{' '}
-                      <Link href="/auth/login" className="text-purple-600 hover:text-purple-700 font-medium">
+                      <Link href="/" className="text-purple-600 hover:text-purple-700 font-medium">
                         Giriş Yap
                       </Link>
                     </p>
@@ -388,7 +388,7 @@ export default function SignupPage() {
               transition={{ delay: 0.9 }}
           >
             <Link
-                href="/auth/homepage"
+                href="/features/homepage"
                 className="text-sm text-gray-500 hover:text-purple-600 transition-colors duration-300"
             >
               Ana Sayfaya Dön

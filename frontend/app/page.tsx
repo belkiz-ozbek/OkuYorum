@@ -323,7 +323,7 @@ export default function LoginPage() {
                     transition={{delay: 0.9}}
                 >
                     <Link
-                        href="/auth/homepage"
+                        href="/features/homepage"
                         className="text-sm text-gray-500 hover:text-purple-600 transition-colors duration-300"
                     >
                         Ana Sayfaya Dön
