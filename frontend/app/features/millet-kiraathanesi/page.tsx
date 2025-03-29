@@ -69,6 +69,11 @@ export default function MilletKiraathanesi() {
                 <span>Millet Kıraathaneleri</span>
               </Link>
 
+              <Link className={`flex items-center gap-2 ${isScrolled ? 'text-gray-600 dark:text-gray-300' : 'text-white/90'} hover:text-primary transition-colors duration-300`} href="/donate">
+                <Heart className="h-5 w-5" />
+                <span>Bağış Yap</span>
+              </Link>
+
               <SearchForm isScrolled={isScrolled} />
             </nav>
             
