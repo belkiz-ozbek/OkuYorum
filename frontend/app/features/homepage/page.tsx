@@ -200,7 +200,11 @@ export default function HomePage() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <header className={`fixed top-0 z-50 w-full transition-all duration-300 ${isScrolled ? 'h-14 bg-background/60 backdrop-blur-lg border-b' : 'h-16'}`}>
+      <header className={`fixed top-0 z-50 w-full transition-all duration-300 ${
+        isScrolled 
+          ? 'h-14 bg-background/60 backdrop-blur-lg border-b' 
+          : 'h-16'
+      }`}>
         <div className="max-w-7xl mx-auto h-full flex items-center justify-between px-6">
           <Link 
             className="flex items-center justify-center group relative" 
@@ -215,23 +219,23 @@ export default function HomePage() {
           </Link>
 
           <div className="hidden md:flex items-center h-full">
-            <nav className="flex items-center gap-3 px-6">
-              <Link className="flex items-center gap-2 px-3 py-2 rounded-lg text-muted-foreground hover:text-primary hover:bg-muted/50 transition-all duration-300" href="/features/library">
+            <nav className="flex items-center gap-6 px-6">
+              <Link className={`flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300`} href="/features/library">
                 <Library className="h-5 w-5" />
                 <span>Kitaplığım</span>
               </Link>
 
-              <Link className="flex items-center gap-2 px-3 py-2 rounded-lg text-muted-foreground hover:text-primary hover:bg-muted/50 transition-all duration-300" href="/features/discover">
+              <Link className={`flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300`} href="/features/discover">
                 <Compass className="h-5 w-5" />
                 <span>Keşfet</span>
               </Link>
 
-              <Link className="flex items-center gap-2 px-3 py-2 rounded-lg text-muted-foreground hover:text-primary hover:bg-muted/50 transition-all duration-300" href="/features/millet-kiraathanesi">
+              <Link className={`flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300`} href="/features/millet-kiraathanesi">
                 <Users className="h-5 w-5" />
                 <span>Millet Kıraathaneleri</span>
               </Link>
 
-              <Link className="flex items-center gap-2 px-3 py-2 rounded-lg text-muted-foreground hover:text-primary hover:bg-muted/50 transition-all duration-300" href="/donate">
+              <Link className={`flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300`} href="/donate">
                 <Heart className="h-5 w-5" />
                 <span>Bağış Yap</span>
               </Link>
@@ -239,10 +243,10 @@ export default function HomePage() {
               <SearchForm isScrolled={isScrolled} />
             </nav>
             
-            <div className="flex items-center gap-2 border-l border-border">
+            <div className="flex items-center gap-4 border-l border-border pl-6">
               <button
                 onClick={toggleTheme}
-                className="p-2 rounded-lg text-muted-foreground hover:text-primary hover:bg-muted/50 transition-all duration-300"
+                className="text-muted-foreground hover:text-primary transition-colors duration-300"
                 aria-label="Tema değiştir"
               >
                 {theme === 'light' ? (
@@ -253,7 +257,7 @@ export default function HomePage() {
               </button>
               
               <Link 
-                className="flex items-center gap-2 px-6 h-full text-muted-foreground hover:text-primary hover:bg-muted/50 transition-all duration-300" 
+                className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300"
                 href="/features/profile"
               >
                 <User className="h-5 w-5" />
@@ -270,7 +274,7 @@ export default function HomePage() {
             
             <button
               onClick={toggleTheme}
-              className="p-2 rounded-lg text-muted-foreground hover:text-primary hover:bg-muted/50 transition-all duration-300"
+              className="text-muted-foreground hover:text-primary transition-colors duration-300"
               aria-label="Tema değiştir"
             >
               {theme === 'light' ? (

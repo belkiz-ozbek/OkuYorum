@@ -1,14 +1,14 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
-import { BookOpen, Heart, MessageCircle, Share2, User, Search, Star, BookmarkPlus, PlusCircle } from "lucide-react"
+import { BookOpen, Heart, MessageCircle, Share2, User, Star, BookmarkPlus, PlusCircle, Library, Compass, Users, Moon, Sun } from "lucide-react"
 import { Button } from "@/components/ui/form/button"
-import { Input } from "@/components/ui/form/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/layout/tabs"
-import { Card, CardContent } from "@/components/ui/layout/card"
+import { Card, CardContent } from "@/components/ui/layout/Card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/layout/avatar"
 import { Badge } from "@/components/ui/layout/badge"
+import {SearchForm} from "@/components/ui/form/search-form"
 
 type ContentItem = {
   id: string
@@ -88,7 +88,31 @@ const sampleContent: ContentItem[] = [
 export default function DiscoverPage() {
   const [content, setContent] = useState<ContentItem[]>(sampleContent)
   const [activeTab, setActiveTab] = useState("all")
-  const [searchTerm, setSearchTerm] = useState("")
+  const [searchTerm] = useState("")
+  const [isScrolled, setIsScrolled] = useState(false)
+  const [theme, setTheme] = useState<'light' | 'dark'>('light')
+
+  useEffect(() => {
+    // Sistem dark mode tercihini kontrol et
+    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      setTheme('dark')
+      document.documentElement.setAttribute('data-theme', 'dark')
+    }
+
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY
+      setIsScrolled(scrollPosition > 50)
+    }
+
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  const toggleTheme = () => {
+    const newTheme = theme === 'light' ? 'dark' : 'light'
+    setTheme(newTheme)
+    document.documentElement.setAttribute('data-theme', newTheme)
+  }
 
   const handleLike = (id: string) => {
     setContent(content.map((item) => (item.id === id ? { ...item, likes: item.likes + 1 } : item)))
@@ -170,33 +194,94 @@ export default function DiscoverPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-purple-100">
-      <header className="bg-white shadow-sm sticky top-0 z-10">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
-          <Link href="/auth/homepage" className="flex items-center">
-            <BookOpen className="h-6 w-6 text-purple-600" />
-            <span className="ml-2 text-lg font-semibold text-gray-900">OkuYorum</span>
-          </Link>
-          <div className="flex items-center space-x-4">
+      <header className={`fixed top-0 z-50 w-full transition-all duration-300 ${
+        isScrolled 
+          ? 'h-14 bg-background/60 backdrop-blur-lg border-b' 
+          : 'h-16'
+      }`}>
+        <div className="max-w-7xl mx-auto h-full flex items-center justify-between px-6">
+          <Link 
+            className="flex items-center justify-center group relative" 
+            href="/features/homepage"
+          >
             <div className="relative">
-              <Input
-                type="search"
-                placeholder="Ara..."
-                className="pl-10 pr-4 py-2 rounded-full bg-gray-100 focus:bg-white w-64"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <BookOpen className={`${isScrolled ? 'h-5 w-5' : 'h-6 w-6'} text-foreground group-hover:text-primary transition-all duration-300`} />
             </div>
-            <Button asChild variant="ghost" size="icon">
-              <Link href="/profile">
-                <User className="h-5 w-5" />
+            <span className={`ml-2 font-medium text-foreground transition-all duration-300 ${isScrolled ? 'text-base' : 'text-lg'}`}>
+              OkuYorum
+            </span>
+          </Link>
+
+          <div className="hidden md:flex items-center h-full">
+            <nav className="flex items-center gap-6 px-6">
+              <Link className={`flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300`} href="/features/library">
+                <Library className="h-5 w-5" />
+                <span>Kitaplığım</span>
               </Link>
-            </Button>
+
+              <Link className={`flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300`} href="/features/discover">
+                <Compass className="h-5 w-5" />
+                <span>Keşfet</span>
+              </Link>
+
+              <Link className={`flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300`} href="/features/millet-kiraathanesi">
+                <Users className="h-5 w-5" />
+                <span>Millet Kıraathaneleri</span>
+              </Link>
+
+              <Link className={`flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300`} href="/donate">
+                <Heart className="h-5 w-5" />
+                <span>Bağış Yap</span>
+              </Link>
+
+              <SearchForm isScrolled={isScrolled} />
+            </nav>
+            
+            <div className="flex items-center gap-4 border-l border-border pl-6">
+              <button
+                onClick={toggleTheme}
+                className="text-muted-foreground hover:text-primary transition-colors duration-300"
+                aria-label="Tema değiştir"
+              >
+                {theme === 'light' ? (
+                  <Moon className="h-5 w-5" />
+                ) : (
+                  <Sun className="h-5 w-5" />
+                )}
+              </button>
+              
+              <Link 
+                className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300"
+                href="/features/profile"
+              >
+                <User className="h-5 w-5" />
+                <span>Profil</span>
+              </Link>
+            </div>
+          </div>
+
+          {/* Mobile Navigation */}
+          <div className="md:hidden flex items-center gap-4">
+            <div className="flex items-center gap-4">
+              <SearchForm isScrolled={true} />
+            </div>
+            
+            <button
+              onClick={toggleTheme}
+              className="text-muted-foreground hover:text-primary transition-colors duration-300"
+              aria-label="Tema değiştir"
+            >
+              {theme === 'light' ? (
+                <Moon className="h-5 w-5" />
+              ) : (
+                <Sun className="h-5 w-5" />
+              )}
+            </button>
           </div>
         </div>
       </header>
 
-      <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Keşfet</h1>
           <Button className="bg-purple-600 hover:bg-purple-700 text-white">

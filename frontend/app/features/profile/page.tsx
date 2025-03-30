@@ -1,13 +1,12 @@
 "use client"
 
 import type React from "react"
-import {useState} from "react"
+import {useState, useEffect} from "react"
 import Link from "next/link"
 import Image from "next/image"
 import {Button} from "@/components/ui/form/button"
 import {Input} from "@/components/ui/form/input"
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/layout/tabs"
-import {Card, CardContent, CardTitle} from "@/components/ui/layout/card"
 import {SearchForm} from "@/components/ui/form/search-form"
 import {motion} from "framer-motion"
 import { Poppins } from 'next/font/google'
@@ -23,8 +22,11 @@ import {
     Star,
     User,
     Users, X,
-    Zap
+    Zap,
+    Moon,
+    Sun
 } from "lucide-react";
+import {Card, CardContent, CardTitle} from "@/components/ui/Card";
 
 type UserProfile = {
     name: string
@@ -156,6 +158,30 @@ export default function ProfilePage() {
     const [showEditMenu, setShowEditMenu] = useState(false)
     const [activeTab, setActiveTab] = useState("library")
     const [coverImage, setCoverImage] = useState<string | null>(null)
+    const [isScrolled, setIsScrolled] = useState(false);
+    const [theme, setTheme] = useState<'light' | 'dark'>('light');
+
+    useEffect(() => {
+        // Sistem dark mode tercihini kontrol et
+        if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            setTheme('dark');
+            document.documentElement.setAttribute('data-theme', 'dark');
+        }
+
+        const handleScroll = () => {
+            const scrollPosition = window.scrollY;
+            setIsScrolled(scrollPosition > 50);
+        };
+
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+
+    const toggleTheme = () => {
+        const newTheme = theme === 'light' ? 'dark' : 'light';
+        setTheme(newTheme);
+        document.documentElement.setAttribute('data-theme', newTheme);
+    };
 
     const handleProfileUpdate = (field: keyof UserProfile, value: string | number) => {
         setProfile((prev) => ({...prev, [field]: value}))
@@ -206,54 +232,94 @@ export default function ProfilePage() {
 
     return (
         <div className={`min-h-screen bg-[#f7f7f7] ${poppins.className}`}>
-            <header className="sticky top-0 z-50 w-full bg-white/90 backdrop-blur-sm shadow-md">
-                <div className="max-w-7xl mx-auto px-6 h-20 flex items-center">
-                    <Link className="flex items-center justify-center" href="/features/homepage">
-                        <BookOpen className="h-6 w-6 text-purple-600"/>
-                        <span className="ml-2 text-lg font-semibold">OkuYorum</span>
+            <header className={`fixed top-0 z-50 w-full transition-all duration-300 ${
+                isScrolled 
+                    ? 'h-14 bg-background/60 backdrop-blur-lg border-b' 
+                    : 'h-16'
+            }`}>
+                <div className="max-w-7xl mx-auto h-full flex items-center justify-between px-6">
+                    <Link 
+                        className="flex items-center justify-center group relative" 
+                        href="/features/homepage"
+                    >
+                        <div className="relative">
+                            <BookOpen className={`${isScrolled ? 'h-5 w-5' : 'h-6 w-6'} text-foreground group-hover:text-primary transition-all duration-300`} />
+                        </div>
+                        <span className={`ml-2 font-medium text-foreground transition-all duration-300 ${isScrolled ? 'text-base' : 'text-lg'}`}>
+                            OkuYorum
+                        </span>
                     </Link>
-                    <nav className="ml-auto flex items-center gap-4">
-                        <Link
-                            className="text-sm font-medium text-purple-600 hover:text-purple-700 flex items-center"
-                            href="/features/profile"
+
+                    <div className="hidden md:flex items-center h-full">
+                        <nav className="flex items-center gap-6 px-6">
+                            <Link className={`flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300`} href="/features/library">
+                                <Library className="h-5 w-5" />
+                                <span>Kitaplığım</span>
+                            </Link>
+
+                            <Link className={`flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300`} href="/features/discover">
+                                <Compass className="h-5 w-5" />
+                                <span>Keşfet</span>
+                            </Link>
+
+                            <Link className={`flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300`} href="/features/millet-kiraathanesi">
+                                <Users className="h-5 w-5" />
+                                <span>Millet Kıraathaneleri</span>
+                            </Link>
+
+                            <Link className={`flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300`} href="/donate">
+                                <Heart className="h-5 w-5" />
+                                <span>Bağış Yap</span>
+                            </Link>
+
+                            <SearchForm isScrolled={isScrolled} />
+                        </nav>
+                        
+                        <div className="flex items-center gap-4 border-l border-border pl-6">
+                            <button
+                                onClick={toggleTheme}
+                                className="text-muted-foreground hover:text-primary transition-colors duration-300"
+                                aria-label="Tema değiştir"
+                            >
+                                {theme === 'light' ? (
+                                    <Moon className="h-5 w-5" />
+                                ) : (
+                                    <Sun className="h-5 w-5" />
+                                )}
+                            </button>
+                            
+                            <Link 
+                                className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300"
+                                href="/features/profile"
+                            >
+                                <User className="h-5 w-5" />
+                                <span>Profil</span>
+                            </Link>
+                        </div>
+                    </div>
+
+                    {/* Mobile Navigation */}
+                    <div className="md:hidden flex items-center gap-4">
+                        <div className="flex items-center gap-4">
+                            <SearchForm isScrolled={true} />
+                        </div>
+                        
+                        <button
+                            onClick={toggleTheme}
+                            className="text-muted-foreground hover:text-primary transition-colors duration-300"
+                            aria-label="Tema değiştir"
                         >
-                            <User className="w-4 h-4 mr-1"/>
-                            Profil
-                        </Link>
-                        <Link
-                            className="text-sm font-medium text-gray-600 hover:text-purple-600 flex items-center"
-                            href="/features/library"
-                        >
-                            <Library className="w-4 h-4 mr-1"/>
-                            Kitaplığım
-                        </Link>
-                        <Link
-                            className="text-sm font-medium text-gray-600 hover:text-purple-600 flex items-center"
-                            href="/features/discover"
-                        >
-                            <Compass className="w-4 h-4 mr-1"/>
-                            Keşfet
-                        </Link>
-                        <Link
-                            className="text-sm font-medium text-gray-600 hover:text-purple-600 flex items-center"
-                            href="/features/kiraathane"
-                        >
-                            <Users className="w-4 h-4 mr-1"/>
-                            Millet Kıraathaneleri
-                        </Link>
-                        <Link
-                            className="text-sm font-medium text-gray-600 hover:text-purple-600 flex items-center"
-                            href="/donate"
-                        >
-                            <Heart className="w-4 h-4 mr-1"/>
-                            Bağış Yap
-                        </Link>
-                        <SearchForm/>
-                    </nav>
+                            {theme === 'light' ? (
+                                <Moon className="h-5 w-5" />
+                            ) : (
+                                <Sun className="h-5 w-5" />
+                            )}
+                        </button>
+                    </div>
                 </div>
             </header>
 
-            <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24">
                 <div className="relative mb-8">
                     <div className="relative w-full h-64 rounded-2xl overflow-hidden shadow-lg group">
                         {/* Background Image */}

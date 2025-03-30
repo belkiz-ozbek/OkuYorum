@@ -14,14 +14,13 @@ import {
   ChevronRight,
   ChevronsUpDown,
   Gift,
-  Home,
-  Info,
   Library,
   Loader2,
-  Mail,
   School,
   User,
-  Users
+  Users,
+  Moon,
+  Sun
 } from "lucide-react"
 import {useToast} from "@/components/ui/feedback/use-toast"
 import {MapSelector} from "@/components/ui/MapSelector"
@@ -39,6 +38,8 @@ import {Toaster} from "@/components/ui/feedback/toaster";
 import {Button} from "@/components/ui/form/button";
 import {Label} from "@/components/ui/form/label";
 import {Input} from "@/components/ui/form/input";
+import {SearchForm} from "@/components/ui/form/search-form"
+import {Compass, Heart} from "lucide-react"
 
 type DonationType = "schools" | "libraries" | "individual"
 type BookCondition = "new" | "likeNew" | "used" | "old"
@@ -231,6 +232,8 @@ export default function DonatePage() {
   const [recipientName, setRecipientName] = useLocalStorage('draft_recipientName', '')
   const [address, setAddress] = useLocalStorage('draft_address', '')
   const [showConfirmModal, setShowConfirmModal] = useState(false)
+  const [isScrolled, setIsScrolled] = useState(false)
+  const [theme, setTheme] = useState<'light' | 'dark'>('light')
   const [pendingDonation, setPendingDonation] = useState<DonationData>({
     bookTitle: '',
     author: '',
@@ -246,6 +249,28 @@ export default function DonatePage() {
 
   const { toast } = useToast()
   const router = useRouter()
+
+  useEffect(() => {
+    // Sistem dark mode tercihini kontrol et
+    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      setTheme('dark')
+      document.documentElement.setAttribute('data-theme', 'dark')
+    }
+
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY
+      setIsScrolled(scrollPosition > 50)
+    }
+
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  const toggleTheme = () => {
+    const newTheme = theme === 'light' ? 'dark' : 'light'
+    setTheme(newTheme)
+    document.documentElement.setAttribute('data-theme', newTheme)
+  }
 
   const nextStep = () => {
     clearErrors()
@@ -793,7 +818,7 @@ export default function DonatePage() {
                             ? "Kitaplarınız öğrencilere ulaşacak" 
                             : donationType === "libraries" 
                               ? "Kitaplarınız kütüphane kullanıcılarına ulaşacak" 
-                              : "Kitaplarınız ihtiyaç sahibi bireylere ulaşacak"}
+                              : "Kitaplarınız ihtiyaç sahiplerine ulaşacak"}
                         </p>
                       </div>
                     </div>
@@ -1052,36 +1077,94 @@ export default function DonatePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-purple-100">
-      <header className="px-6 h-20 flex items-center justify-between max-w-7xl mx-auto border-b border-purple-100 bg-white/80 backdrop-blur-sm sticky top-0 z-50">
-        <Link href="/" className="flex items-center justify-center">
-          <BookOpen className="h-6 w-6 text-purple-600" />
-          <span className="ml-2 text-lg font-semibold bg-gradient-to-r from-purple-600 to-pink-600 text-transparent bg-clip-text">OkuYorum</span>
-        </Link>
-        <nav>
-          <ul className="flex space-x-6">
-            <li>
-              <Link href="/" className="text-gray-700 hover:text-purple-600 transition-colors duration-200 flex items-center gap-1">
-                <Home className="h-4 w-4" />
-                <span>Ana Sayfa</span>
+      <header className={`fixed top-0 z-50 w-full transition-all duration-300 ${
+        isScrolled 
+          ? 'h-14 bg-background/60 backdrop-blur-lg border-b' 
+          : 'h-16'
+      }`}>
+        <div className="max-w-7xl mx-auto h-full flex items-center justify-between px-6">
+          <Link 
+            className="flex items-center justify-center group relative" 
+            href="/features/homepage"
+          >
+            <div className="relative">
+              <BookOpen className={`${isScrolled ? 'h-5 w-5' : 'h-6 w-6'} text-foreground group-hover:text-primary transition-all duration-300`} />
+            </div>
+            <span className={`ml-2 font-medium text-foreground transition-all duration-300 ${isScrolled ? 'text-base' : 'text-lg'}`}>
+              OkuYorum
+            </span>
+          </Link>
+
+          <div className="hidden md:flex items-center h-full">
+            <nav className="flex items-center gap-6 px-6">
+              <Link className={`flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300`} href="/features/library">
+                <Library className="h-5 w-5" />
+                <span>Kitaplığım</span>
               </Link>
-            </li>
-            <li>
-              <Link href="/about" className="text-gray-700 hover:text-purple-600 transition-colors duration-200 flex items-center gap-1">
-                <Info className="h-4 w-4" />
-                <span>Hakkımızda</span>
+
+              <Link className={`flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300`} href="/features/discover">
+                <Compass className="h-5 w-5" />
+                <span>Keşfet</span>
               </Link>
-            </li>
-            <li>
-              <Link href="/contact" className="text-gray-700 hover:text-purple-600 transition-colors duration-200 flex items-center gap-1">
-                <Mail className="h-4 w-4" />
-                <span>İletişim</span>
+
+              <Link className={`flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300`} href="/features/millet-kiraathanesi">
+                <Users className="h-5 w-5" />
+                <span>Millet Kıraathaneleri</span>
               </Link>
-            </li>
-          </ul>
-        </nav>
+
+              <Link className={`flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300`} href="/donate">
+                <Heart className="h-5 w-5" />
+                <span>Bağış Yap</span>
+              </Link>
+
+              <SearchForm isScrolled={isScrolled} />
+            </nav>
+            
+            <div className="flex items-center gap-4 border-l border-border pl-6">
+              <button
+                onClick={toggleTheme}
+                className="text-muted-foreground hover:text-primary transition-colors duration-300"
+                aria-label="Tema değiştir"
+              >
+                {theme === 'light' ? (
+                  <Moon className="h-5 w-5" />
+                ) : (
+                  <Sun className="h-5 w-5" />
+                )}
+              </button>
+              
+              <Link 
+                className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300"
+                href="/features/profile"
+              >
+                <User className="h-5 w-5" />
+                <span>Profil</span>
+              </Link>
+            </div>
+          </div>
+
+          {/* Mobile Navigation */}
+          <div className="md:hidden flex items-center gap-4">
+            <div className="flex items-center gap-4">
+              <SearchForm isScrolled={true} />
+            </div>
+            
+            <button
+              onClick={toggleTheme}
+              className="text-muted-foreground hover:text-primary transition-colors duration-300"
+              aria-label="Tema değiştir"
+            >
+              {theme === 'light' ? (
+                <Moon className="h-5 w-5" />
+              ) : (
+                <Sun className="h-5 w-5" />
+              )}
+            </button>
+          </div>
+        </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-6 py-12">
+      <main className="max-w-6xl mx-auto px-6 py-12 pt-24">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-purple-600 to-pink-600 text-transparent bg-clip-text">
             Kitap Bağışı Yap
