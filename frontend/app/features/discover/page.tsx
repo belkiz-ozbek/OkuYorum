@@ -1,16 +1,16 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { BookOpen, Heart, MessageCircle, Share2, User, Search, Star, BookmarkPlus, PlusCircle } from "lucide-react"
 import { Button } from "@/components/ui/form/button"
-import { Input } from "@/components/ui/form/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/layout/tabs"
 import { Card, CardContent } from "@/components/ui/layout/Card"
 import { Users,Library, Compass } from "lucide-react"
 import { SearchForm } from "@/components/ui/form/search-form"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/layout/avatar"
 import { Badge } from "@/components/ui/layout/badge"
+import {SearchForm} from "@/components/ui/form/search-form"
 
 type ContentItem = {
   id: string
@@ -90,7 +90,31 @@ const sampleContent: ContentItem[] = [
 export default function DiscoverPage() {
   const [content, setContent] = useState<ContentItem[]>(sampleContent)
   const [activeTab, setActiveTab] = useState("all")
-  const [searchTerm, setSearchTerm] = useState("")
+  const [searchTerm] = useState("")
+  const [isScrolled, setIsScrolled] = useState(false)
+  const [theme, setTheme] = useState<'light' | 'dark'>('light')
+
+  useEffect(() => {
+    // Sistem dark mode tercihini kontrol et
+    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      setTheme('dark')
+      document.documentElement.setAttribute('data-theme', 'dark')
+    }
+
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY
+      setIsScrolled(scrollPosition > 50)
+    }
+
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  const toggleTheme = () => {
+    const newTheme = theme === 'light' ? 'dark' : 'light'
+    setTheme(newTheme)
+    document.documentElement.setAttribute('data-theme', newTheme)
+  }
 
   const handleLike = (id: string) => {
     setContent(content.map((item) => (item.id === id ? { ...item, likes: item.likes + 1 } : item)))
@@ -220,7 +244,7 @@ export default function DiscoverPage() {
         </div>
       </header>
 
-      <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Keşfet</h1>
           <Button className="bg-purple-600 hover:bg-purple-700 text-white">
