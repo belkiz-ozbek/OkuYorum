@@ -10,7 +10,6 @@ import { Users,Library, Compass } from "lucide-react"
 import { SearchForm } from "@/components/ui/form/search-form"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/layout/avatar"
 import { Badge } from "@/components/ui/layout/badge"
-import {SearchForm} from "@/components/ui/form/search-form"
 
 type ContentItem = {
   id: string
