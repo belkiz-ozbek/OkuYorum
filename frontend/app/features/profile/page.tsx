@@ -1,52 +1,55 @@
 "use client"
 
 import type React from "react"
-import {useState} from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import {
-    Award,
-    BarChart3,
-    BookMarked,
-    BookOpen,
-    BookOpenCheck,
-    Calendar,
-    Camera,
-    Check,
-    Clock,
-    Compass,
-    Edit,
-    Heart,
-    Library,
-    MessageSquare,
-    Plus,
-    Quote,
-    Star,
-    User,
-    Users,
-    X,
-    Zap,
+  BookOpen,
+  Camera,
+  Calendar,
+  Star,
+  MessageSquare,
+  Quote,
+  Zap,
+  User,
+  Library,
+  Compass,
+  Users,
+  Heart,
+  Edit,
+  BookOpenCheck,
+  Award,
+  BarChart3,
+  BookMarked,
+  Check,
+  X,
+  Moon,
+  Sun,
+  Plus,
 } from "lucide-react"
-import {Button} from "@/components/ui/form/button"
-import {Input} from "@/components/ui/form/input"
-import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/layout/tabs"
-import {Progress} from "@/components/ui/layout/progress"
-import {Card, CardContent, CardTitle} from "@/components/ui/layout/Card"
-import {SearchForm} from "@/components/ui/form/search-form"
-import {motion} from "framer-motion"
+import { motion } from "framer-motion"
+import { Button } from "@/components/ui/form/button"
+import { Input } from "@/components/ui/form/input"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Progress } from "@/components/ui/progress"
+import { Card, CardContent } from "@/components/ui/layout/Card"
+import { SearchForm } from "@/components/ui/form/search-form"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/layout/avatar"
+import { Label } from "@/components/ui/form/label"
 
 type UserProfile = {
-    name: string;
-    joinDate: string;
-    birthDate: string;
-    bio: string;
-    readerScore: number;
-    booksRead: number;
-    profileImage: string;
-    headerImage: string;
-    followers: number;
-    following: number;
-  };
+  name: string
+  joinDate: string
+  birthDate: string
+  bio: string
+  readerScore: number
+  booksRead: number
+  profileImage: string
+  headerImage: string
+  followers: number
+  following: number
+}
 
 type BookType = {
   id: string
@@ -70,36 +73,17 @@ type ReadingActivity = {
 }
 
 const initialProfile: UserProfile = {
-    name: "Esin Yılmaz",
-    joinDate: "2023-01-15",
-    birthDate: "1990-05-20",
-    bio: "Kitap kurdu, bilim kurgu hayranı ve amatör yazar.",
-    readerScore: 85,
-    booksRead: 127,
-    profileImage: "/images/profile-photo.jpg", // ✅ Resim yolu güncellendi
-    headerImage: "/images/header.png", // ✅ Resim yolu güncellendi
-    followers: 256,
-    following: 184,
-  };
-  
-const sampleBooks: BookType[] = [
-  { id: "1", title: "1984", author: "George Orwell", coverImage: "/placeholder.svg?height=150&width=100", rating: 4.5 },
-  {
-    id: "2",
-    title: "Yüzyıllık Yalnızlık",
-    author: "Gabriel García Márquez",
-    coverImage: "/placeholder.svg?height=150&width=100",
-    rating: 5,
-  },
-  {
-    id: "3",
-    title: "Suç ve Ceza",
-    author: "Fyodor Dostoyevski",
-    coverImage: "/placeholder.svg?height=150&width=100",
-    rating: 4,
-  },
-  { id: "4", title: "Dune", author: "Frank Herbert", coverImage: "/placeholder.svg?height=150&width=100", rating: 4.5 },
-]
+  name: "Esin Yılmaz",
+  joinDate: "2023-01-15",
+  birthDate: "1990-05-20",
+  bio: "Kitap kurdu, bilim kurgu hayranı ve amatör yazar.",
+  readerScore: 85,
+  booksRead: 127,
+  profileImage: "/placeholder.svg?height=150&width=150",
+  headerImage: "/placeholder.svg?height=400&width=1200",
+  followers: 256,
+  following: 184,
+}
 
 const achievements: Achievement[] = [
   {
@@ -133,45 +117,68 @@ const achievements: Achievement[] = [
 ]
 
 const readingActivity: ReadingActivity[] = [
-    {month: "Ocak", books: 4},
-    {month: "Şubat", books: 3},
-    {month: "Mart", books: 5},
-    {month: "Nisan", books: 2},
-    {month: "Mayıs", books: 6},
-    {month: "Haziran", books: 4},
-]
-
-const friends = [
-    {id: "1", name: "Mehmet Kaya", image: "/placeholder.svg?height=50&width=50"},
-    {id: "2", name: "Ayşe Demir", image: "/placeholder.svg?height=50&width=50"},
-    {id: "3", name: "Can Yılmaz", image: "/placeholder.svg?height=50&width=50"},
-    {id: "4", name: "Zeynep Öz", image: "/placeholder.svg?height=50&width=50"},
+  { month: "Ocak", books: 4 },
+  { month: "Şubat", books: 3 },
+  { month: "Mart", books: 5 },
+  { month: "Nisan", books: 2 },
+  { month: "Mayıs", books: 6 },
+  { month: "Haziran", books: 4 },
+  { month: "Temmuz", books: 7 },
+  { month: "Ağustos", books: 5 },
+  { month: "Eylül", books: 8 },
+  { month: "Ekim", books: 6 },
+  { month: "Kasım", books: 9 },
+  { month: "Aralık", books: 7 }
 ]
 
 const recommendations: BookType[] = [
-    {
-        id: "5",
-        title: "Fahrenheit 451",
-        author: "Ray Bradbury",
-        coverImage: "/placeholder.svg?height=150&width=100",
-        rating: 4.2,
-    },
-    {
-        id: "6",
-        title: "Otomatik Portakal",
-        author: "Anthony Burgess",
-        coverImage: "/placeholder.svg?height=150&width=100",
-        rating: 4.0,
-    },
+  {
+    id: "5",
+    title: "Fahrenheit 451",
+    author: "Ray Bradbury",
+    coverImage: "/placeholder.svg?height=150&width=100",
+    rating: 4.2,
+  },
+  {
+    id: "6",
+    title: "Otomatik Portakal",
+    author: "Anthony Burgess",
+    coverImage: "/placeholder.svg?height=150&width=100",
+    rating: 4.0,
+  },
 ]
 
 export default function ProfilePage() {
-    const [profile, setProfile] = useState<UserProfile>(initialProfile)
-    const [books, setBooks] = useState<BookType[]>(sampleBooks)
-    const [isEditing, setIsEditing] = useState(false)
-    const [editSection, setEditSection] = useState<string | null>(null)
-    const [showEditMenu, setShowEditMenu] = useState(false)
-    const [activeTab, setActiveTab] = useState("library")
+  const [profile, setProfile] = useState<UserProfile>(initialProfile)
+  const [isEditing, setIsEditing] = useState(false)
+  const [editSection, setEditSection] = useState<string | null>(null)
+  const [showEditMenu, setShowEditMenu] = useState(false)
+  const [activeTab, setActiveTab] = useState("library")
+  const [isScrolled, setIsScrolled] = useState(false)
+  const [theme, setTheme] = useState<"light" | "dark">("light")
+
+  useEffect(() => {
+    // Sistem dark mode tercihini kontrol et
+    if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      setTheme("dark")
+      document.documentElement.setAttribute("data-theme", "dark")
+    }
+
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY
+      setIsScrolled(scrollPosition > 50)
+    }
+
+    window.addEventListener("scroll", handleScroll)
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
+
+  // Toggle theme
+  const toggleTheme = () => {
+    const newTheme = theme === "light" ? "dark" : "light"
+    setTheme(newTheme)
+    document.documentElement.setAttribute("data-theme", newTheme)
+  }
 
   const handleProfileUpdate = (field: keyof UserProfile, value: string | number) => {
     setProfile((prev) => ({ ...prev, [field]: value }))
@@ -208,82 +215,144 @@ export default function ProfilePage() {
       ))
   }
 
-    const getMaxBooks = () => {
-        return Math.max(...readingActivity.map((item) => item.books))
-    }
+  const getMaxBooks = () => {
+    return Math.max(...readingActivity.map((item) => item.books))
+  }
 
-    return (
-        <div className="min-h-screen bg-gradient-to-br from-pink-50 via-rose-50 to-pink-100">
-            <header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-sm shadow-sm">
-                <div className="max-w-7xl mx-auto px-6 h-20 flex items-center">
-                    <Link className="flex items-center justify-center" href="/features/homepage">
-                        <BookOpen className="h-6 w-6 text-purple-600"/>
-                        <span className="ml-2 text-lg font-semibold">OkuYorum</span>
-                    </Link>
-                    <nav className="ml-auto flex items-center gap-4">
-                        <Link
-                            className="text-sm font-medium text-purple-600 hover:text-purple-700 flex items-center"
-                            href="/features/profile"
-                        >
-                            <User className="w-4 h-4 mr-1"/>
-                            Profil
-                        </Link>
-                        <Link
-                            className="text-sm font-medium text-gray-600 hover:text-purple-600 flex items-center"
-                            href="/features/library"
-                        >
-                            <Library className="w-4 h-4 mr-1"/>
-                            Kitaplığım
-                        </Link>
-                        <Link
-                            className="text-sm font-medium text-gray-600 hover:text-purple-600 flex items-center"
-                            href="/features/discover"
-                        >
-                            <Compass className="w-4 h-4 mr-1"/>
-                            Keşfet
-                        </Link>
-                        <Link
-                            className="text-sm font-medium text-gray-600 hover:text-purple-600 flex items-center"
-                            href="/features/kiraathane"
-                        >
-                            <Users className="w-4 h-4 mr-1"/>
-                            Millet Kıraathaneleri
-                        </Link>
-                        <Link
-                            className="text-sm font-medium text-gray-600 hover:text-purple-600 flex items-center"
-                            href="/donate"
-                        >
-                            <Heart className="w-4 h-4 mr-1"/>
-                            Bağış Yap
-                        </Link>
-                        <SearchForm/>
-                    </nav>
-                </div>
-            </header>
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-purple-50/50 via-rose-50/50 to-purple-100/50">
+      <header
+        className={`fixed top-0 z-50 w-full transition-all duration-300 ${
+          isScrolled ? "h-14 bg-background/60 backdrop-blur-lg border-b" : "h-16"
+        }`}
+      >
+        <div className="max-w-7xl mx-auto h-full flex items-center justify-between px-6">
+          <Link className="flex items-center justify-center group relative" href="/features/homepage">
+            <div className="relative">
+              <BookOpen
+                className={`${isScrolled ? "h-5 w-5" : "h-6 w-6"} text-foreground group-hover:text-purple-400 transition-all duration-300`}
+              />
+            </div>
+            <span
+              className={`ml-2 font-medium text-foreground transition-all duration-300 ${isScrolled ? "text-base" : "text-lg"}`}
+            >
+              OkuYorum
+            </span>
+          </Link>
 
-            <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <div className="relative mb-8">
-                    <Image
-                        src={profile.headerImage || "/placeholder.svg"}
-                        alt="Profil Başlığı"
-                        width={1000}
-                        height={300}
-                        className="w-full h-64 object-cover rounded-lg"
-                    />
+          <div className="hidden md:flex items-center h-full">
+            <nav className="flex items-center gap-6 px-6">
+              <Link
+                className={`flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300`}
+                href="/features/library"
+              >
+                <Library className="h-5 w-5" />
+                <span>Kitaplığım</span>
+              </Link>
 
-                    {/* Floating Edit Button */}
-                </div>
+              <Link
+                className={`flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300`}
+                href="/features/discover"
+              >
+                <Compass className="h-5 w-5" />
+                <span>Keşfet</span>
+              </Link>
 
-                {/* Floating Edit Button - Profil kartının dışına taşındı */}
-                <div className="flex justify-end mb-6 relative z-10">
-                    <div className="relative">
-                        <Button
-                            onClick={() => setShowEditMenu(!showEditMenu)}
-                            className="rounded-full bg-purple-300 hover:bg-purple-400 shadow-lg"
-                            size="sm"
-                        >
-                            <Edit className="h-3.5 w-3.5 mr-1"/> Düzenle
-                        </Button>
+              <Link
+                className={`flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300`}
+                href="/features/kiraathane"
+              >
+                <Users className="h-5 w-5" />
+                <span>Millet Kıraathaneleri</span>
+              </Link>
+
+              <Link
+                className={`flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300`}
+                href="/donate"
+              >
+                <Heart className="h-5 w-5" />
+                <span>Bağış Yap</span>
+              </Link>
+
+              <SearchForm />
+            </nav>
+
+            <div className="flex items-center gap-4 border-l border-border pl-6">
+              <button
+                onClick={toggleTheme}
+                className="text-muted-foreground hover:text-primary transition-colors duration-300"
+                aria-label="Tema değiştir"
+              >
+                {theme === "light" ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
+              </button>
+
+              <Link
+                className="flex items-center gap-2 text-primary transition-colors duration-300"
+                href="/features/profile"
+              >
+                <User className="h-5 w-5" />
+                <span>Profil</span>
+              </Link>
+            </div>
+          </div>
+
+          {/* Mobile Navigation */}
+          <div className="md:hidden flex items-center gap-4">
+            <div className="flex items-center gap-4">
+              <SearchForm isScrolled={true} />
+            </div>
+
+            <button
+              onClick={toggleTheme}
+              className="text-muted-foreground hover:text-primary transition-colors duration-300"
+              aria-label="Tema değiştir"
+            >
+              {theme === "light" ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-12">
+        {/* Header Image */}
+        <div className="relative mb-20">
+          <div className="h-64 w-full rounded-xl overflow-hidden">
+            <Image
+              src={profile.headerImage || "/placeholder.svg"}
+              alt="Profile Header"
+              fill
+              className="object-cover"
+              priority
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+          </div>
+
+          {/* Profile Image and Edit Button */}
+          <div className="absolute -bottom-16 left-8 flex items-end">
+            <div className="relative">
+              <div className="h-32 w-32 rounded-full border-4 border-white shadow-lg overflow-hidden bg-white">
+                <Image src={profile.profileImage || "/placeholder.svg"} alt="Profile" fill className="object-cover" />
+              </div>
+              {editSection === "profile" && (
+                <Button
+                  className="absolute bottom-0 right-0 rounded-full p-2 bg-purple-600 hover:bg-purple-700 text-white"
+                  size="icon"
+                >
+                  <Camera className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+          </div>
+
+          {/* Edit Profile Button */}
+          <div className="absolute bottom-4 right-4">
+            <Button
+              onClick={() => setShowEditMenu(!showEditMenu)}
+              variant="outline"
+              className="bg-white/80 hover:bg-white/90 backdrop-blur-sm"
+            >
+              <Edit className="h-4 w-4 mr-2" /> Profili Düzenle
+            </Button>
 
             {showEditMenu && (
               <motion.div
@@ -310,385 +379,344 @@ export default function ProfilePage() {
           </div>
         </div>
 
-                {/* Profile Info Card */}
-                <motion.div
-                    initial={{y: 20, opacity: 0}}
-                    animate={{y: 0, opacity: 1}}
-                    transition={{duration: 0.5}}
-                    className="relative -mt-20 mb-8 bg-white/90 backdrop-blur-sm rounded-xl shadow-lg p-6"
-                >
-                    <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
-                        <div className="relative">
-                            <Image
-                                src={profile.profileImage || "/placeholder.svg"}
-                                alt={profile.name}
-                                width={150}
-                                height={150}
-                                className="rounded-full border-4 border-white shadow-md"
+        {/* Profile Info */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left Column - User Info */}
+          <div className="lg:col-span-1 space-y-6">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+              <Card className="overflow-hidden border-none bg-white/70 backdrop-blur-sm shadow-md">
+                <CardContent className="p-6">
+                  <div className="space-y-4">
+                    {editSection === "info" ? (
+                      <div className="space-y-4">
+                        <div>
+                          <Label className="block text-sm font-medium mb-1">İsim</Label>
+                          <Input value={profile.name} onChange={(e) => handleProfileUpdate("name", e.target.value)} />
+                        </div>
+                        <div>
+                          <Label className="block text-sm font-medium mb-1">Doğum Tarihi</Label>
+                          <Input
+                            type="date"
+                            value={profile.birthDate}
+                            onChange={(e) => handleProfileUpdate("birthDate", e.target.value)}
+                          />
+                        </div>
+                        <div className="flex justify-end space-x-2">
+                          <Button variant="outline" size="sm" onClick={cancelEdit}>
+                            <X className="mr-1 h-4 w-4" /> İptal
+                          </Button>
+                          <Button
+                            size="sm"
+                            onClick={saveChanges}
+                            className="bg-purple-600 hover:bg-purple-700 text-white"
+                          >
+                            <Check className="mr-1 h-4 w-4" /> Kaydet
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <div>
+                          <h2 className="text-2xl font-bold text-gray-800">{profile.name}</h2>
+                          <div className="flex items-center text-gray-500 mt-1">
+                            <Calendar className="h-4 w-4 mr-1" />
+                            <span className="text-sm">Katılma: {new Date(profile.joinDate).toLocaleDateString()}</span>
+                          </div>
+                        </div>
+
+                        {editSection === "bio" ? (
+                          <div className="mt-4">
+                            <textarea
+                              value={profile.bio}
+                              onChange={(e) => handleProfileUpdate("bio", e.target.value)}
+                              className="w-full p-3 border rounded-lg"
+                              rows={4}
+                              placeholder="Kendinizden bahsedin..."
                             />
-                            {editSection === "profile" && (
-                                <Button
-                                    className="absolute bottom-0 right-0 rounded-full p-2 bg-purple-600 hover:bg-purple-700">
-                                    <Camera className="h-4 w-4"/>
-                                </Button>
-                            )}
-                        </div>
-
-                        <div className="flex-grow">
-                            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
-                                <div>
-                                    {editSection === "info" ? (
-                                        <Input
-                                            value={profile.name}
-                                            onChange={(e) => handleProfileUpdate("name", e.target.value)}
-                                            className="text-3xl font-bold mb-2"
-                                        />
-                                    ) : (
-                                        <h1 className="text-3xl font-bold mb-2">{profile.name}</h1>
-                                    )}
-                                    <div className="flex items-center text-gray-600">
-                                        <Calendar className="mr-2 h-4 w-4"/>
-                                        <span>Katılma: {new Date(profile.joinDate).toLocaleDateString()}</span>
-                                    </div>
-                                </div>
-
-                                <div className="flex space-x-6 mt-4 md:mt-0">
-                                    <div className="text-center">
-                                        <div className="text-2xl font-bold text-purple-600">{profile.followers}</div>
-                                        <div className="text-sm text-gray-600">Takipçi</div>
-                                    </div>
-                                    <div className="text-center">
-                                        <div className="text-2xl font-bold text-purple-600">{profile.following}</div>
-                                        <div className="text-sm text-gray-600">Takip Edilen</div>
-                                    </div>
-                                    <div className="text-center">
-                                        <div className="text-2xl font-bold text-purple-600">{profile.booksRead}</div>
-                                        <div className="text-sm text-gray-600">Kitap</div>
-                                    </div>
-                                </div>
+                            <div className="flex justify-end mt-2 space-x-2">
+                              <Button variant="outline" size="sm" onClick={cancelEdit}>
+                                <X className="mr-1 h-4 w-4" /> İptal
+                              </Button>
+                              <Button
+                                size="sm"
+                                onClick={saveChanges}
+                                className="bg-purple-600 hover:bg-purple-700 text-white"
+                              >
+                                <Check className="mr-1 h-4 w-4" /> Kaydet
+                              </Button>
                             </div>
+                          </div>
+                        ) : (
+                          <p className="text-gray-600">{profile.bio}</p>
+                        )}
 
-                            {/* Bio Section */}
-                            {editSection === "bio" ? (
-                                <div className="mt-4">
-                  <textarea
-                      value={profile.bio}
-                      onChange={(e) => handleProfileUpdate("bio", e.target.value)}
-                      className="w-full p-3 border rounded-lg"
-                      rows={4}
-                      placeholder="Kendinizden bahsedin..."
-                  />
-                                    <div className="flex justify-end mt-2 space-x-2">
-                                        <Button variant="outline" size="sm" onClick={cancelEdit}>
-                                            <X className="mr-1 h-4 w-4"/> İptal
-                                        </Button>
-                                        <Button size="sm" onClick={saveChanges}>
-                                            <Check className="mr-1 h-4 w-4"/> Kaydet
-                                        </Button>
-                                    </div>
-                                </div>
-                            ) : (
-                                <p className="text-gray-700 mt-2">{profile.bio}</p>
-                            )}
+                        <div className="flex justify-between pt-4 border-t">
+                          <div className="text-center">
+                            <div className="text-xl font-bold text-purple-600">{profile.followers}</div>
+                            <div className="text-sm text-gray-500">Takipçi</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-xl font-bold text-purple-600">{profile.following}</div>
+                            <div className="text-sm text-gray-500">Takip</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-xl font-bold text-purple-600">{profile.booksRead}</div>
+                            <div className="text-sm text-gray-500">Kitap</div>
+                          </div>
                         </div>
+                      </>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            {/* Reading Stats */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+            >
+              <Card className="overflow-hidden border-none bg-white/70 backdrop-blur-sm shadow-md">
+                <CardContent className="p-6">
+                  <h3 className="text-lg font-semibold mb-6 flex items-center">
+                    <Award className="mr-2 h-5 w-5 text-purple-400" /> Okuma İstatistikleri
+                  </h3>
+
+                  <div className="grid grid-cols-3 gap-4">
+                    {/* Reader Score */}
+                    <div className="text-center p-4 rounded-lg bg-purple-50/50 hover:bg-purple-100/50 transition-colors duration-300">
+                      <div className="text-2xl font-bold text-purple-400 mb-1">{profile.readerScore}</div>
+                      <div className="text-sm text-gray-600">Okuyucu Puanı</div>
                     </div>
-                </motion.div>
 
-                {/* Stats Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <motion.div initial={{opacity: 0, y: 20}} animate={{opacity: 1, y: 0}} transition={{delay: 0.1}}>
-                        <Card
-                            className="overflow-hidden border-none shadow-md hover:shadow-lg transition-shadow h-[250px]">
-                            <div className="bg-gradient-to-r from-purple-200 to-purple-400 p-4">
-                                <CardTitle className="text-gray-700 flex items-center">
-                                    <Star className="mr-2 h-5 w-5"/> Okur Puanı
-                                </CardTitle>
-                            </div>
-                            <CardContent className="p-6 flex flex-col justify-center h-[190px]">
-                                <div className="flex items-center justify-center mb-4">
-                                    <span className="text-5xl font-bold text-purple-600">{profile.readerScore}</span>
-                                    <span className="text-lg text-gray-500 ml-2">/ 100</span>
-                                </div>
-                                <Progress value={profile.readerScore} className="h-2 w-full bg-gray-200"/>
-                                <p className="mt-4 text-gray-600 text-sm text-center">Toplam {profile.booksRead} kitap
-                                    okundu</p>
-                            </CardContent>
-                        </Card>
-                    </motion.div>
-                    <motion.div initial={{opacity: 0, y: 20}} animate={{opacity: 1, y: 0}} transition={{delay: 0.3}}>
-                        <Card
-                            className="overflow-hidden border-none shadow-md hover:shadow-lg transition-shadow h-[250px]">
-                            <div className="bg-gradient-to-r from-green-200 to-green-400 p-4">
-                                <CardTitle className="text-gray-700 flex items-center">
-                                    <Award className="mr-2 h-5 w-5"/> Yıllık Hedef
-                                </CardTitle>
-                            </div>
-                            <CardContent className="p-6 flex flex-col justify-center h-[190px]">
-                                <div className="text-center">
-                                    <div className="text-5xl font-bold text-green-600 mb-2">
-                                        38<span className="text-2xl">/50</span>
-                                    </div>
-                                    <p className="text-gray-600">Kitap</p>
-                                    <Progress value={76} className="h-2 w-full mt-4 bg-gray-200"/>
-                                    <p className="mt-2 text-sm text-gray-500">%76 tamamlandı</p>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </motion.div>
-                </div>
+                    {/* Yearly Goal */}
+                    <div className="text-center p-4 rounded-lg bg-purple-50/50 hover:bg-purple-100/50 transition-colors duration-300">
+                      <div className="text-2xl font-bold text-purple-400 mb-1">26/36</div>
+                      <div className="text-sm text-gray-600">Yıllık Hedef</div>
+                    </div>
 
-                {/* Reading Activity Chart */}
-                <motion.div
-                    initial={{opacity: 0, y: 20}}
-                    animate={{opacity: 1, y: 0}}
-                    transition={{delay: 0.4}}
-                    className="mb-8"
-                >
-                    <Card className="overflow-hidden border-none shadow-md">
-                        <div className="bg-gradient-to-r from-indigo-200 to-indigo-400 p-4">
-                            <CardTitle className="text-gray-700 flex items-center">
-                                <BarChart3 className="mr-2 h-5 w-5"/> Okuma Aktivitesi
-                            </CardTitle>
+                    {/* Reading Time */}
+                    <div className="text-center p-4 rounded-lg bg-purple-50/50 hover:bg-purple-100/50 transition-colors duration-300">
+                      <div className="text-2xl font-bold text-purple-400 mb-1">124</div>
+                      <div className="text-sm text-gray-600">Okuma Saati</div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </div>
+
+          {/* Right Column - Content */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Tabs */}
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+              <Card className="overflow-hidden border-none bg-white/70 backdrop-blur-sm shadow-md">
+                <Tabs defaultValue="library" onValueChange={setActiveTab}>
+                  <TabsList className="w-full bg-transparent p-0 border-b">
+                    <TabsTrigger
+                      value="wall"
+                      className="flex-1 py-3 rounded-none data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-purple-400 data-[state=active]:text-purple-500 transition-all duration-200"
+                    >
+                      Duvar
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="reviews"
+                      className="flex-1 py-3 rounded-none data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-purple-600 data-[state=active]:text-purple-700 transition-all duration-200"
+                    >
+                      İncelemeler
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="quotes"
+                      className="flex-1 py-3 rounded-none data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-purple-600 data-[state=active]:text-purple-700 transition-all duration-200"
+                    >
+                      Alıntılar
+                    </TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="library" className="p-6">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+
+                      <motion.div
+                        whileHover={{ scale: 1.05 }}
+                        className="bg-purple-50/50 rounded-lg border-2 border-dashed border-purple-200 flex flex-col items-center justify-center p-4 h-full cursor-pointer hover:bg-purple-100/50 transition-colors duration-300"
+                      >
+                        <Plus className="h-8 w-8 text-purple-300 mb-2" />
+                        <span className="text-sm font-medium text-purple-500">Kitap Ekle</span>
+                      </motion.div>
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="wall" className="p-6">
+                    <div className="text-center py-8">
+                      <p className="text-gray-500">Duvar içeriği burada gösterilecek</p>
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="reviews" className="p-6">
+                    <div className="text-center py-8">
+                      <p className="text-gray-500">İncelemeler burada listelenecek</p>
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="quotes" className="p-6">
+                    <div className="text-center py-8">
+                      <p className="text-gray-500">Alıntılar burada gösterilecek</p>
+                    </div>
+                  </TabsContent>
+                </Tabs>
+              </Card>
+            </motion.div>
+
+            {/* Reading Activity Chart */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+            >
+              <Card className="overflow-hidden border-none bg-white/70 backdrop-blur-sm shadow-md">
+                <CardContent className="p-6">
+                  <h3 className="text-lg font-semibold mb-4 flex items-center">
+                    <BarChart3 className="mr-2 h-5 w-5 text-purple-400" /> Okuma Aktivitesi
+                  </h3>
+
+                  <div className="relative">
+                    {/* Grid lines */}
+                    <div className="absolute inset-0 grid grid-rows-5 gap-0">
+                      {[...Array(5)].map((_, i) => (
+                        <div key={i} className="border-b border-gray-100"></div>
+                      ))}
+                    </div>
+
+                    {/* Activity bars */}
+                    <div className="h-64 flex items-end justify-between relative">
+                      {readingActivity.map((item, index) => (
+                        <div key={index} className="flex flex-col items-center group">
+                          <div
+                            className="w-8 bg-gradient-to-t from-purple-300 to-purple-100 hover:from-purple-400 hover:to-purple-200 transition-all rounded-t-md relative"
+                            style={{
+                              height: `${(item.books / getMaxBooks()) * 180}px`,
+                            }}
+                          >
+                            {/* Hover tooltip */}
+                            <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                              {item.books} kitap
+                            </div>
+                          </div>
+                          <p className="mt-2 text-xs font-medium text-gray-600">{item.month}</p>
                         </div>
-                        <CardContent className="p-6">
-                            <div className="h-64 flex items-end justify-between">
-                                {readingActivity.map((item, index) => (
-                                    <div key={index} className="flex flex-col items-center">
-                                        <div
-                                            className="w-12 bg-indigo-300 hover:bg-indigo-400 transition-all rounded-t-md"
-                                            style={{
-                                                height: `${(item.books / getMaxBooks()) * 180}px`,
-                                            }}
-                                        ></div>
-                                        <p className="mt-2 text-xs font-medium">{item.month}</p>
-                                        <p className="text-sm font-bold text-indigo-400">{item.books}</p>
-                                    </div>
-                                ))}
-                            </div>
-                        </CardContent>
-                    </Card>
-                </motion.div>
+                      ))}
+                    </div>
+                  </div>
 
-                {/* Achievements */}
-                <motion.div
-                    initial={{opacity: 0, y: 20}}
-                    animate={{opacity: 1, y: 0}}
-                    transition={{delay: 0.5}}
-                    className="mb-8"
-                >
-                    <Card className="overflow-hidden border-none shadow-md">
-                        <div className="bg-gradient-to-r from-amber-200 to-amber-400 p-4">
-                            <CardTitle className="text-gray-700 flex items-center">
-                                <Award className="mr-2 h-5 w-5"/> Başarılar
-                            </CardTitle>
+                  {/* Summary stats */}
+                  <div className="mt-6 grid grid-cols-3 gap-4 pt-4 border-t">
+                    <div className="text-center">
+                      <div className="text-xl font-bold text-purple-500">
+                        {readingActivity.reduce((sum, item) => sum + item.books, 0)}
+                      </div>
+                      <div className="text-sm text-gray-500">Toplam Kitap</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-xl font-bold text-purple-500">
+                        {Math.round(readingActivity.reduce((sum, item) => sum + item.books, 0) / 12)}
+                      </div>
+                      <div className="text-sm text-gray-500">Aylık Ortalama</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-xl font-bold text-purple-500">
+                        {getMaxBooks()}
+                      </div>
+                      <div className="text-sm text-gray-500">En Yüksek Ay</div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            {/* Achievements */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
+              <Card className="overflow-hidden border-none bg-white/70 backdrop-blur-sm shadow-md">
+                <CardContent className="p-6">
+                  <h3 className="text-lg font-semibold mb-4 flex items-center">
+                    <Award className="mr-2 h-5 w-5 text-purple-400" /> Başarılar
+                  </h3>
+
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {achievements.map((achievement) => (
+                      <motion.div
+                        key={achievement.id}
+                        className="bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-all duration-300"
+                        whileHover={{ y: -5 }}
+                      >
+                        <div className="bg-purple-50 rounded-full p-3 inline-flex items-center justify-center mb-3">
+                          <div className="text-purple-400">{achievement.icon}</div>
                         </div>
-                        <CardContent className="p-6">
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                                {achievements.map((achievement) => (
-                                    <motion.div
-                                        key={achievement.id}
-                                        className="text-center bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow"
-                                        whileHover={{y: -5}}
-                                    >
-                                        <div
-                                            className="bg-amber-100 rounded-full p-4 inline-block mb-3">{achievement.icon}</div>
-                                        <h3 className="font-semibold text-gray-800">{achievement.title}</h3>
-                                        <p className="text-xs text-gray-600 mb-2">{achievement.description}</p>
-                                        <Progress
-                                            value={achievement.progress}
-                                            className={`h-2 w-full bg-gray-200 ${achievement.progress === 100 ? "[&>div]:bg-green-300" : "[&>div]:bg-amber-300"}`}
-                                        />
-                                        <p className="mt-1 text-xs font-medium text-gray-700">%{achievement.progress}</p>
-                                    </motion.div>
-                                ))}
-                            </div>
-                        </CardContent>
-                    </Card>
-                </motion.div>
+                        <h4 className="font-semibold text-gray-800 mb-1">{achievement.title}</h4>
+                        <p className="text-xs text-gray-500 mb-2">{achievement.description}</p>
+                        <Progress
+                          value={achievement.progress}
+                          className={`h-2 bg-gray-100 ${achievement.progress === 100 ? "[&>div]:bg-green-400" : "[&>div]:bg-purple-300"}`}
+                        />
+                        <p className="mt-1 text-xs font-medium text-gray-600">%{achievement.progress}</p>
+                      </motion.div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
 
-                {/* Friends Section */}
-                <motion.div
-                    initial={{opacity: 0, y: 20}}
-                    animate={{opacity: 1, y: 0}}
-                    transition={{delay: 0.6}}
-                    className="mb-8"
-                >
-                    <Card className="overflow-hidden border-none shadow-md">
-                        <div className="bg-gradient-to-r from-pink-200 to-pink-400 p-4">
-                            <CardTitle className="text-gray-700 flex items-center">
-                                <Users className="mr-2 h-5 w-5"/> Arkadaşlar
-                            </CardTitle>
+            {/* Recommendations */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+            >
+              <Card className="overflow-hidden border-none bg-white/70 backdrop-blur-sm shadow-md">
+                <CardContent className="p-6">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-lg font-semibold flex items-center">
+                      <BookMarked className="mr-2 h-5 w-5 text-purple-400" /> Sizin İçin Öneriler
+                    </h3>
+                    <Button variant="ghost" size="sm" className="text-purple-500 hover:text-purple-600">
+                      Tümünü Gör
+                    </Button>
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
+                    {recommendations.map((book) => (
+                      <motion.div
+                        key={book.id}
+                        className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-all duration-300"
+                        whileHover={{ y: -5 }}
+                      >
+                        <div className="relative h-32 w-full">
+                          <Image
+                            src={book.coverImage || "/placeholder.svg"}
+                            alt={book.title}
+                            fill
+                            className="object-cover"
+                          />
                         </div>
-                        <CardContent className="p-6">
-                            <div className="flex flex-wrap gap-4">
-                                {friends.map((friend) => (
-                                    <motion.div key={friend.id} className="flex flex-col items-center"
-                                                whileHover={{scale: 1.05}}>
-                                        <Image
-                                            src={friend.image || "/placeholder.svg"}
-                                            alt={friend.name}
-                                            width={60}
-                                            height={60}
-                                            className="rounded-full border-2 border-pink-200"
-                                        />
-                                        <p className="mt-2 text-sm font-medium">{friend.name}</p>
-                                    </motion.div>
-                                ))}
-                                <motion.div className="flex flex-col items-center justify-center"
-                                            whileHover={{scale: 1.05}}>
-                                    <Button
-                                        variant="outline"
-                                        size="icon"
-                                        className="h-[60px] w-[60px] rounded-full border-2 border-dashed border-gray-300"
-                                    >
-                                        <Plus className="h-6 w-6 text-gray-400"/>
-                                    </Button>
-                                    <p className="mt-2 text-sm font-medium text-gray-500">Arkadaş Ekle</p>
-                                </motion.div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                </motion.div>
-
-                {/* Recommendations */}
-                <motion.div
-                    initial={{opacity: 0, y: 20}}
-                    animate={{opacity: 1, y: 0}}
-                    transition={{delay: 0.7}}
-                    className="mb-8"
-                >
-                    <Card className="overflow-hidden border-none shadow-md">
-                        <div className="bg-gradient-to-r from-cyan-200 to-cyan-400 p-4">
-                            <CardTitle className="text-gray-700 flex items-center">
-                                <BookMarked className="mr-2 h-5 w-5"/> Sizin İçin Öneriler
-                            </CardTitle>
+                        <div className="p-2">
+                          <h4 className="font-medium text-xs line-clamp-1">{book.title}</h4>
+                          <p className="text-xs text-gray-500 truncate">{book.author}</p>
+                          <div className="flex mt-1 scale-75 origin-left">{renderStars(book.rating)}</div>
                         </div>
-                        <CardContent className="p-6">
-                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
-                                {recommendations.map((book) => (
-                                    <motion.div
-                                        key={book.id}
-                                        className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow"
-                                        whileHover={{y: -5}}
-                                    >
-                                        <Image
-                                            src={book.coverImage || "/placeholder.svg"}
-                                            alt={book.title}
-                                            width={100}
-                                            height={150}
-                                            className="w-full h-32 object-cover"
-                                        />
-                                        <div className="p-2">
-                                            <h3 className="font-semibold text-xs truncate">{book.title}</h3>
-                                            <p className="text-xs text-gray-600 truncate">{book.author}</p>
-                                            <div className="flex mt-1">{renderStars(book.rating)}</div>
-                                        </div>
-                                    </motion.div>
-                                ))}
-                            </div>
-                        </CardContent>
-                    </Card>
-                </motion.div>
-
-        {/* Content Tabs */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8 }}>
-          <Tabs defaultValue="library" className="mb-8" onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-7 bg-white/50 backdrop-blur-sm rounded-lg p-1">
-              <TabsTrigger value="library" className={activeTab === "library" ? "bg-purple-300 text-gray-700" : ""}>
-                Kitaplık
-              </TabsTrigger>
-              <TabsTrigger value="wall" className={activeTab === "wall" ? "bg-purple-300 text-gray-700" : ""}>
-                Duvar
-              </TabsTrigger>
-              <TabsTrigger value="reviews" className={activeTab === "reviews" ? "bg-purple-300 text-gray-700" : ""}>
-                İncelemeler
-              </TabsTrigger>
-              <TabsTrigger value="quotes" className={activeTab === "quotes" ? "bg-purple-300 text-gray-700" : ""}>
-                Alıntılar
-              </TabsTrigger>
-              <TabsTrigger value="posts" className={activeTab === "posts" ? "bg-purple-300 text-gray-700" : ""}>
-                İletiler
-              </TabsTrigger>
-              <TabsTrigger value="goals" className={activeTab === "goals" ? "bg-purple-300 text-gray-700" : ""}>
-                Hedefler
-              </TabsTrigger>
-              <TabsTrigger value="comments" className={activeTab === "comments" ? "bg-purple-300 text-gray-700" : ""}>
-                Yorumlar
-              </TabsTrigger>
-            </TabsList>
-
-                        <TabsContent value="library" className="mt-6">
-                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                                {books.map((book) => (
-                                    <motion.div
-                                        key={book.id}
-                                        className="bg-white rounded-lg shadow p-4 hover:shadow-md transition-shadow"
-                                        whileHover={{scale: 1.03}}
-                                    >
-                                        <Image
-                                            src={book.coverImage || "/placeholder.svg"}
-                                            alt={book.title}
-                                            width={100}
-                                            height={150}
-                                            className="w-full h-40 object-cover mb-2 rounded"
-                                        />
-                                        <h3 className="font-semibold text-sm">{book.title}</h3>
-                                        <p className="text-xs text-gray-600">{book.author}</p>
-                                        <div className="flex mt-2">{renderStars(book.rating)}</div>
-                                    </motion.div>
-                                ))}
-                                {isEditing && (
-                                    <motion.div whileHover={{scale: 1.05}} className="h-full">
-                                        <Button
-                                            className="h-full w-full flex flex-col items-center justify-center text-gray-400 border-2 border-dashed border-gray-300 rounded-lg hover:border-gray-400 hover:text-gray-500">
-                                            <BookOpenCheck className="h-8 w-8 mb-2"/>
-                                            <span>Kitap Ekle</span>
-                                        </Button>
-                                    </motion.div>
-                                )}
-                            </div>
-                        </TabsContent>
-
-            <TabsContent value="wall">
-              <div className="bg-white rounded-lg p-6 shadow-sm">
-                <p className="text-center text-gray-500">Duvar içeriği burada gösterilecek</p>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="reviews">
-              <div className="bg-white rounded-lg p-6 shadow-sm">
-                <p className="text-center text-gray-500">İncelemeler burada listelenecek</p>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="quotes">
-              <div className="bg-white rounded-lg p-6 shadow-sm">
-                <p className="text-center text-gray-500">Alıntılar burada gösterilecek</p>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="posts">
-              <div className="bg-white rounded-lg p-6 shadow-sm">
-                <p className="text-center text-gray-500">İletiler burada listelenecek</p>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="goals">
-              <div className="bg-white rounded-lg p-6 shadow-sm">
-                <p className="text-center text-gray-500">Okuma hedefleri burada gösterilecek</p>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="comments">
-              <div className="bg-white rounded-lg p-6 shadow-sm">
-                <p className="text-center text-gray-500">Yorumlar burada listelenecek</p>
-              </div>
-            </TabsContent>
-          </Tabs>
-        </motion.div>
+                      </motion.div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </div>
+        </div>
       </main>
     </div>
   )
 }
-
 

@@ -40,13 +40,15 @@ export interface ContentItem {
 
 interface ContentCardProps {
   item: ContentItem
-  index: number
+  index?: number
   onLike: (id: string) => void
   onSave: (id: string) => void
-  onFollow: (userId: string) => void
+  onFollow?: (userId: string) => void
+  onShare?: () => Promise<void>
+  isSaved?: boolean
 }
 
-export const ContentCard = ({ item, index, onLike, onSave, onFollow }: ContentCardProps) => {
+export const ContentCard = ({ item, index, onLike, onSave, onFollow, onShare }: ContentCardProps) => {
   const cardVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: {
@@ -183,8 +185,8 @@ export const ContentCard = ({ item, index, onLike, onSave, onFollow }: ContentCa
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem onClick={() => onFollow(item.user.id)} className="cursor-pointer">
-                {item.user.isFollowing ? "Takibi Bırak" : "Takip Et"}
+              <DropdownMenuItem onClick={() => onFollow && onFollow(item.user.id)} className="cursor-pointer">
+                {onFollow ? (item.user.isFollowing ? "Takibi Bırak" : "Takip Et") : ""}
               </DropdownMenuItem>
               <DropdownMenuItem className="cursor-pointer">Bildir</DropdownMenuItem>
               <DropdownMenuItem className="cursor-pointer">Paylaş</DropdownMenuItem>

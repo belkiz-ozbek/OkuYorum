@@ -2,9 +2,9 @@
 
 import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion"
 import { useInView } from "react-intersection-observer"
-import {BookOpen,PlusCircle,User,Library,Compass,Coffee,Heart,Search,Moon,Sun,Quote,FileText,Filter,ChevronDown,} from "lucide-react"
+import {BookOpen,PlusCircle,User,Library,Compass,Coffee,Heart,Search,Moon,Sun,Quote,FileText,Filter,ChevronDown,Share2,Bookmark,TrendingUp,} from "lucide-react"
 import { Button } from "@/components/ui/form/button"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card } from "@/components/ui/layout/Card"
@@ -166,6 +166,7 @@ const allGenres = Array.from(sampleContent.reduce((genres, item) => {
   return genres
 }, new Set<string>()))
 
+
 export default function DiscoverPage() {
   const [content, setContent] = useState<ContentItem[]>(sampleContent)
   const [activeTab, setActiveTab] = useState<string>("all")
@@ -182,6 +183,10 @@ export default function DiscoverPage() {
     genre: "",
     rating: 0,
   })
+  const [savedItems, setSavedItems] = useState<Set<string>>(new Set());
+  const [showQuickActions, setShowQuickActions] = useState(false);
+  const { scrollY } = useScroll();
+  const opacity = useTransform(scrollY, [0, 300], [1, 0]);
 
   // Ref for infinite scroll
   const loadMoreRef = useRef(null)
@@ -347,8 +352,40 @@ export default function DiscoverPage() {
     })
   }
 
+
+  // Save item function
+  const toggleSaveItem = (itemId: string) => {
+    setSavedItems(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(itemId)) {
+        newSet.delete(itemId);
+      } else {
+        newSet.add(itemId);
+      }
+      return newSet;
+    });
+  };
+
+  // Share function
+  const shareContent = async (item: ContentItem) => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: item.book.title,
+          text: item.content,
+          url: window.location.href
+        });
+      } catch (error) {
+        console.error('Error sharing:', error);
+      }
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 via-rose-50 to-pink-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+
+
+
       {/* Mobile Menu */}
       <MobileMenu open={showMobileMenu} onOpenChange={setShowMobileMenu} />
 
@@ -463,6 +500,7 @@ export default function DiscoverPage() {
       </header>
 
       <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-6">
+
         {/* Search and Filter Bar */}
         <motion.div
           className="mb-6"
@@ -569,19 +607,25 @@ export default function DiscoverPage() {
           </Card>
         </motion.div>
 
-        {/* Content Feed - Tumblr-style Vertical Layout */}
+        {/* Content Feed */}
         <div className="space-y-4 max-w-3xl mx-auto">
           <AnimatePresence>
             {filteredContent.length > 0 ? (
               filteredContent.map((item, index) => (
-                <ContentCard
+                <motion.div
                   key={item.id}
-                  item={item}
-                  index={index}
-                  onLike={toggleLike}
-                  onSave={toggleSave}
-                  onFollow={toggleFollow}
-                />
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <ContentCard
+                    item={item}
+                    onLike={() => toggleLike(item.id)}
+                    onSave={() => toggleSave(item.id)}
+                    onFollow={toggleFollow}
+                  />
+                </motion.div>
               ))
             ) : (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-12">
