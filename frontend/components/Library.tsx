@@ -7,7 +7,8 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {BookOpen, CheckCircle, Clock, Search, Star, Library as LibraryIcon, Compass, Users, Heart, Moon, Sun} from "lucide-react";
-
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { SearchForm } from "@/components/ui/form/search-form";
 
 interface Book {
   id: number;
@@ -338,19 +339,19 @@ const Library: React.FC<LibraryProps> = ({ activeTab = 'all' }) => {
       <div className="pt-24">
         {/* Categories */}
         <div className="max-w-7xl mx-auto px-6 mb-8">
-          <div className="bg-white/80 backdrop-blur-md rounded-2xl p-6 shadow-lg border border-purple-100/50">
+          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 shadow-xl border border-white/10">
             <div className="flex flex-wrap gap-4">
               <Link 
                 href="/features/library/all" 
                 className={`flex items-center gap-2 px-6 py-3 rounded-xl transition-all duration-300 ${
                   activeTab === 'all' 
-                    ? 'bg-purple-600 text-white shadow-lg transform -translate-y-0.5' 
-                    : 'text-gray-600 hover:bg-purple-50'
+                    ? 'bg-white text-[#8B4513] shadow-lg transform -translate-y-0.5' 
+                    : 'text-white hover:bg-white/10'
                 }`}
               >
                 <BookOpen className="w-5 h-5" />
                 <span className="font-medium">Tümü</span>
-                <span className="ml-2 bg-purple-700/20 px-2 py-0.5 rounded-full text-sm">
+                <span className="ml-2 bg-[#8B4513]/20 px-2 py-0.5 rounded-full text-sm">
                   {books.length}
                 </span>
               </Link>
@@ -358,13 +359,13 @@ const Library: React.FC<LibraryProps> = ({ activeTab = 'all' }) => {
                 href="/features/library/favorites" 
                 className={`flex items-center gap-2 px-6 py-3 rounded-xl transition-all duration-300 ${
                   activeTab === 'favorites' 
-                    ? 'bg-purple-600 text-white shadow-lg transform -translate-y-0.5' 
-                    : 'text-gray-600 hover:bg-purple-50'
+                    ? 'bg-white text-[#8B4513] shadow-lg transform -translate-y-0.5' 
+                    : 'text-white hover:bg-white/10'
                 }`}
               >
                 <Star className="w-5 h-5" />
                 <span className="font-medium">Favoriler</span>
-                <span className="ml-2 bg-purple-700/20 px-2 py-0.5 rounded-full text-sm">
+                <span className="ml-2 bg-[#8B4513]/20 px-2 py-0.5 rounded-full text-sm">
                   {getTabCount('favorite')}
                 </span>
               </Link>
@@ -372,13 +373,13 @@ const Library: React.FC<LibraryProps> = ({ activeTab = 'all' }) => {
                 href="/features/library/to-read" 
                 className={`flex items-center gap-2 px-6 py-3 rounded-xl transition-all duration-300 ${
                   activeTab === 'to-read' 
-                    ? 'bg-purple-600 text-white shadow-lg transform -translate-y-0.5' 
-                    : 'text-gray-600 hover:bg-purple-50'
+                    ? 'bg-white text-[#8B4513] shadow-lg transform -translate-y-0.5' 
+                    : 'text-white hover:bg-white/10'
                 }`}
               >
                 <Clock className="w-5 h-5" />
                 <span className="font-medium">Okunacaklar</span>
-                <span className="ml-2 bg-purple-700/20 px-2 py-0.5 rounded-full text-sm">
+                <span className="ml-2 bg-[#8B4513]/20 px-2 py-0.5 rounded-full text-sm">
                   {getTabCount('to-read')}
                 </span>
               </Link>
@@ -386,13 +387,13 @@ const Library: React.FC<LibraryProps> = ({ activeTab = 'all' }) => {
                 href="/features/library/read" 
                 className={`flex items-center gap-2 px-6 py-3 rounded-xl transition-all duration-300 ${
                   activeTab === 'read' 
-                    ? 'bg-purple-600 text-white shadow-lg transform -translate-y-0.5' 
-                    : 'text-gray-600 hover:bg-purple-50'
+                    ? 'bg-white text-[#8B4513] shadow-lg transform -translate-y-0.5' 
+                    : 'text-white hover:bg-white/10'
                 }`}
               >
                 <CheckCircle className="w-5 h-5" />
                 <span className="font-medium">Okunanlar</span>
-                <span className="ml-2 bg-purple-700/20 px-2 py-0.5 rounded-full text-sm">
+                <span className="ml-2 bg-[#8B4513]/20 px-2 py-0.5 rounded-full text-sm">
                   {getTabCount('read')}
                 </span>
               </Link>
@@ -401,11 +402,11 @@ const Library: React.FC<LibraryProps> = ({ activeTab = 'all' }) => {
             {/* Search Bar */}
             <div className="mt-6 relative">
               <div className="relative">
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white w-5 h-5" />
                 <Input
                   type="text"
                   placeholder="Kitaplığınızda arayın..."
-                  className="w-full pl-12 pr-4 py-3.5 bg-purple-50/50 border-none text-gray-600 placeholder-gray-400 rounded-xl focus:ring-2 focus:ring-purple-200 focus:bg-white transition-all duration-300 hover:bg-white text-base"
+                  className="w-full pl-12 pr-4 py-3.5 bg-white/25 border-none text-white placeholder-white/80 rounded-xl focus:ring-2 focus:ring-white/40 focus:bg-white/30 transition-all duration-300 hover:bg-white/30 text-base"
                   value={searchTerm}
                   onChange={(e: ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
                 />
