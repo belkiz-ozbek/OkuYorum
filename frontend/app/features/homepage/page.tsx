@@ -235,7 +235,7 @@ export default function HomePage() {
                 <span>Millet Kıraathaneleri</span>
               </Link>
 
-              <Link className={`flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300`} href="/donate">
+              <Link className={`flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300`} href="/features/donate">
                 <Heart className="h-5 w-5" />
                 <span>Bağış Yap</span>
               </Link>
@@ -342,7 +342,7 @@ export default function HomePage() {
                 asChild 
                 className="btn bg-gradient-to-r from-primary to-[#4A00E0] hover:from-[#4A00E0] hover:to-primary text-white rounded-full px-8 py-6 text-lg"
               >
-                <Link href="/auth/signup">
+                <Link href="/features/auth/signup">
                   Hemen Başlayın <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
@@ -779,7 +779,7 @@ export default function HomePage() {
             asChild 
             className="btn bg-white text-primary hover:bg-white/90 rounded-full px-8 py-4 text-lg"
           >
-            <Link href="/auth/signup">Ücretsiz Hesap Oluşturun</Link>
+            <Link href="/features/auth/signup">Ücretsiz Hesap Oluşturun</Link>
           </Button>
         </div>
       </main>
@@ -805,7 +805,7 @@ export default function HomePage() {
                   </Link>
                 </li>
                 <li>
-                  <Link href="features/donate" className="text-sm text-muted-foreground hover:text-primary">
+                  <Link href="/features/donate" className="text-sm text-muted-foreground hover:text-primary">
                     Bağış Yap
                   </Link>
                 </li>

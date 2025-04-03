@@ -78,7 +78,7 @@ export default function AdminDonationDetailPage() {
             description: "Bu sayfaya erişim yetkiniz bulunmamaktadır.",
             variant: "destructive"
           })
-          router.push('/donations')
+          router.push('/features/admin/features/donations')
         }
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (err: any) {
@@ -88,7 +88,7 @@ export default function AdminDonationDetailPage() {
           description: "Yetki kontrolü yapılırken bir hata oluştu. Ana sayfaya yönlendiriliyorsunuz.",
           variant: "destructive"
         })
-        router.push('/donations')
+        router.push('/features/admin/features/donations')
       }
     }
     
@@ -270,7 +270,7 @@ export default function AdminDonationDetailPage() {
         description: "Bağış başarıyla silindi.",
       })
       
-      router.push('/admin/donations')
+      router.push('/admin/features/donations')
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       console.error("Error deleting donation:", err || "Unknown error")
@@ -309,7 +309,7 @@ export default function AdminDonationDetailPage() {
           </div>
         </div>
         <Button asChild variant="outline">
-          <Link href="/admin/donations">
+          <Link href="/admin/features/donations">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Bağışlara Dön
           </Link>
@@ -324,7 +324,7 @@ export default function AdminDonationDetailPage() {
         <h1 className="text-2xl font-bold text-gray-900">Bağış Yönetimi</h1>
         <div className="flex gap-2">
           <Button asChild variant="outline">
-            <Link href="/admin/donations">
+            <Link href="/admin/features/donations">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Bağışlara Dön
             </Link>

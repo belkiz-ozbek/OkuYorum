@@ -189,7 +189,7 @@ export default function DonationsPage() {
                 <span>Millet Kıraathaneleri</span>
               </Link>
 
-              <Link className={`flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300`} href="/donate">
+              <Link className={`flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300`} href="/features/donate">
                 <Heart className="h-5 w-5" />
                 <span>Bağış Yap</span>
               </Link>
@@ -244,7 +244,7 @@ export default function DonationsPage() {
       <div className="container mx-auto py-8 px-4 pt-24">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-purple-800">Bağışlarım</h1>
-          <Link href="/donate">
+          <Link href="/features/donate">
             <Button className="bg-purple-600 hover:bg-purple-700">
               <BookOpen className="mr-2 h-4 w-4" />
               Yeni Bağış Yap
@@ -363,7 +363,7 @@ export default function DonationsPage() {
                       </div>
                     </CardContent>
                     <CardFooter className="pt-0 pb-4">
-                      <Link href={`/donations/${donation.id}`} className="w-full">
+                      <Link href={`/features/donations/${donation.id}`} className="w-full">
                         <Button 
                           variant="outline" 
                           className="w-full border-purple-200 text-purple-700 hover:bg-purple-50"
@@ -398,7 +398,7 @@ export default function DonationsPage() {
                       : `${donationTypeMap[tabValue as keyof typeof donationTypeMap]} türünde bağışınız bulunmuyor`}
                   </h3>
                   <p className="text-gray-500 mb-4">Yeni bir bağış yapmak için hemen başlayın!</p>
-                  <Link href="/donate">
+                  <Link href="/features/donate">
                     <Button className="bg-purple-600 hover:bg-purple-700">
                       Bağış Yap
                     </Button>

@@ -215,7 +215,7 @@ export default function AdminDashboardPage() {
                   console.log("Navigating to all donations")
                 }}
               >
-                <Link href="/admin/donations">
+                <Link href="/features/admin/features/donations">
                   <div className="flex items-center">
                     <BookOpen className="mr-2 h-5 w-5" />
                     <span>Tüm Bağışlar</span>
@@ -234,7 +234,7 @@ export default function AdminDashboardPage() {
                   console.log("Navigating to pending donations")
                 }}
               >
-                <Link href="/admin/donations?status=PENDING">
+                <Link href="/features/admin/features/donations?status=PENDING">
                   <div className="flex items-center">
                     <Package className="mr-2 h-5 w-5" />
                     <span>Bekleyen Bağışlar</span>
@@ -248,7 +248,7 @@ export default function AdminDashboardPage() {
                 variant="outline" 
                 className="w-full justify-between"
               >
-                <Link href="/admin/donations/new">
+                <Link href="/features/admin/features/donations/new">
                   <div className="flex items-center">
                     <BookMarked className="mr-2 h-5 w-5" />
                     <span>Yeni Bağış Ekle</span>
@@ -272,7 +272,7 @@ export default function AdminDashboardPage() {
                 variant="outline" 
                 className="w-full justify-between"
               >
-                <Link href="/admin/users">
+                <Link href="/features/admin/users">
                   <div className="flex items-center">
                     <Users className="mr-2 h-5 w-5" />
                     <span>Kullanıcı Yönetimi</span>
@@ -286,7 +286,7 @@ export default function AdminDashboardPage() {
                 variant="outline" 
                 className="w-full justify-between"
               >
-                <Link href="/admin/reports">
+                <Link href="/features/admin/reports">
                   <div className="flex items-center">
                     <BarChart3 className="mr-2 h-5 w-5" />
                     <span>Raporlar ve İstatistikler</span>
@@ -300,7 +300,7 @@ export default function AdminDashboardPage() {
                 variant="outline" 
                 className="w-full justify-between"
               >
-                <Link href="/admin/settings">
+                <Link href="/features/admin/settings">
                   <div className="flex items-center">
                     <Settings className="mr-2 h-5 w-5" />
                     <span>Sistem Ayarları</span>

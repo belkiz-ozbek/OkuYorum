@@ -244,7 +244,7 @@ export default function DonationSuccessPage() {
 
   // Paylaşım URL'si ve mesajı oluştur
   const getShareUrl = () => {
-    return window.location.origin + '/donate/success'
+    return window.location.origin + '/features/donate/success'
   }
 
   const getShareMessage = () => {
@@ -564,7 +564,7 @@ export default function DonationSuccessPage() {
                 <span>Millet Kıraathaneleri</span>
               </Link>
 
-              <Link className={`flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300`} href="/donate">
+              <Link className={`flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300`} href="/features/donate">
                 <Heart className="h-5 w-5" />
                 <span>Bağış Yap</span>
               </Link>
@@ -765,13 +765,13 @@ export default function DonationSuccessPage() {
             variants={itemVariants}
             className="space-y-4 sm:space-y-0 sm:space-x-4 flex flex-col sm:flex-row justify-center"
           >
-            <Link href="/donations">
+            <Link href="/features/donations">
               <Button variant="outline" className="w-full sm:w-auto group hover:bg-purple-50">
                 <BookOpen className="h-4 w-4 mr-2 group-hover:text-purple-600" />
                 <span className="group-hover:text-purple-600">Bağışlarım</span>
               </Button>
             </Link>
-            <Link href="/donate">
+            <Link href="/features/donate">
               <Button className="w-full sm:w-auto bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white">
                 Yeni Bağış
                 <ArrowRight className="h-4 w-4 ml-2" />
