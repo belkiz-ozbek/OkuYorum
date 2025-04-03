@@ -123,7 +123,7 @@ export default function DonationDetailPage() {
           
           // Geçersiz ID durumunda kullanıcıyı bağışlar sayfasına yönlendir
           setTimeout(() => {
-            router.push('/donations')
+            router.push('/features/donations')
           }, 2000)
         }
       } finally {
@@ -172,7 +172,7 @@ export default function DonationDetailPage() {
                   <span>Millet Kıraathaneleri</span>
                 </Link>
 
-                <Link className={`flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300`} href="/donate">
+                <Link className={`flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300`} href="/features/donate">
                   <Heart className="h-5 w-5" />
                   <span>Bağış Yap</span>
                 </Link>
@@ -276,7 +276,7 @@ export default function DonationDetailPage() {
                   <span>Millet Kıraathaneleri</span>
                 </Link>
 
-                <Link className={`flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300`} href="/donate">
+                <Link className={`flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300`} href="/features/donate">
                   <Heart className="h-5 w-5" />
                   <span>Bağış Yap</span>
                 </Link>
@@ -337,7 +337,7 @@ export default function DonationDetailPage() {
           </div>
         </div>
         <Button asChild variant="outline">
-          <Link href="/donations">
+          <Link href="/features/donations">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Bağışlarıma Dön
           </Link>
@@ -384,7 +384,7 @@ export default function DonationDetailPage() {
                 <span>Millet Kıraathaneleri</span>
               </Link>
 
-              <Link className={`flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300`} href="/donate">
+              <Link className={`flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300`} href="/features/donate">
                 <Heart className="h-5 w-5" />
                 <span>Bağış Yap</span>
               </Link>
@@ -440,7 +440,7 @@ export default function DonationDetailPage() {
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">Bağış Detayları</h1>
         <Button asChild variant="outline">
-          <Link href="/donations">
+          <Link href="/features/donations">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Bağışlarıma Dön
           </Link>

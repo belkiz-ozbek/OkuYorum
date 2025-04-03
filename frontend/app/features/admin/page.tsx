@@ -38,7 +38,7 @@ export default function AdminPage() {
             <h1 className="text-3xl font-bold mb-6">Yönetici Paneli</h1>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <Link href="/admin/dashboard">
+                <Link href="/features/admin/dashboard">
                     <Card className="cursor-pointer hover:bg-gray-50 transition-colors">
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
                             <CardTitle className="text-lg">Gösterge Paneli</CardTitle>
@@ -50,7 +50,7 @@ export default function AdminPage() {
                     </Card>
                 </Link>
 
-                <Link href="/admin/donations">
+                <Link href="/admin/features/donations">
                     <Card className="cursor-pointer hover:bg-gray-50 transition-colors">
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
                             <CardTitle className="text-lg">Bağışlar</CardTitle>

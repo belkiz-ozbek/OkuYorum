@@ -41,11 +41,11 @@ export default function AdminDonationsPage() {
                         description: "Bu sayfaya erişim yetkiniz bulunmamaktadır.",
                         variant: "destructive"
                     })
-                    router.push('/donations')
+                    router.push('/features/donations')
                 }
             } catch (err) {
                 console.error("Admin kontrolü yapılırken hata oluştu:", err)
-                router.push('/donations')
+                router.push('/features/donations')
             }
         }
 
@@ -127,7 +127,7 @@ export default function AdminDonationsPage() {
                     </div>
                 </div>
                 <Button asChild variant="outline">
-                    <Link href="/donations">
+                    <Link href="/features/donations">
                         Bağışlarıma Dön
                     </Link>
                 </Button>
@@ -140,7 +140,7 @@ export default function AdminDonationsPage() {
             <div className="mb-6 flex items-center justify-between">
                 <h1 className="text-2xl font-bold text-gray-900">Bağış Yönetimi</h1>
                 <Button asChild>
-                    <Link href="/admin/dashboard">
+                    <Link href="/features/admin/dashboard">
                         Yönetim Paneline Dön
                     </Link>
                 </Button>
@@ -193,7 +193,7 @@ export default function AdminDonationsPage() {
                         </div>
 
                         <Button asChild className="bg-green-600 hover:bg-green-700">
-                            <Link href="/admin/donations/new">
+                            <Link href="/admin/features/donations/new">
                                 <Plus className="mr-2 h-4 w-4" key="plus-icon"/>
                                 Yeni Bağış Ekle
                             </Link>
@@ -263,7 +263,7 @@ export default function AdminDonationsPage() {
                                                     onClick={() => {
                                                         if (donation.id) {
                                                             console.log("Navigating to donation detail:", donation.id)
-                                                            router.push(`/admin/donations/${donation.id}`)
+                                                            router.push(`/admin/features/donations/${donation.id}`)
                                                         } else {
                                                             toast({
                                                                 title: "Hata",

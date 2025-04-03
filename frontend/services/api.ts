@@ -75,7 +75,7 @@ api.interceptors.response.use(
           // Token yenilenemezse veya refresh token yoksa oturumu kapat
           localStorage.removeItem('token')
           localStorage.removeItem('refreshToken')
-          window.location.href = '/auth/login'
+          window.location.href = '/features/auth/login'
         }
       } catch (refreshError) {
         return Promise.reject(refreshError)

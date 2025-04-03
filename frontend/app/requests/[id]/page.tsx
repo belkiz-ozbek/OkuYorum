@@ -3,18 +3,19 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { DonationRequest, requestTypeMap, requestStatusMap } from '@/types/donationRequest';
 import { RequestService } from '@/services/requestService';
-import { School, Library, User, BookOpen, MapPin, Calendar, Clock, AlertCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { tr } from 'date-fns/locale';
 import { MapSelector } from '@/components/map/MapSelector';
 import Link from 'next/link';
+import {AlertCircle, Clock, Library, School, User} from "lucide-react";
+import {Button} from "@/components/ui/form/button";
 
 export default function RequestDetailPage() {
     const params = useParams();
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const router = useRouter();
     const [request, setRequest] = useState<DonationRequest | null>(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -76,6 +77,7 @@ export default function RequestDetailPage() {
                             Aradığınız bağış talebi bulunamadı veya silinmiş olabilir.
                         </p>
                         <Link href="/requests">
+                            { }
                             <Button>
                                 Taleplere Dön
                             </Button>
@@ -186,7 +188,7 @@ export default function RequestDetailPage() {
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <Link href={`/donate?requestId=${request.id}`}>
+                            <Link href={`/features/donate?requestId=${request.id}`}>
                                 <Button className="w-full">
                                     Bağış Yap
                                 </Button>

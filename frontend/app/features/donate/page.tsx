@@ -365,7 +365,7 @@ export default function DonatePage() {
           description: "Lütfen önce giriş yapın",
           variant: "destructive"
         })
-        router.push('/auth/login?redirect=/donate')
+        router.push('/features/auth/login?redirect=/features/donate')
         return
       }
 
@@ -386,7 +386,7 @@ export default function DonatePage() {
           description: "Lütfen tekrar giriş yapın",
           variant: "destructive"
         })
-        router.push('/auth/login?redirect=/donate')
+        router.push('/features/auth/login?redirect=/features/donate')
         return
       }
 
@@ -398,7 +398,7 @@ export default function DonatePage() {
 
       clearDraft()
       setShowConfirmModal(false)
-      router.push('/donate/success')
+      router.push('/features/donate/success')
     } catch (error: unknown) {
       toast({
         title: "Hata",
@@ -419,7 +419,7 @@ export default function DonatePage() {
           description: "Bağış yapabilmek için lütfen giriş yapın",
           variant: "destructive"
         })
-        router.push('/auth/login?redirect=/donate')
+        router.push('/features/auth/login?redirect=/features/donate')
       } else {
         setIsPageLoading(false)
       }
@@ -1112,7 +1112,7 @@ export default function DonatePage() {
                 <span>Millet Kıraathaneleri</span>
               </Link>
 
-              <Link className={`flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300`} href="/donate">
+              <Link className={`flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300`} href="/features/donate">
                 <Heart className="h-5 w-5" />
                 <span>Bağış Yap</span>
               </Link>
