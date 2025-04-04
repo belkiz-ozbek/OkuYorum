@@ -8,6 +8,9 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        playfair: ['var(--font-playfair)'],
+      },
       colors: {
         border: "var(--border)",
         input: "var(--input)",
