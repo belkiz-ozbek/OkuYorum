@@ -501,8 +501,8 @@ export default function HomePage() {
             <CarouselContent>
               {[
                 {
-                  title: "1984",
-                  author: "George Orwell",
+                  title: "Kürk Mantolu Madonna",
+                  author: "Sabahattin Ali",
                   coverUrl: "/placeholder.svg?height=300&width=200",
                   rating: 4.5,
                 },
@@ -525,8 +525,8 @@ export default function HomePage() {
                   rating: 4.9,
                 },
                 {
-                  title: "Sefiller",
-                  author: "Victor Hugo",
+                  title: "Simyacı",
+                  author: "Paulo Coelho",
                   coverUrl: "/placeholder.svg?height=300&width=200",
                   rating: 4.6,
                 },
