@@ -45,6 +45,7 @@ type BookReviewCardProps = {
   bookTitle: string
   author: string
   reviewerName: string
+  reviewerImage?: string
   rating: number
   review: string
 }
@@ -69,9 +70,37 @@ type ReadingGroupProps = {
   currentBook: string
 }
 
+// Star Rating Component
+const StarRating = ({ rating, size = "md" }: { rating: number; size?: "sm" | "md" | "lg" }) => {
+  const totalStars = 5
+  const fullStars = Math.floor(rating)
+  const hasHalfStar = rating % 1 >= 0.5
+
+  const starSizes = {
+    sm: "w-3 h-3",
+    md: "w-4 h-4",
+    lg: "w-5 h-5",
+  }
+
+  const sizeClass = starSizes[size]
+
+  return (
+    <div className="flex items-center">
+      {[...Array(totalStars)].map((_, i) => (
+        <Star
+          key={i}
+          className={`${sizeClass} ${i < fullStars ? "text-gray-700 fill-gray-700" : "text-gray-700 fill-none"} mr-0.5`}
+        />
+      ))}
+      <span className="ml-1.5 text-sm font-medium text-gray-700">{rating.toFixed(1)}</span>
+    </div>
+  )
+}
+
  
 // Replace the existing FeaturedBook component with this updated version
-const FeaturedBook = ({ title, author, coverUrl, rating }: FeaturedBookProps) => (
+const FeaturedBook = ({ title, author, coverUrl, rating }: 
+  FeaturedBookProps) => (
   <div className="relative group">
     <div className="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
       {/* Image container */}
@@ -133,23 +162,50 @@ function StatCard({ number, label }: StatCardProps) {
   )
 }
 
-function BookReviewCard({ bookTitle, author, reviewerName, rating, review }: BookReviewCardProps) {
+function BookReviewCard({ bookTitle, author, reviewerName, reviewerImage, rating, review }: BookReviewCardProps) {
   return (
-    <motion.div 
-      className="bg-white/70 dark:bg-white/10 backdrop-blur-sm p-8 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-500 hover:-translate-y-1"
+    <motion.div
+      className="bg-white/70 dark:bg-white/10 backdrop-blur-sm p-8 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:bg-white/90 dark:hover:bg-white/20 transition-all duration-300 hover:-translate-y-1 group"
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.5 }}
     >
-      <h3 className="text-xl font-semibold mb-2 bg-clip-text text-transparent bg-gradient-to-br from-purple-800 to-purple-900 dark:from-purple-400 dark:to-purple-600">{bookTitle}</h3>
-      <p className="text-gray-600 dark:text-gray-300 mb-2">{author}</p>
-      <div className="flex items-center mb-3">
-        <span className="text-amber-400 mr-2">★</span>
-        <span className="text-gray-600 dark:text-gray-300">{rating}</span>
+      <div className="flex flex-col items-center text-center">
+        {/* Reviewer Profile Picture */}
+        <div className="mb-4 relative">
+          <div className="w-20 h-20 rounded-full bg-gray-200 overflow-hidden relative">
+            <Image
+              src={reviewerImage || "/placeholder.svg?height=200&width=200"}
+              alt={reviewerName}
+              fill
+              className="object-cover"
+            />
+          </div>
+        </div>
+
+        {/* Reviewer Name */}
+        <h4 className="text-lg font-medium mb-4">{reviewerName}</h4>
+
+        {/* Book Info */}
+        <div className="w-full">
+          <h3 className="text-xl font-semibold mb-1 bg-clip-text text-transparent bg-gradient-to-br from-purple-800 to-purple-900 dark:from-purple-400 dark:to-purple-600 line-clamp-1 group-hover:line-clamp-none transition-all duration-300">
+            {bookTitle}
+          </h3>
+          <p className="text-gray-600 dark:text-gray-300 mb-2 text-sm">{author}</p>
+
+          <div className="flex justify-center mb-4">
+            <StarRating rating={rating} size="md" />
+          </div>
+
+          <div className="mb-4 relative overflow-hidden">
+            <p className="text-gray-600 dark:text-gray-300 leading-relaxed text-sm line-clamp-3 group-hover:line-clamp-none transition-all duration-300">
+              {review}
+            </p>
+            <div className="absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-white/80 to-transparent group-hover:opacity-0 transition-opacity duration-300 dark:from-gray-900/80"></div>
+          </div>
+        </div>
       </div>
-      <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">Yorumlayan: {reviewerName}</p>
-      <p className="text-gray-600 dark:text-gray-300 leading-relaxed">{review}</p>
     </motion.div>
   )
 }
@@ -495,7 +551,8 @@ export default function HomePage() {
         {/* Featured Books Carousel */}
         <div className="my-16">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-3xl font-bold">Severek Okuduklarımız</h2>
+          <h2 className="text-3xl font-bold text-purple-700">Severek Okuduklarımız</h2>
+
           </div>
           <Carousel className="w-full max-w-5xl mx-auto">
             <CarouselContent>
@@ -716,33 +773,48 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Latest Reviews */}
-        <div className="py-16">
-          <h2 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-br from-purple-700 to-purple-900 dark:from-purple-400 dark:to-purple-600 mb-8">
-            Son Kitap Yorumları
-          </h2>
+       {/* Latest Reviews */}
+       <div className="py-16">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-br from-purple-700 to-purple-900 dark:from-purple-400 dark:to-purple-600 mb-3">
+              Ben de böyle hissetmiştim!
+            </h2>
+            <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+                Okurların yorumlarıyla kitapları yeniden keşfedin. Kim bilir, belki aynı satırlarda buluşursunuz.
+            </p>
+          </div>
+
           <div className="grid md:grid-cols-3 gap-6">
             <BookReviewCard
               bookTitle="Suç ve Ceza"
               author="Fyodor Dostoyevski"
               reviewerName="Ahmet Y."
+              reviewerImage="/placeholder.svg?height=200&width=200"
               rating={4.5}
-              review="Dostoyevski'nin bu başyapıtı, insan psikolojisinin derinliklerine iniyor. Raskolnikov'un iç çatışmaları ve vicdani muhasebeleri etkileyici bir şekilde işlenmiş."
+              review="Dostoyevski'nin bu başyapıtı, insan psikolojisinin derinliklerine iniyor. Raskolnikov'un iç çatışmaları ve vicdani muhasebeleri etkileyici bir şekilde işlenmiş. Kitabın her sayfasında insanın karanlık yönleriyle yüzleşmesine tanık oluyorsunuz."
             />
             <BookReviewCard
               bookTitle="1984"
               author="George Orwell"
               reviewerName="Ayşe K."
+              reviewerImage="/placeholder.svg?height=200&width=200"
               rating={5}
-              review="Distopik bir gelecek tasviri yapan bu kitap, günümüz toplumlarına dair çarpıcı benzetmeler içeriyor. Düşündürücü ve ufuk açıcı bir eser."
+              review="Distopik bir gelecek tasviri yapan bu kitap, günümüz toplumlarına dair çarpıcı benzetmeler içeriyor. Düşündürücü ve ufuk açıcı bir eser. Orwell'in öngörüleri günümüzde bile şaşırtıcı derecede geçerli."
             />
             <BookReviewCard
               bookTitle="Küçük Prens"
               author="Antoine de Saint-Exupéry"
               reviewerName="Mehmet S."
+              reviewerImage="/placeholder.svg?height=200&width=200"
               rating={4}
-              review="Çocuklar için yazılmış gibi görünse de, aslında yetişkinlere hitap eden derin anlamlar içeren bir kitap. Her yaşta okunması gereken bir klasik."
+              review="Çocuklar için yazılmış gibi görünse de, aslında yetişkinlere hitap eden derin anlamlar içeren bir kitap. Her yaşta okunması gereken bir klasik. Basit gibi görünen hikayenin altında yatan felsefi derinlik, her okumada yeni anlamlar keşfetmenizi sağlıyor."
             />
+          </div>
+
+          <div className="flex justify-center mt-8">
+            <Button variant="outline" className="rounded-full hover:bg-purple-50 transition-colors duration-300">
+              Daha Fazla Yorum Gör
+            </Button>
           </div>
         </div>
 
