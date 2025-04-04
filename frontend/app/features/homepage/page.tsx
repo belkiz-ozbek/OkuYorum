@@ -24,6 +24,7 @@ import {
   Library,
   MessageSquare,
   Moon,
+  Star,
   Sun,
   User,
   Users
@@ -52,6 +53,7 @@ type FeaturedBookProps = {
   title: string
   author: string
   coverUrl: string
+  rating: number
 }
 
 type DonationRequestProps = {
@@ -68,17 +70,33 @@ type ReadingGroupProps = {
 }
 
  
-const FeaturedBook = ({ title, author, coverUrl }: FeaturedBookProps) => (
-  <div className="relative w-48 h-64 group">
-    <Image
-      src={coverUrl || "/placeholder.svg"}
-      alt={title}
-      fill
-      className="rounded-lg shadow-lg object-cover"
-    />
-    <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4 rounded-lg">
-      <h3 className="text-white font-semibold">{title}</h3>
-      <p className="text-gray-300">{author}</p>
+// Replace the existing FeaturedBook component with this updated version
+const FeaturedBook = ({ title, author, coverUrl, rating }: FeaturedBookProps) => (
+  <div className="relative group">
+    <div className="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+      {/* Image container */}
+      <div className="relative h-48 w-full">
+        <Image src={coverUrl || "/placeholder.svg?height=300&width=200"} alt={title} fill className="object-cover" />
+        {/* Favorite button */}
+        <button className="absolute top-2 right-2 p-1.5 rounded-full bg-white/80 backdrop-blur-sm shadow-sm hover:bg-white transition-colors duration-200">
+          <Heart className="h-5 w-5 text-gray-400 hover:text-red-500" />
+        </button>
+      </div>
+
+      {/* Content below image */}
+      <div className="p-3">
+        {/* Title and author */}
+        <div className="mb-1.5">
+          <h3 className="font-medium text-gray-900 line-clamp-1">{title}</h3>
+          <p className="text-sm text-gray-600 line-clamp-1">{author}</p>
+        </div>
+
+        {/* Rating */}
+        <div className="flex items-center">
+          <Star className="h-4 w-4 text-gray-700" stroke="currentColor" fill="none" />
+          <span className="ml-1 text-sm font-medium text-gray-700">{rating.toFixed(1)}</span>
+        </div>
+      </div>
     </div>
   </div>
 )
@@ -94,13 +112,16 @@ function FeatureCard({ icon, title, description }: FeatureCardProps) {
           </div>
         </div>
         <div className="space-y-3 flex-1 flex flex-col">
-          <h3 className="text-xl font-semibold bg-clip-text text-transparent bg-gradient-to-br from-purple-800 to-purple-900">{title}</h3>
+          <h3 className="text-xl font-semibold bg-clip-text text-transparent bg-gradient-to-br from-purple-800 to-purple-900">
+            {title}
+          </h3>
           <div className="text-gray-600/90 leading-relaxed text-sm flex-1">{description}</div>
         </div>
       </div>
     </div>
   )
 }
+
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function StatCard({ number, label }: StatCardProps) {
@@ -473,37 +494,52 @@ export default function HomePage() {
         
         {/* Featured Books Carousel */}
         <div className="my-16">
-          <h2 className="text-3xl font-bold mb-6">Öne Çıkan Kitaplar</h2>
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-3xl font-bold">Severek Okuduklarımız</h2>
+          </div>
           <Carousel className="w-full max-w-5xl mx-auto">
             <CarouselContent>
               {[
-                { title: "1984", author: "George Orwell", coverUrl: "/placeholder.svg?height=300&width=200" },
+                {
+                  title: "1984",
+                  author: "George Orwell",
+                  coverUrl: "/placeholder.svg?height=300&width=200",
+                  rating: 4.5,
+                },
                 {
                   title: "Suç ve Ceza",
                   author: "Fyodor Dostoyevski",
                   coverUrl: "/placeholder.svg?height=300&width=200",
+                  rating: 4.7,
                 },
                 {
                   title: "Yüzyıllık Yalnızlık",
                   author: "Gabriel García Márquez",
                   coverUrl: "/placeholder.svg?height=300&width=200",
+                  rating: 4.8,
                 },
                 {
                   title: "Küçük Prens",
                   author: "Antoine de Saint-Exupéry",
                   coverUrl: "/placeholder.svg?height=300&width=200",
+                  rating: 4.9,
                 },
-                { title: "Sefiller", author: "Victor Hugo", coverUrl: "/placeholder.svg?height=300&width=200" },
+                {
+                  title: "Sefiller",
+                  author: "Victor Hugo",
+                  coverUrl: "/placeholder.svg?height=300&width=200",
+                  rating: 4.6,
+                },
               ].map((book, index) => (
-                <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
+                <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3 xl:basis-1/4">
                   <div className="p-1">
                     <FeaturedBook {...book} />
                   </div>
                 </CarouselItem>
               ))}
             </CarouselContent>
-            <CarouselPrevious />
-            <CarouselNext />
+            <CarouselPrevious className="left-0" />
+            <CarouselNext className="right-0" />
           </Carousel>
         </div>
 
