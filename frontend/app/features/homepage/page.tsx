@@ -32,7 +32,7 @@ import {
 type FeatureCardProps = {
   icon: React.ReactNode
   title: string
-  description: string
+  description: React.ReactNode
 }
 
 type StatCardProps = {
@@ -67,7 +67,7 @@ type ReadingGroupProps = {
   currentBook: string
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+ 
 const FeaturedBook = ({ title, author, coverUrl }: FeaturedBookProps) => (
   <div className="relative w-48 h-64 group">
     <Image
@@ -95,7 +95,7 @@ function FeatureCard({ icon, title, description }: FeatureCardProps) {
         </div>
         <div className="space-y-3 flex-1 flex flex-col">
           <h3 className="text-xl font-semibold bg-clip-text text-transparent bg-gradient-to-br from-purple-800 to-purple-900">{title}</h3>
-          <p className="text-gray-600/90 leading-relaxed text-sm flex-1">{description}</p>
+          <div className="text-gray-600/90 leading-relaxed text-sm flex-1">{description}</div>
         </div>
       </div>
     </div>
@@ -520,25 +520,42 @@ export default function HomePage() {
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-purple-100/30 via-transparent to-transparent rounded-[3rem] -z-10" />
           
           <div className="max-w-7xl mx-auto px-6">
-            <div className="text-center mb-16 space-y-4">
-              <motion.h2 
-                className="text-4xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-br from-purple-700 to-purple-900"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-                viewport={{ once: true }}
-              >
-                Kitap Paylaşım Deneyiminizi Zenginleştirin
-              </motion.h2>
-              <motion.p 
-                className="text-gray-600/90 text-lg max-w-2xl mx-auto"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.3 }}
-                viewport={{ once: true }}
-              >
-                Kişisel kütüphanenizi yönetin, kitapları paylaşın ve toplulukla etkileşime geçin
-              </motion.p>
+            <div className="text-center mb-16">
+              <div className="relative max-w-4xl mx-auto">
+                <motion.h2 
+                  className="text-2xl md:text-3xl font-normal bg-clip-text text-transparent bg-gradient-to-br from-purple-700 to-purple-900 font-playfair leading-relaxed tracking-wide"
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                  viewport={{ once: true }}
+                >
+                  Burada kitaplar dolaşır, fikirler çarpışır; kitabın dönmese bile bazen muhabbet döner.
+                </motion.h2>
+                
+                {/* Decorative Divider */}
+                <motion.div
+                  className="flex items-center justify-center gap-3 my-6"
+                  initial={{ opacity: 0 }}
+                  whileInView={{ opacity: 1 }}
+                  transition={{ duration: 0.7, delay: 0.4 }}
+                  viewport={{ once: true }}
+                >
+                  <div className="h-[1px] w-16 bg-gradient-to-r from-transparent via-purple-400/30 to-purple-400/30" />
+                  <span className="text-2xl">😌</span>
+                  <span className="text-2xl">☕</span>
+                  <div className="h-[1px] w-16 bg-gradient-to-r from-purple-400/30 to-transparent" />
+                </motion.div>
+
+                <motion.p 
+                  className="text-gray-600/90 text-lg max-w-2xl mx-auto mt-8"
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.3 }}
+                  viewport={{ once: true }}
+                >
+                  Kütüphaneni kur, paylaş, yorum yap. Biz burada kitapla başlayan her sohbete açığız.
+                </motion.p>
+              </div>
             </div>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -552,7 +569,12 @@ export default function HomePage() {
                 <FeatureCard
                   icon={<BookMarked className="h-6 w-6 text-purple-600/90" />}
                   title="Kişisel Kütüphane"
-                  description="Kitaplarınızı düzenleyin ve koleksiyonunuzu yönetin"
+                  description={
+                    <div className="flex flex-col gap-2">
+                      <span className="block">Kitaplarını sırala, ister oku ister ödünç ver.</span>
+                      <span className="block italic text-gray-500/90 font-light">Geri gelmeyeni Sherlock gibi biz takipteyiz.</span>
+                    </div>
+                  }
                 />
               </motion.div>
               <motion.div
@@ -565,7 +587,12 @@ export default function HomePage() {
                 <FeatureCard
                   icon={<Heart className="h-6 w-6 text-rose-500/90" />}
                   title="Kitap Bağışları"
-                  description="İhtiyaç sahiplerine kitap bağışlayın"
+                  description={
+                    <div className="flex flex-col gap-2">
+                      <span className="block">Okudun, sevdin, doydun — artık başka birine ilham olma zamanı.</span>
+                      <span className="block italic text-gray-500/90 font-light">Kitabını bağışla, kalpleri ısıt.</span>
+                    </div>
+                  }
                 />
               </motion.div>
               <motion.div
@@ -578,7 +605,12 @@ export default function HomePage() {
                 <FeatureCard
                   icon={<MessageSquare className="h-6 w-6 text-blue-500/90" />}
                   title="Kitap Yorumları"
-                  description="Düşüncelerinizi paylaşın ve tartışın"
+                  description={
+                    <div className="flex flex-col gap-2">
+                      <span className="block">&#34;Ben bunu başka türlü okudum&#34;cular burada buluşuyor.</span>
+                      <span className="block italic text-gray-500/90 font-light">Düşünceni yaz, tartış, ama spoilera dikkat!</span>
+                    </div>
+                  }
                 />
               </motion.div>
               <motion.div
@@ -591,7 +623,12 @@ export default function HomePage() {
                 <FeatureCard
                   icon={<Users className="h-6 w-6 text-amber-500/90" />}
                   title="Millet Kıraathaneleri"
-                  description="Topluluk etkinliklerine katılın"
+                  description={
+                    <div className="flex flex-col gap-2">
+                      <span className="block">Okuruz, konuşuruz, bazen de &#34;bu kitap ne anlatıyor ya?&#34; diye dertleşiriz.</span>
+                      <span className="block italic text-gray-500/90 font-light">Kıraathaneye gel, sadece kitaplar değil, insanlar da güzel.</span>
+                    </div>
+                  }
                 />
               </motion.div>
             </div>
