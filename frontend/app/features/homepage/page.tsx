@@ -825,12 +825,6 @@ export default function HomePage() {
               review="Çocuklar için yazılmış gibi görünse de, aslında yetişkinlere hitap eden derin anlamlar içeren bir kitap. Her yaşta okunması gereken bir klasik. Basit gibi görünen hikayenin altında yatan felsefi derinlik, her okumada yeni anlamlar keşfetmenizi sağlıyor."
             />
           </div>
-
-          <div className="flex justify-center mt-8">
-            <Button variant="outline" className="rounded-full hover:bg-purple-50 transition-colors duration-300">
-              Daha Fazla Yorum Gör
-            </Button>
-          </div>
         </div>
 
         {/* Millet Kıraathaneleri Section */}
