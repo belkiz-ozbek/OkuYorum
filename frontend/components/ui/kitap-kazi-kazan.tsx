@@ -40,16 +40,16 @@ export function KitapKaziKazan() {
         <p className="text-xl text-muted-foreground">Bir sonraki kitap maceranızı keşfetmek için kazıyın!</p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8">
         {kitapOnerileri.map((kitap, index) => (
-          <div key={index} className="flex flex-col items-center">
-            <div className="relative">
+          <div key={index} className="flex flex-col items-center group">
+            <div className="relative transform transition-transform duration-300 hover:scale-105">
               <ScratchToReveal
                 width={200}
                 height={250}
                 minScratchPercentage={60}
                 onComplete={() => kazimaTamamlandi(index)}
-                className="flex items-center justify-center overflow-hidden rounded-xl border-2 shadow-lg"
+                className="flex items-center justify-center overflow-hidden rounded-xl border-2 shadow-lg transition-shadow duration-300 group-hover:shadow-xl"
                 gradientColors={gradyanSetleri[index % gradyanSetleri.length]}
               >
                 <div className="flex flex-col items-center justify-center p-4 h-full w-full bg-white">
