@@ -564,9 +564,6 @@ export default function HomePage() {
         <div className="my-16">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-3xl font-bold">Öne Çıkan Kitaplar</h2>
-            <Button variant="outline" className="rounded-full">
-              Tümünü Gör
-            </Button>
           </div>
           <Carousel className="w-full max-w-5xl mx-auto">
             <CarouselContent>
