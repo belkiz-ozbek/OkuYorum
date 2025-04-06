@@ -50,7 +50,7 @@ export default function AdminPage() {
                     </Card>
                 </Link>
 
-                <Link href="/admin/features/donations">
+                <Link href="/features/admin/donations">
                     <Card className="cursor-pointer hover:bg-gray-50 transition-colors">
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
                             <CardTitle className="text-lg">Bağışlar</CardTitle>
@@ -62,7 +62,7 @@ export default function AdminPage() {
                     </Card>
                 </Link>
 
-                <Link href="/admin/requests">
+                <Link href="/features/admin/requests">
                     <Card className="cursor-pointer hover:bg-gray-50 transition-colors">
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
                             <CardTitle className="text-lg">Bağış İstekleri</CardTitle>

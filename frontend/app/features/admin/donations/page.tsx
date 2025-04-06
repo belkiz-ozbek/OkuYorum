@@ -1,7 +1,7 @@
 "use client"
 
 import React, {useEffect, useState} from "react"
-import {useRouter} from "next/navigation"
+import {useRouter, useSearchParams} from "next/navigation"
 import {DonationService} from "@/services/DonationService"
 import {UserService} from "@/services/UserService"
 import {Skeleton} from "@/components/ui/skeleton"
@@ -18,6 +18,7 @@ import {Button} from "@/components/ui/form/button";
 
 export default function AdminDonationsPage() {
     const router = useRouter()
+    const searchParams = useSearchParams()
     const {toast} = useToast()
     const [donations, setDonations] = useState<Donation[]>([])
     const [filteredDonations, setFilteredDonations] = useState<Donation[]>([])
@@ -27,7 +28,7 @@ export default function AdminDonationsPage() {
 
     // Filtreler
     const [searchTerm, setSearchTerm] = useState("")
-    const [statusFilter, setStatusFilter] = useState<string>("all")
+    const [statusFilter, setStatusFilter] = useState<string>(searchParams.get("status") || "all")
 
     useEffect(() => {
         const checkAdmin = async () => {
@@ -52,6 +53,14 @@ export default function AdminDonationsPage() {
         checkAdmin()
     }, [router, toast])
 
+    // URL'deki status parametresini takip et
+    useEffect(() => {
+        const status = searchParams.get("status")
+        if (status) {
+            setStatusFilter(status)
+        }
+    }, [searchParams])
+
     useEffect(() => {
         const fetchDonations = async () => {
             if (!isAdmin) return
@@ -59,15 +68,24 @@ export default function AdminDonationsPage() {
             try {
                 setLoading(true)
                 const response = await DonationService.getDonations()
+                const donationsData = response.data
 
                 // ID kontrolü
-                const donationsWithoutId = response.data.filter((donations: Donation) => !donations.id)
+                const donationsWithoutId = donationsData.filter((donation: Donation) => !donation.id)
                 if (donationsWithoutId.length > 0) {
                     console.warn(`${donationsWithoutId.length} bağışta ID alanı eksik:`, donationsWithoutId)
                 }
 
-                setDonations(response.data)
-                setFilteredDonations(response.data)
+                setDonations(donationsData)
+                
+                // URL'de status parametresi varsa ona göre filtrele
+                const status = searchParams.get("status")
+                if (status) {
+                    const filtered = donationsData.filter(donation => donation.status === status)
+                    setFilteredDonations(filtered)
+                } else {
+                    setFilteredDonations(donationsData)
+                }
             } catch (err) {
                 console.error("Error fetching donations:", err)
                 setError("Bağışlar yüklenirken bir hata oluştu.")
@@ -77,7 +95,7 @@ export default function AdminDonationsPage() {
         }
 
         fetchDonations()
-    }, [isAdmin])
+    }, [isAdmin, searchParams])
 
     // Filtreleme işlemi
     useEffect(() => {
@@ -175,25 +193,22 @@ export default function AdminDonationsPage() {
                                     </div>
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="all" key="status-all">Tüm Durumlar</SelectItem>
-                                    <SelectItem value="PENDING" key="status-PENDING">Beklemede</SelectItem>
-                                    <SelectItem value="APPROVED" key="status-APPROVED">Onaylandı</SelectItem>
-                                    <SelectItem value="PREPARING" key="status-PREPARING">Hazırlanıyor</SelectItem>
-                                    <SelectItem value="READY_FOR_PICKUP" key="status-READY_FOR_PICKUP">Teslim Almaya
-                                        Hazır</SelectItem>
-                                    <SelectItem value="IN_TRANSIT" key="status-IN_TRANSIT">Taşınıyor</SelectItem>
-                                    <SelectItem value="DELIVERED" key="status-DELIVERED">Teslim Edildi</SelectItem>
-                                    <SelectItem value="RECEIVED_BY_RECIPIENT" key="status-RECEIVED_BY_RECIPIENT">Alıcı
-                                        Tarafından Alındı</SelectItem>
-                                    <SelectItem value="COMPLETED" key="status-COMPLETED">Tamamlandı</SelectItem>
-                                    <SelectItem value="REJECTED" key="status-REJECTED">Reddedildi</SelectItem>
-                                    <SelectItem value="CANCELLED" key="status-CANCELLED">İptal Edildi</SelectItem>
+                                    <SelectItem value="all">Tüm Durumlar</SelectItem>
+                                    <SelectItem value="PENDING">Beklemede</SelectItem>
+                                    <SelectItem value="PREPARING">Hazırlanıyor</SelectItem>
+                                    <SelectItem value="READY_FOR_PICKUP">Teslimata Hazır</SelectItem>
+                                    <SelectItem value="IN_TRANSIT">Taşınıyor</SelectItem>
+                                    <SelectItem value="DELIVERED">Teslim Edildi</SelectItem>
+                                    <SelectItem value="RECEIVED_BY_RECIPIENT">Alıcı Teslim Aldı</SelectItem>
+                                    <SelectItem value="COMPLETED">Tamamlandı</SelectItem>
+                                    <SelectItem value="REJECTED">Reddedildi</SelectItem>
+                                    <SelectItem value="CANCELLED">İptal Edildi</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
 
                         <Button asChild className="bg-green-600 hover:bg-green-700">
-                            <Link href="/admin/features/donations/new">
+                            <Link href="/features/admin/donations/new">
                                 <Plus className="mr-2 h-4 w-4" key="plus-icon"/>
                                 Yeni Bağış Ekle
                             </Link>
@@ -263,7 +278,7 @@ export default function AdminDonationsPage() {
                                                     onClick={() => {
                                                         if (donation.id) {
                                                             console.log("Navigating to donation detail:", donation.id)
-                                                            router.push(`/admin/features/donations/${donation.id}`)
+                                                            router.push(`/features/admin/donations/${donation.id}`)
                                                         } else {
                                                             toast({
                                                                 title: "Hata",
