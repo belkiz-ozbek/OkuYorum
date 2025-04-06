@@ -306,7 +306,7 @@ export default function LoginPage() {
 
                                 <p className="text-center text-sm text-gray-600">
                                     Hesabınız yok mu?{' '}
-                                    <Link href="/auth/signup" className="text-purple-600 hover:text-purple-700 font-medium">
+                                    <Link href="/features/auth/signup" className="text-purple-600 hover:text-purple-700 font-medium">
                                         Kayıt Ol
                                     </Link>
                                 </p>

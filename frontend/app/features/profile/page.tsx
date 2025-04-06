@@ -1,9 +1,10 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
 import Image from "next/image"
+import { useRouter } from "next/navigation"
 import {
   BookOpen,
   Camera,
@@ -27,6 +28,7 @@ import {
   Moon,
   Sun,
   Plus,
+  Search,
 } from "lucide-react"
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/form/button"
@@ -37,19 +39,8 @@ import { Card, CardContent } from "@/components/ui/layout/Card"
 import { SearchForm } from "@/components/ui/form/search-form"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/layout/avatar"
 import { Label } from "@/components/ui/form/label"
-
-type UserProfile = {
-  name: string
-  joinDate: string
-  birthDate: string
-  bio: string
-  readerScore: number
-  booksRead: number
-  profileImage: string
-  headerImage: string
-  followers: number
-  following: number
-}
+import { profileService, UserProfile, Achievement, ReadingActivity } from "@/services/profileService"
+import { toast } from "sonner"
 
 type BookType = {
   id: string
@@ -59,77 +50,25 @@ type BookType = {
   rating: number
 }
 
-type Achievement = {
-  id: string
-  title: string
-  description: string
-  icon: React.ReactNode
-  progress: number
-}
-
-type ReadingActivity = {
-  month: string
-  books: number
-}
-
 const initialProfile: UserProfile = {
-  name: "Esin Yılmaz",
-  joinDate: "2023-01-15",
-  birthDate: "1990-05-20",
-  bio: "Kitap kurdu, bilim kurgu hayranı ve amatör yazar.",
-  readerScore: 85,
-  booksRead: 127,
-  profileImage: "/placeholder.svg?height=150&width=150",
-  headerImage: "/placeholder.svg?height=400&width=1200",
-  followers: 256,
-  following: 184,
+  id: 0,
+  nameSurname: "Yükleniyor...",
+  username: "loading",
+  email: "",
+  bio: "",
+  birthDate: "",
+  readerScore: 0,
+  booksRead: 0,
+  profileImage: null,
+  headerImage: null,
+  followers: 0,
+  following: 0,
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString()
 }
 
-const achievements: Achievement[] = [
-  {
-    id: "1",
-    title: "Kitap Kurdu",
-    description: "100 kitap oku",
-    icon: <BookOpenCheck className="h-6 w-6" />,
-    progress: 85,
-  },
-  {
-    id: "2",
-    title: "Sosyal Okur",
-    description: "50 kitap yorumu yap",
-    icon: <MessageSquare className="h-6 w-6" />,
-    progress: 60,
-  },
-  {
-    id: "3",
-    title: "Alıntı Ustası",
-    description: "200 alıntı paylaş",
-    icon: <Quote className="h-6 w-6" />,
-    progress: 40,
-  },
-  {
-    id: "4",
-    title: "Maraton Okuyucu",
-    description: "30 gün arka arkaya oku",
-    icon: <Zap className="h-6 w-6" />,
-    progress: 100,
-  },
-]
-
-const readingActivity: ReadingActivity[] = [
-  { month: "Ocak", books: 4 },
-  { month: "Şubat", books: 3 },
-  { month: "Mart", books: 5 },
-  { month: "Nisan", books: 2 },
-  { month: "Mayıs", books: 6 },
-  { month: "Haziran", books: 4 },
-  { month: "Temmuz", books: 7 },
-  { month: "Ağustos", books: 5 },
-  { month: "Eylül", books: 8 },
-  { month: "Ekim", books: 6 },
-  { month: "Kasım", books: 9 },
-  { month: "Aralık", books: 7 }
-]
+const initialAchievements: Achievement[] = []
+const initialReadingActivity: ReadingActivity[] = []
 
 const recommendations: BookType[] = [
   {
@@ -148,14 +87,58 @@ const recommendations: BookType[] = [
   },
 ]
 
+// Achievement icons mapping
+const achievementIcons = {
+  "BOOK_WORM": <BookOpenCheck className="h-6 w-6" />,
+  "SOCIAL_READER": <MessageSquare className="h-6 w-6" />,
+  "QUOTE_MASTER": <Quote className="h-6 w-6" />,
+  "MARATHON_READER": <Zap className="h-6 w-6" />
+}
+
 export default function ProfilePage() {
+  const router = useRouter()
   const [profile, setProfile] = useState<UserProfile>(initialProfile)
+  const [achievements, setAchievements] = useState<Achievement[]>(initialAchievements)
+  const [readingActivity, setReadingActivity] = useState<ReadingActivity[]>(initialReadingActivity)
   const [isEditing, setIsEditing] = useState(false)
   const [editSection, setEditSection] = useState<string | null>(null)
   const [showEditMenu, setShowEditMenu] = useState(false)
-  const [activeTab, setActiveTab] = useState("library")
+  const [activeTab, setActiveTab] = useState("wall")
   const [isScrolled, setIsScrolled] = useState(false)
   const [theme, setTheme] = useState<"light" | "dark">("light")
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const headerFileInputRef = useRef<HTMLInputElement>(null)
+  const [isUploading, setIsUploading] = useState<'profile' | 'header' | null>(null)
+
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      try {
+        setIsLoading(true)
+        setError(null)
+
+        const [profileData, achievementsData, readingActivityData] = await Promise.all([
+          profileService.getProfile(),
+          profileService.getAchievements(),
+          profileService.getReadingActivity()
+        ])
+        
+        setProfile(profileData)
+        setAchievements(achievementsData)
+        setReadingActivity(readingActivityData)
+      } catch (error: any) {
+        console.error('Profil verileri yüklenirken hata oluştu:', error)
+        const errorMessage = error.response?.data?.message || error.message || 'Bir hata oluştu'
+        setError(errorMessage)
+        toast.error(errorMessage)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchProfileData()
+  }, [])
 
   useEffect(() => {
     // Sistem dark mode tercihini kontrol et
@@ -180,8 +163,21 @@ export default function ProfilePage() {
     document.documentElement.setAttribute("data-theme", newTheme)
   }
 
-  const handleProfileUpdate = (field: keyof UserProfile, value: string | number) => {
-    setProfile((prev) => ({ ...prev, [field]: value }))
+  const handleProfileUpdate = async (field: keyof UserProfile, value: string | number) => {
+    try {
+      setError(null)
+      const updatedProfile = await profileService.updateProfile({
+        ...profile,
+        [field]: value
+      })
+      setProfile(updatedProfile)
+      toast.success('Profil başarıyla güncellendi')
+    } catch (error: any) {
+      console.error('Profil güncellenirken hata oluştu:', error)
+      const errorMessage = error.response?.data?.message || error.message || 'Profil güncellenirken bir hata oluştu'
+      setError(errorMessage)
+      toast.error(errorMessage)
+    }
   }
 
   const toggleEdit = (section: string | null = null) => {
@@ -195,10 +191,20 @@ export default function ProfilePage() {
     setShowEditMenu(false)
   }
 
-  const saveChanges = () => {
-    setIsEditing(false)
-    setEditSection(null)
-    // Burada API'ye kaydetme işlemi yapılabilir
+  const saveChanges = async () => {
+    try {
+      setError(null)
+      const updatedProfile = await profileService.updateProfile(profile)
+      setProfile(updatedProfile)
+      setIsEditing(false)
+      setEditSection(null)
+      toast.success('Değişiklikler kaydedildi')
+    } catch (error: any) {
+      console.error('Değişiklikler kaydedilirken hata oluştu:', error)
+      const errorMessage = error.response?.data?.message || error.message || 'Değişiklikler kaydedilirken bir hata oluştu'
+      setError(errorMessage)
+      toast.error(errorMessage)
+    }
   }
 
   const cancelEdit = () => {
@@ -217,6 +223,70 @@ export default function ProfilePage() {
 
   const getMaxBooks = () => {
     return Math.max(...readingActivity.map((item) => item.books))
+  }
+
+  const getAchievementIcon = (achievementType: string) => {
+    return achievementIcons[achievementType as keyof typeof achievementIcons] || <Award className="h-6 w-6" />
+  }
+
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>, type: 'profile' | 'header') => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    // Dosya boyutu kontrolü (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Dosya boyutu 5MB\'dan küçük olmalıdır')
+      return
+    }
+
+    // Dosya tipi kontrolü
+    if (!file.type.startsWith('image/')) {
+      toast.error('Sadece resim dosyaları yükleyebilirsiniz')
+      return
+    }
+
+    try {
+      setIsUploading(type)
+      setError(null)
+      let updatedProfile: UserProfile
+
+      if (type === 'profile') {
+        updatedProfile = await profileService.updateProfileImage(file)
+      } else {
+        updatedProfile = await profileService.updateHeaderImage(file)
+      }
+
+      setProfile(updatedProfile)
+      toast.success(`${type === 'profile' ? 'Profil' : 'Kapak'} fotoğrafı başarıyla güncellendi`)
+      setEditSection(null)
+    } catch (error: any) {
+      console.error('Fotoğraf yüklenirken hata oluştu:', error)
+      const errorMessage = error.response?.data?.message || error.message || 'Fotoğraf yüklenirken bir hata oluştu'
+      setError(errorMessage)
+      toast.error(errorMessage)
+    } finally {
+      setIsUploading(null)
+    }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-purple-500"></div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-semibold mb-2">Bir hata oluştu</h2>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <Button onClick={() => window.location.reload()}>Yeniden Dene</Button>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -266,12 +336,12 @@ export default function ProfilePage() {
                 <span>Millet Kıraathaneleri</span>
               </Link>
 
-                            <Link className={`flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300`} href="/features/donate">
-                                <Heart className="h-5 w-5" />
-                                <span>Bağış Yap</span>
-                            </Link>
+              <Link className={`flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300`} href="/features/donate">
+                <Heart className="h-5 w-5" />
+                <span>Bağış Yap</span>
+              </Link>
 
-              <SearchForm />
+              <SearchForm isScrolled={true} />
             </nav>
 
             <div className="flex items-center gap-4 border-l border-border pl-6">
@@ -315,28 +385,72 @@ export default function ProfilePage() {
         <div className="relative mb-20">
           <div className="h-64 w-full rounded-xl overflow-hidden">
             <Image
-              src={profile.headerImage || "/placeholder.svg"}
+              src={"/placeholder.svg"}
               alt="Profile Header"
               fill
               className="object-cover"
               priority
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+            {editSection === "header" && (
+              <div className="absolute bottom-4 right-4 flex gap-2">
+                <label
+                  className={`cursor-pointer inline-flex items-center px-4 py-2 rounded-md text-sm font-medium text-white ${
+                    isUploading === 'header'
+                      ? 'bg-purple-400 cursor-not-allowed'
+                      : 'bg-purple-600 hover:bg-purple-700'
+                  }`}
+                >
+                  {isUploading === 'header' ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-white/60 border-t-white mr-2"></div>
+                      Yükleniyor...
+                    </>
+                  ) : (
+                    <>
+                      <Camera className="h-4 w-4 mr-2" />
+                      Kapak Fotoğrafı Seç
+                    </>
+                  )}
+                  <input
+                    type="file"
+                    className="hidden"
+                    accept="image/*"
+                    onChange={(e) => handleImageUpload(e, 'header')}
+                    disabled={isUploading === 'header'}
+                  />
+                </label>
+              </div>
+            )}
           </div>
 
           {/* Profile Image and Edit Button */}
           <div className="absolute -bottom-16 left-8 flex items-end">
             <div className="relative">
               <div className="h-32 w-32 rounded-full border-4 border-white shadow-lg overflow-hidden bg-white">
-                <Image src={profile.profileImage || "/placeholder.svg"} alt="Profile" fill className="object-cover" />
+                <Image src={"/placeholder.svg"} alt={profile.nameSurname} fill className="object-cover" />
               </div>
               {editSection === "profile" && (
-                <Button
-                  className="absolute bottom-0 right-0 rounded-full p-2 bg-purple-600 hover:bg-purple-700 text-white"
-                  size="icon"
+                <label
+                  className={`absolute bottom-0 right-0 cursor-pointer rounded-full p-2 ${
+                    isUploading === 'profile'
+                      ? 'bg-purple-400 cursor-not-allowed'
+                      : 'bg-purple-600 hover:bg-purple-700'
+                  } text-white`}
                 >
-                  <Camera className="h-4 w-4" />
-                </Button>
+                  {isUploading === 'profile' ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white/60 border-t-white"></div>
+                  ) : (
+                    <Camera className="h-4 w-4" />
+                  )}
+                  <input
+                    type="file"
+                    className="hidden"
+                    accept="image/*"
+                    onChange={(e) => handleImageUpload(e, 'profile')}
+                    disabled={isUploading === 'profile'}
+                  />
+                </label>
               )}
             </div>
           </div>
@@ -388,7 +502,7 @@ export default function ProfilePage() {
                       <div className="space-y-4">
                         <div>
                           <Label className="block text-sm font-medium mb-1">İsim</Label>
-                          <Input value={profile.name} onChange={(e) => handleProfileUpdate("name", e.target.value)} />
+                          <Input value={profile.nameSurname} onChange={(e) => handleProfileUpdate("nameSurname", e.target.value)} />
                         </div>
                         <div>
                           <Label className="block text-sm font-medium mb-1">Doğum Tarihi</Label>
@@ -414,10 +528,10 @@ export default function ProfilePage() {
                     ) : (
                       <>
                         <div>
-                          <h2 className="text-2xl font-bold text-gray-800">{profile.name}</h2>
+                          <h2 className="text-2xl font-bold text-gray-800">{profile.nameSurname}</h2>
                           <div className="flex items-center text-gray-500 mt-1">
                             <Calendar className="h-4 w-4 mr-1" />
-                            <span className="text-sm">Katılma: {new Date(profile.joinDate).toLocaleDateString()}</span>
+                            <span className="text-sm">Katılma: {new Date(profile.createdAt).toLocaleDateString()}</span>
                           </div>
                         </div>
 
@@ -588,7 +702,7 @@ export default function ProfilePage() {
                     {/* Activity bars */}
                     <div className="h-64 flex items-end justify-between relative">
                       {readingActivity.map((item, index) => (
-                        <div key={index} className="flex flex-col items-center group">
+                        <div key={item.id} className="flex flex-col items-center group">
                           <div
                             className="w-8 bg-gradient-to-t from-purple-300 to-purple-100 hover:from-purple-400 hover:to-purple-200 transition-all rounded-t-md relative"
                             style={{
@@ -651,7 +765,9 @@ export default function ProfilePage() {
                         whileHover={{ y: -5 }}
                       >
                         <div className="bg-purple-50 rounded-full p-3 inline-flex items-center justify-center mb-3">
-                          <div className="text-purple-400">{achievement.icon}</div>
+                          <div className="text-purple-400">
+                            {getAchievementIcon(achievement.type)}
+                          </div>
                         </div>
                         <h4 className="font-semibold text-gray-800 mb-1">{achievement.title}</h4>
                         <p className="text-xs text-gray-500 mb-2">{achievement.description}</p>
@@ -693,7 +809,7 @@ export default function ProfilePage() {
                       >
                         <div className="relative h-32 w-full">
                           <Image
-                            src={book.coverImage || "/placeholder.svg"}
+                            src={ "/placeholder.svg"}
                             alt={book.title}
                             fill
                             className="object-cover"

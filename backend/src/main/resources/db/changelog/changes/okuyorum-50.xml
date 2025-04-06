@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="20250405 23:54" author="belkizozbek">
+        <!-- Users tablosuna yeni kolonlar ekleme -->
+        <addColumn tableName="users">
+            <column name="birth_date" type="date">
+                <constraints nullable="true"/>
+            </column>
+            <column name="bio" type="varchar(500)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="reader_score" type="int" defaultValue="0">
+                <constraints nullable="true"/>
+            </column>
+            <column name="books_read" type="int" defaultValue="0">
+                <constraints nullable="true"/>
+            </column>
+            <column name="profile_image" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="header_image" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="followers" type="int" defaultValue="0">
+                <constraints nullable="true"/>
+            </column>
+            <column name="following" type="int" defaultValue="0">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+
+        <!-- Achievements tablosu oluşturma -->
+        <createTable tableName="achievements">
+            <column name="id" type="bigint">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="title" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="varchar(500)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="progress" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <!-- Reading Activities tablosu oluşturma -->
+        <createTable tableName="reading_activities">
+            <column name="id" type="bigint">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="month" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="books" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <!-- Foreign key constraints -->
+        <addForeignKeyConstraint baseTableName="achievements"
+                                baseColumnNames="user_id"
+                                constraintName="fk_achievements_user"
+                                referencedTableName="users"
+                                referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="reading_activities"
+                                baseColumnNames="user_id"
+                                constraintName="fk_reading_activities_user"
+                                referencedTableName="users"
+                                referencedColumnNames="id"/>
+
+        <!-- Sequence oluşturma -->
+        <createSequence sequenceName="achievements_seq" startValue="1" incrementBy="1"/>
+        <createSequence sequenceName="reading_activities_seq" startValue="1" incrementBy="1"/>
+    </changeSet>
+</databaseChangeLog> 

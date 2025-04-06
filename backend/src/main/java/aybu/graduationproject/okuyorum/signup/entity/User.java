@@ -12,6 +12,7 @@ import jakarta.validation.constraints.Size;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Date;
 
 @Entity
 @Table(name = "users")
@@ -42,6 +43,25 @@ public class User implements UserDetails {
 
     private boolean enabled = false; // varsayılan olarak false
 
+    // Yeni profil alanları
+    @Temporal(TemporalType.DATE)
+    private Date birthDate;
+
+    @Column(length = 500)
+    private String bio;
+
+    private Integer readerScore = 0;
+
+    private Integer booksRead = 0;
+
+    private String profileImage;
+
+    private String headerImage;
+
+    private Integer followers = 0;
+
+    private Integer following = 0;
+
     public User(Long id, String nameSurname, String username, String password, String email, Role role) {
         this.id = id;
         this.nameSurname = nameSurname;
@@ -60,7 +80,7 @@ public class User implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(role.name()));
+        return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
     }
 
     @Override
@@ -137,6 +157,70 @@ public class User implements UserDetails {
         this.enabled = enabled;
     }
 
+    public Date getBirthDate() {
+        return birthDate;
+    }
+
+    public void setBirthDate(Date birthDate) {
+        this.birthDate = birthDate;
+    }
+
+    public String getBio() {
+        return bio;
+    }
+
+    public void setBio(String bio) {
+        this.bio = bio;
+    }
+
+    public Integer getReaderScore() {
+        return readerScore;
+    }
+
+    public void setReaderScore(Integer readerScore) {
+        this.readerScore = readerScore;
+    }
+
+    public Integer getBooksRead() {
+        return booksRead;
+    }
+
+    public void setBooksRead(Integer booksRead) {
+        this.booksRead = booksRead;
+    }
+
+    public String getProfileImage() {
+        return profileImage;
+    }
+
+    public void setProfileImage(String profileImage) {
+        this.profileImage = profileImage;
+    }
+
+    public String getHeaderImage() {
+        return headerImage;
+    }
+
+    public void setHeaderImage(String headerImage) {
+        this.headerImage = headerImage;
+    }
+
+    public Integer getFollowers() {
+        return followers;
+    }
+
+    public void setFollowers(Integer followers) {
+        this.followers = followers;
+    }
+
+    public Integer getFollowing() {
+        return following;
+    }
+
+    public void setFollowing(Integer following) {
+        this.following = following;
+    }
+
     public boolean equals(final Object o) {
         if (o == this) return true;
         if (!(o instanceof User)) return false;
@@ -193,6 +277,14 @@ public class User implements UserDetails {
         private String email;
         private Role role;
         private boolean enabled;
+        private Date birthDate;
+        private String bio;
+        private Integer readerScore;
+        private Integer booksRead;
+        private String profileImage;
+        private String headerImage;
+        private Integer followers;
+        private Integer following;
 
         UserBuilder() {
         }
@@ -232,6 +324,46 @@ public class User implements UserDetails {
             return this;
         }
 
+        public UserBuilder birthDate(Date birthDate) {
+            this.birthDate = birthDate;
+            return this;
+        }
+
+        public UserBuilder bio(String bio) {
+            this.bio = bio;
+            return this;
+        }
+
+        public UserBuilder readerScore(Integer readerScore) {
+            this.readerScore = readerScore;
+            return this;
+        }
+
+        public UserBuilder booksRead(Integer booksRead) {
+            this.booksRead = booksRead;
+            return this;
+        }
+
+        public UserBuilder profileImage(String profileImage) {
+            this.profileImage = profileImage;
+            return this;
+        }
+
+        public UserBuilder headerImage(String headerImage) {
+            this.headerImage = headerImage;
+            return this;
+        }
+
+        public UserBuilder followers(Integer followers) {
+            this.followers = followers;
+            return this;
+        }
+
+        public UserBuilder following(Integer following) {
+            this.following = following;
+            return this;
+        }
+
         public User build() {
             User user = new User();
             user.id = this.id;
@@ -241,11 +373,19 @@ public class User implements UserDetails {
             user.email = this.email;
             user.role = this.role;
             user.enabled = this.enabled;
+            user.birthDate = this.birthDate;
+            user.bio = this.bio;
+            user.readerScore = this.readerScore;
+            user.booksRead = this.booksRead;
+            user.profileImage = this.profileImage;
+            user.headerImage = this.headerImage;
+            user.followers = this.followers;
+            user.following = this.following;
             return user;
         }
 
         public String toString() {
-            return "User.UserBuilder(id=" + this.id + ", nameSurname=" + this.nameSurname + ", username=" + this.username + ", password=" + this.password + ", role=" + this.role + ", enabled=" + this.enabled + ")";
+            return "User.UserBuilder(id=" + this.id + ", nameSurname=" + this.nameSurname + ", username=" + this.username + ", password=" + this.password + ", role=" + this.role + ", enabled=" + this.enabled + ", birthDate=" + this.birthDate + ", bio=" + this.bio + ", readerScore=" + this.readerScore + ", booksRead=" + this.booksRead + ", profileImage=" + this.profileImage + ", headerImage=" + this.headerImage + ", followers=" + this.followers + ", following=" + this.following + ")";
         }
     }
 }
