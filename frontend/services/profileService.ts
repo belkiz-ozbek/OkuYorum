@@ -54,9 +54,6 @@ const handleError = (error: any): never => {
     if (axiosError.response?.status === 413) {
       throw new Error('Dosya boyutu çok büyük. Lütfen 5MB\'dan küçük bir dosya seçin.');
     }
-    
-    // Diğer API hataları
-    throw new Error(axiosError.response?.data?.message || 'Bir hata oluştu. Lütfen daha sonra tekrar deneyin.');
   }
   
   throw new Error('Beklenmeyen bir hata oluştu. Lütfen daha sonra tekrar deneyin.');
