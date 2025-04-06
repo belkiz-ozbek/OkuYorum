@@ -9,13 +9,13 @@ import { Slider } from "@/components/ui/slider"
 
 interface FilterDialogProps {
   open: boolean
-  onOpenChange: (open: boolean) => void
+  onOpenChange?: (open: boolean) => void
   filters: {
     author: string
     genre: string
     rating: number
   }
-  onFilterChange: (filters: { author: string; genre: string; rating: number }) => void
+  onFilterChange?: (filters: { author: string; genre: string; rating: number }) => void
   authors: string[]
   genres: string[]
 }
@@ -24,15 +24,24 @@ export function FilterDialog({ open, onOpenChange, filters, onFilterChange, auth
   const [localFilters, setLocalFilters] = useState(filters)
 
   const handleReset = () => {
-    setLocalFilters({ author: "", genre: "", rating: 0 })
+    const resetFilters = { author: "", genre: "", rating: 0 }
+    setLocalFilters(resetFilters)
   }
 
   const handleApply = () => {
-    onFilterChange(localFilters)
+    if (onFilterChange) {
+      onFilterChange(localFilters)
+    }
+  }
+
+  const handleOpenChange = (newOpen: boolean) => {
+    if (onOpenChange) {
+      onOpenChange(newOpen)
+    }
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>İçerik Filtrele</DialogTitle>
@@ -43,7 +52,7 @@ export function FilterDialog({ open, onOpenChange, filters, onFilterChange, auth
             <Label htmlFor="author">Yazar</Label>
             <Select
               value={localFilters.author}
-              onValueChange={(value) => setLocalFilters({ ...localFilters, author: value })}
+              onValueChange={(value: string) => setLocalFilters({ ...localFilters, author: value })}
             >
               <SelectTrigger id="author">
                 <SelectValue placeholder="Yazar seçin" />
@@ -63,7 +72,7 @@ export function FilterDialog({ open, onOpenChange, filters, onFilterChange, auth
             <Label htmlFor="genre">Tür</Label>
             <Select
               value={localFilters.genre}
-              onValueChange={(value) => setLocalFilters({ ...localFilters, genre: value })}
+              onValueChange={(value: string) => setLocalFilters({ ...localFilters, genre: value })}
             >
               <SelectTrigger id="genre">
                 <SelectValue placeholder="Tür seçin" />
@@ -90,7 +99,7 @@ export function FilterDialog({ open, onOpenChange, filters, onFilterChange, auth
               max={5}
               step={0.5}
               value={[localFilters.rating]}
-              onValueChange={(value) => setLocalFilters({ ...localFilters, rating: value[0] })}
+              onValueChange={(value: number[]) => setLocalFilters({ ...localFilters, rating: value[0] })}
               className="py-4"
             />
             <div className="flex justify-between text-xs text-gray-500">
