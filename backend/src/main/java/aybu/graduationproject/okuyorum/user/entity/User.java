@@ -47,6 +47,15 @@ public class User implements UserDetails {
     @Column(name = "header_image")
     private String headerImage;
 
+    @Column(name = "followers")
+    private Integer followers = 0;
+
+    @Column(name = "following")
+    private Integer following = 0;
+
+    @Column(name = "books_read")
+    private Integer booksRead = 0;
+
     // Getters and Setters
     public Long getId() {
         return id;
@@ -136,6 +145,30 @@ public class User implements UserDetails {
 
     public void setHeaderImage(String headerImage) {
         this.headerImage = headerImage;
+    }
+
+    public Integer getFollowers() {
+        return followers;
+    }
+
+    public void setFollowers(Integer followers) {
+        this.followers = followers;
+    }
+
+    public Integer getFollowing() {
+        return following;
+    }
+
+    public void setFollowing(Integer following) {
+        this.following = following;
+    }
+
+    public Integer getBooksRead() {
+        return booksRead;
+    }
+
+    public void setBooksRead(Integer booksRead) {
+        this.booksRead = booksRead;
     }
 
     // UserDetails implementation
