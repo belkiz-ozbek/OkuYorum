@@ -48,13 +48,16 @@ public class User implements UserDetails {
     private String headerImage;
 
     @Column(name = "followers")
-    private Integer followers = 0;
+    private Integer followers;
 
     @Column(name = "following")
-    private Integer following = 0;
+    private Integer following;
 
     @Column(name = "books_read")
-    private Integer booksRead = 0;
+    private Integer booksRead;
+
+    @Column(name = "reader_score")
+    private Integer readerScore;
 
     // Getters and Setters
     public Long getId() {
@@ -169,6 +172,14 @@ public class User implements UserDetails {
 
     public void setBooksRead(Integer booksRead) {
         this.booksRead = booksRead;
+    }
+
+    public Integer getReaderScore() {
+        return readerScore;
+    }
+
+    public void setReaderScore(Integer readerScore) {
+        this.readerScore = readerScore;
     }
 
     // UserDetails implementation

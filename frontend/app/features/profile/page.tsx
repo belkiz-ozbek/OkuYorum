@@ -27,8 +27,7 @@ import {
   X,
   Moon,
   Sun,
-  Plus,
-  Search,
+  Plus
 } from "lucide-react"
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/form/button"
@@ -37,10 +36,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Progress } from "@/components/ui/progress"
 import { Card, CardContent } from "@/components/ui/layout/Card"
 import { SearchForm } from "@/components/ui/form/search-form"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/layout/avatar"
 import { Label } from "@/components/ui/form/label"
 import { profileService, UserProfile, Achievement, ReadingActivity } from "@/services/profileService"
 import { toast } from "sonner"
+import { FollowListModal } from "@/components/ui/follow/follow-list-modal"
 
 type BookType = {
   id: string
@@ -96,21 +95,23 @@ const achievementIcons = {
 }
 
 export default function ProfilePage() {
-  const router = useRouter()
+  useRouter();
   const [profile, setProfile] = useState<UserProfile>(initialProfile)
   const [achievements, setAchievements] = useState<Achievement[]>(initialAchievements)
   const [readingActivity, setReadingActivity] = useState<ReadingActivity[]>(initialReadingActivity)
   const [isEditing, setIsEditing] = useState(false)
   const [editSection, setEditSection] = useState<string | null>(null)
   const [showEditMenu, setShowEditMenu] = useState(false)
-  const [activeTab, setActiveTab] = useState("wall")
+  const [, setActiveTab] = useState("wall")
   const [isScrolled, setIsScrolled] = useState(false)
   const [theme, setTheme] = useState<"light" | "dark">("light")
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const fileInputRef = useRef<HTMLInputElement>(null)
-  const headerFileInputRef = useRef<HTMLInputElement>(null)
+  useRef<HTMLInputElement>(null);
+  useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState<'profile' | 'header' | null>(null)
+  const [showFollowersModal, setShowFollowersModal] = useState(false)
+  const [showFollowingModal, setShowFollowingModal] = useState(false)
 
   useEffect(() => {
     const fetchProfileData = async () => {
@@ -127,7 +128,7 @@ export default function ProfilePage() {
         setProfile(profileData)
         setAchievements(achievementsData)
         setReadingActivity(readingActivityData)
-      } catch (error: any) {
+      } catch (error: never) {
         console.error('Profil verileri yüklenirken hata oluştu:', error)
         const errorMessage = error.response?.data?.message || error.message || 'Bir hata oluştu'
         setError(errorMessage)
@@ -172,7 +173,7 @@ export default function ProfilePage() {
       })
       setProfile(updatedProfile)
       toast.success('Profil başarıyla güncellendi')
-    } catch (error: any) {
+    } catch (error: never) {
       console.error('Profil güncellenirken hata oluştu:', error)
       const errorMessage = error.response?.data?.message || error.message || 'Profil güncellenirken bir hata oluştu'
       setError(errorMessage)
@@ -199,7 +200,7 @@ export default function ProfilePage() {
       setIsEditing(false)
       setEditSection(null)
       toast.success('Değişiklikler kaydedildi')
-    } catch (error: any) {
+    } catch (error: never) {
       console.error('Değişiklikler kaydedilirken hata oluştu:', error)
       const errorMessage = error.response?.data?.message || error.message || 'Değişiklikler kaydedilirken bir hata oluştu'
       setError(errorMessage)
@@ -259,7 +260,7 @@ export default function ProfilePage() {
       setProfile(updatedProfile)
       toast.success(`${type === 'profile' ? 'Profil' : 'Kapak'} fotoğrafı başarıyla güncellendi`)
       setEditSection(null)
-    } catch (error: any) {
+    } catch (error: never) {
       console.error('Fotoğraf yüklenirken hata oluştu:', error)
       const errorMessage = error.response?.data?.message || error.message || 'Fotoğraf yüklenirken bir hata oluştu'
       setError(errorMessage)
@@ -290,7 +291,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50/50 via-rose-50/50 to-purple-100/50">
+    <div className="min-h-screen bg-gradient-to-b from-purple-50 to-white dark:from-gray-900 dark:to-gray-800">
       <header
         className={`fixed top-0 z-50 w-full transition-all duration-300 ${
           isScrolled ? "h-14 bg-background/60 backdrop-blur-lg border-b" : "h-16"
@@ -562,11 +563,17 @@ export default function ProfilePage() {
                         )}
 
                         <div className="flex justify-between pt-4 border-t">
-                          <div className="text-center">
+                          <div 
+                            className="text-center cursor-pointer hover:text-purple-700 transition-colors"
+                            onClick={() => setShowFollowersModal(true)}
+                          >
                             <div className="text-xl font-bold text-purple-600">{profile.followers}</div>
                             <div className="text-sm text-gray-500">Takipçi</div>
                           </div>
-                          <div className="text-center">
+                          <div 
+                            className="text-center cursor-pointer hover:text-purple-700 transition-colors"
+                            onClick={() => setShowFollowingModal(true)}
+                          >
                             <div className="text-xl font-bold text-purple-600">{profile.following}</div>
                             <div className="text-sm text-gray-500">Takip</div>
                           </div>
@@ -701,6 +708,7 @@ export default function ProfilePage() {
 
                     {/* Activity bars */}
                     <div className="h-64 flex items-end justify-between relative">
+                      {/* eslint-disable-next-line @typescript-eslint/no-unused-vars */}
                       {readingActivity.map((item, index) => (
                         <div key={item.id} className="flex flex-col items-center group">
                           <div
@@ -829,6 +837,22 @@ export default function ProfilePage() {
           </div>
         </div>
       </main>
+
+      {/* Takipçi/Takip Listesi Modalları */}
+      <FollowListModal
+        isOpen={showFollowersModal}
+        onClose={() => setShowFollowersModal(false)}
+        userId={profile.id}
+        type="followers"
+        title="Takipçiler"
+      />
+      <FollowListModal
+        isOpen={showFollowingModal}
+        onClose={() => setShowFollowingModal(false)}
+        userId={profile.id}
+        type="following"
+        title="Takip Edilenler"
+      />
     </div>
   )
 }

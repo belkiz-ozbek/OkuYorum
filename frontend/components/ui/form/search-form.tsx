@@ -2,13 +2,15 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { Input } from "@/components/ui/form/input"
-import { Button } from "@/components/ui/form/button"
 import { Search } from 'lucide-react'
 import Link from 'next/link'
-import Image from 'next/image'
+import { Card } from "../layout/Card"
+import { Avatar, AvatarFallback, AvatarImage } from "../layout/avatar"
+import { BaseUser } from "@/services/profileService"
+import {searchService} from "@/services/searchService";
 
-type QuickSearchResult = {
-    id: number;
+interface Book {
+    id: string;
     title: string;
     author: string;
     imageUrl?: string;
@@ -19,128 +21,148 @@ interface SearchFormProps {
 }
 
 export function SearchForm({ isScrolled = false }: SearchFormProps) {
-    const [searchQuery, setSearchQuery] = useState('')
-    const [quickResults, setQuickResults] = useState<QuickSearchResult[]>([])
+    const [query, setQuery] = useState("")
+    const [books, setBooks] = useState<Book[]>([])
+    const [users, setUsers] = useState<BaseUser[]>([])
+    const [isLoading, setIsLoading] = useState(false)
     const [showResults, setShowResults] = useState(false)
+    const searchRef = useRef<HTMLDivElement>(null)
     const router = useRouter()
-    const searchContainerRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
-            if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
+            if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
                 setShowResults(false)
             }
         }
 
-        document.addEventListener('mousedown', handleClickOutside)
-        return () => document.removeEventListener('mousedown', handleClickOutside)
+        document.addEventListener("mousedown", handleClickOutside)
+        return () => document.removeEventListener("mousedown", handleClickOutside)
     }, [])
 
     useEffect(() => {
-        const fetchQuickResults = async () => {
-            if (searchQuery.length > 0) {
-                try {
-                    const token = localStorage.getItem('token')
-                    const response = await fetch(
-                        `http://localhost:8080/api/books/quick-search?query=${encodeURIComponent(searchQuery)}`,
-                        {
-                            headers: {
-                                'Authorization': `Bearer ${token}`
-                            }
-                        }
-                    )
-                    if (response.ok) {
-                        const data = await response.json()
-                        setQuickResults(data)
-                        setShowResults(true)
-                    }
-                } catch (error) {
-                    console.error('Quick search error:', error)
-                }
-            } else {
-                setQuickResults([])
-                setShowResults(false)
+        const search = async () => {
+            if (query.length < 1) {
+                setBooks([])
+                setUsers([])
+                return
+            }
+
+            setIsLoading(true)
+            try {
+                const [booksData, usersData] = await Promise.all([
+                    searchService.quickSearchBooks(query),
+                    searchService.quickSearchUsers(query)
+                ])
+                setBooks(booksData)
+                setUsers(usersData)
+            } catch (error) {
+                console.error("Arama hatası:", error)
+            } finally {
+                setIsLoading(false)
             }
         }
 
-        const debounceTimer = setTimeout(fetchQuickResults, 300)
-        return () => clearTimeout(debounceTimer)
-    }, [searchQuery])
+        const debounce = setTimeout(search, 300)
+        return () => clearTimeout(debounce)
+    }, [query])
 
-    const handleSearch = (e: React.FormEvent) => {
+    const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
-        if (searchQuery.trim()) {
-            router.push(`/auth/search?q=${encodeURIComponent(searchQuery.trim())}`)
+        if (query.trim()) {
+            router.push(`/features/search?q=${encodeURIComponent(query)}`)
             setShowResults(false)
         }
     }
 
     return (
-        <div ref={searchContainerRef} className="relative">
-            <form onSubmit={handleSearch} className="flex items-center">
-                <div className="relative">
-                    <Input
-                        type="search"
-                        placeholder="Kitap ara..."
-                        className={`transition-all duration-300 pl-10 pr-4 py-2 rounded-full bg-background text-foreground placeholder:text-muted-foreground ${
-                            isScrolled ? 'w-72 text-xs' : 'w-96 text-sm'
-                        }`}
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        onFocus={() => setShowResults(true)}
-                    />
-                    <Search className={`absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground transition-all duration-300 ${
-                        isScrolled ? 'h-3.5 w-3.5' : 'h-4 w-4'
-                    }`} />
-                </div>
-                <Button
-                    type="submit"
-                    className={`ml-2 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-300 ${
-                        isScrolled ? 'text-xs py-1 px-3' : 'text-sm py-2 px-4'
+        <div ref={searchRef} className="relative w-full max-w-md">
+            <form onSubmit={handleSubmit} className="relative">
+                <Input
+                    type="search"
+                    placeholder="Kitap veya kullanıcı ara..."
+                    value={query}
+                    onChange={(e) => {
+                        setQuery(e.target.value)
+                        setShowResults(true)
+                    }}
+                    onFocus={() => setShowResults(true)}
+                    className={`w-full pl-10 pr-4 py-2 rounded-full bg-background/60 backdrop-blur-sm border ${
+                        isScrolled ? "h-9" : "h-10"
                     }`}
-                    size="sm"
-                >
-                    Ara
-                </Button>
+                />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             </form>
 
-            {showResults && quickResults.length > 0 && (
-                <div className={`absolute z-50 mt-2 bg-background rounded-lg shadow-lg border border-border max-h-[80vh] overflow-y-auto transition-all duration-300 ${
-                    isScrolled ? 'w-72' : 'w-96'
-                }`}>
-                    <div className="grid grid-cols-1 gap-2 p-2">
-                        {quickResults.map((result) => (
-                            <Link
-                                key={result.id}
-                                href={`/auth/book/${result.id}`}
-                                className="flex items-center gap-3 p-2 hover:bg-muted rounded-md transition-colors"
-                                onClick={() => setShowResults(false)}
-                            >
-                                {result.imageUrl && (
-                                    <div className={`relative flex-shrink-0 transition-all duration-300 ${
-                                        isScrolled ? 'w-10 h-14' : 'w-12 h-16'
-                                    }`}>
-                                        <Image
-                                            src={result.imageUrl}
-                                            alt={result.title}
-                                            fill
-                                            sizes={isScrolled ? "40px" : "48px"}
-                                            className="object-cover rounded"
-                                        />
+            {showResults && (query.length >= 1 || isLoading) && (
+                <Card className="absolute top-full left-0 right-0 mt-2 p-2 max-h-[400px] overflow-y-auto z-50">
+                    {isLoading ? (
+                        <div className="flex justify-center items-center py-4">
+                            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-600"></div>
+                        </div>
+                    ) : (
+                        <>
+                            {books.length > 0 && (
+                                <div className="mb-4">
+                                    <h3 className="text-sm font-medium text-muted-foreground mb-2 px-2">Kitaplar</h3>
+                                    <div className="space-y-1">
+                                        {books.map((book: Book) => (
+                                            <Link
+                                                key={book.id}
+                                                href={`/features/books/${book.id}`}
+                                                className="flex items-center gap-3 p-2 hover:bg-muted rounded-lg transition-colors"
+                                                onClick={() => setShowResults(false)}
+                                            >
+                                                <div className="relative h-12 w-8 flex-shrink-0">
+                                                    <img
+                                                        src={book.imageUrl || "/placeholder.svg"}
+                                                        alt={book.title}
+                                                        className="object-cover rounded"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <div className="font-medium">{book.title}</div>
+                                                    <div className="text-sm text-muted-foreground">{book.author}</div>
+                                                </div>
+                                            </Link>
+                                        ))}
                                     </div>
-                                )}
-                                <div className="flex-1 min-w-0">
-                                    <p className={`font-medium text-foreground truncate transition-all duration-300 ${
-                                        isScrolled ? 'text-xs' : 'text-sm'
-                                    }`}>{result.title}</p>
-                                    <p className={`text-muted-foreground truncate transition-all duration-300 ${
-                                        isScrolled ? 'text-[10px]' : 'text-xs'
-                                    }`}>{result.author}</p>
                                 </div>
-                            </Link>
-                        ))}
-                    </div>
-                </div>
+                            )}
+
+                            {users.length > 0 && (
+                                <div>
+                                    <h3 className="text-sm font-medium text-muted-foreground mb-2 px-2">Kullanıcılar</h3>
+                                    <div className="space-y-1">
+                                        {users.map((user) => (
+                                            <Link
+                                                key={user.id}
+                                                href={`/features/profile/${user.id}`}
+                                                className="flex items-center gap-3 p-2 hover:bg-muted rounded-lg transition-colors"
+                                                onClick={() => setShowResults(false)}
+                                            >
+                                                <Avatar className="h-8 w-8">
+                                                    <AvatarImage src={user.profileImage || undefined} alt={user.nameSurname} />
+                                                    <AvatarFallback>{user.nameSurname.charAt(0)}</AvatarFallback>
+                                                </Avatar>
+                                                <div>
+                                                    <div className="font-medium">{user.nameSurname}</div>
+                                                    <div className="text-sm text-muted-foreground">@{user.username}</div>
+                                                </div>
+                                            </Link>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {books.length === 0 && users.length === 0 && query.length >= 1 && (
+                                <div className="text-center py-4 text-muted-foreground">
+                                    Sonuç bulunamadı
+                                </div>
+                            )}
+                        </>
+                    )}
+                </Card>
             )}
         </div>
     )

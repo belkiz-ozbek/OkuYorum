@@ -111,7 +111,10 @@ public class BookService {
     }
 
     public List<BookDto> quickSearchBooks(String query) {
-        return bookRepository.findByTitleStartingWithIgnoreCaseOrderById(query)
+        if (query == null || query.trim().isEmpty()) {
+            return List.of();
+        }
+        return bookRepository.findByTitleStartingWithIgnoreCaseOrAuthorStartingWithIgnoreCaseOrderById(query.trim())
             .stream()
             .map(this::convertToDto)
             .collect(Collectors.toList());

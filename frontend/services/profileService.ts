@@ -1,18 +1,24 @@
 import axios, { AxiosError } from 'axios';
 
-export interface UserProfile {
+// Temel kullanıcı bilgileri
+export interface BaseUser {
   id: number;
   nameSurname: string;
   username: string;
   email: string;
-  birthDate: string;
   bio: string;
-  readerScore: number;
-  booksRead: number;
   profileImage: string | null;
-  headerImage: string | null;
   followers: number;
   following: number;
+  isFollowing?: boolean; // Kullanıcının takip edilip edilmediğini belirten alan
+}
+
+// Profil sayfasında gösterilen ek bilgiler
+export interface UserProfile extends BaseUser {
+  birthDate: string;
+  readerScore: number;
+  booksRead: number;
+  headerImage: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -37,7 +43,7 @@ export interface ReadingActivity {
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
 
-const handleError = (error: any): never => {
+const handleError = (error: never): never => {
   if (axios.isAxiosError(error)) {
     const axiosError = error as AxiosError;
     
