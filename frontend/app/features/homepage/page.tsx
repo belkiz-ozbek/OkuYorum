@@ -1,5 +1,4 @@
 "use client"
-
 import type React from "react"
 import Link from "next/link"
 import Image from "next/image"
@@ -24,7 +23,6 @@ import {
 } from "lucide-react"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/layout/Card"
 import { Lens } from "@/components/ui/lens"
-import { KitapKaziKazan } from "@/components/ui/kitap-kazi-kazan"
 import { useMediaQuery } from "@/components/ui/use-media-query"
 
 type FeatureCardProps = {
