@@ -97,7 +97,7 @@ export function BookReviewSection() {
           bookTitle="Suç ve Ceza"
           author="Fyodor Dostoyevski"
           reviewerName="Ahmet Y."
-          reviewerImage="/placeholder.svg?height=200&width=200"
+          reviewerImage="/icon2.jpg"
           rating={4.5}
           review="Dostoyevski'nin bu başyapıtı, insan psikolojisinin derinliklerine iniyor. Raskolnikov'un iç çatışmaları ve vicdani muhasebeleri etkileyici bir şekilde işlenmiş."
         />
@@ -105,7 +105,7 @@ export function BookReviewSection() {
           bookTitle="1984"
           author="George Orwell"
           reviewerName="Ayşe K."
-          reviewerImage="/placeholder.svg?height=200&width=200"
+          reviewerImage="/icon1.jpg"
           rating={5}
           review="Distopik bir gelecek tasviri yapan bu kitap, günümüz toplumlarına dair çarpıcı benzetmeler içeriyor. Orwell'in öngörüleri günümüzde bile şaşırtıcı derecede geçerli."
         />
@@ -113,7 +113,7 @@ export function BookReviewSection() {
           bookTitle="Küçük Prens"
           author="Antoine de Saint-Exupéry"
           reviewerName="Mehmet S."
-          reviewerImage="/placeholder.svg?height=200&width=200"
+          reviewerImage="/icon3.jpg"
           rating={4}
           review="Basit gibi görünen hikayenin altında yatan felsefi derinlik, her okumada yeni anlamlar keşfetmenizi sağlıyor."
         />
