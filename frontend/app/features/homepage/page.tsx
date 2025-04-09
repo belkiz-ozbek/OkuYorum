@@ -1068,7 +1068,7 @@ export default function HomePage() {
                 <li>
                   <Link
                     href="/features/millet-kiraathanesi"
-                    className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-br from-purple-700 to-purple-900 dark:from-purple-400 dark:to-purple-600 mb-4"
+                    className="text-sm text-muted-foreground hover:text-primary"
                   >
                     Millet Kıraathaneleri
                   </Link>
