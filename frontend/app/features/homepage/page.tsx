@@ -32,6 +32,7 @@ import {
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/layout/Card"
 import { Lens } from "@/components/ui/lens"
 import { KitapKaziKazan } from "@/components/ui/kitap-kazi-kazan"
+import { useMediaQuery } from "@/components/ui/use-media-query"
 
 type FeatureCardProps = {
   icon: React.ReactNode
@@ -89,7 +90,7 @@ const StarRating = ({ rating, size = "md" }: { rating: number; size?: "sm" | "md
 
   return (
     <div className="flex items-center">
-      {[...Array(totalStars)].map((_, i) => (
+      {[Array(totalStars)].map((_, i) => (
         <Star
           key={i}
           className={`${sizeClass} ${i < fullStars ? "text-gray-700 fill-gray-700" : "text-gray-700 fill-none"} mr-0.5`}
@@ -216,7 +217,6 @@ function DonationRequest({ libraryName, bookTitle, author, coverUrl }: DonationR
       className="bg-white/70 dark:bg-white/10 backdrop-blur-sm p-6 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-500 hover:-translate-y-1 flex items-start space-x-4"
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
       transition={{ duration: 0.5 }}
     >
       <Image
@@ -254,6 +254,70 @@ function ReadingGroup({ name, members, currentBook }: ReadingGroupProps) {
         <Button className="mt-auto hover:scale-105 transition-transform duration-300">Gruba Katıl</Button>
       </div>
     </motion.div>
+  )
+}
+
+ function MilletKiraathanesi() {
+  const isMobile = useMediaQuery("(max-width: 768px)")
+
+  const kiraathaneData = [
+    {
+      name: "Beyoğlu Millet Kıraathanesi",
+      description: "İstanbul'un kalbinde kültür ve sanatın buluşma noktası.",
+      image:
+        "https://images.unsplash.com/photo-1559925393-8be0ec4767c8?q=80&w=2071&auto=format&fit=crop&ixlib=rb-4.0.3",
+    },
+    {
+      name: "Kadıköy Millet Kıraathanesi",
+      description: "Anadolu yakasının en gözde kitap ve sohbet mekanı.",
+      image:
+        "https://images.unsplash.com/photo-1610632380989-680fe40816c6?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3",
+    },
+    {
+      name: "Üsküdar Millet Kıraathanesi",
+      description: "Boğaz manzarasında keyifli okuma saatleri için ideal ortam.",
+      image:
+        "https://images.unsplash.com/photo-1519682577862-22b62b24e493?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3",
+    },
+    {
+      name: "Beşiktaş Millet Kıraathanesi",
+      description: "Öğrencilerin ve kitapseverlerin buluşma noktası.",
+      image:
+        "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3",
+    },
+    {
+      name: "Fatih Millet Kıraathanesi",
+      description: "Tarihi atmosferde bilgi ve kültür alışverişi.",
+      image:
+        "https://images.unsplash.com/photo-1507842217343-583bb7270b66?q=80&w=2053&auto=format&fit=crop&ixlib=rb-4.0.3",
+    },
+  ]
+
+  return (
+    <div className="container mx-auto py-8">
+      <h1 className="text-3xl font-bold bg-clip-text text-transparent text-center bg-gradient-to-br from-purple-700 to-purple-900 dark:from-purple-400 dark:to-purple-600 mb-4">Millet Kıraathaneleri</h1>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+        {kiraathaneData.map((kiraathane, index) => (
+          <Card key={index} className="relative shadow-md h-full flex flex-col">
+            <CardHeader className="p-0">
+              <Lens zoomFactor={1.5} lensSize={100} isStatic={false} ariaLabel="Yakınlaştırma Alanı">
+                <img
+                  src={kiraathane.image || "/placeholder.svg"}
+                  alt={`${kiraathane.name} görüntüsü`}
+                  className="w-full h-48 object-cover rounded-t-lg"
+                />
+              </Lens>
+            </CardHeader>
+            <CardContent className="flex-grow pt-4">
+              <CardTitle className="text-xl">{kiraathane.name}</CardTitle>
+              <CardDescription className="mt-2">{kiraathane.description}</CardDescription>
+            </CardContent>
+            <CardFooter className="space-x-2">
+            </CardFooter>
+          </Card>
+        ))}
+      </div>
+    </div>
   )
 }
 
@@ -560,57 +624,6 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Featured Books Carousel */}
-        <div className="my-16">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-3xl font-bold">Öne Çıkan Kitaplar</h2>
-          </div>
-          <Carousel className="w-full max-w-5xl mx-auto">
-            <CarouselContent>
-              {[
-                {
-                  title: "1984",
-                  author: "George Orwell",
-                  coverUrl: "/placeholder.svg?height=300&width=200",
-                  rating: 4.5,
-                },
-                {
-                  title: "Suç ve Ceza",
-                  author: "Fyodor Dostoyevski",
-                  coverUrl: "/placeholder.svg?height=300&width=200",
-                  rating: 4.7,
-                },
-                {
-                  title: "Yüzyıllık Yalnızlık",
-                  author: "Gabriel García Márquez",
-                  coverUrl: "/placeholder.svg?height=300&width=200",
-                  rating: 4.8,
-                },
-                {
-                  title: "Küçük Prens",
-                  author: "Antoine de Saint-Exupéry",
-                  coverUrl: "/placeholder.svg?height=300&width=200",
-                  rating: 4.9,
-                },
-                {
-                  title: "Sefiller",
-                  author: "Victor Hugo",
-                  coverUrl: "/placeholder.svg?height=300&width=200",
-                  rating: 4.6,
-                },
-              ].map((book, index) => (
-                <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3 xl:basis-1/4">
-                  <div className="p-1">
-                    <FeaturedBook {...book} />
-                  </div>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            <CarouselPrevious className="left-0" />
-            <CarouselNext className="right-0" />
-          </Carousel>
-        </div>
-
         {/* Feature Highlights */}
         <motion.div
           className="relative py-24"
@@ -747,43 +760,214 @@ export default function HomePage() {
           </div>
         </motion.div>
 
-        {/* Donation Requests */}
-        <div className="py-16">
-          <h2 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-br from-purple-700 to-purple-900 dark:from-purple-400 dark:to-purple-600 mb-8">
-            Bağış İstekleri
-          </h2>
-          <div className="grid md:grid-cols-2 gap-6">
-            <DonationRequest
-              libraryName="Atatürk İlkokulu Kütüphanesi"
-              bookTitle="Beyaz Diş"
-              author="Jack London"
-              coverUrl="/placeholder.svg"
-            />
-            <DonationRequest
-              libraryName="Mehmet Akif Ersoy Ortaokulu"
-              bookTitle="Küçük Kara Balık"
-              author="Samed Behrengi"
-              coverUrl="/placeholder.svg"
-            />
+        {/* Literary Minds Section */}
+        <div className="py-20 relative overflow-hidden">
+          {/* Background gradient */}
+          <div className="absolute inset-0 bg-gradient-to-br from-gray-100/80 to-gray-50/80 rounded-3xl -z-10" />
+
+          <div className="max-w-7xl mx-auto px-6">
+            <div className="grid lg:grid-cols-2 gap-12 items-center">
+              {/* Image Column */}
+              <motion.div 
+                className="relative rounded-xl overflow-hidden shadow-2xl"
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.7 }}
+              >
+                <div className="relative aspect-[4/3] w-full">
+                  <Image 
+                    src="/authors-discussion.png" 
+                    alt="Yazarlar bir masa etrafında kitaplar üzerine tartışıyor" 
+                    fill 
+                    className="object-cover"
+                    priority
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+                </div>
+              </motion.div>
+
+              {/* Content Column */}
+              <motion.div
+                className="space-y-6"
+                initial={{ opacity: 0, x: 20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.7, delay: 0.2 }}
+              >
+                <h2 className="text-3xl md:text-4xl font-bold bg-clip-text bg-gradient-to-br text-purple-600/90">
+                  Büyük Yazarların Dünyasına Adım Atın
+                </h2>
+                
+                <p className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
+                  Edebiyat, yalnızca kitaplar değil, o kitapları yazan zihinlerin bir araya geldiği büyük bir sofradır. 
+                  Her kitap, bir yazarın düşünce dünyasına açılan bir kapıdır.
+                </p>
+                
+                <p className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
+                  OkuYorum'da yazarların eserlerini okuyarak onların düşünce dünyalarını keşfedin, 
+                  fikirlerini tartışın ve edebiyatın büyülü dünyasında yeni ufuklara yelken açın.
+                </p>
+                
+                <div className="pt-4">
+                <Button
+  className="bg-gradient-to-r from-primary to-[#4A00E0] hover:from-[#4A00E0] hover:to-primary text-white rounded-full px-8 py-6 text-lg shadow-lg hover:shadow-xl transition-all duration-300"
+>
+  Klasikleri Keşfet <ArrowRight className="ml-2 h-5 w-5" />
+</Button>
+
+                </div>
+              </motion.div>
+            </div>
           </div>
         </div>
 
-        {/* Kitap Kazı Kazan */}
-        <div className="py-16 bg-gradient-to-br from-purple-50/50 to-pink-50/50 rounded-3xl my-8">
-          <KitapKaziKazan />
+        
+                        {/* Millet Kıraathaneleri Section */}
+                        <div className="py-16">
+          <MilletKiraathanesi />
         </div>
 
         {/* Reading Groups */}
         <div className="py-16">
-          <h2 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-br from-purple-700 to-purple-900 dark:from-purple-400 dark:to-purple-600 mb-8">
-            Okuma Grupları
-          </h2>
-          <div className="grid md:grid-cols-3 gap-6">
-            <ReadingGroup name="Bilim Kurgu Severler" members={42} currentBook="Dune - Frank Herbert" />
-            <ReadingGroup name="Klasik Edebiyat Kulübü" members={35} currentBook="Madam Bovary - Gustave Flaubert" />
-            <ReadingGroup name="Çağdaş Türk Edebiyatı" members={28} currentBook="Tutunamayanlar - Oğuz Atay" />
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-br from-purple-700 to-purple-900 dark:from-purple-400 dark:to-purple-600 mb-4">
+              Okuma Grupları
+            </h2>
+            <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+              Kitap severlerle buluşun, fikirlerinizi paylaşın ve birlikte keşfedin.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            <motion.div
+              className="bg-white/70 dark:bg-white/10 backdrop-blur-sm p-8 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:bg-white/90 dark:hover:bg-white/20 transition-all duration-300 hover:-translate-y-1 group"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+            >
+              <div className="flex flex-col h-full">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                    <Users className="w-6 h-6 text-purple-600/90" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-semibold bg-clip-text text-transparent bg-gradient-to-br from-purple-800 to-purple-900 dark:from-purple-400 dark:to-purple-600">
+                      Bilim Kurgu Severler
+                    </h3>
+                    <p className="text-sm text-gray-500">42 üye</p>
+                  </div>
+                </div>
+
+                <div className="flex-1 space-y-4">
+                  <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                    <BookOpen className="w-4 h-4 " />
+                    <span>Şu anki kitap: Dune - Frank Herbert</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                    <MessageSquare className="w-4 h-4" />
+                    <span>Haftalık tartışma: Çarşamba 20:00</span>
+                  </div>
+                </div>
+
+                <div className="mt-6 pt-6 border-t border-gray-100 dark:border-gray-800">
+                <Button
+  className="w-full bg-gradient-to-r from-primary to-[#4A00E0] hover:from-[#4A00E0] hover:to-primary text-white rounded-full px-8 py-6 text-lg shadow-lg hover:shadow-xl transition-all duration-300"
+>
+  Gruba Katıl
+</Button>
+
+                </div>
+              </div>
+            </motion.div>
+
+            <motion.div
+              className="bg-white/70 dark:bg-white/10 backdrop-blur-sm p-8 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:bg-white/90 dark:hover:bg-white/20 transition-all duration-300 hover:-translate-y-1 group"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+            >
+              <div className="flex flex-col h-full">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                    <Users className="w-6 h-6 text-purple-600/90" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-semibold bg-clip-text text-transparent bg-gradient-to-br from-purple-800 to-purple-900 dark:from-purple-400 dark:to-purple-600">
+                      Klasik Edebiyat Kulübü
+                    </h3>
+                    <p className="text-sm text-gray-500">35 üye</p>
+                  </div>
+                </div>
+
+                <div className="flex-1 space-y-4">
+                  <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                    <BookOpen className="w-4 h-4" />
+                    <span>Şu anki kitap: Madam Bovary - Gustave Flaubert</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                    <MessageSquare className="w-4 h-4" />
+                    <span>Haftalık tartışma: Perşembe 19:30</span>
+                  </div>
+                </div>
+
+                <div className="mt-6 pt-6 border-t border-gray-100 dark:border-gray-800">
+                <Button
+  className="w-full bg-gradient-to-r from-primary to-[#4A00E0] hover:from-[#4A00E0] hover:to-primary text-white rounded-full px-8 py-6 text-lg shadow-lg hover:shadow-xl transition-all duration-300"
+>
+  Gruba Katıl
+</Button>
+
+                </div>
+              </div>
+            </motion.div>
+
+            <motion.div
+              className="bg-white/70 dark:bg-white/10 backdrop-blur-sm p-8 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:bg-white/90 dark:hover:bg-white/20 transition-all duration-300 hover:-translate-y-1 group"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
+              <div className="flex flex-col h-full">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                    <Users className="w-6 h-6 text-purple-600/90" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-semibold bg-clip-text text-transparent bg-gradient-to-br from-purple-800 to-purple-900 dark:from-purple-400 dark:to-purple-600">
+                      Çağdaş Türk Edebiyatı
+                    </h3>
+                    <p className="text-sm text-gray-500">28 üye</p>
+                  </div>
+                </div>
+
+                <div className="flex-1 space-y-4">
+                  <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                    <BookOpen className="w-4 h-4" />
+                    <span>Şu anki kitap: Tutunamayanlar - Oğuz Atay</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                    <MessageSquare className="w-4 h-4" />
+                    <span>Haftalık tartışma: Cuma 18:00</span>
+                  </div>
+                </div>
+
+                <div className="mt-6 pt-6 border-t border-gray-100 dark:border-gray-800">
+                <Button
+  className="w-full bg-gradient-to-r from-primary to-[#4A00E0] hover:from-[#4A00E0] hover:to-primary text-white rounded-full px-8 py-6 text-lg shadow-lg hover:shadow-xl transition-all duration-300"
+>
+  Gruba Katıl
+</Button>
+
+                </div>
+              </div>
+            </motion.div>
           </div>
         </div>
+
 
         {/* Latest Reviews */}
         <div className="py-16">
@@ -824,72 +1008,7 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Millet Kıraathaneleri Section */}
-        <div className="py-16">
-          <h2 className="text-3xl font-bold mb-4 text-center bg-clip-text text-transparent bg-gradient-to-br from-purple-700 to-purple-900 dark:from-purple-400 dark:to-purple-600">
-            Millet Kıraathaneleri
-          </h2>
-          <p className="text-lg mb-8 text-center text-gray-600 dark:text-gray-300">
-            Kitap tartışmalarına katılın, yeni insanlarla tanışın ve okuma deneyiminizi paylaşın.
-          </p>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-            {[
-              {
-                name: "Beyoğlu Millet Kıraathanesi",
-                description: "İstanbul'un kalbinde kültür ve sanatın buluşma noktası.",
-                image:
-                  "https://images.unsplash.com/photo-1559925393-8be0ec4767c8?q=80&w=2071&auto=format&fit=crop&ixlib=rb-4.0.3",
-              },
-              {
-                name: "Kadıköy Millet Kıraathanesi",
-                description: "Anadolu yakasının en gözde kitap ve sohbet mekanı.",
-                image:
-                  "https://images.unsplash.com/photo-1610632380989-680fe40816c6?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3",
-              },
-              {
-                name: "Üsküdar Millet Kıraathanesi",
-                description: "Boğaz manzarasında keyifli okuma saatleri için ideal ortam.",
-                image:
-                  "https://images.unsplash.com/photo-1519682577862-22b62b24e493?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3",
-              },
-              {
-                name: "Beşiktaş Millet Kıraathanesi",
-                description: "Öğrencilerin ve kitapseverlerin buluşma noktası.",
-                image:
-                  "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3",
-              },
-              {
-                name: "Fatih Millet Kıraathanesi",
-                description: "Tarihi atmosferde bilgi ve kültür alışverişi.",
-                image:
-                  "https://images.unsplash.com/photo-1507842217343-583bb7270b66?q=80&w=2053&auto=format&fit=crop&ixlib=rb-4.0.3",
-              },
-            ].map((kiraathane, index) => (
-              <Card key={index} className="relative shadow-md h-full flex flex-col">
-                <CardHeader className="p-0">
-                  <Lens zoomFactor={1.5} lensSize={100} isStatic={false} ariaLabel="Yakınlaştırma Alanı">
-                    <img
-                      src={kiraathane.image || "/placeholder.svg"}
-                      alt={`${kiraathane.name} görüntüsü`}
-                      className="w-full h-48 object-cover rounded-t-lg"
-                    />
-                  </Lens>
-                </CardHeader>
-                <CardContent className="flex-grow pt-4">
-                  <CardTitle className="text-xl">{kiraathane.name}</CardTitle>
-                  <CardDescription className="mt-2">{kiraathane.description}</CardDescription>
-                </CardContent>
-                <CardFooter className="space-x-2">
-                  <Button size="sm">Ziyaret Et</Button>
-                  <Button size="sm" variant="outline">
-                    Detaylar
-                  </Button>
-                </CardFooter>
-              </Card>
-            ))}
-          </div>
-        </div>
 
         {/* Community Impact */}
         <div className="bg-white/70 dark:bg-white/10 backdrop-blur-sm rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-8 my-16">
@@ -958,13 +1077,14 @@ export default function HomePage() {
                 <li>
                   <Link
                     href="/features/millet-kiraathanesi"
-                    className="text-sm text-muted-foreground hover:text-primary"
+                    className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-br from-purple-700 to-purple-900 dark:from-purple-400 dark:to-purple-600 mb-4"
                   >
                     Millet Kıraathaneleri
                   </Link>
                 </li>
               </ul>
             </div>
+
             <div>
               <h3 className="font-medium mb-4">Yasal</h3>
               <ul className="space-y-2">
@@ -992,6 +1112,4 @@ export default function HomePage() {
         </div>
       </footer>
     </div>
-  )
-}
-
+  )}

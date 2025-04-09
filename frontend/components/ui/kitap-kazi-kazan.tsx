@@ -26,11 +26,11 @@ export function KitapKaziKazan() {
 
   // Her kart için gradyan renkleri
   const gradyanSetleri: [string, string, string][] = [
-    ["#A97CF8", "#F38CB8", "#FDCC92"], // Mor - pembe - şeftali
-    ["#4158D0", "#C850C0", "#FFCC70"], // Mavi - mor - sarı
-    ["#0093E9", "#80D0C7", "#C2E9FB"], // Mavi - turkuaz - açık mavi
-    ["#8EC5FC", "#E0C3FC", "#FBC2EB"], // Açık mavi - lavanta - pembe
-    ["#85FFBD", "#FFFB7D", "#F8CEEC"], // Yeşil - sarı - pembe
+    ["#E2D1F9", "#F8C8DC", "#FFE5B4"], // Soft mor - soft pembe - soft şeftali
+    ["#D1E0FF", "#E0C3FC", "#FFE5B4"], // Soft mavi - soft lavanta - soft şeftali
+    ["#D1F2EB", "#D4E6F1", "#FADBD8"], // Soft turkuaz - soft mavi - soft pembe
+    ["#E8F8F5", "#D5F5E3", "#FEF9E7"], // Soft yeşil - soft nane - soft sarı
+    ["#F5EEF8", "#E8DAEF", "#F9EBEA"], // Soft lavanta - soft leylak - soft pembe
   ]
 
   return (
