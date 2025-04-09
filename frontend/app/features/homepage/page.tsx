@@ -4,13 +4,6 @@ import type React from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { SearchForm } from "@/components/ui/form/search-form"
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/layout/carousel"
 import { motion } from "framer-motion"
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/form/button"
