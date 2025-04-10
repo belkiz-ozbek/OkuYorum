@@ -1,6 +1,6 @@
 package aybu.graduationproject.okuyorum.library.entity;
 
-import aybu.graduationproject.okuyorum.signup.entity.User;
+import aybu.graduationproject.okuyorum.user.entity.User;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;

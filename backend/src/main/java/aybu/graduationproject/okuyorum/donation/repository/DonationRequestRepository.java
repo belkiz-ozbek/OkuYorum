@@ -3,7 +3,7 @@ package aybu.graduationproject.okuyorum.donation.repository;
 import aybu.graduationproject.okuyorum.donation.entity.DonationRequest;
 import aybu.graduationproject.okuyorum.donation.entity.RequestStatus;
 import aybu.graduationproject.okuyorum.donation.entity.RequestType;
-import aybu.graduationproject.okuyorum.signup.entity.User;
+import aybu.graduationproject.okuyorum.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;

@@ -3,8 +3,8 @@ package aybu.graduationproject.okuyorum.library.service;
 import aybu.graduationproject.okuyorum.library.dto.BookDto;
 import aybu.graduationproject.okuyorum.library.entity.Book;
 import aybu.graduationproject.okuyorum.library.repository.BookRepository;
-import aybu.graduationproject.okuyorum.signup.entity.User;
-import aybu.graduationproject.okuyorum.signup.repository.UserRepository;
+import aybu.graduationproject.okuyorum.user.entity.User;
+import aybu.graduationproject.okuyorum.user.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -111,7 +111,10 @@ public class BookService {
     }
 
     public List<BookDto> quickSearchBooks(String query) {
-        return bookRepository.findByTitleStartingWithIgnoreCaseOrderById(query)
+        if (query == null || query.trim().isEmpty()) {
+            return List.of();
+        }
+        return bookRepository.findByTitleStartingWithIgnoreCaseOrAuthorStartingWithIgnoreCaseOrderById(query.trim())
             .stream()
             .map(this::convertToDto)
             .collect(Collectors.toList());

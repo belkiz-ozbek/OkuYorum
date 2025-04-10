@@ -248,7 +248,7 @@
         </insert>
 
         <insert tableName="books">
-            <column name="title" value="Sofie’nin Dünyası"/>
+            <column name="title" value="Sofie'nin Dünyası"/>
             <column name="author" value="Jostein Gaarder"/>
             <column name="summary" value="Felsefe tarihini roman biçiminde anlatan bir başyapıt."/>
             <column name="user_id" value="1"/>

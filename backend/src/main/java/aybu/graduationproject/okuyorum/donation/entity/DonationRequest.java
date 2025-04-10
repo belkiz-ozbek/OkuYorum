@@ -1,6 +1,6 @@
 package aybu.graduationproject.okuyorum.donation.entity;
 
-import aybu.graduationproject.okuyorum.signup.entity.User;
+import aybu.graduationproject.okuyorum.user.entity.User;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
