@@ -1,4 +1,5 @@
 import axios, { AxiosError } from 'axios';
+import { API_URL } from '../config';
 
 // Temel kullanıcı bilgileri
 export interface BaseUser {
@@ -41,85 +42,112 @@ export interface ReadingActivity {
   updatedAt: string;
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
+const getAuthHeaders = () => {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    throw new Error('Token bulunamadı. Lütfen tekrar giriş yapın.');
+  }
+  return {
+    Authorization: `Bearer ${token}`,
+    'Content-Type': 'application/json'
+  };
+};
 
-const handleError = (error: never): never => {
+const handleError = (error: unknown) => {
   if (axios.isAxiosError(error)) {
     const axiosError = error as AxiosError;
-    
-    if (axiosError.response?.status === 401) {
-      // Token geçersiz veya eksik
-      localStorage.removeItem('token'); // Token'ı temizle
-      throw new Error('Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.');
-    }
-    
     if (axiosError.response?.status === 403) {
-      throw new Error('Bu işlem için yetkiniz bulunmuyor.');
+      localStorage.removeItem('token');
+      window.location.href = '/login';
+      throw new Error('Oturum süresi doldu. Lütfen tekrar giriş yapın.');
     }
-    
-    if (axiosError.response?.status === 413) {
-      throw new Error('Dosya boyutu çok büyük. Lütfen 5MB\'dan küçük bir dosya seçin.');
+    if (axiosError.response?.status === 401) {
+      localStorage.removeItem('token');
+      window.location.href = '/login';
+      throw new Error('Yetkilendirme hatası. Lütfen tekrar giriş yapın.');
     }
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
+    throw new Error(axiosError.response?.data?.message || 'Bir hata oluştu.');
   }
-  
-  throw new Error('Beklenmeyen bir hata oluştu. Lütfen daha sonra tekrar deneyin.');
+  throw error;
 };
 
 export const profileService = {
   // Profil bilgilerini getir
   getProfile: async (): Promise<UserProfile> => {
-    const token = localStorage.getItem('token');
-    const response = await axios.get(`${API_URL}/profile`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return response.data;
+    try {
+      const response = await axios.get(`${API_URL}/profile`, {
+        headers: getAuthHeaders()
+      });
+      return response.data;
+    } catch (error) {
+      throw handleError(error);
+    }
   },
 
   // Profil bilgilerini güncelle
   updateProfile: async (profile: Partial<UserProfile>): Promise<UserProfile> => {
-    const token = localStorage.getItem('token');
-    const response = await axios.put(`${API_URL}/profile`, profile, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return response.data;
+    try {
+      const response = await axios.put(`${API_URL}/profile`, profile, {
+        headers: getAuthHeaders()
+      });
+      return response.data;
+    } catch (error) {
+      throw handleError(error);
+    }
   },
 
   // Başarıları getir
   getAchievements: async (): Promise<Achievement[]> => {
-    const token = localStorage.getItem('token');
-    const response = await axios.get(`${API_URL}/profile/achievements`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return response.data;
+    try {
+      const response = await axios.get(`${API_URL}/profile/achievements`, {
+        headers: getAuthHeaders()
+      });
+      return response.data;
+    } catch (error) {
+      throw handleError(error);
+    }
   },
 
   // Başarı ilerlemesini güncelle
   updateAchievementProgress: async (achievementId: number, progress: number): Promise<Achievement> => {
-    const response = await axios.put(`${API_URL}/profile/achievements/${achievementId}/progress`, { progress });
-    return response.data;
+    try {
+      const response = await axios.put(
+        `${API_URL}/profile/achievements/${achievementId}/progress`,
+        { progress },
+        { headers: getAuthHeaders() }
+      );
+      return response.data;
+    } catch (error) {
+      throw handleError(error);
+    }
   },
 
   // Okuma aktivitesini getir
   getReadingActivity: async (): Promise<ReadingActivity[]> => {
-    const token = localStorage.getItem('token');
-    const response = await axios.get(`${API_URL}/profile/reading-activity`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return response.data;
+    try {
+      const response = await axios.get(`${API_URL}/profile/reading-activity`, {
+        headers: getAuthHeaders()
+      });
+      return response.data;
+    } catch (error) {
+      throw handleError(error);
+    }
   },
 
   // Yeni okuma aktivitesi ekle
   addReadingActivity: async (activity: Omit<ReadingActivity, "id" | "createdAt" | "updatedAt">): Promise<ReadingActivity> => {
-    const response = await axios.post(`${API_URL}/profile/reading-activity`, activity);
-    return response.data;
+    try {
+      const response = await axios.post(
+        `${API_URL}/profile/reading-activity`,
+        activity,
+        { headers: getAuthHeaders() }
+      );
+      return response.data;
+    } catch (error) {
+      throw handleError(error);
+    }
   },
 
   // Profil fotoğrafını güncelle
@@ -186,5 +214,35 @@ export const profileService = {
     } catch (error) {
       throw handleError(error);
     }
-  }
+  },
+
+  // Belirli bir kullanıcının profil bilgilerini getir
+  getUserProfile: async (userId: string): Promise<UserProfile> => {
+    try {
+      const response = await axios.get(`${API_URL}/profile/${userId}`);
+      return response.data;
+    } catch (error) {
+      throw handleError(error);
+    }
+  },
+
+  // Kullanıcının başarılarını getir
+  getUserAchievements: async (userId: string): Promise<Achievement[]> => {
+    try {
+      const response = await axios.get(`${API_URL}/profile/${userId}/achievements`);
+      return response.data;
+    } catch (error) {
+      throw handleError(error);
+    }
+  },
+
+  // Kullanıcının okuma aktivitesini getir
+  getUserReadingActivity: async (userId: string): Promise<ReadingActivity[]> => {
+    try {
+      const response = await axios.get(`${API_URL}/profile/${userId}/reading-activity`);
+      return response.data;
+    } catch (error) {
+      throw handleError(error);
+    }
+  },
 }; 

@@ -40,6 +40,7 @@ import {Label} from "@/components/ui/form/label";
 import {Input} from "@/components/ui/form/input";
 import {SearchForm} from "@/components/ui/form/search-form"
 import {Compass, Heart} from "lucide-react"
+import { profileService, UserProfile } from "@/services/profileService"
 
 type DonationType = "schools" | "libraries" | "individual"
 type BookCondition = "new" | "likeNew" | "used" | "old"
@@ -246,6 +247,7 @@ export default function DonatePage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { errors, setErrors, validateBookInfo, validateRecipientInfo, clearErrors } = useFormValidation()
   const [isPageLoading, setIsPageLoading] = useState(true)
+  const [currentUser, setCurrentUser] = useState<UserProfile | null>(null)
 
   const { toast } = useToast()
   const router = useRouter()
@@ -436,6 +438,19 @@ export default function DonatePage() {
       })
     }
   }, [bookTitle, author, description, toast])
+
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      try {
+        const profile = await profileService.getProfile()
+        setCurrentUser(profile)
+      } catch (error) {
+        console.error("Error fetching user profile:", error)
+      }
+    }
+
+    fetchCurrentUser()
+  }, [])
 
   const renderStep = () => {
     switch (currentStep) {
@@ -1135,7 +1150,7 @@ export default function DonatePage() {
               
               <Link 
                 className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300"
-                href="/features/profile"
+                href={`/features/profile/${currentUser?.id}`}
               >
                 <User className="h-5 w-5" />
                 <span>Profil</span>

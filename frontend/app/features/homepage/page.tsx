@@ -77,8 +77,6 @@ type ReadingGroupProps = {
 const StarRating = ({ rating, size = "md" }: { rating: number; size?: "sm" | "md" | "lg" }) => {
   const totalStars = 5
   const fullStars = Math.floor(rating)
-  const hasHalfStar = rating % 1 >= 0.5
-
   const starSizes = {
     sm: "w-3 h-3",
     md: "w-4 h-4",

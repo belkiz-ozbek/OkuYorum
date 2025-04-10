@@ -16,6 +16,7 @@ import {
 import {Button} from "@/components/ui/form/button";
 import {Input} from "@/components/ui/form/input";
 import {SearchForm} from "@/components/ui/form/search-form"
+import { profileService, UserProfile } from "@/services/profileService"
 
 type Donation = {
   id?: number
@@ -54,7 +55,7 @@ export default function DonationsPage() {
   const { toast } = useToast()
   const [searchTerm, setSearchTerm] = useState("")
   const [isScrolled, setIsScrolled] = useState(false)
-  const [theme, setTheme] = useState<'light' | 'dark'>('light')
+  const [theme, setTheme] = useState<"light" | "dark">("light")
   const [filters, setFilters] = useState<{
     donationType: string;
     dateRange: DateRange;
@@ -64,6 +65,7 @@ export default function DonationsPage() {
     dateRange: "all",
     status: "all"
   })
+  const [currentUser, setCurrentUser] = useState<UserProfile | null>(null)
 
   useEffect(() => {
     // Sistem dark mode tercihini kontrol et
@@ -139,6 +141,19 @@ export default function DonationsPage() {
     fetchDonations()
   }, [toast])
 
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      try {
+        const profile = await profileService.getProfile()
+        setCurrentUser(profile)
+      } catch (error) {
+        console.error("Error fetching user profile:", error)
+      }
+    }
+
+    fetchCurrentUser()
+  }, [])
+
   const filteredDonations = donations.filter(donation => {
     return donation.bookTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
            donation.author.toLowerCase().includes(searchTerm.toLowerCase())
@@ -212,7 +227,7 @@ export default function DonationsPage() {
               
               <Link 
                 className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300"
-                href="/features/profile"
+                href={`/features/profile/${currentUser?.id}`}
               >
                 <User className="h-5 w-5" />
                 <span>Profil</span>

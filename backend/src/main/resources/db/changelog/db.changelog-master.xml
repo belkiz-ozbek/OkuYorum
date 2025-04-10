@@ -14,6 +14,7 @@
     <include file="/db/changelog/changes/okuyorum-44.xml"/>
     <include file="/db/changelog/changes/okuyorum-50.xml"/>
     <include file="/db/changelog/changes/okuyorum-51.xml"/>
+    <include file="/db/changelog/changes/okuyorum-52.xml"/>
 
     <!-- Veri değişikliklerini buraya include edeceğiz -->
     <include file="db/changelog/data/data-master.xml"/>

@@ -10,6 +10,7 @@ import DonationInfo, { Donation } from "@/components/donations/DonationInfo"
 import {useToast} from "@/components/ui/feedback/use-toast";
 import {Button} from "@/components/ui/form/button";
 import {SearchForm} from "@/components/ui/form/search-form"
+import { profileService, UserProfile } from "@/services/profileService"
 
 export default function DonationDetailPage() {
   const params = useParams()
@@ -20,6 +21,7 @@ export default function DonationDetailPage() {
   const [error, setError] = useState<string | null>(null)
   const [isScrolled, setIsScrolled] = useState(false)
   const [theme, setTheme] = useState<'light' | 'dark'>('light')
+  const [currentUser, setCurrentUser] = useState<UserProfile | null>(null)
 
   useEffect(() => {
     // Sistem dark mode tercihini kontrol et
@@ -96,7 +98,7 @@ export default function DonationDetailPage() {
             errorMessage = "Bu işlemi gerçekleştirmek için giriş yapmanız gerekmektedir."
             // Kullanıcıyı login sayfasına yönlendir
             setTimeout(() => {
-              router.push('/auth/login')
+              router.push('/')
             }, 2000)
           } else if (err.response.status === 403) {
             errorMessage = "Bu bağışı görüntüleme yetkiniz bulunmamaktadır."
@@ -133,6 +135,19 @@ export default function DonationDetailPage() {
 
     fetchDonation()
   }, [params.id, toast, router])
+
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      try {
+        const profile = await profileService.getProfile()
+        setCurrentUser(profile)
+      } catch (error) {
+        console.error("Error fetching user profile:", error)
+      }
+    }
+
+    fetchCurrentUser()
+  }, [])
 
   if (loading) {
     return (
@@ -195,7 +210,7 @@ export default function DonationDetailPage() {
                 
                 <Link 
                   className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300"
-                  href="/features/profile"
+                  href={`/features/profile/${currentUser?.id}`}
                 >
                   <User className="h-5 w-5" />
                   <span>Profil</span>
@@ -299,7 +314,7 @@ export default function DonationDetailPage() {
                 
                 <Link 
                   className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300"
-                  href="/features/profile"
+                  href={`/features/profile/${currentUser?.id}`}
                 >
                   <User className="h-5 w-5" />
                   <span>Profil</span>
@@ -407,7 +422,7 @@ export default function DonationDetailPage() {
               
               <Link 
                 className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300"
-                href="/features/profile"
+                href={`/features/profile/${currentUser?.id}`}
               >
                 <User className="h-5 w-5" />
                 <span>Profil</span>
