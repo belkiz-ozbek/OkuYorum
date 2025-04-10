@@ -16,7 +16,7 @@ import {
 import {Button} from "@/components/ui/form/button";
 import {Input} from "@/components/ui/form/input";
 import {SearchForm} from "@/components/ui/form/search-form"
-import { profileService, UserProfile } from "@/services/profileService"
+import { UserService } from "@/services/UserService"
 
 type Donation = {
   id?: number
@@ -65,7 +65,7 @@ export default function DonationsPage() {
     dateRange: "all",
     status: "all"
   })
-  const [currentUser, setCurrentUser] = useState<UserProfile | null>(null)
+  const [currentUser, setCurrentUser] = useState<{ id: number; username: string } | null>(null)
 
   useEffect(() => {
     // Sistem dark mode tercihini kontrol et
@@ -79,7 +79,18 @@ export default function DonationsPage() {
       setIsScrolled(scrollPosition > 50)
     }
 
+    const loadUserInfo = async () => {
+      try {
+        const userInfo = await UserService.getCurrentUserInfo();
+        setCurrentUser(userInfo);
+      } catch (error) {
+        console.error('Error loading user info:', error);
+      }
+    };
+
     window.addEventListener('scroll', handleScroll)
+    loadUserInfo();
+    
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
@@ -141,19 +152,6 @@ export default function DonationsPage() {
     fetchDonations()
   }, [toast])
 
-  useEffect(() => {
-    const fetchCurrentUser = async () => {
-      try {
-        const profile = await profileService.getProfile()
-        setCurrentUser(profile)
-      } catch (error) {
-        console.error("Error fetching user profile:", error)
-      }
-    }
-
-    fetchCurrentUser()
-  }, [])
-
   const filteredDonations = donations.filter(donation => {
     return donation.bookTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
            donation.author.toLowerCase().includes(searchTerm.toLowerCase())
@@ -168,7 +166,7 @@ export default function DonationsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-rose-50 to-pink-100">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-purple-100">
       <header className={`fixed top-0 z-50 w-full transition-all duration-300 ${
         isScrolled 
           ? 'h-14 bg-background/60 backdrop-blur-lg border-b' 
@@ -227,10 +225,10 @@ export default function DonationsPage() {
               
               <Link 
                 className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300"
-                href={`/features/profile/${currentUser?.id}`}
+                href={`/features/profile/${currentUser?.id || ''}`}
               >
                 <User className="h-5 w-5" />
-                <span>Profil</span>
+                <span>{currentUser?.username || 'Profil'}</span>
               </Link>
             </div>
           </div>

@@ -50,7 +50,7 @@ export function LiteraryMinds() {
             </p>
             
             <p className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
-              OkuYorum'da yazarların eserlerini okuyarak onların düşünce dünyalarını keşfedin, 
+              OkuYorum&apos;da yazarların eserlerini okuyarak onların düşünce dünyalarını keşfedin,
               fikirlerini tartışın ve edebiyatın büyülü dünyasında yeni ufuklara yelken açın.
             </p>
             

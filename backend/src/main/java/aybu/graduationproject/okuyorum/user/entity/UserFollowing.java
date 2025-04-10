@@ -5,7 +5,10 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "user_followings")
+@Table(name = "user_followings",
+       uniqueConstraints = {
+           @UniqueConstraint(columnNames = {"follower_id", "following_id"})
+       })
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class UserFollowing {
     @Id

@@ -26,7 +26,10 @@ import {
   X,
   Moon,
   Sun,
-  Plus
+  Plus,
+  UserPlus,
+  UserMinus,
+  UserCheck
 } from "lucide-react"
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/form/button"
@@ -39,6 +42,9 @@ import { Label } from "@/components/ui/form/label"
 import { profileService, UserProfile, Achievement, ReadingActivity } from "@/services/profileService"
 import { useToast } from "@/components/ui/feedback/use-toast"
 import { FollowListModal } from "@/components/ui/follow/follow-list-modal"
+import { UserService } from "@/services/UserService"
+import { followService } from "@/services/followService"
+
 
 type BookType = {
   id: string
@@ -104,15 +110,19 @@ export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false)
   const [editSection, setEditSection] = useState<string | null>(null)
   const [showEditMenu, setShowEditMenu] = useState(false)
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [activeTab, setActiveTab] = useState("library")
+  const [, setActiveTab] = useState("overview")
   const [isScrolled, setIsScrolled] = useState(false)
   const [theme, setTheme] = useState<"light" | "dark">("light")
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [isUploading, setIsUploading] = useState<'profile' | 'header' | null>(null)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [setIsUploading] = useState<'profile' | 'header' | null>(null)
   const [showFollowersModal, setShowFollowersModal] = useState(false)
   const [showFollowingModal, setShowFollowingModal] = useState(false)
+  const [currentUser, setCurrentUser] = useState<{ id: number; username: string } | null>(null)
+  const [isFollowing, setIsFollowing] = useState(false)
+  const [showUnfollowConfirm, setShowUnfollowConfirm] = useState(false)
+  const [isFollowLoading, setIsFollowLoading] = useState(false)
 
   useEffect(() => {
     const fetchProfileData = async () => {
@@ -130,41 +140,47 @@ export default function ProfilePage() {
           throw new Error('Kullanıcı ID\'si bulunamadı')
         }
 
-        const [profileData, achievementsData, readingActivityData] = await Promise.all([
-          profileService.getUserProfile(userId.toString()),
-          profileService.getUserAchievements(userId.toString()),
-          profileService.getUserReadingActivity(userId.toString())
-        ])
-        
-        setProfile(profileData)
-        setAchievements(achievementsData)
-        setReadingActivity(readingActivityData)
-      } catch (error: unknown) {
-        console.error('Profil verileri yüklenirken hata oluştu:', error)
-        if (error instanceof Error) {
-          if (error.message === 'Token bulunamadı') {
-            router.push('/')
-            return
-          }
-          setError(error.message)
-          toast({
-            description: error.message,
-            variant: "destructive"
-          })
+        // Mevcut kullanıcı bilgilerini al
+        const currentUserResponse = await UserService.getCurrentUser()
+        setCurrentUser({
+          id: currentUserResponse.data.id,
+          username: currentUserResponse.data.username
+        })
+
+        // Takip durumunu kontrol et
+        if (currentUserResponse.data && userId.toString() !== currentUserResponse.data.id.toString()) {
+          const [isFollowingStatus, profileData, achievementsData, readingActivityData] = await Promise.all([
+            followService.isFollowing(userId.toString()),
+            profileService.getUserProfile(userId.toString()),
+            profileService.getUserAchievements(userId.toString()),
+            profileService.getUserReadingActivity(userId.toString())
+          ])
+          
+          setIsFollowing(isFollowingStatus)
+          setProfile(profileData)
+          setAchievements(achievementsData)
+          setReadingActivity(readingActivityData)
         } else {
-          setError('Beklenmeyen bir hata oluştu')
-          toast({
-            description: "Beklenmeyen bir hata oluştu",
-            variant: "destructive"
-          })
+          const [profileData, achievementsData, readingActivityData] = await Promise.all([
+            profileService.getUserProfile(userId.toString()),
+            profileService.getUserAchievements(userId.toString()),
+            profileService.getUserReadingActivity(userId.toString())
+          ])
+          
+          setProfile(profileData)
+          setAchievements(achievementsData)
+          setReadingActivity(readingActivityData)
         }
+      } catch (error) {
+        console.error("Error fetching profile data:", error)
+        setError("Profil bilgileri yüklenirken bir hata oluştu.")
       } finally {
         setIsLoading(false)
       }
     }
 
     fetchProfileData()
-  }, [userId, router, toast])
+  }, [userId, router])
 
   useEffect(() => {
     // Sistem dark mode tercihini kontrol et
@@ -198,15 +214,16 @@ export default function ProfilePage() {
       })
       setProfile(updatedProfile)
       toast({
-        description: 'Profil başarıyla güncellendi',
-        variant: "default"
+        title: "Başarılı",
+        description: "Profil başarıyla güncellendi",
       })
     } catch (error: unknown) {
       console.error("Error updating profile:", error)
       setError("Profil güncellenirken bir hata oluştu.")
       toast({
+        title: "Hata",
         description: "Profil güncellenirken bir hata oluştu.",
-        variant: "destructive"
+        variant: "destructive",
       })
     }
   }
@@ -230,15 +247,16 @@ export default function ProfilePage() {
       setIsEditing(false)
       setEditSection(null)
       toast({
-        description: 'Değişiklikler kaydedildi',
-        variant: "default"
+        title: "Başarılı",
+        description: "Değişiklikler kaydedildi",
       })
     } catch (error: unknown) {
       console.error("Error saving changes:", error)
       setError("Değişiklikler kaydedilirken bir hata oluştu.")
       toast({
+        title: "Hata",
         description: "Değişiklikler kaydedilirken bir hata oluştu.",
-        variant: "destructive"
+        variant: "destructive",
       })
     }
   }
@@ -264,57 +282,63 @@ export default function ProfilePage() {
   const getAchievementIcon = (achievementType: string) => {
     return achievementIcons[achievementType as keyof typeof achievementIcons] || <Award className="h-6 w-6" />
   }
-
-  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>, type: 'profile' | 'header') => {
-    const file = event.target.files?.[0]
-    if (!file) return
-
-    // Dosya boyutu kontrolü (5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      toast({
-        description: 'Dosya boyutu 5MB\'dan küçük olmalıdır',
-        variant: "destructive"
-      })
-      return
-    }
-
-    // Dosya tipi kontrolü
-    if (!file.type.startsWith('image/')) {
-      toast({
-        description: 'Sadece resim dosyaları yükleyebilirsiniz',
-        variant: "destructive"
-      })
-      return
-    }
-
+  const handleFollow = async () => {
+    if (!userId || Array.isArray(userId)) return;
+    setIsFollowLoading(true);
     try {
-      setIsUploading(type)
-      setError(null)
-      let updatedProfile: UserProfile
-
-      if (type === 'profile') {
-        updatedProfile = await profileService.updateProfileImage(file)
-      } else {
-        updatedProfile = await profileService.updateHeaderImage(file)
+      const response = await followService.follow(userId);
+      if (response.success && response.user) {
+        const { followers, following } = response.user;
+        setProfile((prev) => ({
+          ...prev,
+          followers,
+          following,
+        }));
+        toast({
+          title: "Başarılı",
+          description: "Kullanıcı takip edildi",
+        });
       }
-
-      setProfile(updatedProfile)
+    } catch (error) {
+      console.error('Follow error:', error);
       toast({
-        description: `${type === 'profile' ? 'Profil' : 'Kapak'} fotoğrafı başarıyla güncellendi`,
-        variant: "default"
-      })
-      setEditSection(null)
-    } catch (error: unknown) {
-      console.error("Error uploading image:", error)
-      setError("Fotoğraf yüklenirken bir hata oluştu.")
-      toast({
-        description: "Fotoğraf yüklenirken bir hata oluştu.",
-        variant: "destructive"
-      })
+        title: "Hata",
+        description: "Takip edilirken bir hata oluştu",
+        variant: "destructive",
+      });
     } finally {
-      setIsUploading(null)
+      setIsFollowLoading(false);
     }
-  }
+  };
+
+  const handleUnfollow = async () => {
+    if (!userId || Array.isArray(userId)) return;
+    setIsFollowLoading(true);
+    try {
+      const response = await followService.unfollow(userId);
+      if (response.success && response.user) {
+        const { followers, following } = response.user;
+        setProfile((prev) => ({
+          ...prev,
+          followers,
+          following,
+        }));
+        toast({
+          title: "Başarılı",
+          description: "Takipten çıkıldı",
+        });
+      }
+    } catch (error) {
+      console.error('Unfollow error:', error);
+      toast({
+        title: "Hata",
+        description: "Takipten çıkarken bir hata oluştu",
+        variant: "destructive",
+      });
+    } finally {
+      setIsFollowLoading(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -402,10 +426,10 @@ export default function ProfilePage() {
 
                 <Link
                     className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300"
-                    href={`/features/profile/${profile.id}`}
+                    href={`/features/profile/${currentUser?.id || ''}`}
                 >
                   <User className="h-5 w-5" />
-                  <span>Profil</span>
+                  <span>{currentUser?.username || 'Profil'}</span>
                 </Link>
               </div>
             </div>
@@ -428,113 +452,133 @@ export default function ProfilePage() {
         </header>
 
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-12">
-          {/* Header Image */}
-          <div className="relative mb-20">
-            <div className="h-64 w-full rounded-xl overflow-hidden">
-              <Image
-                  src={"/placeholder.svg"}
-                  alt="Profile Header"
+          {/* Profile Header */}
+          <div className="relative h-64 rounded-lg mb-24">
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600">
+              {profile.headerImage ? (
+                <Image
+                  src={profile.headerImage}
+                  alt="Header"
                   fill
-                  className="object-cover"
-                  priority
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
-              {editSection === "header" && (
-                  <div className="absolute bottom-4 right-4 flex gap-2">
-                    <label
-                        className={`cursor-pointer inline-flex items-center px-4 py-2 rounded-md text-sm font-medium text-white ${
-                            isUploading === 'header'
-                                ? 'bg-purple-400 cursor-not-allowed'
-                                : 'bg-purple-600 hover:bg-purple-700'
-                        }`}
-                    >
-                      {isUploading === 'header' ? (
-                          <>
-                            <div className="animate-spin rounded-full h-4 w-4 border-2 border-white/60 border-t-white mr-2"></div>
-                            Yükleniyor...
-                          </>
-                      ) : (
-                          <>
-                            <Camera className="h-4 w-4 mr-2" />
-                            Kapak Fotoğrafı Seç
-                          </>
-                      )}
-                      <input
-                          type="file"
-                          className="hidden"
-                          accept="image/*"
-                          onChange={(e) => handleImageUpload(e, 'header')}
-                          disabled={isUploading === 'header'}
-                      />
-                    </label>
-                  </div>
+                  className="object-cover opacity-50"
+                />
+              ) : (
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600" />
               )}
             </div>
 
-            {/* Profile Image and Edit Button */}
-            <div className="absolute -bottom-16 left-8 flex items-end">
-              <div className="relative">
-                <div className="h-32 w-32 rounded-full border-4 border-white shadow-lg overflow-hidden bg-white">
-                  <Image src={"/placeholder.svg"} alt={profile.nameSurname} fill className="object-cover" />
-                </div>
-                {editSection === "profile" && (
-                    <label
-                        className={`absolute bottom-0 right-0 cursor-pointer rounded-full p-2 ${
-                            isUploading === 'profile'
-                                ? 'bg-purple-400 cursor-not-allowed'
-                                : 'bg-purple-600 hover:bg-purple-700'
-                        } text-white`}
-                    >
-                      {isUploading === 'profile' ? (
-                          <div className="animate-spin rounded-full h-4 w-4 border-2 border-white/60 border-t-white"></div>
+            {/* Profile Image and Buttons Container */}
+            <div className="absolute bottom-0 left-8 right-8 transform translate-y-1/2">
+              <div className="flex items-end justify-between">
+                <div className="flex items-center gap-6">
+                  {/* Profile Image */}
+                  <div className="relative">
+                    <div className="h-32 w-32 rounded-full border-4 border-white shadow-lg overflow-hidden bg-white">
+                      {profile.profileImage ? (
+                        <Image
+                          src={profile.profileImage}
+                          alt={profile.nameSurname}
+                          fill
+                          className="object-cover"
+                        />
                       ) : (
-                          <Camera className="h-4 w-4" />
+                        <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                          <User className="h-16 w-16 text-gray-400" />
+                        </div>
                       )}
-                      <input
-                          type="file"
-                          className="hidden"
-                          accept="image/*"
-                          onChange={(e) => handleImageUpload(e, 'profile')}
-                          disabled={isUploading === 'profile'}
-                      />
-                    </label>
-                )}
+                    </div>
+                  </div>
+
+                  {/* Profile Info and Follow Button */}
+                  <div className="flex flex-col mb-4">
+                    <h2 className="text-2xl font-bold text-white mb-1">
+                      {profile.nameSurname}
+                    </h2>
+                    <div className="flex items-center text-white/80">
+                      <Calendar className="h-4 w-4 mr-1" />
+                      <span className="text-sm">
+                        Katılma: {new Date(profile.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Follow/Edit Button */}
+                <div className="mb-4">
+                  {currentUser && currentUser.id !== profile.id && (
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      disabled={isFollowLoading}
+                      className={`group relative z-10 min-w-[140px] ${
+                        isFollowing 
+                          ? 'bg-white hover:bg-red-50 border-gray-200 text-gray-700' 
+                          : 'bg-purple-400 hover:bg-purple-500 text-white border-transparent'
+                      } transition-all duration-200`}
+                      onClick={isFollowing ? () => setShowUnfollowConfirm(true) : handleFollow}
+                    >
+                      {isFollowLoading ? (
+                        <div className="flex items-center justify-center">
+                          <div className="animate-spin rounded-full h-5 w-5 border-2 border-current border-t-transparent" />
+                        </div>
+                      ) : isFollowing ? (
+                        <>
+                          <span className="group-hover:hidden flex items-center justify-center w-full">
+                            <UserCheck className="h-5 w-5 mr-2" />
+                            Takip Ediliyor
+                          </span>
+                          <span className="hidden group-hover:flex items-center justify-center w-full text-red-600">
+                            <UserMinus className="h-5 w-5 mr-2" />
+                            Takibi Bırak
+                          </span>
+                        </>
+                      ) : (
+                        <span className="flex items-center justify-center w-full">
+                          <UserPlus className="h-5 w-5 mr-2" />
+                          Takip Et
+                        </span>
+                      )}
+                    </Button>
+                  )}
+
+                  {currentUser?.id === profile.id && (
+                    <Button
+                      onClick={() => setShowEditMenu(!showEditMenu)}
+                      variant="outline"
+                      size="lg"
+                      className="bg-white/80 hover:bg-white/90 backdrop-blur-sm z-10"
+                    >
+                      <Edit className="h-4 w-4 mr-2" />
+                      Profili Düzenle
+                    </Button>
+                  )}
+                </div>
               </div>
             </div>
 
-            {/* Edit Profile Button */}
-            <div className="absolute bottom-4 right-4">
-              <Button
-                  onClick={() => setShowEditMenu(!showEditMenu)}
-                  variant="outline"
-                  className="bg-white/80 hover:bg-white/90 backdrop-blur-sm"
+            {/* Edit Menu */}
+            {showEditMenu && currentUser?.id === profile.id && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="absolute right-4 top-4 bg-white rounded-lg shadow-lg p-2 w-48 z-20"
               >
-                <Edit className="h-4 w-4 mr-2" /> Profili Düzenle
-              </Button>
-
-              {showEditMenu && (
-                  <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="absolute right-0 top-10 bg-white rounded-lg shadow-lg p-2 w-48 z-20"
-                  >
-                    <div className="flex flex-col space-y-1">
-                      <Button variant="ghost" className="justify-start text-sm" onClick={() => toggleEdit("header")}>
-                        <Camera className="mr-2 h-4 w-4" /> Kapak Fotoğrafı
-                      </Button>
-                      <Button variant="ghost" className="justify-start text-sm" onClick={() => toggleEdit("profile")}>
-                        <User className="mr-2 h-4 w-4" /> Profil Fotoğrafı
-                      </Button>
-                      <Button variant="ghost" className="justify-start text-sm" onClick={() => toggleEdit("info")}>
-                        <Edit className="mr-2 h-4 w-4" /> Profil Bilgileri
-                      </Button>
-                      <Button variant="ghost" className="justify-start text-sm" onClick={() => toggleEdit("bio")}>
-                        <MessageSquare className="mr-2 h-4 w-4" /> Hakkımda
-                      </Button>
-                    </div>
-                  </motion.div>
-              )}
-            </div>
+                <div className="flex flex-col space-y-1">
+                  <Button variant="ghost" className="justify-start text-sm" onClick={() => toggleEdit("header")}>
+                    <Camera className="mr-2 h-4 w-4" /> Kapak Fotoğrafı
+                  </Button>
+                  <Button variant="ghost" className="justify-start text-sm" onClick={() => toggleEdit("profile")}>
+                    <User className="mr-2 h-4 w-4" /> Profil Fotoğrafı
+                  </Button>
+                  <Button variant="ghost" className="justify-start text-sm" onClick={() => toggleEdit("info")}>
+                    <Edit className="mr-2 h-4 w-4" /> Profil Bilgileri
+                  </Button>
+                  <Button variant="ghost" className="justify-start text-sm" onClick={() => toggleEdit("bio")}>
+                    <MessageSquare className="mr-2 h-4 w-4" /> Hakkımda
+                  </Button>
+                </div>
+              </motion.div>
+            )}
           </div>
 
           {/* Profile Info */}
@@ -888,17 +932,47 @@ export default function ProfilePage() {
         <FollowListModal
             isOpen={showFollowersModal}
             onClose={() => setShowFollowersModal(false)}
-            userId={profile.id}
+            userId={profile.id.toString()}
             type="followers"
             title="Takipçiler"
         />
         <FollowListModal
             isOpen={showFollowingModal}
             onClose={() => setShowFollowingModal(false)}
-            userId={profile.id}
+            userId={profile.id.toString()}
             type="following"
             title="Takip Edilenler"
         />
+
+        {/* Unfollow Confirmation Modal */}
+        {showUnfollowConfirm && (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50">
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="bg-white rounded-lg p-6 max-w-sm w-full"
+            >
+              <h3 className="text-lg font-semibold mb-4">Takibi Bırak</h3>
+              <p className="text-gray-600 mb-6">
+                {profile.nameSurname} kullanıcısını takipten çıkarmak istediğinize emin misiniz?
+              </p>
+              <div className="flex justify-end space-x-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowUnfollowConfirm(false)}
+                >
+                  İptal
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={handleUnfollow}
+                >
+                  Takibi Bırak
+                </Button>
+              </div>
+            </motion.div>
+          </div>
+        )}
       </div>
   )
 } 
