@@ -81,7 +81,7 @@ export function SearchForm({ isScrolled = false }: SearchFormProps) {
 
     const handleBookClick = (bookId: number) => {
         setShowResults(false)
-        router.push(`/features/books/${bookId}`)
+        router.push(`/features/book/${bookId}`)
     }
 
     return (
