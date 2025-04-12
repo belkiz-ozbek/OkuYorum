@@ -44,7 +44,17 @@ export class UserService {
     return api.post('/api/auth/register', userData);
   }
 
-  static async getCurrentUser(): Promise<AxiosResponse<User>> {
+  static async getCurrentUser(): Promise<AxiosResponse<User | null>> {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      return Promise.resolve({
+        data: null,
+        status: 200,
+        statusText: 'OK',
+        headers: {},
+        config: {} as never
+      });
+    }
     return api.get('/api/users/me');
   }
 
@@ -59,7 +69,7 @@ export class UserService {
   static async isAdmin(): Promise<boolean> {
     try {
       const response = await this.getCurrentUser();
-      return response.data.role === 'ADMIN';
+      return response.data?.role === 'ADMIN';
     } catch (error) {
       console.error('Error checking admin status:', error);
       return false;

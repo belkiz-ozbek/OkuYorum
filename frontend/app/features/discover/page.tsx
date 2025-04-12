@@ -225,10 +225,11 @@ export default function DiscoverPage() {
 
     const loadUserInfo = async () => {
       try {
-        const userInfo = await UserService.getCurrentUserInfo();
-        setCurrentUser(userInfo);
+        const response = await UserService.getCurrentUser();
+        setCurrentUser(response.data);
       } catch (error) {
         console.error('Error loading user info:', error);
+        setCurrentUser(null);
       }
     };
 
@@ -456,10 +457,10 @@ export default function DiscoverPage() {
 
               <Link
                 className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300"
-                href={`/features/profile/${currentUser?.id || ''}`}
+                href={currentUser ? `/features/profile/${currentUser.id}` : '/'}
               >
                 <User className="h-5 w-5" />
-                <span>{currentUser?.username || 'Profil'}</span>
+                <span>{currentUser?.username || 'Giriş Yap'}</span>
               </Link>
             </div>
           </div>

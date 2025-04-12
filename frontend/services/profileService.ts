@@ -219,7 +219,17 @@ export const profileService = {
   // Belirli bir kullanıcının profil bilgilerini getir
   getUserProfile: async (userId: string): Promise<UserProfile> => {
     try {
-      const response = await axios.get(`${API_URL}/profile/${userId}`);
+      const token = localStorage.getItem('token');
+      const headers: Record<string, string> = {};
+      
+      // Token varsa ekle, yoksa boş headers ile devam et
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+      
+      const response = await axios.get(`${API_URL}/profile/${userId}`, {
+        headers
+      });
       return response.data;
     } catch (error) {
       throw handleError(error);
@@ -229,7 +239,17 @@ export const profileService = {
   // Kullanıcının başarılarını getir
   getUserAchievements: async (userId: string): Promise<Achievement[]> => {
     try {
-      const response = await axios.get(`${API_URL}/profile/${userId}/achievements`);
+      const token = localStorage.getItem('token');
+      const headers: Record<string, string> = {};
+      
+      // Token varsa ekle, yoksa boş headers ile devam et
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+      
+      const response = await axios.get(`${API_URL}/profile/${userId}/achievements`, {
+        headers
+      });
       return response.data;
     } catch (error) {
       throw handleError(error);
@@ -239,7 +259,17 @@ export const profileService = {
   // Kullanıcının okuma aktivitesini getir
   getUserReadingActivity: async (userId: string): Promise<ReadingActivity[]> => {
     try {
-      const response = await axios.get(`${API_URL}/profile/${userId}/reading-activity`);
+      const token = localStorage.getItem('token');
+      const headers: Record<string, string> = {};
+      
+      // Token varsa ekle, yoksa boş headers ile devam et
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+      
+      const response = await axios.get(`${API_URL}/profile/${userId}/reading-activity`, {
+        headers
+      });
       return response.data;
     } catch (error) {
       throw handleError(error);

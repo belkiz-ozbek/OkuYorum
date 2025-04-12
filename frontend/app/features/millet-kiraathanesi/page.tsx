@@ -26,8 +26,8 @@ export default function MilletKiraathanesi() {
 
     const loadUserInfo = async () => {
       try {
-        const userInfo = await UserService.getCurrentUserInfo();
-        setCurrentUser(userInfo);
+        const response = await UserService.getCurrentUser();
+        setCurrentUser(response.data);
       } catch (error) {
         console.error('Error loading user info:', error);
       }
@@ -105,10 +105,10 @@ export default function MilletKiraathanesi() {
               
               <Link 
                 className={`flex items-center gap-2 ${isScrolled ? 'text-gray-600 dark:text-gray-300' : 'text-white/90'} hover:text-primary transition-colors duration-300`}
-                href={`/features/profile/${currentUser?.id || ''}`}
+                href={currentUser ? `/features/profile/${currentUser.id}` : '/'}
               >
                 <User className="h-5 w-5" />
-                <span>{currentUser?.username || 'Profil'}</span>
+                <span>{currentUser?.username || 'Giriş Yap'}</span>
               </Link>
             </div>
           </div>

@@ -33,59 +33,63 @@ export function FollowListModal({ isOpen, onClose, userId, type, title }: Follow
   useEffect(() => {
     const loadCurrentUser = async () => {
       try {
-        const response = await UserService.getCurrentUser()
-        setCurrentUser({
-          id: response.data.id,
-          username: response.data.username
-        })
+        const response = await UserService.getCurrentUser();
+        if (response.data) {
+          setCurrentUser({
+            id: response.data.id,
+            username: response.data.username
+          });
+        } else {
+          setCurrentUser(null);
+        }
       } catch (error) {
-        console.error('Error loading current user:', error)
+        console.error('Error loading current user:', error);
+        setCurrentUser(null);
       }
-    }
+    };
 
     if (isOpen) {
-      loadCurrentUser()
-      fetchUsers()
+      loadCurrentUser();
+      fetchUsers();
     }
-  }, [isOpen, userId, type])
+  }, [isOpen, userId, type]);
 
   const fetchUsers = async () => {
     try {
-      setIsLoading(true)
-      setError(null)
+      setIsLoading(true);
+      setError(null);
 
-      // Önce mevcut kullanıcı bilgisini al
-      await UserService.getCurrentUser();
+      const currentUserResponse = await UserService.getCurrentUser();
+      if (!currentUserResponse.data) {
+        throw new Error('Kullanıcı girişi gerekli');
+      }
+
       const data = type === "followers"
         ? await followService.getFollowers(userId)
-        : await followService.getFollowing(userId)
+        : await followService.getFollowing(userId);
       
-      // Her kullanıcı için takip durumunu kontrol et
       const usersWithFollowStatus = await Promise.all(
         data.map(async (user) => {
-          // Eğer following listesindeyse, zaten takip ediyoruz demektir
-          const isFollowing = type === "following" ? true : await followService.isFollowing(user.id.toString())
-          
-          // Listedeki kullanıcının, mevcut kullanıcıyı takip edip etmediği
-          const isFollowedBy = await followService.isFollowing(user.id.toString())
+          const isFollowing = type === "following" ? true : await followService.isFollowing(user.id.toString());
+          const isFollowedBy = await followService.isFollowing(user.id.toString());
           
           return {
             ...user,
             isFollowing,
             isFollowedBy
-          }
+          };
         })
-      )
+      );
       
-      setUsers(usersWithFollowStatus)
+      setUsers(usersWithFollowStatus);
     } catch (error) {
-      console.error('Kullanıcılar yüklenirken hata oluştu:', error)
-      setError('Kullanıcılar yüklenirken bir hata oluştu')
-      toast.error('Kullanıcılar yüklenirken bir hata oluştu')
+      console.error('Kullanıcılar yüklenirken hata oluştu:', error);
+      setError('Kullanıcılar yüklenirken bir hata oluştu');
+      toast.error('Kullanıcılar yüklenirken bir hata oluştu');
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleFollow = async (targetUserId: number) => {
     try {

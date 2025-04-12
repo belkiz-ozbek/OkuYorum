@@ -101,7 +101,6 @@ const achievementIcons = {
 
 export default function ProfilePage() {
   const params = useParams()
-  const userId = params.id
   const router = useRouter()
   const { toast } = useToast()
   const [profile, setProfile] = useState<UserProfile>(initialProfile)
@@ -125,35 +124,36 @@ export default function ProfilePage() {
   const [isFollowLoading, setIsFollowLoading] = useState(false)
 
   useEffect(() => {
+    const loadUserInfo = async () => {
+      try {
+        const response = await UserService.getCurrentUser();
+        setCurrentUser(response.data);
+      } catch (error) {
+        console.error('Error loading user info:', error);
+        setCurrentUser(null);
+      }
+    };
+
+    loadUserInfo();
+  }, []);
+
+  useEffect(() => {
     const fetchProfileData = async () => {
       try {
         setIsLoading(true)
         setError(null)
 
-        const token = localStorage.getItem('token')
-        if (!token) {
-          router.push('/')
-          return
-        }
-
-        if (!userId) {
+        if (!params.id) {
           throw new Error('Kullanıcı ID\'si bulunamadı')
         }
 
-        // Mevcut kullanıcı bilgilerini al
-        const currentUserResponse = await UserService.getCurrentUser()
-        setCurrentUser({
-          id: currentUserResponse.data.id,
-          username: currentUserResponse.data.username
-        })
-
         // Takip durumunu kontrol et
-        if (currentUserResponse.data && userId.toString() !== currentUserResponse.data.id.toString()) {
+        if (currentUser && params.id.toString() !== currentUser.id.toString()) {
           const [isFollowingStatus, profileData, achievementsData, readingActivityData] = await Promise.all([
-            followService.isFollowing(userId.toString()),
-            profileService.getUserProfile(userId.toString()),
-            profileService.getUserAchievements(userId.toString()),
-            profileService.getUserReadingActivity(userId.toString())
+            followService.isFollowing(params.id.toString()),
+            profileService.getUserProfile(params.id.toString()),
+            profileService.getUserAchievements(params.id.toString()),
+            profileService.getUserReadingActivity(params.id.toString())
           ])
           
           setIsFollowing(isFollowingStatus)
@@ -162,9 +162,9 @@ export default function ProfilePage() {
           setReadingActivity(readingActivityData)
         } else {
           const [profileData, achievementsData, readingActivityData] = await Promise.all([
-            profileService.getUserProfile(userId.toString()),
-            profileService.getUserAchievements(userId.toString()),
-            profileService.getUserReadingActivity(userId.toString())
+            profileService.getUserProfile(params.id.toString()),
+            profileService.getUserAchievements(params.id.toString()),
+            profileService.getUserReadingActivity(params.id.toString())
           ])
           
           setProfile(profileData)
@@ -180,7 +180,7 @@ export default function ProfilePage() {
     }
 
     fetchProfileData()
-  }, [userId, router])
+  }, [params.id, router, currentUser])
 
   useEffect(() => {
     // Sistem dark mode tercihini kontrol et
@@ -283,10 +283,10 @@ export default function ProfilePage() {
     return achievementIcons[achievementType as keyof typeof achievementIcons] || <Award className="h-6 w-6" />
   }
   const handleFollow = async () => {
-    if (!userId || Array.isArray(userId)) return;
+    if (!params.id || Array.isArray(params.id)) return;
     setIsFollowLoading(true);
     try {
-      const response = await followService.follow(userId);
+      const response = await followService.follow(params.id);
       if (response.success && response.user) {
         const { followers, following } = response.user;
         setProfile((prev) => ({
@@ -312,10 +312,10 @@ export default function ProfilePage() {
   };
 
   const handleUnfollow = async () => {
-    if (!userId || Array.isArray(userId)) return;
+    if (!params.id || Array.isArray(params.id)) return;
     setIsFollowLoading(true);
     try {
-      const response = await followService.unfollow(userId);
+      const response = await followService.unfollow(params.id);
       if (response.success && response.user) {
         const { followers, following } = response.user;
         setProfile((prev) => ({

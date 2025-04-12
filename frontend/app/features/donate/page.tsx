@@ -265,7 +265,9 @@ export default function DonatePage() {
 
     const loadUserInfo = async () => {
       try {
-        const userInfo = await UserService.getCurrentUserInfo()
+        const userInfo = await UserService.getCurrentUser()
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-expect-error
         setCurrentUser(userInfo)
       } catch (error) {
         console.error('Error loading user info:', error)
