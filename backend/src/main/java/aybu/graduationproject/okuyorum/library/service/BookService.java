@@ -120,6 +120,13 @@ public class BookService {
             .collect(Collectors.toList());
     }
 
+    public BookDto updateBookStatus(Long id, Book.ReadingStatus status) {
+        Book book = bookRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Book not found"));
+        book.setStatus(status);
+        return convertToDto(bookRepository.save(book));
+    }
+
     private BookDto convertToDto(Book book) {
         BookDto dto = new BookDto();
         dto.setId(book.getId());
@@ -131,6 +138,7 @@ public class BookService {
         dto.setImageUrl(book.getImageUrl());
         dto.setPublishedDate(book.getPublishedDate());
         dto.setPageCount(book.getPageCount());
+        dto.setStatus(book.getStatus());
         return dto;
     }
 
@@ -148,6 +156,7 @@ public class BookService {
         book.setImageUrl(bookDto.getImageUrl());
         book.setPublishedDate(formatPublishedDate(bookDto.getPublishedDate()));
         book.setPageCount(bookDto.getPageCount());
+        book.setStatus(bookDto.getStatus());
     }
 
     private String formatPublishedDate(String publishedDate) {

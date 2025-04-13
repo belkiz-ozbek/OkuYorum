@@ -1,6 +1,7 @@
 package aybu.graduationproject.okuyorum.library.controller;
 
 import aybu.graduationproject.okuyorum.library.dto.BookDto;
+import aybu.graduationproject.okuyorum.library.entity.Book;
 import aybu.graduationproject.okuyorum.library.service.BookService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -57,5 +58,13 @@ public class BookController {
     @GetMapping("/quick-search")
     public ResponseEntity<List<BookDto>> quickSearchBooks(@RequestParam String query) {
         return ResponseEntity.ok(bookService.quickSearchBooks(query));
+    }
+
+    @PutMapping("/{id}/status")
+    public ResponseEntity<BookDto> updateBookStatus(
+            @PathVariable Long id,
+            @RequestBody String status) {
+        Book.ReadingStatus readingStatus = Book.ReadingStatus.valueOf(status);
+        return ResponseEntity.ok(bookService.updateBookStatus(id, readingStatus));
     }
 } 

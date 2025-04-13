@@ -47,6 +47,17 @@ public class Book {
     @Column(name = "page_count")
     private Integer pageCount;
 
+    @Column(name = "status")
+    @Enumerated(EnumType.STRING)
+    private ReadingStatus status;
+
+    public enum ReadingStatus {
+        READING,
+        READ,
+        WILL_READ,
+        DROPPED
+    }
+
     // Getters and Setters
     public Long getId() {
         return id;
@@ -126,5 +137,13 @@ public class Book {
 
     public void setPageCount(Integer pageCount) {
         this.pageCount = pageCount;
+    }
+
+    public ReadingStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(ReadingStatus status) {
+        this.status = status;
     }
 } 

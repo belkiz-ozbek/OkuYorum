@@ -47,6 +47,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.PUT, "/api/profile/**").hasAnyRole("USER", "ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/api/profile/**").hasAnyRole("USER", "ADMIN")
                 .requestMatchers("/api/donations/**").hasAnyRole("USER", "ADMIN")
+                .requestMatchers("/api/messages/**").hasAnyRole("USER", "ADMIN")
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session

@@ -1,9 +1,9 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
-import Image from "next/image"
+import Image, { StaticImport } from "next/image"
 import {
   BookOpen,
   Camera,
@@ -44,15 +44,11 @@ import { useToast } from "@/components/ui/feedback/use-toast"
 import { FollowListModal } from "@/components/ui/follow/follow-list-modal"
 import { UserService } from "@/services/UserService"
 import { followService } from "@/services/followService"
-
-
-type BookType = {
-  id: string
-  title: string
-  author: string
-  coverImage: string
-  rating: number
-}
+import { messageService, Message } from "@/services/messageService"
+import { bookService, Book, Review, Quote as BookQuote } from "@/services/bookService"
+import { AddBookModal } from "@/components/ui/book/add-book-modal"
+import { Book as BookType } from "@/types/book"
+import { cn } from "@/lib/utils"
 
 const initialProfile: UserProfile = {
   id: 0,
@@ -76,18 +72,36 @@ const initialReadingActivity: ReadingActivity[] = []
 
 const recommendations: BookType[] = [
   {
-    id: "5",
+    id: 5,
     title: "Fahrenheit 451",
     author: "Ray Bradbury",
+    summary: "A dystopian novel about a future American society where books are outlawed.",
+    imageUrl: "/placeholder.svg?height=150&width=100",
     coverImage: "/placeholder.svg?height=150&width=100",
     rating: 4.2,
+    ratingCount: 1000,
+    readCount: 500,
+    reviewCount: 200,
+    categories: ["Science Fiction", "Dystopian"],
+    language: "English",
+    publisher: "Ballantine Books",
+    status: "read"
   },
   {
-    id: "6",
+    id: 6,
     title: "Otomatik Portakal",
     author: "Anthony Burgess",
+    summary: "A disturbing dystopian novel exploring themes of free will and morality.",
+    imageUrl: "/placeholder.svg?height=150&width=100",
     coverImage: "/placeholder.svg?height=150&width=100",
     rating: 4.0,
+    ratingCount: 800,
+    readCount: 400,
+    reviewCount: 150,
+    categories: ["Science Fiction", "Dystopian"],
+    language: "Turkish",
+    publisher: "Türkiye İş Bankası Kültür Yayınları",
+    status: "read"
   },
 ]
 
@@ -112,16 +126,74 @@ export default function ProfilePage() {
   const [, setActiveTab] = useState("overview")
   const [isScrolled, setIsScrolled] = useState(false)
   const [theme, setTheme] = useState<"light" | "dark">("light")
-  const [isLoading, setIsLoading] = useState(true)
+  const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [setIsUploading] = useState<'profile' | 'header' | null>(null)
+  const [books, setBooks] = useState<Book[]>([])
   const [showFollowersModal, setShowFollowersModal] = useState(false)
   const [showFollowingModal, setShowFollowingModal] = useState(false)
   const [currentUser, setCurrentUser] = useState<{ id: number; username: string } | null>(null)
   const [isFollowing, setIsFollowing] = useState(false)
   const [showUnfollowConfirm, setShowUnfollowConfirm] = useState(false)
   const [isFollowLoading, setIsFollowLoading] = useState(false)
+  const [messages, setMessages] = useState<Message[]>([])
+  const [reviews, setReviews] = useState<Review[]>([])
+  const [quotes, setQuotes] = useState<BookQuote[]>([])
+  const [showAddBookModal, setShowAddBookModal] = useState(false)
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const token = localStorage.getItem('token')
+        if (!token) {
+          throw new Error('Oturum bulunamadı')
+        }
+
+        const response = await fetch(`http://localhost:8080/api/users/${params.id}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        })
+
+        if (!response.ok) {
+          throw new Error('Profil bilgileri alınamadı')
+        }
+
+        const data = await response.json()
+        setProfile({
+          ...data,
+          id: Number(data.id)
+        })
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Bir hata oluştu')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    const fetchBooks = async () => {
+      try {
+        if (!params.id) return;
+        
+        const token = localStorage.getItem('token');
+        if (!token) {
+          throw new Error('Oturum bulunamadı');
+        }
+
+        const booksData = await bookService.getBooks(params.id.toString());
+        setBooks(booksData);
+      } catch (err) {
+        console.error('Kitaplar yüklenirken hata:', err);
+        toast({
+          title: "Hata",
+          description: "Kitap bilgileri yüklenirken bir hata oluştu.",
+          variant: "destructive"
+        });
+      }
+    };
+
+    fetchProfile()
+    fetchBooks()
+  }, [params.id, toast])
 
   useEffect(() => {
     const loadUserInfo = async () => {
@@ -140,7 +212,7 @@ export default function ProfilePage() {
   useEffect(() => {
     const fetchProfileData = async () => {
       try {
-        setIsLoading(true)
+        setLoading(true)
         setError(null)
 
         if (!params.id) {
@@ -175,12 +247,37 @@ export default function ProfilePage() {
         console.error("Error fetching profile data:", error)
         setError("Profil bilgileri yüklenirken bir hata oluştu.")
       } finally {
-        setIsLoading(false)
+        setLoading(false)
       }
     }
 
     fetchProfileData()
   }, [params.id, router, currentUser])
+
+  useEffect(() => {
+    const fetchMessages = async () => {
+      try {
+        if (!params.id) return;
+        
+        const token = localStorage.getItem('token');
+        if (!token) {
+          throw new Error('Oturum bulunamadı');
+        }
+
+        const messagesData = await messageService.getMessages(params.id.toString());
+        setMessages(messagesData);
+      } catch (error) {
+        console.error('Mesajlar yüklenirken hata:', error);
+        toast({
+          title: "Hata",
+          description: "Mesajlar yüklenirken bir hata oluştu.",
+          variant: "destructive"
+        });
+      }
+    };
+
+    fetchMessages();
+  }, [params.id, toast]);
 
   useEffect(() => {
     // Sistem dark mode tercihini kontrol et
@@ -268,11 +365,12 @@ export default function ProfilePage() {
   }
 
   const renderStars = (rating: number) => {
-    return Array(5)
-        .fill(0)
-        .map((_, i) => (
-            <Star key={i} className={`h-4 w-4 ${i < Math.floor(rating) ? "text-yellow-400" : "text-gray-300"}`} />
-        ))
+    return Array(5).fill(0).map((_, index) => (
+      <Star
+        key={index}
+        className={`w-3 h-3 ${index < (rating || 0) ? 'text-amber-400 fill-amber-400' : 'text-gray-300'}`}
+      />
+    ))
   }
 
   const getMaxBooks = () => {
@@ -340,7 +438,11 @@ export default function ProfilePage() {
     }
   };
 
-  if (isLoading) {
+  const handleAddBookSuccess = () => {
+    fetchBooks()
+  }
+
+  if (loading) {
     return (
         <div className="min-h-screen flex items-center justify-center">
           <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-purple-500"></div>
@@ -720,44 +822,73 @@ export default function ProfilePage() {
               {/* Tabs */}
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
                 <Card className="overflow-hidden border-none bg-white/70 backdrop-blur-sm shadow-md">
-                  <Tabs defaultValue="library" onValueChange={setActiveTab}>
-                    <TabsList className="w-full bg-transparent p-0 border-b">
-                      <TabsTrigger
-                          value="wall"
-                          className="flex-1 py-3 rounded-none data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-purple-400 data-[state=active]:text-purple-500 transition-all duration-200"
-                      >
-                        Duvar
-                      </TabsTrigger>
-                      <TabsTrigger
-                          value="reviews"
-                          className="flex-1 py-3 rounded-none data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-purple-600 data-[state=active]:text-purple-700 transition-all duration-200"
-                      >
-                        İncelemeler
-                      </TabsTrigger>
-                      <TabsTrigger
-                          value="quotes"
-                          className="flex-1 py-3 rounded-none data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-purple-600 data-[state=active]:text-purple-700 transition-all duration-200"
-                      >
-                        Alıntılar
-                      </TabsTrigger>
+                  <Tabs defaultValue="books" className="w-full">
+                    <TabsList className="grid w-full grid-cols-5">
+                      <TabsTrigger value="books">Kitaplar</TabsTrigger>
+                      <TabsTrigger value="wall">Duvar</TabsTrigger>
+                      <TabsTrigger value="quotes">Alıntılar</TabsTrigger>
+                      <TabsTrigger value="reviews">İncelemeler</TabsTrigger>
+                      <TabsTrigger value="messages">İletiler</TabsTrigger>
                     </TabsList>
 
-                    <TabsContent value="library" className="p-6">
-                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                    <TabsContent value="books" className="p-6">
+                      <Card>
+                        <CardContent className="p-6">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                            {books.map((book) => (
+                              <div key={book.id} className="flex flex-col gap-2">
+                                <div className="relative h-32 w-full">
+                                  <Image
+                                    src={book.imageUrl || "/placeholder.svg" as string | StaticImport}
+                                    alt={book.title}
+                                    width={150}
+                                    height={200}
+                                    className="object-cover rounded-lg shadow-lg"
+                                  />
+                                </div>
+                                <div className="flex flex-col">
+                                  <span className="text-sm font-medium">{book.title}</span>
+                                  <span className="text-xs text-gray-500">{book.author}</span>
+                                  <div className="flex items-center gap-2">
+                                    <span className={cn(
+                                      "text-xs px-2 py-1 rounded-full",
+                                      {
+                                        "bg-blue-100 text-blue-800": book.status === "READING",
+                                        "bg-green-100 text-green-800": book.status === "READ",
+                                        "bg-yellow-100 text-yellow-800": book.status === "WILL_READ",
+                                        "bg-red-100 text-red-800": book.status === "DROPPED"
+                                      }
+                                    )}>
+                                      {book.status}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
 
-                        <motion.div
-                            whileHover={{ scale: 1.05 }}
-                            className="bg-purple-50/50 rounded-lg border-2 border-dashed border-purple-200 flex flex-col items-center justify-center p-4 h-full cursor-pointer hover:bg-purple-100/50 transition-colors duration-300"
-                        >
-                          <Plus className="h-8 w-8 text-purple-300 mb-2" />
-                          <span className="text-sm font-medium text-purple-500">Kitap Ekle</span>
-                        </motion.div>
-                      </div>
+                          {books.length === 0 && (
+                            <div className="text-center py-8">
+                              <BookOpen className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                              <p className="text-gray-500">Henüz kitap eklenmemiş</p>
+                              <p className="text-sm text-gray-400 mt-2">
+                                Kitap eklemek için arama çubuğunu kullanabilirsiniz
+                              </p>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
                     </TabsContent>
 
                     <TabsContent value="wall" className="p-6">
                       <div className="text-center py-8">
                         <p className="text-gray-500">Duvar içeriği burada gösterilecek</p>
+                      </div>
+                    </TabsContent>
+
+                    <TabsContent value="quotes" className="p-6">
+                      <div className="text-center py-8">
+                        <p className="text-gray-500">Alıntılar burada gösterilecek</p>
                       </div>
                     </TabsContent>
 
@@ -767,10 +898,38 @@ export default function ProfilePage() {
                       </div>
                     </TabsContent>
 
-                    <TabsContent value="quotes" className="p-6">
-                      <div className="text-center py-8">
-                        <p className="text-gray-500">Alıntılar burada gösterilecek</p>
-                      </div>
+                    <TabsContent value="messages" className="space-y-4">
+                      <Card>
+                        <CardContent className="p-6">
+                          <div className="space-y-4">
+                            {messages.map((message) => (
+                              <div
+                                key={message.id}
+                                className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                              >
+                                <div className="flex justify-between items-start">
+                                  <div>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                                      {new Date(message.createdAt).toLocaleDateString()}
+                                    </p>
+                                    <p className="mt-2">{message.content}</p>
+                                  </div>
+                                  {!message.isRead && (
+                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                                      Yeni
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                            {messages.length === 0 && (
+                              <p className="text-center text-gray-500 dark:text-gray-400">
+                                Henüz ileti bulunmuyor.
+                              </p>
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
                     </TabsContent>
                   </Tabs>
                 </Card>
@@ -907,7 +1066,7 @@ export default function ProfilePage() {
                           >
                             <div className="relative h-32 w-full">
                               <Image
-                                  src={ "/placeholder.svg"}
+                                  src={book.coverImage}
                                   alt={book.title}
                                   fill
                                   className="object-cover"
@@ -916,7 +1075,7 @@ export default function ProfilePage() {
                             <div className="p-2">
                               <h4 className="font-medium text-xs line-clamp-1">{book.title}</h4>
                               <p className="text-xs text-gray-500 truncate">{book.author}</p>
-                              <div className="flex mt-1 scale-75 origin-left">{renderStars(book.rating)}</div>
+                              <div className="flex mt-1 scale-75 origin-left">{renderStars(book.rating || 0)}</div>
                             </div>
                           </motion.div>
                       ))}
@@ -973,6 +1132,12 @@ export default function ProfilePage() {
             </motion.div>
           </div>
         )}
+
+        <AddBookModal
+          isOpen={showAddBookModal}
+          onClose={() => setShowAddBookModal(false)}
+          onSuccess={handleAddBookSuccess}
+        />
       </div>
   )
 } 
