@@ -127,6 +127,13 @@ public class BookService {
         return convertToDto(bookRepository.save(book));
     }
 
+    public List<BookDto> getUserBooks(Long userId) {
+        List<Book> books = bookRepository.findByUserId(userId);
+        return books.stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
+
     private BookDto convertToDto(Book book) {
         BookDto dto = new BookDto();
         dto.setId(book.getId());

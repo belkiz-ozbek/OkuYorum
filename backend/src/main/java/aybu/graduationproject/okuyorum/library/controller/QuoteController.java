@@ -4,12 +4,14 @@ import aybu.graduationproject.okuyorum.library.entity.Quote;
 import aybu.graduationproject.okuyorum.library.service.QuoteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/quotes")
+@CrossOrigin(origins = "*")
 public class QuoteController {
     private final QuoteService quoteService;
 
@@ -19,16 +21,19 @@ public class QuoteController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Quote> createQuote(@RequestBody Quote quote) {
         return ResponseEntity.ok(quoteService.createQuote(quote));
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Quote> updateQuote(@PathVariable Long id, @RequestBody Quote quote) {
         return ResponseEntity.ok(quoteService.updateQuote(id, quote));
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Void> deleteQuote(@PathVariable Long id) {
         quoteService.deleteQuote(id);
         return ResponseEntity.ok().build();

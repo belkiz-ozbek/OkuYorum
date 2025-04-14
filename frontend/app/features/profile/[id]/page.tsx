@@ -148,7 +148,16 @@ export default function ProfilePage() {
           throw new Error('Oturum bulunamadı')
         }
 
-        const response = await fetch(`http://localhost:8080/api/users/${params.id}`, {
+        // Kendi ID'mizi kontrol ediyoruz
+        const currentUserResponse = await UserService.getCurrentUser();
+        const currentUserId = currentUserResponse.data?.id;
+
+        // Eğer kendi profilimizi görüntülüyorsak /me endpoint'ini kullanıyoruz
+        const endpoint = currentUserId === Number(params.id) ? 
+          'http://localhost:8080/api/users/me' : 
+          `http://localhost:8080/api/users/${params.id}`;
+
+        const response = await fetch(endpoint, {
           headers: {
             'Authorization': `Bearer ${token}`
           }

@@ -1,5 +1,4 @@
-import axios from 'axios';
-import { API_URL } from '@/config';
+import { api } from './api';
 
 export interface Message {
   id: number;
@@ -12,50 +11,30 @@ export interface Message {
 }
 
 class MessageService {
-  private readonly baseUrl = `${API_URL}/api/messages`;
-
-  private getHeaders() {
-    const token = localStorage.getItem('token');
-    return {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    };
-  }
-
   async getMessages(userId: string): Promise<Message[]> {
-    const response = await axios.get(`${this.baseUrl}/user/${userId}`, {
-      headers: this.getHeaders()
-    });
+    const response = await api.get(`/api/messages/user/${userId}`);
     return response.data;
   }
 
   async getUnreadMessages(userId: string): Promise<Message[]> {
-    const response = await axios.get(`${this.baseUrl}/user/${userId}/unread`, {
-      headers: this.getHeaders()
-    });
+    const response = await api.get(`/api/messages/user/${userId}/unread`);
     return response.data;
   }
 
   async sendMessage(receiverId: string, content: string): Promise<Message> {
-    const response = await axios.post(this.baseUrl, {
+    const response = await api.post('/api/messages', {
       receiverId,
       content
-    }, {
-      headers: this.getHeaders()
     });
     return response.data;
   }
 
   async markAsRead(messageId: number): Promise<void> {
-    await axios.put(`${this.baseUrl}/${messageId}/read`, {}, {
-      headers: this.getHeaders()
-    });
+    await api.put(`/api/messages/${messageId}/read`, {});
   }
 
   async deleteMessage(messageId: number): Promise<void> {
-    await axios.delete(`${this.baseUrl}/${messageId}`, {
-      headers: this.getHeaders()
-    });
+    await api.delete(`/api/messages/${messageId}`);
   }
 }
 

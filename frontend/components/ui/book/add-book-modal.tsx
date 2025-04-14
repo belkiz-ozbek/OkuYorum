@@ -3,13 +3,10 @@ import { Button } from "@/components/ui/form/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/form/input"
 import { Label } from "@/components/ui/form/label"
-import { bookService } from "@/services/bookService"
+import { bookService, Book, ReadingStatus } from "@/services/bookService"
 import { useToast } from "@/components/ui/feedback/use-toast"
-import { Book } from "@/types/book"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/form/select"
 import { Card, CardContent } from "@/components/ui/Card"
-
-type ReadingStatus = 'reading' | 'read' | 'will-read' | 'dropped'
 
 interface AddBookModalProps {
   isOpen: boolean;
@@ -21,7 +18,7 @@ export function AddBookModal({ isOpen, onClose, onSuccess }: AddBookModalProps) 
   const [searchQuery, setSearchQuery] = useState("")
   const [searchResults, setSearchResults] = useState<Book[]>([])
   const [selectedBook, setSelectedBook] = useState<Book | null>(null)
-  const [readingStatus, setReadingStatus] = useState<ReadingStatus>("will-read")
+  const [readingStatus, setReadingStatus] = useState<ReadingStatus>("WILL_READ")
   const [isLoading, setIsLoading] = useState(false)
   const { toast } = useToast()
 
@@ -31,11 +28,8 @@ export function AddBookModal({ isOpen, onClose, onSuccess }: AddBookModalProps) 
     setIsLoading(true)
     try {
       const results = await bookService.getBooks(searchQuery)
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
       setSearchResults(results)
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (error) {
+    } catch {
       toast({
         title: "Hata",
         description: "Kitap arama sırasında bir hata oluştu.",
@@ -65,8 +59,6 @@ export function AddBookModal({ isOpen, onClose, onSuccess }: AddBookModalProps) 
         status: readingStatus,
       }
 
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
       await bookService.createBook(bookToAdd)
       
       toast({
@@ -75,11 +67,10 @@ export function AddBookModal({ isOpen, onClose, onSuccess }: AddBookModalProps) 
       })
       
       setSelectedBook(null)
-      setReadingStatus("will-read")
+      setReadingStatus("WILL_READ")
       onClose()
       onSuccess()
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (error) {
+    } catch {
       toast({
         title: "Hata",
         description: "Kitap eklenirken bir hata oluştu.",
@@ -155,10 +146,10 @@ export function AddBookModal({ isOpen, onClose, onSuccess }: AddBookModalProps) 
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="will-read">Okumak İstiyorum</SelectItem>
-                    <SelectItem value="reading">Okuyorum</SelectItem>
-                    <SelectItem value="read">Okudum</SelectItem>
-                    <SelectItem value="dropped">Bıraktım</SelectItem>
+                    <SelectItem value="WILL_READ">Okumak İstiyorum</SelectItem>
+                    <SelectItem value="READING">Okuyorum</SelectItem>
+                    <SelectItem value="READ">Okudum</SelectItem>
+                    <SelectItem value="DROPPED">Bıraktım</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

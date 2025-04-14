@@ -13,7 +13,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/books")
-@PreAuthorize("hasRole('USER')")
+@CrossOrigin(origins = "*")
 public class BookController {
 
     private final BookService bookService;
@@ -23,6 +23,7 @@ public class BookController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<BookDto> createBook(@RequestBody BookDto bookDto) {
         return ResponseEntity.ok(bookService.createBook(bookDto));
     }
@@ -37,12 +38,19 @@ public class BookController {
         return ResponseEntity.ok(bookService.getBookById(id));
     }
 
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<BookDto>> getUserBooks(@PathVariable Long userId) {
+        return ResponseEntity.ok(bookService.getUserBooks(userId));
+    }
+
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<BookDto> updateBook(@PathVariable Long id, @RequestBody BookDto bookDto) {
         return ResponseEntity.ok(bookService.updateBook(id, bookDto));
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Void> deleteBook(@PathVariable Long id) {
         bookService.deleteBook(id);
         return ResponseEntity.ok().build();
@@ -61,6 +69,7 @@ public class BookController {
     }
 
     @PutMapping("/{id}/status")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<BookDto> updateBookStatus(
             @PathVariable Long id,
             @RequestBody String status) {
