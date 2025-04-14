@@ -369,29 +369,7 @@ export default function DiscoverPage() {
   // Save item function
 // Share function
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-rose-50 to-pink-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-
-
-
-      {/* Mobile Menu */}
-      <MobileMenu open={showMobileMenu} onOpenChange={setShowMobileMenu} />
-
-      {/* Search Dialog */}
-      <SearchDialog open={showSearchDialog} onOpenChange={setShowSearchDialog} onSearch={handleSearch} />
-
-      {/* Create Content Dialog */}
-      <CreateContentDialog open={showCreateDialog} onOpenChange={setShowCreateDialog} />
-
-      {/* Filter Dialog */}
-      <FilterDialog
-        open={showFilterDialog}
-        onOpenChange={setShowFilterDialog}
-        filters={filters}
-        onFilterChange={handleFilterChange}
-        authors={allAuthors}
-        genres={allGenres}
-      />
-
+    <div className="flex flex-col min-h-screen">
       {/* Header */}
       <header
         className={`fixed top-0 z-50 w-full transition-all duration-300 ${
@@ -399,7 +377,7 @@ export default function DiscoverPage() {
         }`}
       >
         <div className="max-w-7xl mx-auto h-full flex items-center justify-between px-6">
-          <Link className="flex items-center justify-center group relative" href="/auth/homepage">
+          <Link className="flex items-center justify-center group relative" href="/features/homepage">
             <div className="relative">
               <BookOpen
                 className={`${isScrolled ? "h-5 w-5" : "h-6 w-6"} text-foreground group-hover:text-primary transition-all duration-300`}
