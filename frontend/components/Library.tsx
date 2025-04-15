@@ -1,14 +1,12 @@
 "use client";
 
-import React, { useState, ChangeEvent, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Card } from "@/components/ui/Card";
-import { Input } from "@/components/ui/form/input";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {BookOpen, CheckCircle, Clock, Search, Star, Library as LibraryIcon, Compass, Users, Heart, Moon, Sun, Check, Bookmark} from "lucide-react";
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { SearchForm } from "@/components/ui/form/search-form";
+import {BookOpen, CheckCircle, Clock, Star, Library as LibraryIcon, Compass, Users, Heart, Moon, Sun, Check, Bookmark} from "lucide-react";
+import { ScratchToReveal } from "@/components/ui/scratch-to-reveal";
 
 interface Book {
   id: number;
@@ -24,12 +22,17 @@ interface LibraryProps {
 }
 
 const Library: React.FC<LibraryProps> = ({ activeTab = 'all' }) => {
-  const [searchTerm, setSearchTerm] = useState("");
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const pathname = usePathname();
   const [isScrolled, setIsScrolled] = useState(false);
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const [isClient, setIsClient] = useState(false);
+  const [revealedBook, setRevealedBook] = useState<Book | null>(null);
+  
+  // İstemci tarafında olduğumuzu kontrol et
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
   
   const books: Book[] = useMemo(() => [
     {
@@ -199,180 +202,173 @@ const Library: React.FC<LibraryProps> = ({ activeTab = 'all' }) => {
       coverImage: "/bir idam mahkumunun son günü.jpg",
       rating: 8,
       status: 'read'
+    },
+    {
+      id: 22,
+      title: "Aşk",
+      author: "Elif Şafak",
+      coverImage: "https://r2.1k-cdn.com/sig/size:384/plain/https%3A%2F%2F1k-cdn.com%2Fresimler%2F%2Fkitaplar%2F131_1431127652.jpg",
+      rating: 8,
+      status: 'to-read'
+    },
+    {
+      id: 23,
+      title: "Nutuk",
+      author: "Mustafa Kemal Atatürk",
+      coverImage: "https://r2.1k-cdn.com/sig/size:96/plain/https%3A%2F%2F1k-cdn.com%2Fresimler%2F%2Fkitaplar%2F2582_1451326603.jpg",
+      rating: 9,
+      status: 'to-read'
+    },
+    {
+      id: 24,
+      title: "Olasılıksız",
+      author: "Adam Fawer",
+      coverImage: "https://r2.1k-cdn.com/sig/size:96/plain/https%3A%2F%2F1k-cdn.com%2Fresimler%2Fkitaplar%2F102_Olasiliksiz-Adam_Fawer324.jpg",
+      rating: 8,
+      status: 'to-read'
+    },
+    {
+      id: 25,
+      title: "Başlangıç",
+      author: "Dan Brown",
+      coverImage: "https://r2.1k-cdn.com/sig/size:96/plain/https%3A%2F%2F1k-cdn.com%2Fresimler%2Fkitaplar%2F107518_WmRwU_1505307242.jpg",
+      rating: 8,
+      status: 'to-read'
+    },
+    {
+      id: 26,
+      title: "Bin Muhteşem Güneş",
+      author: "Khaled Hosseini",
+      coverImage: "https://r2.1k-cdn.com/sig/size:96/plain/https%3A%2F%2F1k-cdn.com%2Fresimler%2Fkitaplar%2F120_Bin_Muhtesem_Gunes-Khaled_Hosseini453.jpg",
+      rating: 9,
+      status: 'to-read'
+    },
+    {
+      id: 27,
+      title: "Zamanın Kısa Tarihi",
+      author: "Stephen Hawking",
+      coverImage: "https://r2.1k-cdn.com/sig/size:96/plain/https%3A%2F%2F1k-cdn.com%2Fresimler%2Fkitaplar%2F1637855_1701893339_Rq9AK.jpg",
+      rating: 8,
+      status: 'to-read'
+    },
+    {
+      id: 28,
+      title: "Harry Potter ve Felsefe Taşı",
+      author: "J.K. Rowling",
+      coverImage: "https://r2.1k-cdn.com/sig/size:96/plain/https%3A%2F%2F1k-cdn.com%2Fresimler%2Fkitaplar%2F2267_1464005642.jpg",
+      rating: 9,
+      status: 'to-read'
+    },
+    {
+      id: 29,
+      title: "Kırmızı ve Siyah",
+      author: "Stendhal",
+      coverImage: "https://r2.1k-cdn.com/sig/size:96/plain/https%3A%2F%2F1k-cdn.com%2Fresimler%2Fkitaplar%2F2331481_1720352639_Zeblw.jpg",
+      rating: 8,
+      status: 'to-read'
+    },
+    {
+      id: 30,
+      title: "Eşekli Kütüphaneci",
+      author: "Fakir Baykurt",
+      coverImage: "https://r2.1k-cdn.com/sig/size:96/plain/https%3A%2F%2F1k-cdn.com%2Fresimler%2Fkitaplar%2F2398_Esekli_Kutuphaneci-Fakir_Baykurt489.jpg",
+      rating: 8,
+      status: 'to-read'
+    },
+    {
+      id: 31,
+      title: "Baba ve Piç",
+      author: "Elif Şafak",
+      coverImage: "https://r2.1k-cdn.com/sig/size:96/plain/https%3A%2F%2F1k-cdn.com%2Fresimler%2Fkitaplar%2F257_Baba_ve_Pic-Elif_safak983.jpg",
+      rating: 8,
+      status: 'to-read'
+    },
+    {
+      id: 32,
+      title: "İstanbul Hatırası",
+      author: "Ahmet Ümit",
+      coverImage: "https://r2.1k-cdn.com/sig/size:96/plain/https%3A%2F%2F1k-cdn.com%2Fresimler%2Fkitaplar%2F27823_1708166890_2xbNH.jpg",
+      rating: 8,
+      status: 'to-read'
+    },
+    {
+      id: 33,
+      title: "Dava",
+      author: "Franz Kafka",
+      coverImage: "https://r2.1k-cdn.com/sig/size:96/plain/https%3A%2F%2F1k-cdn.com%2Fresimler%2Fkitaplar%2F27823_2906d_1608143858.jpg",
+      rating: 8,
+      status: 'to-read'
     }
   ], []);
 
-  const [favoriteBooks, setFavoriteBooks] = useState<Set<number>>(() => {
-    // Tarayıcı ortamında mı kontrol et
+  const [favoriteBooks, setFavoriteBooks] = useState<Set<number>>(() => new Set());
+  const [readBooks, setReadBooks] = useState<Set<number>>(() => new Set());
+  const [toReadBooks, setToReadBooks] = useState<Set<number>>(() => new Set());
+
+  // LocalStorage işlemleri için ayrı bir useEffect
+  useEffect(() => {
     if (typeof window !== 'undefined') {
-      // localStorage'dan favori kitapları yükle
+      // Favori kitapları yükle
       const savedFavorites = localStorage.getItem('favoriteBooks');
       if (savedFavorites) {
         try {
-          // JSON string'i Set'e dönüştür
-          const parsedFavorites = JSON.parse(savedFavorites);
-          return new Set(parsedFavorites);
+          setFavoriteBooks(new Set(JSON.parse(savedFavorites)));
         } catch (e) {
           console.error('Favori kitaplar yüklenirken hata oluştu:', e);
-          return new Set();
         }
       }
-    }
-    return new Set();
-  });
 
-  const [readBooks, setReadBooks] = useState<Set<number>>(() => {
-    // Tarayıcı ortamında mı kontrol et
-    if (typeof window !== 'undefined') {
-      // localStorage'dan okundu kitapları yükle
-      const savedReadBooks = localStorage.getItem('readBooks');
-      if (savedReadBooks) {
+      // Okunan kitapları yükle
+      const savedRead = localStorage.getItem('readBooks');
+      if (savedRead) {
         try {
-          // JSON string'i Set'e dönüştür
-          const parsedReadBooks = JSON.parse(savedReadBooks);
-          return new Set(parsedReadBooks);
+          setReadBooks(new Set(JSON.parse(savedRead)));
         } catch (e) {
-          console.error('Okundu kitaplar yüklenirken hata oluştu:', e);
-          return new Set();
+          console.error('Okunan kitaplar yüklenirken hata oluştu:', e);
         }
       }
-    }
-    return new Set();
-  });
 
-  const [toReadBooks, setToReadBooks] = useState<Set<number>>(() => {
-    // Tarayıcı ortamında mı kontrol et
-    if (typeof window !== 'undefined') {
-      // localStorage'dan okunacak kitapları yükle
-      const savedToReadBooks = localStorage.getItem('toReadBooks');
-      if (savedToReadBooks) {
+      // Okunacak kitapları yükle
+      const savedToRead = localStorage.getItem('toReadBooks');
+      if (savedToRead) {
         try {
-          // JSON string'i Set'e dönüştür
-          const parsedToReadBooks = JSON.parse(savedToReadBooks);
-          return new Set(parsedToReadBooks);
+          setToReadBooks(new Set(JSON.parse(savedToRead)));
         } catch (e) {
           console.error('Okunacak kitaplar yüklenirken hata oluştu:', e);
-          return new Set();
         }
       } else {
-        // Eğer localStorage'da yoksa, tüm kitapları okunacaklar listesine ekle
-        const allBookIds = books.map(book => book.id);
-        return new Set(allBookIds);
+        // Eğer localStorage'da veri yoksa, status'u 'to-read' olan kitapları ekle
+        setToReadBooks(new Set(books.filter(book => book.status === 'to-read').map(book => book.id)));
       }
     }
-    return new Set();
-  });
+  }, [books]);
 
-  // Sayfa yüklendiğinde, eğer toReadBooks boşsa tüm kitapları ekle
+  // LocalStorage'a kaydetme işlemleri
   useEffect(() => {
-    if (toReadBooks.size === 0) {
-      const allBookIds = books.map(book => book.id);
-      setToReadBooks(new Set(allBookIds));
-      
-      // localStorage'a kaydet
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('toReadBooks', JSON.stringify(Array.from(allBookIds)));
-      }
+    if (isClient) {
+      localStorage.setItem('favoriteBooks', JSON.stringify(Array.from(favoriteBooks)));
     }
-  }, [books, toReadBooks]);
+  }, [favoriteBooks, isClient]);
 
-  const toggleFavorite = (bookId: number) => {
-    setFavoriteBooks(prevFavorites => {
-      const newFavorites = new Set(prevFavorites);
-      if (newFavorites.has(bookId)) {
-        newFavorites.delete(bookId);
-      } else {
-        newFavorites.add(bookId);
-      }
-      console.log(`Toggled favorite for book ID: ${bookId}`);
-      
-      // localStorage'a kaydet
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('favoriteBooks', JSON.stringify(Array.from(newFavorites)));
-      }
-      
-      return newFavorites;
-    });
-  };
+  useEffect(() => {
+    if (isClient) {
+      localStorage.setItem('readBooks', JSON.stringify(Array.from(readBooks)));
+    }
+  }, [readBooks, isClient]);
 
-  const toggleRead = (bookId: number) => {
-    setReadBooks(prevReadBooks => {
-      const newReadBooks = new Set(prevReadBooks);
-      if (newReadBooks.has(bookId)) {
-        newReadBooks.delete(bookId);
-      } else {
-        newReadBooks.add(bookId);
-        // Okundu listesine eklendiğinde, okunacaklar listesinden çıkar
-        setToReadBooks(prevToReadBooks => {
-          const newToReadBooks = new Set(prevToReadBooks);
-          newToReadBooks.delete(bookId);
-          
-          // localStorage'a kaydet
-          if (typeof window !== 'undefined') {
-            localStorage.setItem('toReadBooks', JSON.stringify(Array.from(newToReadBooks)));
-          }
-          
-          return newToReadBooks;
-        });
-      }
-      console.log(`Toggled read for book ID: ${bookId}`);
-      
-      // localStorage'a kaydet
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('readBooks', JSON.stringify(Array.from(newReadBooks)));
-      }
-      
-      return newReadBooks;
-    });
-  };
-
-  const toggleToRead = (bookId: number) => {
-    setToReadBooks(prevToReadBooks => {
-      const newToReadBooks = new Set(prevToReadBooks);
-      if (newToReadBooks.has(bookId)) {
-        newToReadBooks.delete(bookId);
-      } else {
-        newToReadBooks.add(bookId);
-        // Okunacaklar listesine eklendiğinde, okundu listesinden çıkar
-        setReadBooks(prevReadBooks => {
-          const newReadBooks = new Set(prevReadBooks);
-          newReadBooks.delete(bookId);
-          
-          // localStorage'a kaydet
-          if (typeof window !== 'undefined') {
-            localStorage.setItem('readBooks', JSON.stringify(Array.from(newReadBooks)));
-          }
-          
-          return newReadBooks;
-        });
-      }
-      console.log(`Toggled to-read for book ID: ${bookId}`);
-      
-      // localStorage'a kaydet
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('toReadBooks', JSON.stringify(Array.from(newToReadBooks)));
-      }
-      
-      return newToReadBooks;
-    });
-  };
+  useEffect(() => {
+    if (isClient) {
+      localStorage.setItem('toReadBooks', JSON.stringify(Array.from(toReadBooks)));
+    }
+  }, [toReadBooks, isClient]);
 
   const filteredBooks = useMemo(() => books.filter(book => {
-    const matchesSearch = book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         book.author.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    if (activeTab === 'all') return matchesSearch;
-    if (activeTab === 'favorites') {
-        return matchesSearch && favoriteBooks.has(book.id);
-    }
-    if (activeTab === 'read') {
-        return matchesSearch && readBooks.has(book.id);
-    }
-    if (activeTab === 'to-read') {
-        return matchesSearch && toReadBooks.has(book.id);
-    }
-    return matchesSearch && book.status === activeTab;
-  }), [books, searchTerm, activeTab, favoriteBooks, readBooks, toReadBooks]);
+    if (activeTab === 'all') return true;
+    if (activeTab === 'favorites') return favoriteBooks.has(book.id);
+    if (activeTab === 'read') return readBooks.has(book.id);
+    if (activeTab === 'to-read') return toReadBooks.has(book.id);
+    return book.status === activeTab;
+  }), [books, activeTab, favoriteBooks, readBooks, toReadBooks]);
 
   const renderStars = (rating: number = 0) => {
     return Array(5).fill(0).map((_, index) => (
@@ -391,8 +387,9 @@ const Library: React.FC<LibraryProps> = ({ activeTab = 'all' }) => {
     return books.filter(book => book.status === status).length;
   };
 
+  // Theme kontrolü
   useEffect(() => {
-    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    if (isClient && window.matchMedia('(prefers-color-scheme: dark)').matches) {
       setTheme('dark');
       document.documentElement.setAttribute('data-theme', 'dark');
     }
@@ -402,9 +399,11 @@ const Library: React.FC<LibraryProps> = ({ activeTab = 'all' }) => {
       setIsScrolled(scrollPosition > 50);
     };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+    if (isClient) {
+      window.addEventListener('scroll', handleScroll);
+      return () => window.removeEventListener('scroll', handleScroll);
+    }
+  }, [isClient]);
 
   const toggleTheme = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light';
@@ -412,16 +411,25 @@ const Library: React.FC<LibraryProps> = ({ activeTab = 'all' }) => {
     document.documentElement.setAttribute('data-theme', newTheme);
   };
 
+  const getRandomBook = useCallback(() => {
+    if (typeof window !== 'undefined') {
+      const availableBooks = books.filter(book => !revealedBook || book.id !== revealedBook.id);
+      const randomIndex = Math.floor(Math.random() * availableBooks.length);
+      return availableBooks[randomIndex];
+    }
+    return null;
+  }, [books, revealedBook]);
+
   return (
     <div className={`min-h-screen ${theme === 'dark' ? 'bg-gradient-to-br from-gray-900 to-slate-800' : 'bg-gradient-to-br from-[#FDF3E7] to-[#EADBC8]'}`}>
       <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-opacity-90 backdrop-blur-lg shadow-lg border-b border-white/10' : 'bg-transparent'} ${theme === 'dark' ? 'bg-gray-900' : 'bg-[#8B4513]'}`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-20">
-            <Link href="/" className="flex items-center gap-2">
-              <LibraryIcon className="h-8 w-8 text-white" />
-              <span className="text-2xl font-bold text-white">OkuYorum</span>
-            </Link>
+        <div className="flex justify-between items-center h-20">
+          <Link href="/" className="flex items-center gap-2 w-48">
+            <LibraryIcon className="h-8 w-8 text-white" />
+            <span className="text-2xl font-bold text-white">OkuYorum</span>
+          </Link>
 
+          <div className="flex-1 flex justify-center">
             <nav className="hidden md:flex items-center space-x-2 bg-white/10 px-3 py-2 rounded-full">
               {[
                 { name: 'Kitaplığım', href: '/features/library/all', icon: BookOpen },
@@ -443,222 +451,288 @@ const Library: React.FC<LibraryProps> = ({ activeTab = 'all' }) => {
                 </Link>
               ))}
             </nav>
+          </div>
 
-            <div className="flex items-center gap-4">
-              <SearchForm isScrolled={isScrolled} />
-              <button onClick={toggleTheme} className="text-white p-2 rounded-full hover:bg-white/20 transition-colors">
-                {theme === 'light' ? <Moon className="h-6 w-6" /> : <Sun className="h-6 w-6" />}
-              </button>
-            </div>
+          <div className="w-48 flex justify-end pr-4">
+            <button onClick={toggleTheme} className="text-white p-2 rounded-full hover:bg-white/20 transition-colors">
+              {theme === 'light' ? <Moon className="h-6 w-6" /> : <Sun className="h-6 w-6" />}
+            </button>
           </div>
         </div>
       </header>
 
       <div className="pt-24">
+        {/* Scratch To Reveal Component */}
         <div className="max-w-7xl mx-auto px-6 mb-8">
-          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 shadow-xl border border-white/10">
-            <div className="flex flex-wrap gap-4">
-              <Link
-                href="/features/library/all"
-                className={`flex items-center gap-2 px-6 py-3 rounded-xl transition-all duration-300 ${
-                  activeTab === 'all'
-                    ? 'bg-white text-[#8B4513] shadow-lg transform -translate-y-0.5'
-                    : 'text-white hover:bg-white/10'
-                }`}
-              >
-                <BookOpen className="w-5 h-5" />
-                <span className="font-medium">Tümü</span>
-                <span className="ml-2 bg-[#8B4513]/20 px-2 py-0.5 rounded-full text-sm">
-                  {getTabCount('all')}
-                </span>
-              </Link>
-              <Link
-                href="/features/library/favorites"
-                className={`flex items-center gap-2 px-6 py-3 rounded-xl transition-all duration-300 ${
-                  activeTab === 'favorites'
-                    ? 'bg-white text-[#8B4513] shadow-lg transform -translate-y-0.5'
-                    : 'text-white hover:bg-white/10'
-                }`}
-              >
-                <Star className="w-5 h-5" />
-                <span className="font-medium">Favoriler</span>
-                <span className="ml-2 bg-[#8B4513]/20 px-2 py-0.5 rounded-full text-sm">
-                  {getTabCount('favorite')}
-                </span>
-              </Link>
-              <Link
-                href="/features/library/to-read"
-                className={`flex items-center gap-2 px-6 py-3 rounded-xl transition-all duration-300 ${
-                  activeTab === 'to-read'
-                    ? 'bg-white text-[#8B4513] shadow-lg transform -translate-y-0.5'
-                    : 'text-white hover:bg-white/10'
-                }`}
-              >
-                <Clock className="w-5 h-5" />
-                <span className="font-medium">Okunacaklar</span>
-                <span className="ml-2 bg-[#8B4513]/20 px-2 py-0.5 rounded-full text-sm">
-                  {getTabCount('to-read')}
-                </span>
-              </Link>
-              <Link
-                href="/features/library/read"
-                className={`flex items-center gap-2 px-6 py-3 rounded-xl transition-all duration-300 ${
-                  activeTab === 'read'
-                    ? 'bg-white text-[#8B4513] shadow-lg transform -translate-y-0.5'
-                    : 'text-white hover:bg-white/10'
-                }`}
-              >
-                <CheckCircle className="w-5 h-5" />
-                <span className="font-medium">Okunanlar</span>
-                <span className="ml-2 bg-[#8B4513]/20 px-2 py-0.5 rounded-full text-sm">
-                  {getTabCount('read')}
-                </span>
-              </Link>
-            </div>
-
-            <div className="mt-6 relative">
-              <div className="relative">
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white w-5 h-5" />
-                <Input
-                  type="text"
-                  placeholder="Kitaplığınızda arayın..."
-                  className="w-full pl-12 pr-4 py-3.5 bg-white/25 border-none text-white placeholder-white/80 rounded-xl focus:ring-2 focus:ring-white/40 focus:bg-white/30 transition-all duration-300 hover:bg-white/30 text-base"
-                  value={searchTerm}
-                  onChange={(e: ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
-                />
+          {isClient && (
+            <ScratchToReveal
+              width={800}
+              height={200}
+              minScratchPercentage={70}
+              className="mx-auto rounded-2xl overflow-hidden"
+              gradientColors={['#1a1f2c', '#0f1219', '#070a10']}
+              onComplete={() => {
+                const randomBook = getRandomBook();
+                if (randomBook) {
+                  setRevealedBook(randomBook);
+                }
+              }}
+            >
+              <div className="w-full h-full flex flex-col items-center justify-center bg-[#0f1219]">
+                {!revealedBook ? (
+                  <div className="text-center">
+                    <h2 className="text-4xl font-bold text-white mb-2 font-playfair tracking-wide">
+                      Sıradaki Kitap Maceran Seni Bekliyor
+                    </h2>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-8">
+                    <div className="w-32 h-48 relative">
+                      <img
+                        src={revealedBook.coverImage}
+                        alt={revealedBook.title}
+                        className="w-full h-full object-cover rounded-lg shadow-lg"
+                      />
+                    </div>
+                    <div className="text-left">
+                      <h3 className="text-2xl font-bold text-white mb-2">{revealedBook.title}</h3>
+                      <p className="text-gray-400 text-lg">{revealedBook.author}</p>
+                    </div>
+                  </div>
+                )}
               </div>
-            </div>
+            </ScratchToReveal>
+          )}
+        </div>
+
+        {/* Sol taraftaki ince dikey tab bar */}
+        <div className="fixed left-0 top-20 bottom-0 w-48 bg-[#8B4513]/90 dark:bg-gray-900/90 backdrop-blur-md shadow-xl border-r border-white/10">
+          <div className="flex flex-col h-full py-8 space-y-6">
+            <Link
+              href="/features/library/all"
+              className={`flex items-center gap-2 px-4 py-3 transition-all duration-300 border-l-4 ${
+                activeTab === 'all'
+                  ? 'bg-white/10 border-white text-white'
+                  : 'border-transparent text-white/80 hover:bg-white/5 hover:border-white/50'
+              }`}
+            >
+              <BookOpen className="w-5 h-5" />
+              <span className="font-medium text-sm">Tümü</span>
+              <span className="ml-auto text-xs bg-white/20 px-2 py-0.5 rounded-full">
+                {getTabCount('all')}
+              </span>
+            </Link>
+
+            <Link
+              href="/features/library/favorites"
+              className={`flex items-center gap-2 px-4 py-3 transition-all duration-300 border-l-4 ${
+                activeTab === 'favorites'
+                  ? 'bg-white/10 border-white text-white'
+                  : 'border-transparent text-white/80 hover:bg-white/5 hover:border-white/50'
+              }`}
+            >
+              <Star className="w-5 h-5" />
+              <span className="font-medium text-sm">Favoriler</span>
+              <span className="ml-auto text-xs bg-white/20 px-2 py-0.5 rounded-full">
+                {getTabCount('favorite')}
+              </span>
+            </Link>
+
+            <Link
+              href="/features/library/to-read"
+              className={`flex items-center gap-2 px-4 py-3 transition-all duration-300 border-l-4 ${
+                activeTab === 'to-read'
+                  ? 'bg-white/10 border-white text-white'
+                  : 'border-transparent text-white/80 hover:bg-white/5 hover:border-white/50'
+              }`}
+            >
+              <Clock className="w-5 h-5" />
+              <span className="font-medium text-sm">Okunacaklar</span>
+              <span className="ml-auto text-xs bg-white/20 px-2 py-0.5 rounded-full">
+                {getTabCount('to-read')}
+              </span>
+            </Link>
+
+            <Link
+              href="/features/library/read"
+              className={`flex items-center gap-2 px-4 py-3 transition-all duration-300 border-l-4 ${
+                activeTab === 'read'
+                  ? 'bg-white/10 border-white text-white'
+                  : 'border-transparent text-white/80 hover:bg-white/5 hover:border-white/50'
+              }`}
+            >
+              <CheckCircle className="w-5 h-5" />
+              <span className="font-medium text-sm">Okunanlar</span>
+              <span className="ml-auto text-xs bg-white/20 px-2 py-0.5 rounded-full">
+                {getTabCount('read')}
+              </span>
+            </Link>
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-6 pb-12">
-          <div className="relative bg-[#6B4423] dark:bg-[#523018] rounded-3xl p-8 shadow-2xl">
-            <div className="absolute inset-0 opacity-30 rounded-3xl" style={{
-              backgroundImage: `repeating-linear-gradient(
-                90deg,
-                #000 0px,
-                #000 2px,
-                transparent 2px,
-                transparent 20px
-              )`
-            }}></div>
+        {/* Ana içerik - sol tab bar'a göre ayarlanmış margin */}
+        <div className="ml-48">
+          <div className="max-w-7xl mx-auto px-6 pb-12">
+            <div className="relative bg-[#6B4423] dark:bg-[#523018] rounded-3xl p-8 shadow-2xl">
+              <div className="absolute inset-0 opacity-30 rounded-3xl" style={{
+                backgroundImage: `repeating-linear-gradient(
+                  90deg,
+                  #000 0px,
+                  #000 2px,
+                  transparent 2px,
+                  transparent 20px
+                )`
+              }}></div>
 
-            <div className="relative space-y-12">
-              {[0, 1, 2].map((shelf) => (
-                <div key={shelf} className="relative">
-                  <div className="relative min-h-[280px]">
-                    <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-x-6 gap-y-12 items-end">
-                      {filteredBooks.slice(shelf * 8, (shelf + 1) * 8).map((book) => (
-                        <motion.div
-                          key={book.id}
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          whileHover={{
-                            y: -12,
-                            scale: 1.1,
-                            transition: { duration: 0.2 },
-                            zIndex: 20
-                          }}
-                          className="transform origin-bottom"
-                        >
-                          <div className="relative group">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                toggleFavorite(book.id);
-                              }}
-                              className="absolute top-2 right-2 z-10 p-1.5 bg-black/40 rounded-full text-white/70 hover:text-red-500 hover:bg-black/60 transition-all duration-200 opacity-0 group-hover:opacity-100"
-                              aria-label={favoriteBooks.has(book.id) ? "Favorilerden çıkar" : "Favorilere ekle"}
-                            >
-                              <Heart
-                                className={`w-4 h-4 transition-colors duration-200 ${
-                                  favoriteBooks.has(book.id) ? 'fill-red-500 text-red-500' : ''
-                                }`}
-                              />
-                            </button>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                toggleRead(book.id);
-                              }}
-                              className="absolute top-2 right-10 z-10 p-1.5 bg-black/40 rounded-full text-white/70 hover:text-green-500 hover:bg-black/60 transition-all duration-200 opacity-0 group-hover:opacity-100"
-                              aria-label={readBooks.has(book.id) ? "Okundu listesinden çıkar" : "Okundu listesine ekle"}
-                            >
-                              <Check
-                                className={`w-4 h-4 transition-colors duration-200 ${
-                                  readBooks.has(book.id) ? 'fill-green-500 text-green-500' : 'text-white/70'
-                                }`}
-                              />
-                            </button>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                toggleToRead(book.id);
-                              }}
-                              className="absolute top-2 right-18 z-10 p-1.5 bg-black/40 rounded-full text-white/70 hover:text-blue-500 hover:bg-black/60 transition-all duration-200 opacity-0 group-hover:opacity-100"
-                              aria-label={toReadBooks.has(book.id) ? "Okunacaklar listesinden çıkar" : "Okunacaklar listesine ekle"}
-                            >
-                              <Bookmark
-                                className={`w-4 h-4 transition-colors duration-200 ${
-                                  toReadBooks.has(book.id) ? 'fill-blue-500 text-blue-500' : 'text-white/70'
-                                }`}
-                              />
-                            </button>
-                            <Card className="relative h-[240px] bg-white border-none shadow-xl hover:shadow-2xl transition-all duration-300 rounded-lg overflow-hidden">
-                              <img
-                                src={book.coverImage}
-                                alt={book.title}
-                                className="w-full h-full object-cover"
-                              />
-                              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                            </Card>
-                            <div className="mt-3 text-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                              <p className="font-semibold text-white text-sm mb-1 truncate">{book.title}</p>
-                              <p className="text-white/80 text-xs mb-2 truncate">{book.author}</p>
-                              {book.rating && (
-                                <div className="flex items-center justify-center gap-0.5">
-                                  {renderStars(book.rating)}
-                                </div>
-                              )}
+              <div className="relative space-y-12">
+                {[0, 1, 2].map((shelf) => (
+                  <div key={shelf} className="relative">
+                    <div className="relative min-h-[280px]">
+                      <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-x-6 gap-y-12 items-end">
+                        {filteredBooks.slice(shelf * 8, (shelf + 1) * 8).map((book) => (
+                          <motion.div
+                            key={book.id}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            whileHover={{
+                              y: -12,
+                              scale: 1.1,
+                              transition: { duration: 0.2 },
+                              zIndex: 20
+                            }}
+                            className="transform origin-bottom"
+                          >
+                            <div className="relative group">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setFavoriteBooks(prevFavorites => {
+                                    const newFavorites = new Set(prevFavorites);
+                                    if (newFavorites.has(book.id)) {
+                                      newFavorites.delete(book.id);
+                                    } else {
+                                      newFavorites.add(book.id);
+                                    }
+                                    console.log(`Toggled favorite for book ID: ${book.id}`);
+                                    return newFavorites;
+                                  });
+                                }}
+                                className="absolute top-2 right-2 z-10 p-1.5 bg-black/40 rounded-full text-white/70 hover:text-red-500 hover:bg-black/60 transition-all duration-200 opacity-0 group-hover:opacity-100"
+                                aria-label={favoriteBooks.has(book.id) ? "Favorilerden çıkar" : "Favorilere ekle"}
+                              >
+                                <Heart
+                                  className={`w-4 h-4 transition-colors duration-200 ${
+                                    favoriteBooks.has(book.id) ? 'fill-red-500 text-red-500' : ''
+                                  }`}
+                                />
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setReadBooks(prevReadBooks => {
+                                    const newReadBooks = new Set(prevReadBooks);
+                                    if (newReadBooks.has(book.id)) {
+                                      newReadBooks.delete(book.id);
+                                    } else {
+                                      newReadBooks.add(book.id);
+                                      setToReadBooks(prevToReadBooks => {
+                                        const newToReadBooks = new Set(prevToReadBooks);
+                                        newToReadBooks.delete(book.id);
+                                        return newToReadBooks;
+                                      });
+                                    }
+                                    console.log(`Toggled read for book ID: ${book.id}`);
+                                    return newReadBooks;
+                                  });
+                                }}
+                                className="absolute top-2 right-10 z-10 p-1.5 bg-black/40 rounded-full text-white/70 hover:text-green-500 hover:bg-black/60 transition-all duration-200 opacity-0 group-hover:opacity-100"
+                                aria-label={readBooks.has(book.id) ? "Okundu listesinden çıkar" : "Okundu listesine ekle"}
+                              >
+                                <Check
+                                  className={`w-4 h-4 transition-colors duration-200 ${
+                                    readBooks.has(book.id) ? 'fill-green-500 text-green-500' : 'text-white/70'
+                                  }`}
+                                />
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setToReadBooks(prevToReadBooks => {
+                                    const newToReadBooks = new Set(prevToReadBooks);
+                                    if (newToReadBooks.has(book.id)) {
+                                      newToReadBooks.delete(book.id);
+                                    } else {
+                                      newToReadBooks.add(book.id);
+                                      setReadBooks(prevReadBooks => {
+                                        const newReadBooks = new Set(prevReadBooks);
+                                        newReadBooks.delete(book.id);
+                                        return newReadBooks;
+                                      });
+                                    }
+                                    console.log(`Toggled to-read for book ID: ${book.id}`);
+                                    return newToReadBooks;
+                                  });
+                                }}
+                                className="absolute top-2 right-18 z-10 p-1.5 bg-black/40 rounded-full text-white/70 hover:text-blue-500 hover:bg-black/60 transition-all duration-200 opacity-0 group-hover:opacity-100"
+                                aria-label={toReadBooks.has(book.id) ? "Okunacaklar listesinden çıkar" : "Okunacaklar listesine ekle"}
+                              >
+                                <Bookmark
+                                  className={`w-4 h-4 transition-colors duration-200 ${
+                                    toReadBooks.has(book.id) ? 'fill-blue-500 text-blue-500' : 'text-white/70'
+                                  }`}
+                                />
+                              </button>
+                              <Card className="relative h-[240px] bg-white border-none shadow-xl hover:shadow-2xl transition-all duration-300 rounded-lg overflow-hidden">
+                                <img
+                                  src={book.coverImage}
+                                  alt={book.title}
+                                  className="w-full h-full object-cover"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                              </Card>
+                              <div className="mt-3 text-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                <p className="font-semibold text-white text-sm mb-1 truncate">{book.title}</p>
+                                <p className="text-white/80 text-xs mb-2 truncate">{book.author}</p>
+                              </div>
                             </div>
-                          </div>
-                        </motion.div>
-                      ))}
+                          </motion.div>
+                        ))}
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="absolute bottom-0 left-0 right-0 h-10 pointer-events-none">
-                    <div className="h-4 bg-[#8B5E3C] dark:bg-[#6B4423] rounded-t-sm shadow-inner">
-                      <div className="absolute inset-0 opacity-20" style={{
-                        backgroundImage: `repeating-linear-gradient(
-                          90deg,
-                          #000 0px,
-                          #000 1px,
-                          transparent 1px,
-                          transparent 10px
-                        )`
-                      }}></div>
-                    </div>
-                    <div className="h-6 bg-gradient-to-b from-[#6B4423] to-[#523018] transform -skew-y-1 rounded-b-sm">
-                      <div className="absolute inset-0 opacity-10" style={{
-                        backgroundImage: `repeating-linear-gradient(
-                          90deg,
-                          #000 0px,
-                          #000 1px,
-                          transparent 1px,
-                          transparent 10px
-                        )`
-                      }}></div>
+                    <div className="absolute bottom-0 left-0 right-0 h-10 pointer-events-none">
+                      <div className="h-4 bg-[#8B5E3C] dark:bg-[#6B4423] rounded-t-sm shadow-inner">
+                        <div className="absolute inset-0 opacity-20" style={{
+                          backgroundImage: `repeating-linear-gradient(
+                            90deg,
+                            #000 0px,
+                            #000 1px,
+                            transparent 1px,
+                            transparent 10px
+                          )`
+                        }}></div>
+                      </div>
+                      <div className="h-6 bg-gradient-to-b from-[#6B4423] to-[#523018] transform -skew-y-1 rounded-b-sm">
+                        <div className="absolute inset-0 opacity-10" style={{
+                          backgroundImage: `repeating-linear-gradient(
+                            90deg,
+                            #000 0px,
+                            #000 1px,
+                            transparent 1px,
+                            transparent 10px
+                          )`
+                        }}></div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
 
-          <div className="flex justify-center mt-8">
-            <div className="bg-white dark:bg-gray-900 text-[#8B4513] dark:text-white rounded-full py-2 px-6 shadow-lg">
-              Sayfa 1 / {Math.ceil(filteredBooks.length / 8)}
+            <div className="flex justify-center mt-8">
+              <div className="bg-white dark:bg-gray-900 text-[#8B4513] dark:text-white rounded-full py-2 px-6 shadow-lg">
+                Sayfa 1 / {Math.ceil(filteredBooks.length / 8)}
+              </div>
             </div>
           </div>
         </div>

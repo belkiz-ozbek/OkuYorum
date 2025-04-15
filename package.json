@@ -18,6 +18,7 @@
     "lottie-react": "^2.4.1",
     "qrcode": "1.5.4",
     "react-intersection-observer": "^9.16.0",
+    "sonner": "^2.0.3",
     "tailwind-merge": "^3.0.2"
   },
   "devDependencies": {
