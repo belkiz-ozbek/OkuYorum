@@ -74,15 +74,16 @@ export default function SignupPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const router = useRouter()
   const [mounted, setMounted] = useState(false)
+  const [starPositions, setStarPositions] = useState<Array<{ top: string; left: string }>>([])
 
   useEffect(() => {
     setMounted(true)
+    // Yıldız pozisyonlarını client tarafında oluştur
+    setStarPositions(Array.from({ length: 15 }).map(() => ({
+      top: `${Math.floor(Math.random() * 100)}%`,
+      left: `${Math.floor(Math.random() * 100)}%`,
+    })))
   }, [])
-
-  const starPositions = Array.from({ length: 15 }).map(() => ({
-    top: `${Math.floor(Math.random() * 100)}%`,
-    left: `${Math.floor(Math.random() * 100)}%`,
-  }))
 
   const icons = [BookOpen, BookMarked, Bookmark]
 
