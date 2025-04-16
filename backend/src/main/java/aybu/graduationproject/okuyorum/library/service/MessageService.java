@@ -90,10 +90,10 @@ public class MessageService {
         return messageRepository.findBySender(sender);
     }
 
-    public List<Message> getUnreadMessages(Long receiverId) {
-        User receiver = userRepository.findById(receiverId)
+    public List<Message> getUnreadMessages(Long userId) {
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("Kullanıcı bulunamadı"));
-        return messageRepository.findByReceiverAndIsReadFalse(receiver);
+        return messageRepository.findByReceiverAndIsReadFalse(user);
     }
 
     public List<Message> getMessagesBetweenUsers(Long senderId, Long receiverId) {

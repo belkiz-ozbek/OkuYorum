@@ -1,4 +1,4 @@
-import { AxiosResponse } from 'axios'
+import { AxiosResponse, AxiosError } from 'axios'
 import { api } from './api'
 // Mock veri kullanımını kaldırıyoruz
 // import { mockUsers, findUserByEmail, mockAuthToken } from './mockData'
@@ -73,6 +73,21 @@ export class UserService {
     } catch (error) {
       console.error('Error checking admin status:', error);
       return false;
+    }
+  }
+
+  static async getAllUsers() {
+    try {
+      const response = await api.get('/api/users');
+      return response;
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        if (error.response?.status === 401) {
+          throw new Error('Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.');
+        }
+        throw new Error(`Kullanıcılar alınırken bir hata oluştu: ${error.response?.data?.message || error.message}`);
+      }
+      throw new Error('Kullanıcılar alınırken beklenmeyen bir hata oluştu');
     }
   }
 } 
