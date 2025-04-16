@@ -5,31 +5,35 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
 
+    <changeSet id="20250406 00:11" author="belkiz.ozbek">
+        <createSequence sequenceName="achievements_seq" startValue="5" incrementBy="1"/>
+    </changeSet>
+
     <changeSet id="20250406 00:12" author="belkiz.ozbek">
         <!-- Varsayılan başarıları ekleme -->
         <insert tableName="achievements">
-            <column name="id" valueSequenceNext="achievements_seq"/>
+            <column name="id" value="1"/>
             <column name="title" value="Kitap Kurdu"/>
             <column name="description" value="100 kitap oku"/>
             <column name="progress" value="0"/>
             <column name="user_id" value="1"/>
         </insert>
         <insert tableName="achievements">
-            <column name="id" valueSequenceNext="achievements_seq"/>
+            <column name="id" value="2"/>
             <column name="title" value="Sosyal Okur"/>
             <column name="description" value="50 kitap yorumu yap"/>
             <column name="progress" value="0"/>
             <column name="user_id" value="1"/>
         </insert>
         <insert tableName="achievements">
-            <column name="id" valueSequenceNext="achievements_seq"/>
+            <column name="id" value="3"/>
             <column name="title" value="Alıntı Ustası"/>
             <column name="description" value="200 alıntı paylaş"/>
             <column name="progress" value="0"/>
             <column name="user_id" value="1"/>
         </insert>
         <insert tableName="achievements">
-            <column name="id" valueSequenceNext="achievements_seq"/>
+            <column name="id" value="4"/>
             <column name="title" value="Maraton Okuyucu"/>
             <column name="description" value="30 gün arka arkaya oku"/>
             <column name="progress" value="0"/>

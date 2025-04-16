@@ -249,14 +249,14 @@ export default function BookPage({ params }: PageProps) {
                       cursor-pointer hover:border-purple-200 transition-colors duration-300
                       focus:outline-none focus:ring-2 focus:ring-purple-100"
                                         value={book.status || ''}
-                                        onChange={(e) => handleStatusChange(e.target.value as Book['status'])}
+                                        onChange={(e) => handleStatusChange(e.target.value === '' ? null : e.target.value as Book['status'])}
                                         disabled={updatingStatus}
                                     >
-                                        <option value="" disabled>📚 Okuma Durumu</option>
-                                        <option value="reading">📖 Okuyorum</option>
-                                        <option value="will-read">🔖 Okuyacağım</option>
-                                        <option value="read">✅ Okudum</option>
-                                        <option value="dropped">⏸️ Yarım Bıraktım</option>
+                                        <option value="">📚 Durum Yok</option>
+                                        <option value="READING">📖 Okuyorum</option>
+                                        <option value="WILL_READ">🔖 Okuyacağım</option>
+                                        <option value="READ">✅ Okudum</option>
+                                        <option value="DROPPED">⏸️ Yarım Bıraktım</option>
                                     </select>
                                 </div>
                             </div>

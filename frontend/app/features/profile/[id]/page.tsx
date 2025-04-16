@@ -1,9 +1,9 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect } from "react"
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
-import Image, { StaticImport } from "next/image"
+import Image from "next/image"
 import {
   BookOpen,
   Camera,
@@ -21,12 +21,10 @@ import {
   BookOpenCheck,
   Award,
   BarChart3,
-  BookMarked,
   Check,
   X,
   Moon,
   Sun,
-  Plus,
   UserPlus,
   UserMinus,
   UserCheck
@@ -47,8 +45,9 @@ import { followService } from "@/services/followService"
 import { messageService, Message } from "@/services/messageService"
 import { bookService, Book, Review, Quote as BookQuote } from "@/services/bookService"
 import { AddBookModal } from "@/components/ui/book/add-book-modal"
-import { Book as BookType } from "@/types/book"
-import { cn } from "@/lib/utils"
+import { bookEventEmitter } from '@/services/bookService'
+import { api } from '@/services/api'
+import StatusBadge from "@/components/ui/book/StatusBadge"
 
 const initialProfile: UserProfile = {
   id: 0,
@@ -70,41 +69,6 @@ const initialProfile: UserProfile = {
 const initialAchievements: Achievement[] = []
 const initialReadingActivity: ReadingActivity[] = []
 
-const recommendations: BookType[] = [
-  {
-    id: 5,
-    title: "Fahrenheit 451",
-    author: "Ray Bradbury",
-    summary: "A dystopian novel about a future American society where books are outlawed.",
-    imageUrl: "/placeholder.svg?height=150&width=100",
-    coverImage: "/placeholder.svg?height=150&width=100",
-    rating: 4.2,
-    ratingCount: 1000,
-    readCount: 500,
-    reviewCount: 200,
-    categories: ["Science Fiction", "Dystopian"],
-    language: "English",
-    publisher: "Ballantine Books",
-    status: "read"
-  },
-  {
-    id: 6,
-    title: "Otomatik Portakal",
-    author: "Anthony Burgess",
-    summary: "A disturbing dystopian novel exploring themes of free will and morality.",
-    imageUrl: "/placeholder.svg?height=150&width=100",
-    coverImage: "/placeholder.svg?height=150&width=100",
-    rating: 4.0,
-    ratingCount: 800,
-    readCount: 400,
-    reviewCount: 150,
-    categories: ["Science Fiction", "Dystopian"],
-    language: "Turkish",
-    publisher: "Türkiye İş Bankası Kültür Yayınları",
-    status: "read"
-  },
-]
-
 // Achievement icons mapping
 const achievementIcons = {
   "BOOK_WORM": <BookOpenCheck className="h-6 w-6" />,
@@ -123,7 +87,6 @@ export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false)
   const [editSection, setEditSection] = useState<string | null>(null)
   const [showEditMenu, setShowEditMenu] = useState(false)
-  const [, setActiveTab] = useState("overview")
   const [isScrolled, setIsScrolled] = useState(false)
   const [theme, setTheme] = useState<"light" | "dark">("light")
   const [loading, setLoading] = useState(true)
@@ -139,39 +102,44 @@ export default function ProfilePage() {
   const [reviews, setReviews] = useState<Review[]>([])
   const [quotes, setQuotes] = useState<BookQuote[]>([])
   const [showAddBookModal, setShowAddBookModal] = useState(false)
+  const [showBooksModal, setShowBooksModal] = useState(false)
+  const [selectedState, setSelectedState] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchProfile = async () => {
       try {
         const token = localStorage.getItem('token')
         if (!token) {
-          throw new Error('Oturum bulunamadı')
+          router.push('/')
+          return
         }
 
         // Kendi ID'mizi kontrol ediyoruz
         const currentUserResponse = await UserService.getCurrentUser();
-        const currentUserId = currentUserResponse.data?.id;
-
-        // Eğer kendi profilimizi görüntülüyorsak /me endpoint'ini kullanıyoruz
-        const endpoint = currentUserId === Number(params.id) ? 
-          'http://localhost:8080/api/users/me' : 
-          `http://localhost:8080/api/users/${params.id}`;
-
-        const response = await fetch(endpoint, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        })
-
-        if (!response.ok) {
-          throw new Error('Profil bilgileri alınamadı')
+        if (!currentUserResponse.data) {
+          localStorage.removeItem('token')
+          router.push('/')
+          return
         }
-
-        const data = await response.json()
-        setProfile({
-          ...data,
-          id: Number(data.id)
-        })
+        // Kendi profilimiz için de profileService.getUserProfile kullanıyoruz
+        // Bu şekilde tüm profil bilgilerini alabiliriz
+        if (!params.id) {
+          throw new Error('Kullanıcı ID\'si bulunamadı');
+        }
+        
+        const profileData = await profileService.getUserProfile(params.id.toString());
+        setProfile(profileData);
+        
+        // Diğer verileri de çekelim
+        const [achievementsData, readingActivityData, booksData] = await Promise.all([
+          profileService.getUserAchievements(params.id.toString()),
+          profileService.getUserReadingActivity(params.id.toString()),
+          bookService.getBooks(params.id.toString())
+        ]);
+        
+        setAchievements(achievementsData);
+        setReadingActivity(readingActivityData);
+        setBooks(booksData);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Bir hata oluştu')
       } finally {
@@ -189,6 +157,11 @@ export default function ProfilePage() {
         }
 
         const booksData = await bookService.getBooks(params.id.toString());
+        console.log('Fetched books with status:', booksData.map(book => ({
+          title: book.title,
+          status: book.status,
+          rawStatus: book.status
+        })));
         setBooks(booksData);
       } catch (err) {
         console.error('Kitaplar yüklenirken hata:', err);
@@ -202,7 +175,7 @@ export default function ProfilePage() {
 
     fetchProfile()
     fetchBooks()
-  }, [params.id, toast])
+  }, [params.id, toast, router])
 
   useEffect(() => {
     const loadUserInfo = async () => {
@@ -218,50 +191,91 @@ export default function ProfilePage() {
     loadUserInfo();
   }, []);
 
-  useEffect(() => {
-    const fetchProfileData = async () => {
-      try {
-        setLoading(true)
-        setError(null)
-
-        if (!params.id) {
-          throw new Error('Kullanıcı ID\'si bulunamadı')
-        }
-
-        // Takip durumunu kontrol et
-        if (currentUser && params.id.toString() !== currentUser.id.toString()) {
-          const [isFollowingStatus, profileData, achievementsData, readingActivityData] = await Promise.all([
-            followService.isFollowing(params.id.toString()),
-            profileService.getUserProfile(params.id.toString()),
-            profileService.getUserAchievements(params.id.toString()),
-            profileService.getUserReadingActivity(params.id.toString())
-          ])
-          
-          setIsFollowing(isFollowingStatus)
-          setProfile(profileData)
-          setAchievements(achievementsData)
-          setReadingActivity(readingActivityData)
-        } else {
-          const [profileData, achievementsData, readingActivityData] = await Promise.all([
-            profileService.getUserProfile(params.id.toString()),
-            profileService.getUserAchievements(params.id.toString()),
-            profileService.getUserReadingActivity(params.id.toString())
-          ])
-          
-          setProfile(profileData)
-          setAchievements(achievementsData)
-          setReadingActivity(readingActivityData)
-        }
-      } catch (error) {
-        console.error("Error fetching profile data:", error)
-        setError("Profil bilgileri yüklenirken bir hata oluştu.")
-      } finally {
-        setLoading(false)
-      }
+  const fetchProfileData = async () => {
+    if (!params.id) {
+      setError('Kullanıcı ID\'si bulunamadı');
+      return;
     }
+    try {
+      setLoading(true)
+      setError(null)
 
-    fetchProfileData()
-  }, [params.id, router, currentUser])
+      // Kendi profilimiz için de profileService.getUserProfile kullanıyoruz
+      const profileData = await profileService.getUserProfile(params.id.toString());
+      
+      // Takip durumunu kontrol et
+      if (currentUser && params.id.toString() !== currentUser.id.toString()) {
+        const [isFollowingStatus, achievementsData, readingActivityData, booksData] = await Promise.all([
+          followService.isFollowing(params.id.toString()),
+          profileService.getUserAchievements(params.id.toString()),
+          profileService.getUserReadingActivity(params.id.toString()),
+          bookService.getBooks(params.id.toString())
+        ])
+        
+        setIsFollowing(isFollowingStatus)
+        setProfile(profileData)
+        setAchievements(achievementsData)
+        setReadingActivity(readingActivityData)
+        setBooks(booksData)
+      } else {
+        const [achievementsData, readingActivityData, booksData] = await Promise.all([
+          profileService.getUserAchievements(params.id.toString()),
+          profileService.getUserReadingActivity(params.id.toString()),
+          bookService.getBooks(params.id.toString())
+        ])
+        
+        setProfile(profileData)
+        setAchievements(achievementsData)
+        setReadingActivity(readingActivityData)
+        setBooks(booksData)
+      }
+    } catch (error) {
+      console.error("Error fetching profile data:", error)
+      setError("Profil bilgileri yüklenirken bir hata oluştu.")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    const loadProfile = async () => {
+      if (!params.id) {
+        setError("Invalid profile ID");
+        return;
+      }
+
+      try {
+        setLoading(true);
+        const [profileResponse, booksData] = await Promise.all([
+          api.get(`/api/users/${params.id}`),
+          bookService.getBooks(params.id.toString())
+        ]);
+        setProfile(profileResponse.data);
+        setBooks(booksData);
+        setLoading(false);
+      } catch (error) {
+        console.error("Error loading profile:", error);
+        setError("Failed to load profile");
+        setLoading(false);
+      }
+    };
+
+    loadProfile();
+
+    // Listen for profile update events
+    const handleProfileUpdate = () => {
+      loadProfile();
+    };
+
+    // Listen for both profile updates and book status updates
+    bookEventEmitter.on('profileNeedsUpdate', handleProfileUpdate);
+    bookEventEmitter.on('bookStatusUpdated', handleProfileUpdate);
+
+    return () => {
+      bookEventEmitter.off('profileNeedsUpdate', handleProfileUpdate);
+      bookEventEmitter.off('bookStatusUpdated', handleProfileUpdate);
+    };
+  }, [params.id]);
 
   useEffect(() => {
     const fetchMessages = async () => {
@@ -372,16 +386,6 @@ export default function ProfilePage() {
     setEditSection(null)
     // Değişiklikleri geri al
   }
-
-  const renderStars = (rating: number) => {
-    return Array(5).fill(0).map((_, index) => (
-      <Star
-        key={index}
-        className={`w-3 h-3 ${index < (rating || 0) ? 'text-amber-400 fill-amber-400' : 'text-gray-300'}`}
-      />
-    ))
-  }
-
   const getMaxBooks = () => {
     return Math.max(...readingActivity.map((item) => item.books))
   }
@@ -448,9 +452,10 @@ export default function ProfilePage() {
   };
 
   const handleAddBookSuccess = () => {
-    fetchBooks()
+    fetchProfileData();
   }
 
+  // Profile stats section
   if (loading) {
     return (
         <div className="min-h-screen flex items-center justify-center">
@@ -463,9 +468,14 @@ export default function ProfilePage() {
     return (
         <div className="min-h-screen flex items-center justify-center">
           <div className="text-center">
-            <h2 className="text-2xl font-semibold mb-2">Bir hata oluştu</h2>
+            <div className="text-red-500 text-xl font-semibold mb-4">Hata</div>
             <p className="text-gray-600 mb-4">{error}</p>
-            <Button onClick={() => window.location.reload()}>Yeniden Dene</Button>
+            <Button
+              onClick={() => router.push('/features/homepage')}
+              className="bg-purple-600 hover:bg-purple-700 text-white"
+            >
+              Ana Sayfaya Dön
+            </Button>
           </div>
         </div>
     )
@@ -585,16 +595,17 @@ export default function ProfilePage() {
                   {/* Profile Image */}
                   <div className="relative">
                     <div className="h-32 w-32 rounded-full border-4 border-white shadow-lg overflow-hidden bg-white">
-                      {profile.profileImage ? (
+                      {typeof profile.profileImage === 'string' ? (
                         <Image
                           src={profile.profileImage}
-                          alt={profile.nameSurname}
-                          fill
-                          className="object-cover"
+                          alt={`${profile.nameSurname}'s profile picture`}
+                          width={128}
+                          height={128}
+                          className="rounded-full object-cover"
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-gray-100">
-                          <User className="h-16 w-16 text-gray-400" />
+                        <div className="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center">
+                          <span className="text-4xl text-gray-500">{profile.nameSurname?.[0]?.toUpperCase() || '?'}</span>
                         </div>
                       )}
                     </div>
@@ -778,8 +789,13 @@ export default function ProfilePage() {
                                 <div className="text-xl font-bold text-purple-600">{profile.following}</div>
                                 <div className="text-sm text-gray-500">Takip</div>
                               </div>
-                              <div className="text-center">
-                                <div className="text-xl font-bold text-purple-600">{profile.booksRead}</div>
+                              <div
+                                className="text-center cursor-pointer hover:text-purple-700 transition-colors"
+                                onClick={() => setShowBooksModal(true)}
+                              >
+                                <div className="text-xl font-bold text-purple-600">
+                                  {books.filter(book => book.status?.toUpperCase() === "READ").length}
+                                </div>
                                 <div className="text-sm text-gray-500">Kitap</div>
                               </div>
                             </div>
@@ -843,44 +859,108 @@ export default function ProfilePage() {
                     <TabsContent value="books" className="p-6">
                       <Card>
                         <CardContent className="p-6">
-                          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                            {books.map((book) => (
-                              <div key={book.id} className="flex flex-col gap-2">
-                                <div className="relative h-32 w-full">
-                                  <Image
-                                    src={book.imageUrl || "/placeholder.svg" as string | StaticImport}
-                                    alt={book.title}
-                                    width={150}
-                                    height={200}
-                                    className="object-cover rounded-lg shadow-lg"
-                                  />
-                                </div>
-                                <div className="flex flex-col">
-                                  <span className="text-sm font-medium">{book.title}</span>
-                                  <span className="text-xs text-gray-500">{book.author}</span>
-                                  <div className="flex items-center gap-2">
-                                    <span className={cn(
-                                      "text-xs px-2 py-1 rounded-full",
-                                      {
-                                        "bg-blue-100 text-blue-800": book.status === "READING",
-                                        "bg-green-100 text-green-800": book.status === "READ",
-                                        "bg-yellow-100 text-yellow-800": book.status === "WILL_READ",
-                                        "bg-red-100 text-red-800": book.status === "DROPPED"
-                                      }
-                                    )}>
-                                      {book.status}
-                                    </span>
-                                  </div>
-                                </div>
-                              </div>
-                            ))}
+                          {/* State Filter Buttons */}
+                          <div className="flex flex-wrap gap-2 mb-6">
+                            <Button
+                              variant={selectedState === null ? "default" : "outline"}
+                              size="sm"
+                              onClick={() => setSelectedState(null)}
+                              className="text-sm flex items-center gap-2"
+                            >
+                              Tümü
+                              <span className="bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full text-xs">
+                                {books.length}
+                              </span>
+                            </Button>
+                            <Button
+                              variant={selectedState === "WILL_READ" ? "default" : "outline"}
+                              size="sm"
+                              onClick={() => setSelectedState("WILL_READ")}
+                              className="text-sm flex items-center gap-2"
+                            >
+                              Okunacak
+                              <span className="bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full text-xs">
+                                {books.filter(book => book.status?.toUpperCase() === "WILL_READ").length}
+                              </span>
+                            </Button>
+                            <Button
+                              variant={selectedState === "READING" ? "default" : "outline"}
+                              size="sm"
+                              onClick={() => setSelectedState("READING")}
+                              className="text-sm flex items-center gap-2"
+                            >
+                              Okunuyor
+                              <span className="bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full text-xs">
+                                {books.filter(book => book.status?.toUpperCase() === "READING").length}
+                              </span>
+                            </Button>
+                            <Button
+                              variant={selectedState === "READ" ? "default" : "outline"}
+                              size="sm"
+                              onClick={() => setSelectedState("READ")}
+                              className="text-sm flex items-center gap-2"
+                            >
+                              Okundu
+                              <span className="bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full text-xs">
+                                {books.filter(book => book.status?.toUpperCase() === "READ").length}
+                              </span>
+                            </Button>
+                            <Button
+                              variant={selectedState === "DROPPED" ? "default" : "outline"}
+                              size="sm"
+                              onClick={() => setSelectedState("DROPPED")}
+                              className="text-sm flex items-center gap-2"
+                            >
+                              Yarım Bırakıldı
+                              <span className="bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full text-xs">
+                                {books.filter(book => book.status?.toUpperCase() === "DROPPED").length}
+                              </span>
+                            </Button>
                           </div>
 
-                          {books.length === 0 && (
-                            <div className="text-center py-8">
-                              <BookOpen className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-                              <p className="text-gray-500">Henüz kitap eklenmemiş</p>
-                              <p className="text-sm text-gray-400 mt-2">
+                          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+                            {books
+                              .filter(book => !selectedState || book.status?.toUpperCase() === selectedState)
+                              .map((book) => (
+                                <motion.div
+                                  key={book.id}
+                                  className="group relative flex flex-col"
+                                  whileHover={{ y: -5 }}
+                                  transition={{ duration: 0.2 }}
+                                >
+                                  <div className="relative aspect-[2/3] w-full overflow-hidden rounded-xl shadow-lg transition-all duration-300 group-hover:shadow-xl">
+                                    <Image
+                                      src={book.imageUrl ?? "/placeholder.svg"}
+                                      alt={book.title}
+                                      fill
+                                      className="object-cover transition-transform duration-300 group-hover:scale-105"
+                                    />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                    
+                                    <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-full transition-transform duration-300 group-hover:translate-y-0">
+                                      <p className="text-white font-medium line-clamp-2 text-sm">{book.title}</p>
+                                      <p className="text-white/80 text-xs mt-1">{book.author}</p>
+                                    </div>
+
+                                    {/* Status Badge */}
+                                    <StatusBadge status={book.status?.toUpperCase() as Book['status']} />
+                                  </div>
+                                </motion.div>
+                              ))}
+                          </div>
+
+                          {books.filter(book => !selectedState || book.status?.toUpperCase() === selectedState).length === 0 && (
+                            <div className="text-center py-12">
+                              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-purple-50 flex items-center justify-center">
+                                <BookOpen className="h-8 w-8 text-purple-400" />
+                              </div>
+                              <p className="text-lg font-medium text-gray-900 mb-2">
+                                {selectedState ? `${selectedState === "WILL_READ" ? "Okunacak" : 
+                                  selectedState === "READING" ? "Okunuyor" : 
+                                  selectedState === "READ" ? "Okundu" : 
+                                  "Yarım Bırakıldı"} durumunda kitap bulunamadı` : "Henüz kitap eklenmemiş"}
+                              </p>
+                              <p className="text-sm text-gray-500">
                                 Kitap eklemek için arama çubuğunu kullanabilirsiniz
                               </p>
                             </div>
@@ -1048,50 +1128,6 @@ export default function ProfilePage() {
                   </CardContent>
                 </Card>
               </motion.div>
-
-              {/* Recommendations */}
-              <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.3 }}
-              >
-                <Card className="overflow-hidden border-none bg-white/70 backdrop-blur-sm shadow-md">
-                  <CardContent className="p-6">
-                    <div className="flex justify-between items-center mb-4">
-                      <h3 className="text-lg font-semibold flex items-center">
-                        <BookMarked className="mr-2 h-5 w-5 text-purple-400" /> Sizin İçin Öneriler
-                      </h3>
-                      <Button variant="ghost" size="sm" className="text-purple-500 hover:text-purple-600">
-                        Tümünü Gör
-                      </Button>
-                    </div>
-
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
-                      {recommendations.map((book) => (
-                          <motion.div
-                              key={book.id}
-                              className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-all duration-300"
-                              whileHover={{ y: -5 }}
-                          >
-                            <div className="relative h-32 w-full">
-                              <Image
-                                  src={book.coverImage}
-                                  alt={book.title}
-                                  fill
-                                  className="object-cover"
-                              />
-                            </div>
-                            <div className="p-2">
-                              <h4 className="font-medium text-xs line-clamp-1">{book.title}</h4>
-                              <p className="text-xs text-gray-500 truncate">{book.author}</p>
-                              <div className="flex mt-1 scale-75 origin-left">{renderStars(book.rating || 0)}</div>
-                            </div>
-                          </motion.div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
             </div>
           </div>
         </main>
@@ -1147,6 +1183,46 @@ export default function ProfilePage() {
           onClose={() => setShowAddBookModal(false)}
           onSuccess={handleAddBookSuccess}
         />
+
+        {/* Kitap Sayısı Modalı */}
+        {showBooksModal && (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50">
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="bg-white rounded-lg p-6 max-w-sm w-full"
+            >
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold">Okunan Kitaplar</h3>
+                <button
+                  onClick={() => setShowBooksModal(false)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+              <div className="text-center py-4">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-purple-50 flex items-center justify-center">
+                  <BookOpen className="h-8 w-8 text-purple-400" />
+                </div>
+                <p className="text-2xl font-bold text-gray-900 mb-2">
+                  {books.filter(book => book.status?.toUpperCase() === "READ").length}
+                </p>
+                <p className="text-gray-600">
+                  Toplam Okunan Kitap
+                </p>
+              </div>
+              <div className="flex justify-end mt-4">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowBooksModal(false)}
+                >
+                  Kapat
+                </Button>
+              </div>
+            </motion.div>
+          </div>
+        )}
       </div>
   )
 } 

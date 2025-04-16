@@ -6,6 +6,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "books")
@@ -27,6 +29,9 @@ public class Book {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserBook> userBooks = new ArrayList<>();
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -46,10 +51,6 @@ public class Book {
     
     @Column(name = "page_count")
     private Integer pageCount;
-
-    @Column(name = "status")
-    @Enumerated(EnumType.STRING)
-    private ReadingStatus status;
 
     public enum ReadingStatus {
         READING,
@@ -99,6 +100,14 @@ public class Book {
         this.user = user;
     }
 
+    public List<UserBook> getUserBooks() {
+        return userBooks;
+    }
+
+    public void setUserBooks(List<UserBook> userBooks) {
+        this.userBooks = userBooks;
+    }
+
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
@@ -137,13 +146,5 @@ public class Book {
 
     public void setPageCount(Integer pageCount) {
         this.pageCount = pageCount;
-    }
-
-    public ReadingStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(ReadingStatus status) {
-        this.status = status;
     }
 } 

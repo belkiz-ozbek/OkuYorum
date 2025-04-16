@@ -18,8 +18,8 @@ export type Book = {
   firstPublishDate?: string;
   popularity?: number;
   weeklyReaders?: number;
-  status?: 'reading' | 'read' | 'will-read' | 'dropped';
-  readingStatus?: 'reading' | 'read' | 'will-read' | 'dropped';
+  status?: 'READING' | 'READ' | 'WILL_READ' | 'DROPPED' | null;
+  readingStatus?: 'READING' | 'READ' | 'WILL_READ' | 'DROPPED' | null;
   userId?: number;
   createdAt?: string;
   updatedAt?: string;

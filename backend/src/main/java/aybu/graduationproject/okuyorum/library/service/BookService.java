@@ -2,13 +2,16 @@ package aybu.graduationproject.okuyorum.library.service;
 
 import aybu.graduationproject.okuyorum.library.dto.BookDto;
 import aybu.graduationproject.okuyorum.library.entity.Book;
+import aybu.graduationproject.okuyorum.library.entity.UserBook;
 import aybu.graduationproject.okuyorum.library.repository.BookRepository;
+import aybu.graduationproject.okuyorum.library.repository.UserBookRepository;
 import aybu.graduationproject.okuyorum.user.entity.User;
 import aybu.graduationproject.okuyorum.user.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,14 +23,20 @@ public class BookService {
 
     private final BookRepository bookRepository;
     private final UserRepository userRepository;
+    private final UserBookRepository userBookRepository;
     private final GoogleBooksService googleBooksService;
 
-    public BookService(BookRepository bookRepository, UserRepository userRepository, GoogleBooksService googleBooksService) {
+    public BookService(BookRepository bookRepository, 
+                      UserRepository userRepository, 
+                      UserBookRepository userBookRepository,
+                      GoogleBooksService googleBooksService) {
         this.bookRepository = bookRepository;
         this.userRepository = userRepository;
+        this.userBookRepository = userBookRepository;
         this.googleBooksService = googleBooksService;
     }
 
+    @Transactional
     public BookDto createBook(BookDto bookDto) {
         if (bookDto.getGoogleBooksId() != null) {
             Optional<Book> existingBook = bookRepository.findByGoogleBooksId(bookDto.getGoogleBooksId());
@@ -39,8 +48,17 @@ public class BookService {
         Book book = convertToEntity(bookDto);
         book.setUser(userRepository.findById(bookDto.getUserId())
                 .orElseThrow(() -> new EntityNotFoundException("User not found")));
+        
         Book savedBook = bookRepository.save(book);
-        return convertToDto(savedBook);
+        
+        // Create UserBook entry with initial status
+        UserBook userBook = new UserBook();
+        userBook.setUser(savedBook.getUser());
+        userBook.setBook(savedBook);
+        userBook.setStatus(Book.ReadingStatus.WILL_READ); // Default status
+        userBookRepository.save(userBook);
+        
+        return convertToDto(savedBook, userBook);
     }
 
     public List<BookDto> getAllBooks() {
@@ -120,21 +138,58 @@ public class BookService {
             .collect(Collectors.toList());
     }
 
-    public BookDto updateBookStatus(Long id, Book.ReadingStatus status) {
-        Book book = bookRepository.findById(id)
+    @Transactional
+    public BookDto updateBookStatus(Long bookId, Long userId, Book.ReadingStatus status) {
+        Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new EntityNotFoundException("Book not found"));
-        book.setStatus(status);
-        return convertToDto(bookRepository.save(book));
+        
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+
+        UserBook userBook = userBookRepository.findByUserIdAndBookId(userId, bookId)
+                .orElseGet(() -> {
+                    UserBook newUserBook = new UserBook();
+                    newUserBook.setUser(user);
+                    newUserBook.setBook(book);
+                    return newUserBook;
+                });
+        
+        // Eğer durum "READ" olarak değiştirildiyse ve önceki durum "READ" değilse
+        if (status == Book.ReadingStatus.READ && userBook.getStatus() != Book.ReadingStatus.READ) {
+            user.setBooksRead(user.getBooksRead() + 1);
+            userRepository.save(user);
+        }
+        // Eğer durum "READ"den başka bir duruma değiştirildiyse ve önceki durum "READ" ise
+        else if (status != Book.ReadingStatus.READ && userBook.getStatus() == Book.ReadingStatus.READ) {
+            user.setBooksRead(Math.max(0, user.getBooksRead() - 1));
+            userRepository.save(user);
+        }
+        
+        userBook.setStatus(status);
+        userBookRepository.save(userBook);
+        
+        return convertToDto(book, userBook);
     }
 
     public List<BookDto> getUserBooks(Long userId) {
-        List<Book> books = bookRepository.findByUserId(userId);
-        return books.stream()
-                .map(this::convertToDto)
+        List<UserBook> userBooks = userBookRepository.findByUserId(userId);
+        return userBooks.stream()
+                .map(userBook -> convertToDto(userBook.getBook(), userBook))
+                .collect(Collectors.toList());
+    }
+
+    public List<BookDto> getUserBooksByStatus(Long userId, Book.ReadingStatus status) {
+        List<UserBook> userBooks = userBookRepository.findByUserIdAndStatus(userId, status);
+        return userBooks.stream()
+                .map(userBook -> convertToDto(userBook.getBook(), userBook))
                 .collect(Collectors.toList());
     }
 
     private BookDto convertToDto(Book book) {
+        return convertToDto(book, null);
+    }
+
+    private BookDto convertToDto(Book book, UserBook userBook) {
         BookDto dto = new BookDto();
         dto.setId(book.getId());
         dto.setTitle(book.getTitle());
@@ -145,7 +200,12 @@ public class BookService {
         dto.setImageUrl(book.getImageUrl());
         dto.setPublishedDate(book.getPublishedDate());
         dto.setPageCount(book.getPageCount());
-        dto.setStatus(book.getStatus());
+        
+        // Get status from UserBook if available
+        if (userBook != null) {
+            dto.setStatus(userBook.getStatus());
+        }
+        
         return dto;
     }
 
@@ -163,7 +223,6 @@ public class BookService {
         book.setImageUrl(bookDto.getImageUrl());
         book.setPublishedDate(formatPublishedDate(bookDto.getPublishedDate()));
         book.setPageCount(bookDto.getPageCount());
-        book.setStatus(bookDto.getStatus());
     }
 
     private String formatPublishedDate(String publishedDate) {

@@ -18,7 +18,7 @@ export function AddBookModal({ isOpen, onClose, onSuccess }: AddBookModalProps) 
   const [searchQuery, setSearchQuery] = useState("")
   const [searchResults, setSearchResults] = useState<Book[]>([])
   const [selectedBook, setSelectedBook] = useState<Book | null>(null)
-  const [readingStatus, setReadingStatus] = useState<ReadingStatus>("WILL_READ")
+  const [readingStatus, setReadingStatus] = useState<ReadingStatus>("will_read")
   const [isLoading, setIsLoading] = useState(false)
   const { toast } = useToast()
 
@@ -67,7 +67,7 @@ export function AddBookModal({ isOpen, onClose, onSuccess }: AddBookModalProps) 
       })
       
       setSelectedBook(null)
-      setReadingStatus("WILL_READ")
+      setReadingStatus("will_read")
       onClose()
       onSuccess()
     } catch {
@@ -146,10 +146,10 @@ export function AddBookModal({ isOpen, onClose, onSuccess }: AddBookModalProps) 
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="WILL_READ">Okumak İstiyorum</SelectItem>
-                    <SelectItem value="READING">Okuyorum</SelectItem>
-                    <SelectItem value="READ">Okudum</SelectItem>
-                    <SelectItem value="DROPPED">Bıraktım</SelectItem>
+                    <SelectItem value="will_read">Okumak İstiyorum</SelectItem>
+                    <SelectItem value="reading">Okuyorum</SelectItem>
+                    <SelectItem value="read">Okudum</SelectItem>
+                    <SelectItem value="dropped">Bıraktım</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

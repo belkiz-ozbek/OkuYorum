@@ -1,6 +1,7 @@
 import { api } from './api';
+import { EventEmitter } from 'events';
 
-export type ReadingStatus = 'READING' | 'READ' | 'WILL_READ' | 'DROPPED';
+export type ReadingStatus = 'reading' | 'read' | 'will_read' | 'dropped' | null;
 
 export interface Book {
   id: number;
@@ -36,6 +37,9 @@ export interface Quote {
   createdAt: string;
   updatedAt: string;
 }
+
+// Event emitter for book status changes and profile updates
+export const bookEventEmitter = new EventEmitter();
 
 class BookService {
   async getBooks(userId: string): Promise<Book[]> {
@@ -105,8 +109,13 @@ class BookService {
   async updateBookStatus(id: string, status: ReadingStatus): Promise<Book> {
     const response = await api.put(
       `/api/books/${id}/status`,
-      JSON.stringify(status)
+      JSON.stringify({ status })
     );
+    
+    // Emit both events to ensure all components are updated
+    bookEventEmitter.emit('bookStatusUpdated', response.data);
+    bookEventEmitter.emit('profileNeedsUpdate');
+    
     return response.data;
   }
 }
