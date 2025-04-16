@@ -9,6 +9,7 @@ import { usePathname } from "next/navigation";
 import {BookOpen, CheckCircle, Clock, Search, Star, Library as LibraryIcon, Compass, Users, Heart, Moon, Sun, Check, Bookmark} from "lucide-react";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { SearchForm } from "@/components/ui/form/search-form";
+import { Header } from "@/components/homepage/Header";
 
 interface Book {
   id: number;
@@ -25,7 +26,6 @@ interface LibraryProps {
 
 const Library: React.FC<LibraryProps> = ({ activeTab = 'all' }) => {
   const [searchTerm, setSearchTerm] = useState("");
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const pathname = usePathname();
   const [isScrolled, setIsScrolled] = useState(false);
@@ -413,256 +413,219 @@ const Library: React.FC<LibraryProps> = ({ activeTab = 'all' }) => {
   };
 
   return (
-    <div className={`min-h-screen ${theme === 'dark' ? 'bg-gradient-to-br from-gray-900 to-slate-800' : 'bg-gradient-to-br from-[#FDF3E7] to-[#EADBC8]'}`}>
-      <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-opacity-90 backdrop-blur-lg shadow-lg border-b border-white/10' : 'bg-transparent'} ${theme === 'dark' ? 'bg-gray-900' : 'bg-[#8B4513]'}`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-20">
-            <Link href="/" className="flex items-center gap-2">
-              <LibraryIcon className="h-8 w-8 text-white" />
-              <span className="text-2xl font-bold text-white">OkuYorum</span>
-            </Link>
-
-            <nav className="hidden md:flex items-center space-x-2 bg-white/10 px-3 py-2 rounded-full">
-              {[
-                { name: 'Kitaplığım', href: '/features/library/all', icon: BookOpen },
-                { name: 'Keşfet', href: '/features/explore', icon: Compass },
-                { name: 'Millet Kıraathaneleri', href: '/features/reading-halls', icon: Users },
-                { name: 'Bağış Yap', href: '/features/donations', icon: Heart },
-              ].map((item) => (
+    <div className="flex flex-col min-h-screen">
+      <Header />
+      <main className="max-w-7xl mx-auto px-6">
+        <div className="pt-24">
+          <div className="max-w-7xl mx-auto px-6 mb-8">
+            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 shadow-xl border border-white/10">
+              <div className="flex flex-wrap gap-4">
                 <Link
-                  key={item.name}
-                  href={item.href}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-200 ${
-                    pathname.startsWith(item.href.split('/').slice(0, 3).join('/'))
-                      ? 'bg-white text-[#8B4513] shadow-md'
-                      : 'text-white hover:bg-white/20'
+                  href="/features/library/all"
+                  className={`flex items-center gap-2 px-6 py-3 rounded-xl transition-all duration-300 ${
+                    activeTab === 'all'
+                      ? 'bg-white text-[#8B4513] shadow-lg transform -translate-y-0.5'
+                      : 'text-white hover:bg-white/10'
                   }`}
                 >
-                  <item.icon className="w-5 h-5" />
-                  <span className="font-medium text-sm">{item.name}</span>
+                  <BookOpen className="w-5 h-5" />
+                  <span className="font-medium">Tümü</span>
+                  <span className="ml-2 bg-[#8B4513]/20 px-2 py-0.5 rounded-full text-sm">
+                    {getTabCount('all')}
+                  </span>
                 </Link>
-              ))}
-            </nav>
+                <Link
+                  href="/features/library/favorites"
+                  className={`flex items-center gap-2 px-6 py-3 rounded-xl transition-all duration-300 ${
+                    activeTab === 'favorites'
+                      ? 'bg-white text-[#8B4513] shadow-lg transform -translate-y-0.5'
+                      : 'text-white hover:bg-white/10'
+                  }`}
+                >
+                  <Star className="w-5 h-5" />
+                  <span className="font-medium">Favoriler</span>
+                  <span className="ml-2 bg-[#8B4513]/20 px-2 py-0.5 rounded-full text-sm">
+                    {getTabCount('favorite')}
+                  </span>
+                </Link>
+                <Link
+                  href="/features/library/to-read"
+                  className={`flex items-center gap-2 px-6 py-3 rounded-xl transition-all duration-300 ${
+                    activeTab === 'to-read'
+                      ? 'bg-white text-[#8B4513] shadow-lg transform -translate-y-0.5'
+                      : 'text-white hover:bg-white/10'
+                  }`}
+                >
+                  <Clock className="w-5 h-5" />
+                  <span className="font-medium">Okunacaklar</span>
+                  <span className="ml-2 bg-[#8B4513]/20 px-2 py-0.5 rounded-full text-sm">
+                    {getTabCount('to-read')}
+                  </span>
+                </Link>
+                <Link
+                  href="/features/library/read"
+                  className={`flex items-center gap-2 px-6 py-3 rounded-xl transition-all duration-300 ${
+                    activeTab === 'read'
+                      ? 'bg-white text-[#8B4513] shadow-lg transform -translate-y-0.5'
+                      : 'text-white hover:bg-white/10'
+                  }`}
+                >
+                  <CheckCircle className="w-5 h-5" />
+                  <span className="font-medium">Okunanlar</span>
+                  <span className="ml-2 bg-[#8B4513]/20 px-2 py-0.5 rounded-full text-sm">
+                    {getTabCount('read')}
+                  </span>
+                </Link>
+              </div>
 
-            <div className="flex items-center gap-4">
-              <SearchForm isScrolled={isScrolled} />
-              <button onClick={toggleTheme} className="text-white p-2 rounded-full hover:bg-white/20 transition-colors">
-                {theme === 'light' ? <Moon className="h-6 w-6" /> : <Sun className="h-6 w-6" />}
-              </button>
+              <div className="mt-6 relative">
+                <div className="relative">
+                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white w-5 h-5" />
+                  <Input
+                    type="text"
+                    placeholder="Kitaplığınızda arayın..."
+                    className="w-full pl-12 pr-4 py-3.5 bg-white/25 border-none text-white placeholder-white/80 rounded-xl focus:ring-2 focus:ring-white/40 focus:bg-white/30 transition-all duration-300 hover:bg-white/30 text-base"
+                    value={searchTerm}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
+                  />
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </header>
 
-      <div className="pt-24">
-        <div className="max-w-7xl mx-auto px-6 mb-8">
-          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 shadow-xl border border-white/10">
-            <div className="flex flex-wrap gap-4">
-              <Link
-                href="/features/library/all"
-                className={`flex items-center gap-2 px-6 py-3 rounded-xl transition-all duration-300 ${
-                  activeTab === 'all'
-                    ? 'bg-white text-[#8B4513] shadow-lg transform -translate-y-0.5'
-                    : 'text-white hover:bg-white/10'
-                }`}
-              >
-                <BookOpen className="w-5 h-5" />
-                <span className="font-medium">Tümü</span>
-                <span className="ml-2 bg-[#8B4513]/20 px-2 py-0.5 rounded-full text-sm">
-                  {getTabCount('all')}
-                </span>
-              </Link>
-              <Link
-                href="/features/library/favorites"
-                className={`flex items-center gap-2 px-6 py-3 rounded-xl transition-all duration-300 ${
-                  activeTab === 'favorites'
-                    ? 'bg-white text-[#8B4513] shadow-lg transform -translate-y-0.5'
-                    : 'text-white hover:bg-white/10'
-                }`}
-              >
-                <Star className="w-5 h-5" />
-                <span className="font-medium">Favoriler</span>
-                <span className="ml-2 bg-[#8B4513]/20 px-2 py-0.5 rounded-full text-sm">
-                  {getTabCount('favorite')}
-                </span>
-              </Link>
-              <Link
-                href="/features/library/to-read"
-                className={`flex items-center gap-2 px-6 py-3 rounded-xl transition-all duration-300 ${
-                  activeTab === 'to-read'
-                    ? 'bg-white text-[#8B4513] shadow-lg transform -translate-y-0.5'
-                    : 'text-white hover:bg-white/10'
-                }`}
-              >
-                <Clock className="w-5 h-5" />
-                <span className="font-medium">Okunacaklar</span>
-                <span className="ml-2 bg-[#8B4513]/20 px-2 py-0.5 rounded-full text-sm">
-                  {getTabCount('to-read')}
-                </span>
-              </Link>
-              <Link
-                href="/features/library/read"
-                className={`flex items-center gap-2 px-6 py-3 rounded-xl transition-all duration-300 ${
-                  activeTab === 'read'
-                    ? 'bg-white text-[#8B4513] shadow-lg transform -translate-y-0.5'
-                    : 'text-white hover:bg-white/10'
-                }`}
-              >
-                <CheckCircle className="w-5 h-5" />
-                <span className="font-medium">Okunanlar</span>
-                <span className="ml-2 bg-[#8B4513]/20 px-2 py-0.5 rounded-full text-sm">
-                  {getTabCount('read')}
-                </span>
-              </Link>
+          <div className="max-w-7xl mx-auto px-6 pb-12">
+            <div className="relative bg-[#6B4423] dark:bg-[#523018] rounded-3xl p-8 shadow-2xl">
+              <div className="absolute inset-0 opacity-30 rounded-3xl" style={{
+                backgroundImage: `repeating-linear-gradient(
+                  90deg,
+                  #000 0px,
+                  #000 2px,
+                  transparent 2px,
+                  transparent 20px
+                )`
+              }}></div>
+
+              <div className="relative space-y-12">
+                {[0, 1, 2].map((shelf) => (
+                  <div key={shelf} className="relative">
+                    <div className="relative min-h-[280px]">
+                      <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-x-6 gap-y-12 items-end">
+                        {filteredBooks.slice(shelf * 8, (shelf + 1) * 8).map((book) => (
+                          <motion.div
+                            key={book.id}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            whileHover={{
+                              y: -12,
+                              scale: 1.1,
+                              transition: { duration: 0.2 },
+                              zIndex: 20
+                            }}
+                            className="transform origin-bottom"
+                          >
+                            <div className="relative group">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  toggleFavorite(book.id);
+                                }}
+                                className="absolute top-2 right-2 z-10 p-1.5 bg-black/40 rounded-full text-white/70 hover:text-red-500 hover:bg-black/60 transition-all duration-200 opacity-0 group-hover:opacity-100"
+                                aria-label={favoriteBooks.has(book.id) ? "Favorilerden çıkar" : "Favorilere ekle"}
+                              >
+                                <Heart
+                                  className={`w-4 h-4 transition-colors duration-200 ${
+                                    favoriteBooks.has(book.id) ? 'fill-red-500 text-red-500' : ''
+                                  }`}
+                                />
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  toggleRead(book.id);
+                                }}
+                                className="absolute top-2 right-10 z-10 p-1.5 bg-black/40 rounded-full text-white/70 hover:text-green-500 hover:bg-black/60 transition-all duration-200 opacity-0 group-hover:opacity-100"
+                                aria-label={readBooks.has(book.id) ? "Okundu listesinden çıkar" : "Okundu listesine ekle"}
+                              >
+                                <Check
+                                  className={`w-4 h-4 transition-colors duration-200 ${
+                                    readBooks.has(book.id) ? 'fill-green-500 text-green-500' : 'text-white/70'
+                                  }`}
+                                />
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  toggleToRead(book.id);
+                                }}
+                                className="absolute top-2 right-18 z-10 p-1.5 bg-black/40 rounded-full text-white/70 hover:text-blue-500 hover:bg-black/60 transition-all duration-200 opacity-0 group-hover:opacity-100"
+                                aria-label={toReadBooks.has(book.id) ? "Okunacaklar listesinden çıkar" : "Okunacaklar listesine ekle"}
+                              >
+                                <Bookmark
+                                  className={`w-4 h-4 transition-colors duration-200 ${
+                                    toReadBooks.has(book.id) ? 'fill-blue-500 text-blue-500' : 'text-white/70'
+                                  }`}
+                                />
+                              </button>
+                              <Card className="relative h-[240px] bg-white border-none shadow-xl hover:shadow-2xl transition-all duration-300 rounded-lg overflow-hidden">
+                                <img
+                                  src={book.coverImage}
+                                  alt={book.title}
+                                  className="w-full h-full object-cover"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                              </Card>
+                              <div className="mt-3 text-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                <p className="font-semibold text-white text-sm mb-1 truncate">{book.title}</p>
+                                <p className="text-white/80 text-xs mb-2 truncate">{book.author}</p>
+                                {book.rating && (
+                                  <div className="flex items-center justify-center gap-0.5">
+                                    {renderStars(book.rating)}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </motion.div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="absolute bottom-0 left-0 right-0 h-10 pointer-events-none">
+                      <div className="h-4 bg-[#8B5E3C] dark:bg-[#6B4423] rounded-t-sm shadow-inner">
+                        <div className="absolute inset-0 opacity-20" style={{
+                          backgroundImage: `repeating-linear-gradient(
+                            90deg,
+                            #000 0px,
+                            #000 1px,
+                            transparent 1px,
+                            transparent 10px
+                          )`
+                        }}></div>
+                      </div>
+                      <div className="h-6 bg-gradient-to-b from-[#6B4423] to-[#523018] transform -skew-y-1 rounded-b-sm">
+                        <div className="absolute inset-0 opacity-10" style={{
+                          backgroundImage: `repeating-linear-gradient(
+                            90deg,
+                            #000 0px,
+                            #000 1px,
+                            transparent 1px,
+                            transparent 10px
+                          )`
+                        }}></div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
 
-            <div className="mt-6 relative">
-              <div className="relative">
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white w-5 h-5" />
-                <Input
-                  type="text"
-                  placeholder="Kitaplığınızda arayın..."
-                  className="w-full pl-12 pr-4 py-3.5 bg-white/25 border-none text-white placeholder-white/80 rounded-xl focus:ring-2 focus:ring-white/40 focus:bg-white/30 transition-all duration-300 hover:bg-white/30 text-base"
-                  value={searchTerm}
-                  onChange={(e: ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
-                />
+            <div className="flex justify-center mt-8">
+              <div className="bg-white dark:bg-gray-900 text-[#8B4513] dark:text-white rounded-full py-2 px-6 shadow-lg">
+                Sayfa 1 / {Math.ceil(filteredBooks.length / 8)}
               </div>
             </div>
           </div>
         </div>
-
-        <div className="max-w-7xl mx-auto px-6 pb-12">
-          <div className="relative bg-[#6B4423] dark:bg-[#523018] rounded-3xl p-8 shadow-2xl">
-            <div className="absolute inset-0 opacity-30 rounded-3xl" style={{
-              backgroundImage: `repeating-linear-gradient(
-                90deg,
-                #000 0px,
-                #000 2px,
-                transparent 2px,
-                transparent 20px
-              )`
-            }}></div>
-
-            <div className="relative space-y-12">
-              {[0, 1, 2].map((shelf) => (
-                <div key={shelf} className="relative">
-                  <div className="relative min-h-[280px]">
-                    <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-x-6 gap-y-12 items-end">
-                      {filteredBooks.slice(shelf * 8, (shelf + 1) * 8).map((book) => (
-                        <motion.div
-                          key={book.id}
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          whileHover={{
-                            y: -12,
-                            scale: 1.1,
-                            transition: { duration: 0.2 },
-                            zIndex: 20
-                          }}
-                          className="transform origin-bottom"
-                        >
-                          <div className="relative group">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                toggleFavorite(book.id);
-                              }}
-                              className="absolute top-2 right-2 z-10 p-1.5 bg-black/40 rounded-full text-white/70 hover:text-red-500 hover:bg-black/60 transition-all duration-200 opacity-0 group-hover:opacity-100"
-                              aria-label={favoriteBooks.has(book.id) ? "Favorilerden çıkar" : "Favorilere ekle"}
-                            >
-                              <Heart
-                                className={`w-4 h-4 transition-colors duration-200 ${
-                                  favoriteBooks.has(book.id) ? 'fill-red-500 text-red-500' : ''
-                                }`}
-                              />
-                            </button>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                toggleRead(book.id);
-                              }}
-                              className="absolute top-2 right-10 z-10 p-1.5 bg-black/40 rounded-full text-white/70 hover:text-green-500 hover:bg-black/60 transition-all duration-200 opacity-0 group-hover:opacity-100"
-                              aria-label={readBooks.has(book.id) ? "Okundu listesinden çıkar" : "Okundu listesine ekle"}
-                            >
-                              <Check
-                                className={`w-4 h-4 transition-colors duration-200 ${
-                                  readBooks.has(book.id) ? 'fill-green-500 text-green-500' : 'text-white/70'
-                                }`}
-                              />
-                            </button>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                toggleToRead(book.id);
-                              }}
-                              className="absolute top-2 right-18 z-10 p-1.5 bg-black/40 rounded-full text-white/70 hover:text-blue-500 hover:bg-black/60 transition-all duration-200 opacity-0 group-hover:opacity-100"
-                              aria-label={toReadBooks.has(book.id) ? "Okunacaklar listesinden çıkar" : "Okunacaklar listesine ekle"}
-                            >
-                              <Bookmark
-                                className={`w-4 h-4 transition-colors duration-200 ${
-                                  toReadBooks.has(book.id) ? 'fill-blue-500 text-blue-500' : 'text-white/70'
-                                }`}
-                              />
-                            </button>
-                            <Card className="relative h-[240px] bg-white border-none shadow-xl hover:shadow-2xl transition-all duration-300 rounded-lg overflow-hidden">
-                              <img
-                                src={book.coverImage}
-                                alt={book.title}
-                                className="w-full h-full object-cover"
-                              />
-                              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                            </Card>
-                            <div className="mt-3 text-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                              <p className="font-semibold text-white text-sm mb-1 truncate">{book.title}</p>
-                              <p className="text-white/80 text-xs mb-2 truncate">{book.author}</p>
-                              {book.rating && (
-                                <div className="flex items-center justify-center gap-0.5">
-                                  {renderStars(book.rating)}
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </motion.div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="absolute bottom-0 left-0 right-0 h-10 pointer-events-none">
-                    <div className="h-4 bg-[#8B5E3C] dark:bg-[#6B4423] rounded-t-sm shadow-inner">
-                      <div className="absolute inset-0 opacity-20" style={{
-                        backgroundImage: `repeating-linear-gradient(
-                          90deg,
-                          #000 0px,
-                          #000 1px,
-                          transparent 1px,
-                          transparent 10px
-                        )`
-                      }}></div>
-                    </div>
-                    <div className="h-6 bg-gradient-to-b from-[#6B4423] to-[#523018] transform -skew-y-1 rounded-b-sm">
-                      <div className="absolute inset-0 opacity-10" style={{
-                        backgroundImage: `repeating-linear-gradient(
-                          90deg,
-                          #000 0px,
-                          #000 1px,
-                          transparent 1px,
-                          transparent 10px
-                        )`
-                      }}></div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="flex justify-center mt-8">
-            <div className="bg-white dark:bg-gray-900 text-[#8B4513] dark:text-white rounded-full py-2 px-6 shadow-lg">
-              Sayfa 1 / {Math.ceil(filteredBooks.length / 8)}
-            </div>
-          </div>
-        </div>
-      </div>
+      </main>
     </div>
   );
 };
