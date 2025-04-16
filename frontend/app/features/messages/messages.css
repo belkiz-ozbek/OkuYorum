@@ -1,0 +1,186 @@
+/* Custom Properties */
+:root {
+  --background-start: #F4F1EE;
+  --background-end: #E5ECF4;
+  --accent-purple: #7F6DF2;
+  --accent-blue: #A0C4FF;
+  --accent-mint: #A8D5BA;
+  --text-primary: #2E2E2E;
+  --text-secondary: #6C7A89;
+}
+
+/* Base Animations */
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px) rotate(-2deg);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  70% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Glass Card Effects */
+.glass-card {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.05),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.glass-card:hover {
+  background: rgba(255, 255, 255, 0.8);
+  transform: translateY(-2px);
+  box-shadow: 
+    0 12px 40px rgba(0, 0, 0, 0.08),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+}
+
+/* User List Item Styles */
+.user-list-item {
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.user-list-item:hover {
+  background: rgba(255, 255, 255, 0.8);
+  transform: translateY(-1px) scale(1.01);
+  box-shadow: 
+    0 4px 20px rgba(127, 109, 242, 0.1),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+}
+
+.user-list-item.active {
+  background: linear-gradient(
+    to right,
+    rgba(127, 109, 242, 0.1),
+    rgba(160, 196, 255, 0.1)
+  );
+  border-left: 3px solid var(--accent-purple);
+}
+
+/* Search Input Styles */
+.search-container {
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.search-input {
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 
+    inset 0 2px 4px rgba(0, 0, 0, 0.02),
+    0 2px 10px rgba(127, 109, 242, 0.05);
+  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.search-input:focus {
+  background: rgba(255, 255, 255, 0.95);
+  transform: scale(1.01);
+  box-shadow: 
+    0 4px 20px rgba(127, 109, 242, 0.15),
+    inset 0 0 0 2px rgba(127, 109, 242, 0.3);
+}
+
+/* Message Bubble Styles */
+.message-bubble {
+  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.message-bubble.own {
+  background: linear-gradient(135deg, var(--accent-purple), #9985FF);
+  box-shadow: 
+    0 4px 15px rgba(127, 109, 242, 0.2),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+.message-bubble.other {
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 
+    0 4px 15px rgba(0, 0, 0, 0.05),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.3);
+}
+
+/* Custom Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(127, 109, 242, 0.05);
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(127, 109, 242, 0.2);
+  border-radius: 3px;
+  transition: all 0.3s ease;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(127, 109, 242, 0.3);
+}
+
+/* Animation Classes */
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+.animate-pulse {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* Online Status Indicator */
+.status-indicator {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid white;
+  transition: all 0.3s ease;
+}
+
+.status-online {
+  background-color: var(--accent-mint);
+  box-shadow: 0 0 0 rgba(168, 213, 186, 0.4);
+  animation: pulse 2s infinite;
+}
+
+.status-offline {
+  background-color: var(--text-secondary);
+} 

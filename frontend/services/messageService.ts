@@ -156,12 +156,16 @@ class MessageService {
 
     async deleteMessage(messageId: number): Promise<void> {
         try {
-            const currentUser = await UserService.getCurrentUser();
-            if (!currentUser.data) {
+            const token = localStorage.getItem('token');
+            if (!token) {
                 throw new Error('Mesaj silmek için giriş yapmalısınız');
             }
 
-            await axios.delete(`${API_URL}/api/messages/${messageId}`);
+            await axios.delete(`${API_URL}/api/messages/${messageId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
         } catch (error) {
             if (error instanceof AxiosError) {
                 if (error.response?.status === 401) {
