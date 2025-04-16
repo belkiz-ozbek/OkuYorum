@@ -4,12 +4,11 @@ import axios from 'axios'
 const baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'
 
 // Axios instance oluştur
-export const api = axios.create({
+const api = axios.create({
   baseURL,
   headers: {
     'Content-Type': 'application/json',
   },
-  withCredentials: true, // CORS için cookie'leri gönder
 })
 
 // İstek interceptor'ı
@@ -29,12 +28,15 @@ api.interceptors.request.use(
 // Yanıt interceptor'ı
 api.interceptors.response.use(
   (response) => response,
-  async (error) => {
-    if (error.response?.status === 403) {
-      // Token expired or invalid
+  (error) => {
+    if (error.response?.status === 401 || error.response?.status === 403) {
       localStorage.removeItem('token')
-      window.location.href = '/login'
+      if (typeof window !== 'undefined') {
+        window.location.href = '/auth/login'
+      }
     }
     return Promise.reject(error)
   }
-) 
+)
+
+export { api } 

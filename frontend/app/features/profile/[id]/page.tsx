@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
@@ -9,7 +9,6 @@ import {
   Camera,
   Calendar,
   MessageSquare,
-  Quote,
   Zap,
   User,
   Library,
@@ -26,7 +25,8 @@ import {
   Sun,
   UserPlus,
   UserMinus,
-  UserCheck
+  UserCheck,
+  Quote as QuoteIcon
 } from "lucide-react"
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/form/button"
@@ -41,12 +41,14 @@ import { useToast } from "@/components/ui/feedback/use-toast"
 import { FollowListModal } from "@/components/ui/follow/follow-list-modal"
 import { UserService } from "@/services/UserService"
 import { followService } from "@/services/followService"
-import { messageService, Message } from "@/services/messageService"
 import { bookService, Book } from "@/services/bookService"
 import { AddBookModal } from "@/components/ui/book/add-book-modal"
 import { bookEventEmitter } from '@/services/bookService'
 import { api } from '@/services/api'
 import StatusBadge from "@/components/ui/book/StatusBadge"
+import { quoteService, Quote as QuoteType } from "@/services/quoteService"
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
+import { postService, Post } from "@/services/postService"
 
 const initialProfile: UserProfile = {
   id: 0,
@@ -72,11 +74,91 @@ const initialReadingActivity: ReadingActivity[] = []
 const achievementIcons = {
   "BOOK_WORM": <BookOpenCheck className="h-6 w-6" />,
   "SOCIAL_READER": <MessageSquare className="h-6 w-6" />,
-  "QUOTE_MASTER": <Quote className="h-6 w-6" />,
+  "QUOTE_MASTER": <QuoteIcon className="h-6 w-6" />,
   "MARATHON_READER": <Zap className="h-6 w-6" />
 }
 
+const usePosts = (
+  params: ReturnType<typeof useParams>,
+  toast: ReturnType<typeof useToast>["toast"],
+  setPosts: React.Dispatch<React.SetStateAction<Post[]>>,
+  router: { push: (path: string) => void }
+) => {
+  const fetchPosts = useCallback(async () => {
+    try {
+      if (!params.id) return;
+      const postsData = await postService.getUserPosts(params.id.toString());
+      setPosts(postsData);
+    } catch (err: unknown) {
+      console.error('İletiler yüklenirken hata:', err);
+      if (err && typeof err === 'object' && 'response' in err && err.response && typeof err.response === 'object' && 'status' in err.response) {
+        const status = err.response.status;
+        if (status === 401 || status === 403) {
+          localStorage.removeItem('token');
+          router.push('/');
+          return;
+        }
+      }
+      toast({
+        title: "Hata",
+        description: "İletiler yüklenirken bir hata oluştu.",
+        variant: "destructive"
+      });
+    }
+  }, [params.id, toast, setPosts, router]);
+
+  return { fetchPosts };
+};
+
+// --- Düzenleme ve Silme için ek state'ler ---
+
 export default function ProfilePage() {
+  // ... mevcut stateler ...
+  const [editingPostId, setEditingPostId] = useState<number | null>(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editContent, setEditContent] = useState("");
+  const [menuOpenId, setMenuOpenId] = useState<number | null>(null);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
+
+  // --- DÜZENLEME FONKSİYONLARI ---
+  const handleEditPost = (post: Post) => {
+    setEditingPostId(post.id);
+    setEditTitle(post.title || "");
+    setEditContent(post.content || "");
+  };
+  const handleCancelEdit = () => {
+    setEditingPostId(null);
+    setEditTitle("");
+    setEditContent("");
+  };
+  const handleUpdatePost = async (postId: number) => {
+    try {
+      if (!editTitle.trim() || !editContent.trim()) {
+        toast({ title: "Hata", description: "Başlık ve içerik boş olamaz.", variant: "destructive" });
+        return;
+      }
+      await postService.updatePost(postId, editTitle, editContent);
+      setEditingPostId(null);
+      setEditTitle("");
+      setEditContent("");
+      await fetchPosts();
+      toast({ title: "Başarılı", description: "Gönderi güncellendi." });
+    } catch (error: unknown) {
+      console.error('Güncelleme hatası:', error);
+      toast({ title: "Hata", description: "Güncelleme sırasında hata oluştu.", variant: "destructive" });
+    }
+  };
+  // --- SİLME FONKSİYONU ---
+  const handleDeletePost = async (postId: number) => {
+    try {
+      await postService.deletePost(postId);
+      await fetchPosts();
+      toast({ title: "Başarılı", description: "Gönderi silindi." });
+    } catch (error: unknown) {
+      console.error('Silme hatası:', error);
+      toast({ title: "Hata", description: "Silme sırasında hata oluştu.", variant: "destructive" });
+    }
+  };
   const params = useParams()
   const router = useRouter()
   const { toast } = useToast()
@@ -97,10 +179,15 @@ export default function ProfilePage() {
   const [isFollowing, setIsFollowing] = useState(false)
   const [showUnfollowConfirm, setShowUnfollowConfirm] = useState(false)
   const [isFollowLoading, setIsFollowLoading] = useState(false)
-  const [messages, setMessages] = useState<Message[]>([])
+  const [posts, setPosts] = useState<Post[]>([])
   const [showAddBookModal, setShowAddBookModal] = useState(false)
   const [showBooksModal, setShowBooksModal] = useState(false)
   const [selectedState, setSelectedState] = useState<string | null>(null)
+  const [quotes, setQuotes] = useState<QuoteType[]>([])
+  const [newPostTitle, setNewPostTitle] = useState("");
+  const [newPost, setNewPost] = useState("")
+
+  const { fetchPosts } = usePosts(params, toast, setPosts, router);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -170,9 +257,24 @@ export default function ProfilePage() {
       }
     };
 
-    fetchProfile()
-    fetchBooks()
-  }, [params.id, toast, router])
+    const loadData = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          router.push('/');
+          return;
+        }
+
+        await fetchProfile();
+        await fetchBooks();
+        await fetchPosts();
+      } catch (error) {
+        console.error('Error loading data:', error);
+      }
+    };
+
+    loadData();
+  }, [params.id, fetchPosts]);
 
   useEffect(() => {
     const loadUserInfo = async () => {
@@ -275,7 +377,7 @@ export default function ProfilePage() {
   }, [params.id]);
 
   useEffect(() => {
-    const fetchMessages = async () => {
+    const fetchQuotes = async () => {
       try {
         if (!params.id) return;
         
@@ -284,19 +386,19 @@ export default function ProfilePage() {
           throw new Error('Oturum bulunamadı');
         }
 
-        const messagesData = await messageService.getMessages(params.id.toString());
-        setMessages(messagesData);
+        const quotesData = await quoteService.getQuotesByUser(params.id.toString());
+        setQuotes(quotesData);
       } catch (error) {
-        console.error('Mesajlar yüklenirken hata:', error);
+        console.error('Alıntılar yüklenirken hata:', error);
         toast({
           title: "Hata",
-          description: "Mesajlar yüklenirken bir hata oluştu.",
+          description: "Alıntılar yüklenirken bir hata oluştu.",
           variant: "destructive"
         });
       }
     };
 
-    fetchMessages();
+    fetchQuotes();
   }, [params.id, toast]);
 
   useEffect(() => {
@@ -452,6 +554,64 @@ export default function ProfilePage() {
     fetchProfileData();
   }
 
+  const createPost = async () => {
+    try {
+      if (!newPostTitle.trim()) {
+        toast({
+          title: "Hata",
+          description: "Başlık boş olamaz.",
+          variant: "destructive"
+        });
+        return;
+      }
+      if (!newPost.trim()) {
+        toast({
+          title: "Hata",
+          description: "İleti boş olamaz.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      const token = localStorage.getItem('token');
+      if (!token) {
+        router.push('/');
+        return;
+      }
+
+      await postService.createPost(newPostTitle, newPost);
+      setNewPostTitle("");
+      setNewPost("");
+      await fetchPosts();
+      toast({
+        title: "Başarılı",
+        description: "İletiniz başarıyla oluşturuldu.",
+      });
+    } catch (err: unknown) {
+      console.error('İleti oluşturulurken hata:', err);
+      if (err && typeof err === 'object' && 'response' in err && err.response && typeof err.response === 'object' && 'status' in err.response) {
+        const status = err.response.status;
+        if (status === 401 || status === 403) {
+          localStorage.removeItem('token');
+          router.push('/');
+          return;
+        }
+      }
+      toast({
+        title: "Hata",
+        description: "İleti oluşturulurken bir hata oluştu.",
+        variant: "destructive"
+      });
+    }
+  };
+
+
+  // Date formatting helper function
+  const formatDate = (dateString: string | undefined) => {
+    if (!dateString) return '';
+    return new Date(dateString).toLocaleDateString('tr-TR');
+  };
+
   // Profile stats section
   if (loading) {
     return (
@@ -478,8 +638,28 @@ export default function ProfilePage() {
     )
   }
 
+  const deleteConfirmModal = deleteConfirmId !== null && (
+  <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/30 animate-fade-in">
+    <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-xs text-center">
+      <div className="text-xl font-semibold mb-2">Gönderi Silinsin mi?</div>
+      <div className="text-gray-600 mb-4">Bu gönderi kalıcı olarak silinecek. Emin misiniz?</div>
+      <div className="flex justify-center gap-3">
+        <Button
+          variant="destructive"
+          onClick={async () => {
+            await handleDeletePost(deleteConfirmId!);
+            setDeleteConfirmId(null);
+          }}
+        >Evet, Sil</Button>
+        <Button variant="outline" onClick={() => setDeleteConfirmId(null)}>Vazgeç</Button>
+      </div>
+    </div>
+  </div>
+);
+
   return (
-      <div className="min-h-screen bg-gradient-to-b from-purple-50 to-white dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen bg-gradient-to-b from-purple-50 to-white dark:from-gray-900 dark:to-gray-800">
+      {deleteConfirmModal}
         <header
             className={`fixed top-0 z-50 w-full transition-all duration-300 ${
                 isScrolled ? "h-14 bg-background/60 backdrop-blur-lg border-b" : "h-16"
@@ -845,12 +1025,13 @@ export default function ProfilePage() {
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
                 <Card className="overflow-hidden border-none bg-white/70 backdrop-blur-sm shadow-md">
                   <Tabs defaultValue="books" className="w-full">
-                    <TabsList className="grid w-full grid-cols-5">
+                    <TabsList className="grid w-full grid-cols-6">
                       <TabsTrigger value="books">Kitaplar</TabsTrigger>
                       <TabsTrigger value="wall">Duvar</TabsTrigger>
                       <TabsTrigger value="quotes">Alıntılar</TabsTrigger>
                       <TabsTrigger value="reviews">İncelemeler</TabsTrigger>
-                      <TabsTrigger value="messages">İletiler</TabsTrigger>
+                      <TabsTrigger value="posts">İletiler</TabsTrigger>
+                      <TabsTrigger value="messages">Mesajlar</TabsTrigger>
                     </TabsList>
 
                     <TabsContent value="books" className="p-6">
@@ -977,8 +1158,39 @@ export default function ProfilePage() {
                     </TabsContent>
 
                     <TabsContent value="quotes" className="p-6">
-                      <div className="text-center py-8">
-                        <p className="text-gray-500">Alıntılar burada gösterilecek</p>
+                      <div className="space-y-6">
+                        {quotes.length > 0 ? (
+                          quotes.map((quote) => (
+                            <Card key={quote.id} className="overflow-hidden border-none bg-white/70 backdrop-blur-sm shadow-md">
+                              <CardContent className="p-6">
+                                <div className="space-y-4">
+                                  <div className="flex items-center justify-between">
+                                    <div className="flex items-center space-x-2">
+                                      <BookOpen className="h-5 w-5 text-gray-500" />
+                                      <span className="font-medium">{quote.book?.title}</span>
+                                    </div>
+                                    <span className="text-sm text-gray-500">
+                                      {formatDate(quote.createdAt)}
+                                    </span>
+                                  </div>
+                                  <blockquote className="text-lg italic text-gray-700 border-l-4 border-gray-300 pl-4">
+                                    &#34;{quote.content}&#34;
+                                  </blockquote>
+                                  {quote.pageNumber && (
+                                    <div className="text-sm text-gray-500">
+                                      Sayfa: {quote.pageNumber}
+                                    </div>
+                                  )}
+                                </div>
+                              </CardContent>
+                            </Card>
+                          ))
+                        ) : (
+                          <div className="text-center py-8">
+                            <QuoteIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                            <p className="text-gray-500">Henüz alıntı paylaşılmamış.</p>
+                          </div>
+                        )}
                       </div>
                     </TabsContent>
 
@@ -988,38 +1200,127 @@ export default function ProfilePage() {
                       </div>
                     </TabsContent>
 
-                    <TabsContent value="messages" className="space-y-4">
-                      <Card>
-                        <CardContent className="p-6">
-                          <div className="space-y-4">
-                            {messages.map((message) => (
-                              <div
-                                key={message.id}
-                                className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                              >
-                                <div className="flex justify-between items-start">
-                                  <div>
-                                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                                      {new Date(message.createdAt).toLocaleDateString()}
-                                    </p>
-                                    <p className="mt-2">{message.content}</p>
-                                  </div>
-                                  {!message.isRead && (
-                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                                      Yeni
+                    <TabsContent value="posts" className="p-6">
+                      {currentUser && currentUser.id.toString() === params.id && (
+                        <Card className="mb-4">
+                          <CardContent className="p-4">
+                            <div className="flex flex-col gap-2 w-full">
+                              <Input
+                                placeholder="Başlık..."
+                                value={newPostTitle}
+                                onChange={(e) => setNewPostTitle(e.target.value)}
+                                className="flex-1"
+                                maxLength={100}
+                              />
+                              <div className="flex gap-2 w-full">
+                                <Input
+                                  placeholder="Bir şeyler yaz..."
+                                  value={newPost}
+                                  onChange={(e) => setNewPost(e.target.value)}
+                                  className="flex-1"
+                                  maxLength={500}
+                                />
+                                <Button onClick={createPost}>Paylaş</Button>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      )}
+                      
+                      <div className="space-y-4">
+                        {posts.map((post) => (
+                          <Card key={post.id} className="relative shadow-md hover:shadow-lg transition-shadow rounded-xl border border-gray-100">
+                            <CardContent className="p-4">
+                              <div className="flex items-start gap-4">
+                                <Avatar>
+                                  <AvatarImage src={post.profileImage || undefined} />
+                                  <AvatarFallback>{(post.nameSurname && post.nameSurname.length > 0) ? post.nameSurname[0].toUpperCase() : "?"}</AvatarFallback>
+                                </Avatar>
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2">
+                                    <span className="font-semibold">{post.nameSurname}</span>
+                                    <span className="text-sm text-gray-500">@{post.username}</span>
+                                    <span className="text-sm text-gray-500">
+                                      {formatDate(post.createdAt)}
                                     </span>
+                                  </div>
+                                  {/* BAŞLIK GÖSTERİMİ */}
+                                  <div className="mt-2 mb-1">
+                                    <span className="text-lg font-bold text-purple-800">{post.title}</span>
+                                  </div>
+                                  {/* DÜZENLEME MODU */}
+                                  {editingPostId === post.id ? (
+                                    <div className="flex flex-col gap-2">
+                                      <Input
+                                        value={editTitle}
+                                        onChange={e => setEditTitle(e.target.value)}
+                                        placeholder="Başlık"
+                                        maxLength={100}
+                                      />
+                                      <Input
+                                        value={editContent}
+                                        onChange={e => setEditContent(e.target.value)}
+                                        placeholder="İçerik"
+                                        maxLength={500}
+                                      />
+                                      <div className="flex gap-2 mt-1">
+                                        <Button size="sm" onClick={() => handleUpdatePost(post.id)} className="bg-purple-600 text-white">Kaydet</Button>
+                                        <Button size="sm" variant="outline" onClick={handleCancelEdit}>İptal</Button>
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <>
+                                      <p className="mt-1 mb-2">{post.content}</p>
+                                      {/* 3 NOKTA MENÜ */}
+                                      {currentUser && post.userId === currentUser.id && (
+                                        <div className="absolute top-3 right-3 z-10">
+                                          <button
+                                            onClick={() => setMenuOpenId(menuOpenId === post.id ? null : post.id)}
+                                            className="rounded-full p-2 hover:bg-gray-100 focus:outline-none transition"
+                                          >
+                                            <span className="text-2xl">⋮</span>
+                                          </button>
+                                          {menuOpenId === post.id && (
+                                            <div className="absolute right-0 mt-2 w-32 bg-white rounded-lg shadow-lg border border-gray-100 animate-fade-in z-20">
+                                              <button
+                                                className="block w-full text-left px-4 py-2 hover:bg-purple-50 text-sm"
+                                                onClick={() => { setMenuOpenId(null); handleEditPost(post); }}
+                                              >Düzenle</button>
+                                              <button
+                                                className="block w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 text-sm"
+                                                onClick={() => { setMenuOpenId(null); setDeleteConfirmId(post.id); }}
+                                              >Sil</button>
+                                            </div>
+                                          )}
+                                        </div>
+                                      )}
+                                    </>
                                   )}
                                 </div>
                               </div>
-                            ))}
-                            {messages.length === 0 && (
-                              <p className="text-center text-gray-500 dark:text-gray-400">
-                                Henüz ileti bulunmuyor.
-                              </p>
-                            )}
+                            </CardContent>
+                          </Card>
+                        ))}
+                        {posts.length === 0 && (
+                          <div className="text-center py-8">
+                            <MessageSquare className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                            <p className="text-gray-500">Henüz ileti paylaşılmamış.</p>
                           </div>
-                        </CardContent>
-                      </Card>
+                        )}
+                      </div>
+                    </TabsContent>
+
+                    <TabsContent value="messages" className="p-6">
+                      <div className="space-y-6">
+                        {/* Mesajlar sekmesi içeriği */}
+                        <div className="text-center py-12">
+                          <div className="bg-purple-50 rounded-full p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                            <MessageSquare className="h-8 w-8 text-purple-500" />
+                          </div>
+                          <h3 className="text-lg font-medium text-gray-900 mb-2">Mesajlar</h3>
+                          <p className="text-gray-500">Mesajlarınızı görüntülemek için mesajlar sayfasına gidin.</p>
+                        </div>
+                      </div>
                     </TabsContent>
                   </Tabs>
                 </Card>
