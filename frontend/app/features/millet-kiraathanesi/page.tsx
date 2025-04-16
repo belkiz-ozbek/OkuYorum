@@ -47,88 +47,87 @@ export default function MilletKiraathanesi() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <header className={`fixed top-0 z-50 w-full transition-all duration-300 ${
-        isScrolled 
-          ? 'h-14 bg-white/95 dark:bg-gray-950/95 border-b border-gray-200/30 dark:border-gray-800/30 backdrop-blur-sm' 
-          : 'h-16 bg-gradient-to-b from-black/60 to-transparent'
-      }`}>
+      <header
+        className={`fixed top-0 z-50 w-full transition-all duration-300 ${
+          isScrolled ? "h-14 bg-background/60 backdrop-blur-lg border-b" : "h-16"
+        }`}
+      >
         <div className="max-w-7xl mx-auto h-full flex items-center justify-between px-6">
-          <Link 
-            className="flex items-center justify-center group relative" 
-            href="/features/homepage"
-          >
+          <Link className="flex items-center justify-center group relative" href="/features/homepage">
             <div className="relative">
-              <BookOpen className={`${isScrolled ? 'h-5 w-5' : 'h-6 w-6'} ${isScrolled ? 'text-gray-800 dark:text-gray-200' : 'text-white'} group-hover:text-primary transition-all duration-300`} />
+              <BookOpen
+                className={`${isScrolled ? "h-5 w-5" : "h-6 w-6"} text-foreground group-hover:text-primary transition-all duration-300`}
+              />
             </div>
-            <span className={`ml-2 font-medium ${isScrolled ? 'text-gray-800 dark:text-gray-200' : 'text-white'} transition-all duration-300 ${isScrolled ? 'text-base' : 'text-lg'}`}>
+            <span
+              className={`ml-2 font-medium text-foreground transition-all duration-300 ${isScrolled ? "text-base" : "text-lg"}`}
+            >
               OkuYorum
             </span>
           </Link>
 
           <div className="hidden md:flex items-center h-full">
             <nav className="flex items-center gap-6 px-6">
-              <Link className={`flex items-center gap-2 ${isScrolled ? 'text-gray-600 dark:text-gray-300' : 'text-white/90'} hover:text-primary transition-colors duration-300`} href="/features/library">
+              <Link
+                className={`flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300`}
+                href="/features/library"
+              >
                 <Library className="h-5 w-5" />
                 <span>Kitaplığım</span>
               </Link>
 
-              <Link className={`flex items-center gap-2 ${isScrolled ? 'text-gray-600 dark:text-gray-300' : 'text-white/90'} hover:text-primary transition-colors duration-300`} href="/features/discover">
+              <Link
+                className={`flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300`}
+                href="/features/discover"
+              >
                 <Compass className="h-5 w-5" />
                 <span>Keşfet</span>
               </Link>
 
-              <Link className={`flex items-center gap-2 ${isScrolled ? 'text-gray-600 dark:text-gray-300' : 'text-white/90'} hover:text-primary transition-colors duration-300`} href="/features/millet-kiraathanesi">
+              <Link
+                className={`flex items-center gap-2 text-primary transition-colors duration-300`}
+                href="/features/millet-kiraathanesi"
+              >
                 <Users className="h-5 w-5" />
                 <span>Millet Kıraathaneleri</span>
               </Link>
 
-              <Link className={`flex items-center gap-2 ${isScrolled ? 'text-gray-600 dark:text-gray-300' : 'text-white/90'} hover:text-primary transition-colors duration-300`} href="/features/donate">
+              <Link
+                className={`flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300`}
+                href="/features/donate"
+              >
                 <Heart className="h-5 w-5" />
                 <span>Bağış Yap</span>
               </Link>
-
-              <SearchForm isScrolled={isScrolled} />
             </nav>
-            
-            <div className="flex items-center gap-4 border-l border-gray-200/30 dark:border-gray-800/30 pl-6">
+
+            <div className="flex items-center gap-4 border-l border-border pl-6">
               <button
                 onClick={toggleTheme}
-                className={`${isScrolled ? 'text-gray-600 dark:text-gray-300' : 'text-white/90'} hover:text-primary transition-colors duration-300`}
+                className="text-muted-foreground hover:text-primary transition-colors duration-300"
                 aria-label="Tema değiştir"
               >
-                {theme === 'light' ? (
-                  <Moon className="h-5 w-5" />
-                ) : (
-                  <Sun className="h-5 w-5" />
-                )}
+                {theme === "light" ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
               </button>
-              
-              <Link 
-                className={`flex items-center gap-2 ${isScrolled ? 'text-gray-600 dark:text-gray-300' : 'text-white/90'} hover:text-primary transition-colors duration-300`}
-                href={currentUser ? `/features/profile/${currentUser.id}` : '/'}
+
+              <Link
+                className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300"
+                href={currentUser ? `/features/profile/${currentUser.id}` : "/"}
               >
                 <User className="h-5 w-5" />
-                <span>{currentUser?.username || 'Giriş Yap'}</span>
+                <span>{currentUser?.username || "Giriş Yap"}</span>
               </Link>
             </div>
           </div>
 
           {/* Mobile Navigation */}
           <div className="md:hidden flex items-center gap-4">
-            <div className="flex items-center gap-4">
-              <SearchForm isScrolled={true} />
-            </div>
-            
             <button
               onClick={toggleTheme}
-              className={`${isScrolled ? 'text-gray-600 dark:text-gray-300' : 'text-white/90'} hover:text-primary transition-colors duration-300`}
+              className="text-muted-foreground hover:text-primary transition-colors duration-300"
               aria-label="Tema değiştir"
             >
-              {theme === 'light' ? (
-                <Moon className="h-5 w-5" />
-              ) : (
-                <Sun className="h-5 w-5" />
-              )}
+              {theme === "light" ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
             </button>
           </div>
         </div>
