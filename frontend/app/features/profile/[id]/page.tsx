@@ -8,7 +8,6 @@ import {
   BookOpen,
   Camera,
   Calendar,
-  Star,
   MessageSquare,
   Quote,
   Zap,
@@ -43,7 +42,7 @@ import { FollowListModal } from "@/components/ui/follow/follow-list-modal"
 import { UserService } from "@/services/UserService"
 import { followService } from "@/services/followService"
 import { messageService, Message } from "@/services/messageService"
-import { bookService, Book, Review, Quote as BookQuote } from "@/services/bookService"
+import { bookService, Book } from "@/services/bookService"
 import { AddBookModal } from "@/components/ui/book/add-book-modal"
 import { bookEventEmitter } from '@/services/bookService'
 import { api } from '@/services/api'
@@ -99,8 +98,6 @@ export default function ProfilePage() {
   const [showUnfollowConfirm, setShowUnfollowConfirm] = useState(false)
   const [isFollowLoading, setIsFollowLoading] = useState(false)
   const [messages, setMessages] = useState<Message[]>([])
-  const [reviews, setReviews] = useState<Review[]>([])
-  const [quotes, setQuotes] = useState<BookQuote[]>([])
   const [showAddBookModal, setShowAddBookModal] = useState(false)
   const [showBooksModal, setShowBooksModal] = useState(false)
   const [selectedState, setSelectedState] = useState<string | null>(null)
@@ -920,7 +917,11 @@ export default function ProfilePage() {
 
                           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
                             {books
-                              .filter(book => !selectedState || book.status?.toUpperCase() === selectedState)
+                              .filter(book => {
+                                if (!selectedState) return true;
+                                const bookStatus = book.status?.toUpperCase();
+                                return bookStatus === selectedState;
+                              })
                               .map((book) => (
                                 <motion.div
                                   key={book.id}
@@ -943,7 +944,7 @@ export default function ProfilePage() {
                                     </div>
 
                                     {/* Status Badge */}
-                                    <StatusBadge status={book.status?.toUpperCase() as Book['status']} />
+                                    <StatusBadge status={book.status?.toUpperCase() as 'READING' | 'READ' | 'WILL_READ' | 'DROPPED' | null} />
                                   </div>
                                 </motion.div>
                               ))}
