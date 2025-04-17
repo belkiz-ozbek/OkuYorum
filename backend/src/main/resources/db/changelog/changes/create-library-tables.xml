@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.4.xsd">
+
+    <changeSet id="001" author="okuyorum">
+        <!-- Kitap Ödünç Alma Tablosu -->
+        <createTable tableName="book_lendings">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="book_id" type="bigint">
+                <constraints nullable="false" foreignKeyName="fk_lending_book" references="books(id)"/>
+            </column>
+            <column name="borrower_id" type="bigint">
+                <constraints nullable="false" foreignKeyName="fk_lending_user" references="users(id)"/>
+            </column>
+            <column name="lend_date" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="due_date" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="return_date" type="timestamp"/>
+            <column name="status" type="varchar(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <!-- Kitap Değerlendirme Tablosu -->
+        <createTable tableName="book_feedbacks">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="book_id" type="bigint">
+                <constraints nullable="false" foreignKeyName="fk_feedback_book" references="books(id)"/>
+            </column>
+            <column name="user_id" type="bigint">
+                <constraints nullable="false" foreignKeyName="fk_feedback_user" references="users(id)"/>
+            </column>
+            <column name="rating" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="comment" type="varchar(1000)"/>
+            <column name="created_at" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <!-- İndeksler -->
+        <createIndex indexName="idx_lending_book" tableName="book_lendings">
+            <column name="book_id"/>
+        </createIndex>
+        <createIndex indexName="idx_lending_borrower" tableName="book_lendings">
+            <column name="borrower_id"/>
+        </createIndex>
+        <createIndex indexName="idx_lending_status" tableName="book_lendings">
+            <column name="status"/>
+        </createIndex>
+        <createIndex indexName="idx_feedback_book" tableName="book_feedbacks">
+            <column name="book_id"/>
+        </createIndex>
+        <createIndex indexName="idx_feedback_user" tableName="book_feedbacks">
+            <column name="user_id"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog> 

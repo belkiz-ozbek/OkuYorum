@@ -42,4 +42,8 @@ public class UserService {
         }
         return userRepository.findByUsernameStartingWithIgnoreCaseOrNameSurnameStartingWithIgnoreCaseOrderById(query.trim());
     }
+
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
 } 
