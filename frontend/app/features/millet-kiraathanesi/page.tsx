@@ -6,10 +6,12 @@ import { Card } from '@/components/ui/Card';
 import { SearchForm } from "@/components/ui/form/search-form";
 import { useState, useEffect } from 'react';
 import { BookOpen, Moon, Sun, Library, Compass, Users, Heart, User } from 'lucide-react';
+import { UserService } from "@/services/UserService";
 
 export default function MilletKiraathanesi() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const [currentUser, setCurrentUser] = useState<{ id: number; username: string } | null>(null);
 
   useEffect(() => {
     if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
@@ -22,7 +24,18 @@ export default function MilletKiraathanesi() {
       setIsScrolled(scrollPosition > 50);
     };
 
+    const loadUserInfo = async () => {
+      try {
+        const response = await UserService.getCurrentUser();
+        setCurrentUser(response.data);
+      } catch (error) {
+        console.error('Error loading user info:', error);
+      }
+    };
+
     window.addEventListener('scroll', handleScroll);
+    loadUserInfo();
+    
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -69,7 +82,7 @@ export default function MilletKiraathanesi() {
                 <span>Millet Kıraathaneleri</span>
               </Link>
 
-              <Link className={`flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300`} href="/features/donate">
+              <Link className={`flex items-center gap-2 ${isScrolled ? 'text-gray-600 dark:text-gray-300' : 'text-white/90'} hover:text-primary transition-colors duration-300`} href="/features/donate">
                 <Heart className="h-5 w-5" />
                 <span>Bağış Yap</span>
               </Link>
@@ -92,10 +105,10 @@ export default function MilletKiraathanesi() {
               
               <Link 
                 className={`flex items-center gap-2 ${isScrolled ? 'text-gray-600 dark:text-gray-300' : 'text-white/90'} hover:text-primary transition-colors duration-300`}
-                href="/features/profile"
+                href={currentUser ? `/features/profile/${currentUser.id}` : '/'}
               >
                 <User className="h-5 w-5" />
-                <span>Profil</span>
+                <span>{currentUser?.username || 'Giriş Yap'}</span>
               </Link>
             </div>
           </div>

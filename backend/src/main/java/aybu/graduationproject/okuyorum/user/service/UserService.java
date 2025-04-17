@@ -3,6 +3,8 @@ package aybu.graduationproject.okuyorum.user.service;
 import aybu.graduationproject.okuyorum.user.entity.User;
 import aybu.graduationproject.okuyorum.user.repository.UserRepository;
 import aybu.graduationproject.okuyorum.user.enums.Role;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -43,7 +45,18 @@ public class UserService {
         return userRepository.findByUsernameStartingWithIgnoreCaseOrNameSurnameStartingWithIgnoreCaseOrderById(query.trim());
     }
 
+    public Long getUserIdByUsername(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"))
+                .getId();
+    }
+
+    public User getUserById(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+    }
+
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
-} 
+}

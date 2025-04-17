@@ -1,20 +1,25 @@
 package aybu.graduationproject.okuyorum.user.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "user_followings")
+@Table(name = "user_followings",
+       uniqueConstraints = {
+           @UniqueConstraint(columnNames = {"follower_id", "following_id"})
+       })
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class UserFollowing {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "follower_id", nullable = false)
     private User follower;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "following_id", nullable = false)
     private User following;
 

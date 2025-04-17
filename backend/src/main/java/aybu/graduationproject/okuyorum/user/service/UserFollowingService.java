@@ -41,8 +41,8 @@ public class UserFollowingService {
         userFollowingRepository.save(userFollowing);
 
         // Takipçi ve takip edilen sayılarını güncelle
-        follower.setFollowing(follower.getFollowing() + 1);
-        following.setFollowers(following.getFollowers() + 1);
+        follower.setFollowing(follower.getFollowing() == null ? 1 : follower.getFollowing() + 1);
+        following.setFollowers(following.getFollowers() == null ? 1 : following.getFollowers() + 1);
         
         userRepository.save(follower);
         userRepository.save(following);
@@ -63,8 +63,8 @@ public class UserFollowingService {
         userFollowingRepository.deleteByFollowerAndFollowing(follower, following);
 
         // Takipçi ve takip edilen sayılarını güncelle
-        follower.setFollowing(follower.getFollowing() - 1);
-        following.setFollowers(following.getFollowers() - 1);
+        follower.setFollowing(follower.getFollowing() == null ? 0 : Math.max(0, follower.getFollowing() - 1));
+        following.setFollowers(following.getFollowers() == null ? 0 : Math.max(0, following.getFollowers() - 1));
         
         userRepository.save(follower);
         userRepository.save(following);
@@ -77,6 +77,11 @@ public class UserFollowingService {
         return userFollowingRepository.findByFollowing(user)
                 .stream()
                 .map(UserFollowing::getFollower)
+                .map(follower -> {
+                    User loadedFollower = userRepository.findById(follower.getId()).orElse(follower);
+                    loadedFollower.setPassword(null); // Güvenlik için şifreyi temizle
+                    return loadedFollower;
+                })
                 .toList();
     }
 
@@ -87,6 +92,11 @@ public class UserFollowingService {
         return userFollowingRepository.findByFollower(user)
                 .stream()
                 .map(UserFollowing::getFollowing)
+                .map(following -> {
+                    User loadedFollowing = userRepository.findById(following.getId()).orElse(following);
+                    loadedFollowing.setPassword(null); // Güvenlik için şifreyi temizle
+                    return loadedFollowing;
+                })
                 .toList();
     }
 

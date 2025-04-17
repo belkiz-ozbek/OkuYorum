@@ -40,6 +40,7 @@ import {Label} from "@/components/ui/form/label";
 import {Input} from "@/components/ui/form/input";
 import {SearchForm} from "@/components/ui/form/search-form"
 import {Compass, Heart} from "lucide-react"
+import { UserService } from "@/services/UserService"
 
 type DonationType = "schools" | "libraries" | "individual"
 type BookCondition = "new" | "likeNew" | "used" | "old"
@@ -246,12 +247,12 @@ export default function DonatePage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { errors, setErrors, validateBookInfo, validateRecipientInfo, clearErrors } = useFormValidation()
   const [isPageLoading, setIsPageLoading] = useState(true)
+  const [currentUser, setCurrentUser] = useState<{ id: number; username: string } | null>(null)
 
   const { toast } = useToast()
   const router = useRouter()
 
   useEffect(() => {
-    // Sistem dark mode tercihini kontrol et
     if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
       setTheme('dark')
       document.documentElement.setAttribute('data-theme', 'dark')
@@ -262,7 +263,20 @@ export default function DonatePage() {
       setIsScrolled(scrollPosition > 50)
     }
 
+    const loadUserInfo = async () => {
+      try {
+        const userInfo = await UserService.getCurrentUser()
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-expect-error
+        setCurrentUser(userInfo)
+      } catch (error) {
+        console.error('Error loading user info:', error)
+      }
+    }
+
     window.addEventListener('scroll', handleScroll)
+    loadUserInfo()
+    
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
@@ -445,6 +459,7 @@ export default function DonatePage() {
             <div 
               className={cn(
                 "group relative overflow-hidden rounded-2xl transition-all duration-500 ease-out cursor-pointer",
+                "bg-white hover:shadow-xl transform hover:-translate-y-1",
                 "bg-white hover:shadow-xl transform hover:-translate-y-1",
                 donationType === "schools" ? "ring-2 ring-purple-500" : "hover:ring-2 hover:ring-purple-200"
               )}
@@ -996,6 +1011,7 @@ export default function DonatePage() {
                             </div>
                           )}
                           
+                          
                           <div className="flex items-center justify-between pt-2 border-t border-gray-100">
                             <span className="text-sm text-gray-500">Adres</span>
                             <span className="font-medium">{address}</span>
@@ -1135,10 +1151,10 @@ export default function DonatePage() {
               
               <Link 
                 className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300"
-                href="/features/profile"
+                href={`/features/profile/${currentUser?.id || ''}`}
               >
                 <User className="h-5 w-5" />
-                <span>Profil</span>
+                <span>{currentUser?.username || 'Profil'}</span>
               </Link>
             </div>
           </div>

@@ -6,6 +6,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "books")
@@ -46,6 +48,13 @@ public class Book {
     
     @Column(name = "page_count")
     private Integer pageCount;
+
+    public enum ReadingStatus {
+        READING,
+        READ,
+        WILL_READ,
+        DROPPED
+    }
 
     @Column(name = "pathname", nullable = false)
     private String pathname;
@@ -138,4 +147,4 @@ public class Book {
     public void setPathname(String pathname) {
         this.pathname = pathname;
     }
-} 
+}

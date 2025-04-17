@@ -1,6 +1,6 @@
 "use client"
 import { motion } from "framer-motion"
-import { Users, BookOpen, MessageSquare, ArrowRight } from "lucide-react"
+import { Users, BookOpen, MessageSquare} from "lucide-react"
 import { Button } from "@/components/ui/form/button"
 
 export function ReadingGroups() {

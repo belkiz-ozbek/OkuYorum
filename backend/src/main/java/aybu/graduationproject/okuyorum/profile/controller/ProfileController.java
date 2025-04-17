@@ -80,4 +80,19 @@ public class ProfileController {
         User user = (User) auth.getPrincipal();
         return ResponseEntity.ok(profileService.updateHeaderImage(user.getId(), file));
     }
+
+    @GetMapping("/{userId}")
+    public ResponseEntity<User> getUserProfileById(@PathVariable Long userId) {
+        return ResponseEntity.ok(profileService.getUserProfile(userId));
+    }
+
+    @GetMapping("/{userId}/achievements")
+    public ResponseEntity<List<Achievement>> getUserAchievementsById(@PathVariable Long userId) {
+        return ResponseEntity.ok(profileService.getUserAchievements(userId));
+    }
+
+    @GetMapping("/{userId}/reading-activity")
+    public ResponseEntity<List<ReadingActivity>> getUserReadingActivityById(@PathVariable Long userId) {
+        return ResponseEntity.ok(profileService.getUserReadingActivity(userId));
+    }
 } 

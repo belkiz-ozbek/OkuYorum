@@ -3,14 +3,13 @@ import React, { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { Input } from "@/components/ui/form/input"
 import { Search } from 'lucide-react'
-import Link from 'next/link'
 import { Card } from "../layout/Card"
 import { Avatar, AvatarFallback, AvatarImage } from "../layout/avatar"
 import { BaseUser } from "@/services/profileService"
 import {searchService} from "@/services/searchService";
 
 interface Book {
-    id: string;
+    id: number;
     title: string;
     author: string;
     imageUrl?: string;
@@ -75,6 +74,16 @@ export function SearchForm({ isScrolled = false }: SearchFormProps) {
         }
     }
 
+    const handleUserClick = (userId: number) => {
+        setShowResults(false)
+        router.push(`/features/profile/${userId}`)
+    }
+
+    const handleBookClick = (bookId: number) => {
+        setShowResults(false)
+        router.push(`/features/book/${bookId}`)
+    }
+
     return (
         <div ref={searchRef} className="relative w-full max-w-md">
             <form onSubmit={handleSubmit} className="relative">
@@ -106,12 +115,11 @@ export function SearchForm({ isScrolled = false }: SearchFormProps) {
                                 <div className="mb-4">
                                     <h3 className="text-sm font-medium text-muted-foreground mb-2 px-2">Kitaplar</h3>
                                     <div className="space-y-1">
-                                        {books.map((book: Book) => (
-                                            <Link
+                                        {books.map((book) => (
+                                            <button
                                                 key={book.id}
-                                                href={`/features/books/${book.id}`}
-                                                className="flex items-center gap-3 p-2 hover:bg-muted rounded-lg transition-colors"
-                                                onClick={() => setShowResults(false)}
+                                                onClick={() => handleBookClick(book.id)}
+                                                className="w-full flex items-center gap-3 p-2 hover:bg-muted rounded-lg transition-colors text-left"
                                             >
                                                 <div className="relative h-12 w-8 flex-shrink-0">
                                                     <img
@@ -124,7 +132,7 @@ export function SearchForm({ isScrolled = false }: SearchFormProps) {
                                                     <div className="font-medium">{book.title}</div>
                                                     <div className="text-sm text-muted-foreground">{book.author}</div>
                                                 </div>
-                                            </Link>
+                                            </button>
                                         ))}
                                     </div>
                                 </div>
@@ -135,11 +143,10 @@ export function SearchForm({ isScrolled = false }: SearchFormProps) {
                                     <h3 className="text-sm font-medium text-muted-foreground mb-2 px-2">Kullanıcılar</h3>
                                     <div className="space-y-1">
                                         {users.map((user) => (
-                                            <Link
+                                            <button
                                                 key={user.id}
-                                                href={`/features/profile/${user.id}`}
-                                                className="flex items-center gap-3 p-2 hover:bg-muted rounded-lg transition-colors"
-                                                onClick={() => setShowResults(false)}
+                                                onClick={() => handleUserClick(user.id)}
+                                                className="w-full flex items-center gap-3 p-2 hover:bg-muted rounded-lg transition-colors text-left"
                                             >
                                                 <Avatar className="h-8 w-8">
                                                     <AvatarImage src={user.profileImage || undefined} alt={user.nameSurname} />
@@ -149,7 +156,7 @@ export function SearchForm({ isScrolled = false }: SearchFormProps) {
                                                     <div className="font-medium">{user.nameSurname}</div>
                                                     <div className="text-sm text-muted-foreground">@{user.username}</div>
                                                 </div>
-                                            </Link>
+                                            </button>
                                         ))}
                                     </div>
                                 </div>

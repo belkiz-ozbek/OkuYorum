@@ -6,27 +6,8 @@ import Image from 'next/image'
 import { useEffect, useState } from 'react'
 import { use } from 'react'
 import { Button } from "@/components/ui/form/button"
-
-type Book = {
-    id: number;
-    title: string;
-    author: string;
-    summary: string;
-    imageUrl?: string;
-    publishedDate?: string;
-    pageCount?: number;
-    rating?: number;
-    ratingCount?: number;
-    readCount?: number;
-    reviewCount?: number;
-    categories?: string[];
-    language?: string;
-    publisher?: string;
-    isbn?: string;
-    firstPublishDate?: string;
-    popularity?: number;
-    weeklyReaders?: number;
-}
+import { Book } from "@/types/book"
+import { toast } from "@/components/ui/feedback/use-toast"
 
 type PageProps = {
     params: Promise<{ id: string }>
@@ -37,6 +18,7 @@ export default function BookPage({ params }: PageProps) {
     const [book, setBook] = useState<Book | null>(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
+    const [updatingStatus, setUpdatingStatus] = useState(false)
 
     useEffect(() => {
         const fetchBook = async () => {
@@ -57,7 +39,10 @@ export default function BookPage({ params }: PageProps) {
                 }
 
                 const data = await response.json()
-                setBook(data)
+                setBook({
+                    ...data,
+                    id: Number(data.id)
+                })
             } catch (err) {
                 setError(err instanceof Error ? err.message : 'Bir hata oluştu')
             } finally {
@@ -67,6 +52,45 @@ export default function BookPage({ params }: PageProps) {
 
         fetchBook()
     }, [resolvedParams.id])
+
+    const handleStatusChange = async (newStatus: Book['status']) => {
+        if (!book) return
+
+        try {
+            setUpdatingStatus(true)
+            const token = localStorage.getItem('token')
+            if (!token) {
+                throw new Error('Oturum bulunamadı')
+            }
+
+            const response = await fetch(`http://localhost:8080/api/books/${book.id}/status`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ status: newStatus })
+            })
+
+            if (!response.ok) {
+                throw new Error('Okuma durumu güncellenemedi')
+            }
+
+            setBook(prev => prev ? { ...prev, status: newStatus } : null)
+            toast({
+                title: "Başarılı!",
+                description: "Okuma durumu güncellendi.",
+            })
+        } catch (err) {
+            toast({
+                title: "Hata!",
+                description: err instanceof Error ? err.message : 'Okuma durumu güncellenirken bir hata oluştu',
+                variant: "destructive",
+            })
+        } finally {
+            setUpdatingStatus(false)
+        }
+    }
 
     if (loading) {
         return (
@@ -224,13 +248,15 @@ export default function BookPage({ params }: PageProps) {
                                         className="w-full p-4 rounded-2xl border border-gray-100 bg-white/80 text-gray-600
                       cursor-pointer hover:border-purple-200 transition-colors duration-300
                       focus:outline-none focus:ring-2 focus:ring-purple-100"
-                                        defaultValue=""
+                                        value={book.status || ''}
+                                        onChange={(e) => handleStatusChange(e.target.value === '' ? null : e.target.value as Book['status'])}
+                                        disabled={updatingStatus}
                                     >
-                                        <option value="" disabled>📚 Okuma Durumu</option>
-                                        <option value="reading">📖 Okuyorum</option>
-                                        <option value="will-read">🔖 Okuyacağım</option>
-                                        <option value="finished">✅ Okudum</option>
-                                        <option value="dropped">⏸️ Yarım Bıraktım</option>
+                                        <option value="">📚 Durum Yok</option>
+                                        <option value="READING">📖 Okuyorum</option>
+                                        <option value="WILL_READ">🔖 Okuyacağım</option>
+                                        <option value="READ">✅ Okudum</option>
+                                        <option value="DROPPED">⏸️ Yarım Bıraktım</option>
                                     </select>
                                 </div>
                             </div>
