@@ -47,7 +47,6 @@ import { bookEventEmitter } from '@/services/bookService'
 import { api } from '@/services/api'
 import StatusBadge from "@/components/ui/book/StatusBadge"
 import { quoteService, Quote as QuoteType } from "@/services/quoteService"
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { postService, Post } from "@/services/postService"
 
 const initialProfile: UserProfile = {
@@ -113,6 +112,8 @@ const usePosts = (
 // --- Düzenleme ve Silme için ek state'ler ---
 
 export default function ProfilePage() {
+
+
   // ... mevcut stateler ...
   const [editingPostId, setEditingPostId] = useState<number | null>(null);
   const [editTitle, setEditTitle] = useState("");
@@ -189,41 +190,32 @@ export default function ProfilePage() {
 
   const { fetchPosts } = usePosts(params, toast, setPosts, router);
 
+  // PROFİL İLETİLERİNİ HER ZAMAN YÜKLE
+  useEffect(() => {
+    fetchPosts();
+  }, [fetchPosts]);
+
   useEffect(() => {
     const fetchProfile = async () => {
       try {
         const token = localStorage.getItem('token')
         if (!token) {
-          router.push('/')
-          return
+          // Token yoksa sadece public verileri getir
+          const profileData = await profileService.getUserProfile(params.id.toString());
+          setProfile(profileData);
+          return;
         }
 
-        // Kendi ID'mizi kontrol ediyoruz
-        const currentUserResponse = await UserService.getCurrentUser();
-        if (!currentUserResponse.data) {
-          localStorage.removeItem('token')
-          router.push('/')
-          return
-        }
-        // Kendi profilimiz için de profileService.getUserProfile kullanıyoruz
-        // Bu şekilde tüm profil bilgilerini alabiliriz
-        if (!params.id) {
-          throw new Error('Kullanıcı ID\'si bulunamadı');
-        }
-        
-        const profileData = await profileService.getUserProfile(params.id.toString());
-        setProfile(profileData);
-        
-        // Diğer verileri de çekelim
-        const [achievementsData, readingActivityData, booksData] = await Promise.all([
+        // Token varsa tüm verileri getir
+        const [profileData, achievementsData, readingActivityData] = await Promise.all([
+          profileService.getUserProfile(params.id.toString()),
           profileService.getUserAchievements(params.id.toString()),
-          profileService.getUserReadingActivity(params.id.toString()),
-          bookService.getBooks(params.id.toString())
+          profileService.getUserReadingActivity(params.id.toString())
         ]);
-        
+
+        setProfile(profileData);
         setAchievements(achievementsData);
         setReadingActivity(readingActivityData);
-        setBooks(booksData);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Bir hata oluştu')
       } finally {
@@ -234,47 +226,33 @@ export default function ProfilePage() {
     const fetchBooks = async () => {
       try {
         if (!params.id) return;
-        
-        const token = localStorage.getItem('token');
-        if (!token) {
-          throw new Error('Oturum bulunamadı');
-        }
-
         const booksData = await bookService.getBooks(params.id.toString());
-        console.log('Fetched books with status:', booksData.map(book => ({
-          title: book.title,
-          status: book.status,
-          rawStatus: book.status
-        })));
         setBooks(booksData);
       } catch (err) {
         console.error('Kitaplar yüklenirken hata:', err);
-        toast({
-          title: "Hata",
-          description: "Kitap bilgileri yüklenirken bir hata oluştu.",
-          variant: "destructive"
-        });
+      }
+    };
+
+    const fetchQuotes = async () => {
+      try {
+        if (!params.id) return;
+        const quotesData = await quoteService.getQuotesByUser(params.id.toString());
+        setQuotes(quotesData);
+      } catch (err) {
+        console.error('Alıntılar yüklenirken hata:', err);
       }
     };
 
     const loadData = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-          router.push('/');
-          return;
-        }
-
-        await fetchProfile();
-        await fetchBooks();
-        await fetchPosts();
-      } catch (error) {
-        console.error('Error loading data:', error);
-      }
+      await Promise.all([
+        fetchProfile(),
+        fetchBooks(),
+        fetchQuotes()
+      ]);
     };
 
     loadData();
-  }, [params.id, fetchPosts]);
+  }, [params.id]);
 
   useEffect(() => {
     const loadUserInfo = async () => {
@@ -375,31 +353,6 @@ export default function ProfilePage() {
       bookEventEmitter.off('bookStatusUpdated', handleProfileUpdate);
     };
   }, [params.id]);
-
-  useEffect(() => {
-    const fetchQuotes = async () => {
-      try {
-        if (!params.id) return;
-        
-        const token = localStorage.getItem('token');
-        if (!token) {
-          throw new Error('Oturum bulunamadı');
-        }
-
-        const quotesData = await quoteService.getQuotesByUser(params.id.toString());
-        setQuotes(quotesData);
-      } catch (error) {
-        console.error('Alıntılar yüklenirken hata:', error);
-        toast({
-          title: "Hata",
-          description: "Alıntılar yüklenirken bir hata oluştu.",
-          variant: "destructive"
-        });
-      }
-    };
-
-    fetchQuotes();
-  }, [params.id, toast]);
 
   useEffect(() => {
     // Sistem dark mode tercihini kontrol et
@@ -1025,13 +978,12 @@ export default function ProfilePage() {
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
                 <Card className="overflow-hidden border-none bg-white/70 backdrop-blur-sm shadow-md">
                   <Tabs defaultValue="books" className="w-full">
-                    <TabsList className="grid w-full grid-cols-6">
+                    <TabsList className="grid w-full grid-cols-5">
                       <TabsTrigger value="books">Kitaplar</TabsTrigger>
                       <TabsTrigger value="wall">Duvar</TabsTrigger>
                       <TabsTrigger value="quotes">Alıntılar</TabsTrigger>
                       <TabsTrigger value="reviews">İncelemeler</TabsTrigger>
                       <TabsTrigger value="posts">İletiler</TabsTrigger>
-                      <TabsTrigger value="messages">Mesajlar</TabsTrigger>
                     </TabsList>
 
                     <TabsContent value="books" className="p-6">
@@ -1226,77 +1178,73 @@ export default function ProfilePage() {
                           </CardContent>
                         </Card>
                       )}
-                      
-                      <div className="space-y-4">
+                      <div className="space-y-6">
                         {posts.map((post) => (
                           <Card key={post.id} className="relative shadow-md hover:shadow-lg transition-shadow rounded-xl border border-gray-100">
-                            <CardContent className="p-4">
-                              <div className="flex items-start gap-4">
-                                <Avatar>
-                                  <AvatarImage src={post.profileImage || undefined} />
-                                  <AvatarFallback>{(post.nameSurname && post.nameSurname.length > 0) ? post.nameSurname[0].toUpperCase() : "?"}</AvatarFallback>
-                                </Avatar>
-                                <div className="flex-1">
+                            <CardContent className="p-6">
+                              <div className="space-y-4">
+                                <div className="flex items-center justify-between gap-2">
+                                  <h3 className="text-lg font-medium">{post.title}</h3>
                                   <div className="flex items-center gap-2">
-                                    <span className="font-semibold">{post.nameSurname}</span>
-                                    <span className="text-sm text-gray-500">@{post.username}</span>
-                                    <span className="text-sm text-gray-500">
-                                      {formatDate(post.createdAt)}
-                                    </span>
-                                  </div>
-                                  {/* BAŞLIK GÖSTERİMİ */}
-                                  <div className="mt-2 mb-1">
-                                    <span className="text-lg font-bold text-purple-800">{post.title}</span>
-                                  </div>
-                                  {/* DÜZENLEME MODU */}
-                                  {editingPostId === post.id ? (
-                                    <div className="flex flex-col gap-2">
-                                      <Input
-                                        value={editTitle}
-                                        onChange={e => setEditTitle(e.target.value)}
-                                        placeholder="Başlık"
-                                        maxLength={100}
-                                      />
-                                      <Input
-                                        value={editContent}
-                                        onChange={e => setEditContent(e.target.value)}
-                                        placeholder="İçerik"
-                                        maxLength={500}
-                                      />
-                                      <div className="flex gap-2 mt-1">
-                                        <Button size="sm" onClick={() => handleUpdatePost(post.id)} className="bg-purple-600 text-white">Kaydet</Button>
-                                        <Button size="sm" variant="outline" onClick={handleCancelEdit}>İptal</Button>
+                                    <span className="text-sm text-gray-500">{formatDate(post.createdAt)}</span>
+                                    {currentUser && currentUser.id === profile.id && (
+                                      <div className="relative">
+                                        <button
+                                          className="p-1 rounded-full hover:bg-gray-100 transition"
+                                          onClick={() => setMenuOpenId(menuOpenId === post.id ? null : post.id)}
+                                          aria-label="İşlemler"
+                                        >
+                                          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <circle cx="4" cy="10" r="1.5" fill="#888" />
+                                            <circle cx="10" cy="10" r="1.5" fill="#888" />
+                                            <circle cx="16" cy="10" r="1.5" fill="#888" />
+                                          </svg>
+                                        </button>
+                                        {menuOpenId === post.id && (
+                                          <div className="absolute right-0 mt-2 w-32 bg-white rounded-lg shadow-lg border z-20 animate-fadeIn">
+                                            <button
+                                              className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                              onClick={() => {
+                                                setMenuOpenId(null);
+                                                handleEditPost(post);
+                                              }}
+                                            >Düzenle</button>
+                                            <button
+                                              className="block w-full text-left px-4 py-2 hover:bg-red-50 text-sm text-red-600"
+                                              onClick={() => {
+                                                setMenuOpenId(null);
+                                                setDeleteConfirmId(post.id);
+                                              }}
+                                            >Sil</button>
+                                          </div>
+                                        )}
                                       </div>
-                                    </div>
-                                  ) : (
-                                    <>
-                                      <p className="mt-1 mb-2">{post.content}</p>
-                                      {/* 3 NOKTA MENÜ */}
-                                      {currentUser && post.userId === currentUser.id && (
-                                        <div className="absolute top-3 right-3 z-10">
-                                          <button
-                                            onClick={() => setMenuOpenId(menuOpenId === post.id ? null : post.id)}
-                                            className="rounded-full p-2 hover:bg-gray-100 focus:outline-none transition"
-                                          >
-                                            <span className="text-2xl">⋮</span>
-                                          </button>
-                                          {menuOpenId === post.id && (
-                                            <div className="absolute right-0 mt-2 w-32 bg-white rounded-lg shadow-lg border border-gray-100 animate-fade-in z-20">
-                                              <button
-                                                className="block w-full text-left px-4 py-2 hover:bg-purple-50 text-sm"
-                                                onClick={() => { setMenuOpenId(null); handleEditPost(post); }}
-                                              >Düzenle</button>
-                                              <button
-                                                className="block w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 text-sm"
-                                                onClick={() => { setMenuOpenId(null); setDeleteConfirmId(post.id); }}
-                                              >Sil</button>
-                                            </div>
-                                          )}
-                                        </div>
-                                      )}
-                                    </>
-                                  )}
+                                    )}
+                                  </div>
                                 </div>
+                                {editingPostId === post.id ? (
+                                  <div className="space-y-2">
+                                    <Input
+                                      value={editTitle}
+                                      onChange={e => setEditTitle(e.target.value)}
+                                      maxLength={100}
+                                      className="mb-2"
+                                      placeholder="Başlık"
+                                    />
+                                    <Input
+                                      value={editContent}
+                                      onChange={e => setEditContent(e.target.value)}
+                                      maxLength={500}
+                                      placeholder="İleti içeriği"
+                                    />
+                                    <div className="flex gap-2 mt-2">
+                                      <Button size="sm" onClick={() => handleUpdatePost(post.id)} className="bg-purple-600 hover:bg-purple-700 text-white">Kaydet</Button>
+                                      <Button size="sm" variant="outline" onClick={handleCancelEdit}>İptal</Button>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <p className="text-gray-700 whitespace-pre-line">{post.content}</p>
+                                )}
                               </div>
                             </CardContent>
                           </Card>
@@ -1307,19 +1255,6 @@ export default function ProfilePage() {
                             <p className="text-gray-500">Henüz ileti paylaşılmamış.</p>
                           </div>
                         )}
-                      </div>
-                    </TabsContent>
-
-                    <TabsContent value="messages" className="p-6">
-                      <div className="space-y-6">
-                        {/* Mesajlar sekmesi içeriği */}
-                        <div className="text-center py-12">
-                          <div className="bg-purple-50 rounded-full p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                            <MessageSquare className="h-8 w-8 text-purple-500" />
-                          </div>
-                          <h3 className="text-lg font-medium text-gray-900 mb-2">Mesajlar</h3>
-                          <p className="text-gray-500">Mesajlarınızı görüntülemek için mesajlar sayfasına gidin.</p>
-                        </div>
                       </div>
                     </TabsContent>
                   </Tabs>

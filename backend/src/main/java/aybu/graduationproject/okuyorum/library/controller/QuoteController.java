@@ -1,63 +1,68 @@
 package aybu.graduationproject.okuyorum.library.controller;
 
-import aybu.graduationproject.okuyorum.library.entity.Quote;
+import aybu.graduationproject.okuyorum.library.dto.CreateQuoteRequest;
+import aybu.graduationproject.okuyorum.library.dto.QuoteDTO;
 import aybu.graduationproject.okuyorum.library.service.QuoteService;
-import org.springframework.beans.factory.annotation.Autowired;
+import aybu.graduationproject.okuyorum.user.service.UserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/quotes")
-@CrossOrigin(origins = "*")
+@RequiredArgsConstructor
 public class QuoteController {
     private final QuoteService quoteService;
-
-    @Autowired
-    public QuoteController(QuoteService quoteService) {
-        this.quoteService = quoteService;
-    }
+    private final UserService userService;
 
     @PostMapping
-    @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<Quote> createQuote(@RequestBody Quote quote) {
-        return ResponseEntity.ok(quoteService.createQuote(quote));
-    }
-
-    @PutMapping("/{id}")
-    @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<Quote> updateQuote(@PathVariable Long id, @RequestBody Quote quote) {
-        return ResponseEntity.ok(quoteService.updateQuote(id, quote));
-    }
-
-    @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<Void> deleteQuote(@PathVariable Long id) {
-        quoteService.deleteQuote(id);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<QuoteDTO> createQuote(
+            @RequestBody CreateQuoteRequest request,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        Long userId = userService.findUserIdByUsername(userDetails.getUsername());
+        return ResponseEntity.ok(quoteService.createQuote(request, userId));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Quote> getQuote(@PathVariable Long id) {
+    public ResponseEntity<QuoteDTO> getQuote(@PathVariable Long id) {
         return ResponseEntity.ok(quoteService.getQuote(id));
     }
 
+    @GetMapping("/user")
+    public ResponseEntity<List<QuoteDTO>> getUserQuotes(
+            @AuthenticationPrincipal UserDetails userDetails) {
+        Long userId = userService.findUserIdByUsername(userDetails.getUsername());
+        return ResponseEntity.ok(quoteService.getUserQuotes(userId));
+    }
+
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<Quote>> getQuotesByUser(@PathVariable Long userId) {
-        return ResponseEntity.ok(quoteService.getQuotesByUser(userId));
+    public ResponseEntity<List<QuoteDTO>> getQuotesByUser(@PathVariable Long userId) {
+        return ResponseEntity.ok(quoteService.getUserQuotes(userId));
     }
 
     @GetMapping("/book/{bookId}")
-    public ResponseEntity<List<Quote>> getQuotesByBook(@PathVariable Long bookId) {
-        return ResponseEntity.ok(quoteService.getQuotesByBook(bookId));
+    public ResponseEntity<List<QuoteDTO>> getBookQuotes(@PathVariable Long bookId) {
+        return ResponseEntity.ok(quoteService.getBookQuotes(bookId));
     }
 
-    @GetMapping("/user/{userId}/book/{bookId}")
-    public ResponseEntity<List<Quote>> getQuotesByUserAndBook(
-            @PathVariable Long userId,
-            @PathVariable Long bookId) {
-        return ResponseEntity.ok(quoteService.getQuotesByUserAndBook(userId, bookId));
+    @GetMapping("/user/book/{bookId}")
+    public ResponseEntity<List<QuoteDTO>> getUserBookQuotes(
+            @PathVariable Long bookId,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        Long userId = userService.findUserIdByUsername(userDetails.getUsername());
+        return ResponseEntity.ok(quoteService.getUserBookQuotes(userId, bookId));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteQuote(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        Long userId = userService.findUserIdByUsername(userDetails.getUsername());
+        quoteService.deleteQuote(id, userId);
+        return ResponseEntity.ok().build();
     }
 } 

@@ -8,6 +8,9 @@ import { use } from 'react'
 import { Button } from "@/components/ui/form/button"
 import { Book } from "@/types/book"
 import { toast } from "@/components/ui/feedback/use-toast"
+import { AddQuoteModal } from "@/components/ui/quote/add-quote-modal"
+import { Quote as QuoteType } from "@/types/quote"
+import { quoteService } from "@/services/quoteService"
 
 type PageProps = {
     params: Promise<{ id: string }>
@@ -19,6 +22,7 @@ export default function BookPage({ params }: PageProps) {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
     const [updatingStatus, setUpdatingStatus] = useState(false)
+    const [quotes, setQuotes] = useState<QuoteType[]>([])
 
     useEffect(() => {
         const fetchBook = async () => {
@@ -91,6 +95,24 @@ export default function BookPage({ params }: PageProps) {
             setUpdatingStatus(false)
         }
     }
+
+    const handleQuoteAdded = (newQuote: QuoteType) => {
+        setQuotes(prev => [newQuote, ...prev]);
+    };
+
+    useEffect(() => {
+        const fetchQuotes = async () => {
+            try {
+                if (!book) return;
+                const bookQuotes = await quoteService.getBookQuotes(book.id);
+                setQuotes(bookQuotes);
+            } catch (error) {
+                console.error('Alıntılar yüklenirken hata:', error);
+            }
+        };
+
+        fetchQuotes();
+    }, [book]);
 
     if (loading) {
         return (
@@ -333,45 +355,38 @@ export default function BookPage({ params }: PageProps) {
                                 </p>
                             </div>
 
-                            <div className="border-t border-gray-100 pt-8 mt-8">
-                                <h3 className="text-2xl font-semibold mb-6 text-gray-900">Alıntılar</h3>
-                                <div className="space-y-4">
-                                    <div className="bg-purple-50 p-6 rounded-lg border border-purple-100">
-                                        <Quote className="h-8 w-8 text-purple-600 mb-4" />
-                                        <p className="text-gray-700 italic text-lg mb-4">
-                                            Henüz alıntı eklenmemiş. İlk alıntıyı siz ekleyin!
-                                        </p>
-                                        <Button variant="outline" className="text-purple-600 border-purple-600">
-                                            Alıntı Ekle
-                                        </Button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Son İncelemeler */}
-                            <div className="border-t border-gray-100 pt-8 mt-8">
+                            {/* Alıntılar Bölümü */}
+                            <div className="mt-8">
                                 <div className="flex items-center justify-between mb-6">
-                                    <h3 className="text-2xl font-semibold text-gray-900">Son İncelemeler</h3>
-                                    <Button variant="link" className="text-purple-600">
-                                        Tümünü Gör
-                                    </Button>
+                                    <h2 className="text-xl font-semibold text-gray-800">Alıntılar</h2>
+                                    <AddQuoteModal bookId={book.id} onQuoteAdded={handleQuoteAdded} />
                                 </div>
-                                <div className="space-y-6">
-                                    <div className="bg-gray-50 rounded-lg p-6">
-                                        <div className="flex items-center gap-4 mb-4">
-                                            <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
-                                                <Users className="w-6 h-6 text-purple-600" />
-                                            </div>
-                                            <div>
-                                                <h4 className="font-semibold">Kullanıcı Adı</h4>
-                                                <p className="text-sm text-gray-500">2 gün önce</p>
-                                            </div>
-                                        </div>
-                                        <p className="text-gray-700">
-                                            Henüz bir inceleme yazılmamış. İlk incelemeyi siz yazın!
-                                        </p>
+
+                                {quotes.length === 0 ? (
+                                    <div className="text-center py-8 text-gray-500">
+                                        <Quote className="w-12 h-12 mx-auto mb-4 opacity-20" />
+                                        <p>Henüz bu kitap için alıntı eklenmemiş.</p>
+                                        <p className="text-sm mt-2">İlk alıntıyı siz ekleyin!</p>
                                     </div>
-                                </div>
+                                ) : (
+                                    <div className="space-y-6">
+                                        {quotes.map((quote) => (
+                                            <div key={quote.id} className="bg-white/50 backdrop-blur-sm rounded-xl p-6 border border-gray-100/50">
+                                                <p className="text-gray-700 italic">&#34;{quote.content}&#34;</p>
+                                                {quote.pageNumber && (
+                                                    <p className="text-sm text-gray-500 mt-2">Sayfa: {quote.pageNumber}</p>
+                                                )}
+                                                <div className="flex items-center mt-4 text-sm text-gray-500">
+                                                    <Link href={`/features/profile/${quote.userId}`} className="hover:text-purple-600">
+                                                        {quote.username}
+                                                    </Link>
+                                                    <span className="mx-2">•</span>
+                                                    <time>{new Date(quote.createdAt || '').toLocaleDateString('tr-TR')}</time>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>

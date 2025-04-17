@@ -28,14 +28,25 @@ api.interceptors.request.use(
 // Yanıt interceptor'ı
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (error.response?.status === 401 || error.response?.status === 403) {
-      localStorage.removeItem('token')
-      if (typeof window !== 'undefined') {
-        window.location.href = '/auth/login'
+  async (error) => {
+    const originalRequest = error.config;
+
+    // Token hatası ve oturum açma sayfasında değilse
+    if ((error.response?.status === 401 || error.response?.status === 403) && 
+        !originalRequest._retry && 
+        !window.location.pathname.startsWith('/auth/login')) {
+      originalRequest._retry = true;
+      localStorage.removeItem('token');
+      
+      // Eğer API çağrısı GET değilse login sayfasına yönlendir
+      if (originalRequest.method !== 'get') {
+        if (typeof window !== 'undefined') {
+          window.location.href = '/auth/login';
+        }
+        return Promise.reject(error);
       }
     }
-    return Promise.reject(error)
+    return Promise.reject(error);
   }
 )
 

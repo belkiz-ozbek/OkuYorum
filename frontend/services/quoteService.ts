@@ -1,47 +1,38 @@
 import { api } from './api';
+import { Quote, CreateQuoteRequest } from '@/types/quote';
 
-export interface Quote {
-  id: number;
-  bookId: number;
-  userId: number;
-  content: string;
-  pageNumber: number;
-  createdAt: string;
-  updatedAt: string;
-  book?: {
-    title: string;
-    author: string;
-  };
-  user?: {
-    nameSurname: string;
-    username: string;
-  };
-}
+export const quoteService = {
+    getQuotes: async (): Promise<Quote[]> => {
+        const response = await api.get('/api/quotes');
+        return response.data;
+    },
 
-class QuoteService {
-  async getQuotesByUser(userId: string): Promise<Quote[]> {
-    const response = await api.get(`/api/quotes/user/${userId}`);
-    return response.data;
-  }
+    getQuotesByUser: async (userId: string): Promise<Quote[]> => {
+        const response = await api.get(`/api/quotes/user/${userId}`);
+        return response.data;
+    },
 
-  async getQuotesByBook(bookId: string): Promise<Quote[]> {
-    const response = await api.get(`/api/quotes/book/${bookId}`);
-    return response.data;
-  }
+    createQuote: async (request: CreateQuoteRequest): Promise<Quote> => {
+        const response = await api.post('/api/quotes', request);
+        return response.data;
+    },
 
-  async createQuote(quote: Partial<Quote>): Promise<Quote> {
-    const response = await api.post('/api/quotes', quote);
-    return response.data;
-  }
+    updateQuote: async (quoteId: number, content: string, pageNumber?: number): Promise<Quote> => {
+        const response = await api.put(`/api/quotes/${quoteId}`, { content, pageNumber });
+        return response.data;
+    },
 
-  async updateQuote(id: number, quote: Partial<Quote>): Promise<Quote> {
-    const response = await api.put(`/api/quotes/${id}`, quote);
-    return response.data;
-  }
+    getQuote: async (id: number): Promise<Quote> => {
+        const response = await api.get(`/api/quotes/${id}`);
+        return response.data;
+    },
 
-  async deleteQuote(id: number): Promise<void> {
-    await api.delete(`/api/quotes/${id}`);
-  }
-}
+    getBookQuotes: async (bookId: number): Promise<Quote[]> => {
+        const response = await api.get(`/api/quotes/book/${bookId}`);
+        return response.data;
+    },
 
-export const quoteService = new QuoteService(); 
+    deleteQuote: async (quoteId: number): Promise<void> => {
+        await api.delete(`/api/quotes/${quoteId}`);
+    }
+}; 

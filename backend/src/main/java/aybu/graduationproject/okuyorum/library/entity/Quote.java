@@ -14,6 +14,12 @@ public class Quote {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
+    private String content;
+
+    @Column(name = "page_number")
+    private Integer pageNumber;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "book_id", nullable = false)
     private Book book;
@@ -22,43 +28,33 @@ public class Quote {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(columnDefinition = "TEXT", nullable = false)
-    private String content;
-
-    @Column(name = "page_number")
-    private Integer pageNumber;
-
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
-    @Column(name = "updated_at", nullable = false)
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    // Getters and Setters
+    public Quote() {
+    }
+
+    public Quote(Long id, String content, Integer pageNumber, Book book, User user, LocalDateTime createdAt, LocalDateTime updatedAt) {
+        this.id = id;
+        this.content = content;
+        this.pageNumber = pageNumber;
+        this.book = book;
+        this.user = user;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
+
     public Long getId() {
         return id;
     }
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public Book getBook() {
-        return book;
-    }
-
-    public void setBook(Book book) {
-        this.book = book;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
     }
 
     public String getContent() {
@@ -77,11 +73,35 @@ public class Quote {
         this.pageNumber = pageNumber;
     }
 
+    public Book getBook() {
+        return book;
+    }
+
+    public void setBook(Book book) {
+        this.book = book;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 }
