@@ -23,7 +23,7 @@ public class PostController {
     public ResponseEntity<PostResponse> createPost(
             @RequestBody PostRequest request,
             @AuthenticationPrincipal UserDetails userDetails) {
-        Long userId = userService.findUserIdByUsername(userDetails.getUsername());
+        Long userId = userService.getUserIdByUsername(userDetails.getUsername());
         return ResponseEntity.ok(postService.createPost(request, userId));
     }
 
@@ -42,7 +42,7 @@ public class PostController {
             @PathVariable Long postId,
             @RequestBody PostRequest request,
             @AuthenticationPrincipal UserDetails userDetails) {
-        Long userId = userService.findUserIdByUsername(userDetails.getUsername());
+        Long userId = userService.getUserIdByUsername(userDetails.getUsername());
         return ResponseEntity.ok(postService.updatePost(postId, request, userId));
     }
 
@@ -50,7 +50,7 @@ public class PostController {
     public ResponseEntity<Void> deletePost(
             @PathVariable Long postId,
             @AuthenticationPrincipal UserDetails userDetails) {
-        Long userId = userService.findUserIdByUsername(userDetails.getUsername());
+        Long userId = userService.getUserIdByUsername(userDetails.getUsername());
         postService.deletePost(postId, userId);
         return ResponseEntity.ok().build();
     }

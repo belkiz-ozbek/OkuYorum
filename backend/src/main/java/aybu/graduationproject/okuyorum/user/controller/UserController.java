@@ -23,6 +23,24 @@ public class UserController {
         this.userService = userService;
     }
 
+    @GetMapping
+    public ResponseEntity<List<UserDto>> getAllUsers() {
+        List<User> users = userService.getAllUsers();
+        List<UserDto> userDtos = users.stream().map(user -> {
+            UserDto userDto = new UserDto();
+            userDto.setId(user.getId());
+            userDto.setUsername(user.getUsername());
+            userDto.setNameSurname(user.getNameSurname());
+            userDto.setEmail(user.getEmail());
+            userDto.setBio(user.getBio());
+            userDto.setProfileImage(user.getProfileImage());
+            userDto.setReaderScore(user.getReaderScore());
+            userDto.setCreatedAt(user.getCreatedAt());
+            return userDto;
+        }).toList();
+        return ResponseEntity.ok(userDtos);
+    }
+
     @GetMapping("/me")
     public ResponseEntity<?> getCurrentUser() {
         try {

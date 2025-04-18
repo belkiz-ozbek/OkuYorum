@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { UserService } from '@/services/UserService';
-import { Message } from '@/services/messageService';
+import { Message, messageService } from '@/services/messageService';
 import { format } from 'date-fns';
 import { tr } from 'date-fns/locale';
+import { Badge } from '@/components/ui/badge';
 
 interface User {
   id: number;
@@ -11,6 +12,7 @@ interface User {
   username: string;
   profileImage: string | null;
   lastMessage?: Message;
+  unreadCount?: number;
 }
 
 interface UserListProps {
@@ -22,6 +24,7 @@ interface UserListProps {
 export function UserList({ onSelectUser, selectedUserId, searchQuery }: UserListProps) {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
+  const [unreadMessages, setUnreadMessages] = useState<Message[]>([]);
 
   // Rastgele bir renk döndüren yardımcı fonksiyon
   const getRandomColor = (name: string) => {
@@ -37,24 +40,79 @@ export function UserList({ onSelectUser, selectedUserId, searchQuery }: UserList
     return colors[index % colors.length];
   };
 
-  useEffect(() => {
-    const loadUsers = async () => {
-      try {
-        const response = await UserService.getAllUsers();
-        const filteredUsers = response.data.filter((user: User) =>
-          user.nameSurname.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          user.username.toLowerCase().includes(searchQuery.toLowerCase())
-        );
-        setUsers(filteredUsers);
-      } catch (error) {
-        console.error('Kullanıcılar yüklenirken hata oluştu:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const loadUnreadMessages = async () => {
+    try {
+      const messages = await messageService.getUnreadMessages();
+      setUnreadMessages(messages);
+    } catch (error) {
+      console.error('Okunmamış mesajlar yüklenirken hata oluştu:', error);
+    }
+  };
 
+  const loadUsers = async () => {
+    try {
+      const response = await UserService.getAllUsers();
+      const usersData = response.data;
+      
+      // Her kullanıcı için son mesajı al
+      const usersWithMessages = await Promise.all(
+        usersData.map(async (user: User) => {
+          try {
+            const messages = await messageService.getMessages(user.id);
+            const lastMessage = messages.length > 0 ? messages[messages.length - 1] : undefined;
+            
+            // Okunmamış mesaj sayısını unreadMessages state'inden al
+            const unreadCount = unreadMessages.filter(msg => msg.senderId === user.id).length;
+            
+            return {
+              ...user,
+              lastMessage,
+              unreadCount: unreadCount > 0 ? unreadCount : undefined
+            };
+          } catch (error) {
+            console.error(`Error loading messages for user ${user.id}:`, error);
+            return user;
+          }
+        })
+      );
+
+      const filteredUsers = usersWithMessages.filter((user: User) =>
+        user.nameSurname.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        user.username.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+
+      // Son mesaj tarihine göre sırala
+      const sortedUsers = filteredUsers.sort((a, b) => {
+        if (!a.lastMessage && !b.lastMessage) return 0;
+        if (!a.lastMessage) return 1;
+        if (!b.lastMessage) return -1;
+        return new Date(b.lastMessage.createdAt).getTime() - new Date(a.lastMessage.createdAt).getTime();
+      });
+
+      setUsers(sortedUsers);
+    } catch (error) {
+      console.error('Kullanıcılar yüklenirken hata oluştu:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Arama terimi değiştiğinde kullanıcıları yeniden yükle
+  useEffect(() => {
     loadUsers();
-  }, [searchQuery]);
+  }, [searchQuery, unreadMessages]);
+
+  // Seçili kullanıcı değiştiğinde veya her 5 saniyede bir okunmamış mesajları kontrol et
+  useEffect(() => {
+    loadUnreadMessages();
+
+    // Her 5 saniyede bir okunmamış mesajları kontrol et
+    const interval = setInterval(() => {
+      loadUnreadMessages();
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [selectedUserId]);
 
   if (loading) {
     return (
@@ -78,20 +136,29 @@ export function UserList({ onSelectUser, selectedUserId, searchQuery }: UserList
                 : 'hover:bg-white/50 dark:hover:bg-white/5 hover:shadow-md'
             }`}
           >
-            <Avatar className={`h-12 w-12 ring-2 ring-white/50 shadow-lg transition-transform duration-300 group-hover:scale-105 ${
-              selectedUserId === user.id ? 'ring-purple-300' : ''
-            }`}>
-              <AvatarImage 
-                src={user.profileImage || undefined} 
-                className="object-cover"
-              />
-              <AvatarFallback className={`${userColor} text-white font-medium`}>
-                {user.nameSurname
-                  .split(' ')
-                  .map((n) => n[0])
-                  .join('')}
-              </AvatarFallback>
-            </Avatar>
+            <div className="relative">
+              <Avatar className={`h-12 w-12 ring-2 ring-white/50 shadow-lg transition-transform duration-300 group-hover:scale-105 ${
+                selectedUserId === user.id ? 'ring-purple-300' : ''
+              }`}>
+                <AvatarImage 
+                  src={user.profileImage || undefined} 
+                  className="object-cover"
+                />
+                <AvatarFallback className={`${userColor} text-white font-medium`}>
+                  {user.nameSurname
+                    .split(' ')
+                    .map((n) => n[0])
+                    .join('')}
+                </AvatarFallback>
+              </Avatar>
+              {user.unreadCount && user.unreadCount > 0 && (
+                <Badge 
+                  className="absolute -top-1 -right-1 bg-red-500 text-white min-w-[1.25rem] h-5 flex items-center justify-center rounded-full text-xs"
+                >
+                  {user.unreadCount}
+                </Badge>
+              )}
+            </div>
             <div className="flex-1 min-w-0">
               <div className="flex justify-between items-start">
                 <div>
@@ -104,12 +171,16 @@ export function UserList({ onSelectUser, selectedUserId, searchQuery }: UserList
                 </div>
                 {user.lastMessage && (
                   <span className="text-xs text-gray-500 dark:text-gray-400">
-                    {format(new Date(user.lastMessage.createdAt!), 'HH:mm', { locale: tr })}
+                    {format(new Date(user.lastMessage.createdAt), 'HH:mm', { locale: tr })}
                   </span>
                 )}
               </div>
               {user.lastMessage && (
-                <p className="text-sm text-gray-600 dark:text-gray-400 truncate mt-1">
+                <p className={`text-sm truncate mt-1 ${
+                  user.unreadCount && user.unreadCount > 0 
+                    ? 'font-medium text-gray-900 dark:text-gray-100' 
+                    : 'text-gray-600 dark:text-gray-400'
+                }`}>
                   {user.lastMessage.content}
                 </p>
               )}

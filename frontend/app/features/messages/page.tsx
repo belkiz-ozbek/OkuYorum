@@ -5,7 +5,8 @@ import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { messageService, Message } from '@/services/messageService';
-import { UserService, User } from '@/services/UserService';
+import { useAuth } from '@/contexts/AuthContext';
+import { useRouter } from 'next/navigation';
 
 import { Send, Search, Trash2, Check, CheckCheck } from 'lucide-react';
 import { format } from 'date-fns';
@@ -14,28 +15,41 @@ import { UserList } from '@/components/messages/UserList';
 import { toast } from 'sonner';
 import './messages.css';
 
+interface User {
+  id: number;
+  username: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  bio?: string;
+  profileImage?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 interface ExtendedUser extends User {
-  profileImage?: string | null;
+  nameSurname?: string;
 }
 
 export default function MessagesPage() {
+  const router = useRouter();
+  const { user: currentUser, loading: authLoading, isAuthenticated } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [selectedUser, setSelectedUser] = useState<number | null>(null);
   const [newMessage, setNewMessage] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
-  const [currentUser, setCurrentUser] = useState<ExtendedUser | null>(null);
   const [, setUnreadCount] = useState(0);
   const [tempMessageCounter, setTempMessageCounter] = useState(0);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // Check authentication
   useEffect(() => {
-    const loadCurrentUser = async () => {
-      const user = await UserService.getCurrentUser();
-      setCurrentUser(user.data);
-    };
-    loadCurrentUser();
-  }, []);
+    if (!authLoading && !isAuthenticated) {
+      toast.error('Lütfen önce giriş yapın');
+      router.push('/auth/login?redirect=/features/messages');
+    }
+  }, [authLoading, isAuthenticated, router]);
 
   useEffect(() => {
     if (selectedUser) {
@@ -99,7 +113,7 @@ export default function MessagesPage() {
     try {
       // Önce API'ye gönder ve gerçek ID al
       const response = await messageService.sendMessage({
-        sender: currentUser,
+        sender: currentUser as ExtendedUser,
         receiver: { id: selectedUser },
         content: newMessage,
       });
@@ -117,7 +131,7 @@ export default function MessagesPage() {
         createdAt: new Date().toISOString(),
         sender: {
           id: currentUser.id,
-          nameSurname: currentUser.nameSurname || '',
+          nameSurname: `${currentUser.firstName} ${currentUser.lastName}`,
           username: currentUser.username,
           profileImage: currentUser.profileImage
         },

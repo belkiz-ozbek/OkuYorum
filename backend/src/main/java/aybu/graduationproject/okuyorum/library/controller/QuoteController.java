@@ -23,7 +23,7 @@ public class QuoteController {
     public ResponseEntity<QuoteDTO> createQuote(
             @RequestBody CreateQuoteRequest request,
             @AuthenticationPrincipal UserDetails userDetails) {
-        Long userId = userService.findUserIdByUsername(userDetails.getUsername());
+        Long userId = userService.getUserIdByUsername(userDetails.getUsername());
         return ResponseEntity.ok(quoteService.createQuote(request, userId));
     }
 
@@ -35,7 +35,7 @@ public class QuoteController {
     @GetMapping("/user")
     public ResponseEntity<List<QuoteDTO>> getUserQuotes(
             @AuthenticationPrincipal UserDetails userDetails) {
-        Long userId = userService.findUserIdByUsername(userDetails.getUsername());
+        Long userId = userService.getUserIdByUsername(userDetails.getUsername());
         return ResponseEntity.ok(quoteService.getUserQuotes(userId));
     }
 
@@ -53,7 +53,7 @@ public class QuoteController {
     public ResponseEntity<List<QuoteDTO>> getUserBookQuotes(
             @PathVariable Long bookId,
             @AuthenticationPrincipal UserDetails userDetails) {
-        Long userId = userService.findUserIdByUsername(userDetails.getUsername());
+        Long userId = userService.getUserIdByUsername(userDetails.getUsername());
         return ResponseEntity.ok(quoteService.getUserBookQuotes(userId, bookId));
     }
 
@@ -61,7 +61,7 @@ public class QuoteController {
     public ResponseEntity<Void> deleteQuote(
             @PathVariable Long id,
             @AuthenticationPrincipal UserDetails userDetails) {
-        Long userId = userService.findUserIdByUsername(userDetails.getUsername());
+        Long userId = userService.getUserIdByUsername(userDetails.getUsername());
         quoteService.deleteQuote(id, userId);
         return ResponseEntity.ok().build();
     }
@@ -70,7 +70,7 @@ public class QuoteController {
     public ResponseEntity<QuoteDTO> toggleLike(
             @PathVariable Long id,
             @AuthenticationPrincipal UserDetails userDetails) {
-        Long userId = userService.findUserIdByUsername(userDetails.getUsername());
+        Long userId = userService.getUserIdByUsername(userDetails.getUsername());
         return ResponseEntity.ok(quoteService.toggleLike(id, userId));
     }
 
@@ -78,21 +78,21 @@ public class QuoteController {
     public ResponseEntity<QuoteDTO> toggleSave(
             @PathVariable Long id,
             @AuthenticationPrincipal UserDetails userDetails) {
-        Long userId = userService.findUserIdByUsername(userDetails.getUsername());
+        Long userId = userService.getUserIdByUsername(userDetails.getUsername());
         return ResponseEntity.ok(quoteService.toggleSave(id, userId));
     }
 
     @GetMapping("/liked")
     public ResponseEntity<List<QuoteDTO>> getLikedQuotes(
             @AuthenticationPrincipal UserDetails userDetails) {
-        Long userId = userService.findUserIdByUsername(userDetails.getUsername());
+        Long userId = userService.getUserIdByUsername(userDetails.getUsername());
         return ResponseEntity.ok(quoteService.getLikedQuotes(userId));
     }
 
     @GetMapping("/saved")
     public ResponseEntity<List<QuoteDTO>> getSavedQuotes(
             @AuthenticationPrincipal UserDetails userDetails) {
-        Long userId = userService.findUserIdByUsername(userDetails.getUsername());
+        Long userId = userService.getUserIdByUsername(userDetails.getUsername());
         return ResponseEntity.ok(quoteService.getSavedQuotes(userId));
     }
 } 
