@@ -10,8 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import jakarta.persistence.EntityNotFoundException;
-import java.time.LocalDateTime;
+import javax.persistence.EntityNotFoundException;
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -37,8 +37,8 @@ public class BookLendingService {
         BookLending lending = new BookLending();
         lending.setBook(book);
         lending.setBorrower(borrower);
-        lending.setLendDate(LocalDateTime.now());
-        lending.setDueDate(LocalDateTime.now().plusDays(14)); // 2 weeks lending period
+        lending.setLendDate(LocalDate.now());
+        lending.setDueDate(LocalDate.now().plusDays(14)); // 2 weeks lending period
         lending.setStatus(BookLending.LendingStatus.BORROWED);
 
         return bookLendingRepository.save(lending);
@@ -53,7 +53,7 @@ public class BookLendingService {
             throw new IllegalStateException("Book is not in borrowed state");
         }
 
-        lending.setReturnDate(LocalDateTime.now());
+        lending.setReturnDate(LocalDate.now());
         lending.setStatus(BookLending.LendingStatus.RETURNED);
         lending.setRating(rating);
         lending.setFeedback(feedback);
@@ -62,25 +62,24 @@ public class BookLendingService {
     }
 
     public List<BookLending> getBorrowedBooksByUser(Long userId) {
-        return bookLendingRepository.findByBorrowerIdAndStatus(userId, BookLending.LendingStatus.BORROWED);
+        return bookLendingRepository.findByBorrowerId(userId);
     }
 
     public List<BookLending> getLendingHistoryForBook(Long bookId) {
-        return bookLendingRepository.findByBookIdOrderByLendDateDesc(bookId);
+        return bookLendingRepository.findByBookId(bookId);
     }
 
-    @Transactional
     public void checkAndUpdateOverdueBooks() {
-        LocalDateTime now = LocalDateTime.now();
-        List<BookLending> overdueLendings = bookLendingRepository.findByStatusAndDueDateBefore(
-                BookLending.LendingStatus.BORROWED, now);
-        
-        overdueLendings.forEach(lending -> {
-            lending.setStatus(BookLending.LendingStatus.OVERDUE);
-        });
-        
-        if (!overdueLendings.isEmpty()) {
-            bookLendingRepository.saveAll(overdueLendings);
-        }
+        // This method could be scheduled to run daily
+        List<BookLending> allBorrowedBooks = bookLendingRepository.findAll();
+        LocalDate today = LocalDate.now();
+
+        allBorrowedBooks.stream()
+                .filter(lending -> lending.getStatus() == BookLending.LendingStatus.BORROWED)
+                .filter(lending -> lending.getDueDate().isBefore(today))
+                .forEach(lending -> {
+                    lending.setStatus(BookLending.LendingStatus.OVERDUE);
+                    bookLendingRepository.save(lending);
+                });
     }
-}
+} 
