@@ -6,10 +6,12 @@ import { Card } from '@/components/ui/Card';
 import { SearchForm } from "@/components/ui/form/search-form";
 import { useState, useEffect } from 'react';
 import { BookOpen, Moon, Sun, Library, Compass, Users, Heart, User } from 'lucide-react';
+import { UserService } from "@/services/UserService";
 
 export default function MilletKiraathanesi() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const [currentUser, setCurrentUser] = useState<{ id: number; username: string } | null>(null);
 
   useEffect(() => {
     if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
@@ -22,7 +24,18 @@ export default function MilletKiraathanesi() {
       setIsScrolled(scrollPosition > 50);
     };
 
+    const loadUserInfo = async () => {
+      try {
+        const response = await UserService.getCurrentUser();
+        setCurrentUser(response.data);
+      } catch (error) {
+        console.error('Error loading user info:', error);
+      }
+    };
+
     window.addEventListener('scroll', handleScroll);
+    loadUserInfo();
+    
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -34,88 +47,87 @@ export default function MilletKiraathanesi() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <header className={`fixed top-0 z-50 w-full transition-all duration-300 ${
-        isScrolled 
-          ? 'h-14 bg-white/95 dark:bg-gray-950/95 border-b border-gray-200/30 dark:border-gray-800/30 backdrop-blur-sm' 
-          : 'h-16 bg-gradient-to-b from-black/60 to-transparent'
-      }`}>
+      <header
+        className={`fixed top-0 z-50 w-full transition-all duration-300 ${
+          isScrolled ? "h-14 bg-background/60 backdrop-blur-lg border-b" : "h-16"
+        }`}
+      >
         <div className="max-w-7xl mx-auto h-full flex items-center justify-between px-6">
-          <Link 
-            className="flex items-center justify-center group relative" 
-            href="/features/homepage"
-          >
+          <Link className="flex items-center justify-center group relative" href="/features/homepage">
             <div className="relative">
-              <BookOpen className={`${isScrolled ? 'h-5 w-5' : 'h-6 w-6'} ${isScrolled ? 'text-gray-800 dark:text-gray-200' : 'text-white'} group-hover:text-primary transition-all duration-300`} />
+              <BookOpen
+                className={`${isScrolled ? "h-5 w-5" : "h-6 w-6"} text-foreground group-hover:text-primary transition-all duration-300`}
+              />
             </div>
-            <span className={`ml-2 font-medium ${isScrolled ? 'text-gray-800 dark:text-gray-200' : 'text-white'} transition-all duration-300 ${isScrolled ? 'text-base' : 'text-lg'}`}>
+            <span
+              className={`ml-2 font-medium text-foreground transition-all duration-300 ${isScrolled ? "text-base" : "text-lg"}`}
+            >
               OkuYorum
             </span>
           </Link>
 
           <div className="hidden md:flex items-center h-full">
             <nav className="flex items-center gap-6 px-6">
-              <Link className={`flex items-center gap-2 ${isScrolled ? 'text-gray-600 dark:text-gray-300' : 'text-white/90'} hover:text-primary transition-colors duration-300`} href="/features/library">
+              <Link
+                className={`flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300`}
+                href="/features/library"
+              >
                 <Library className="h-5 w-5" />
                 <span>Kitaplığım</span>
               </Link>
 
-              <Link className={`flex items-center gap-2 ${isScrolled ? 'text-gray-600 dark:text-gray-300' : 'text-white/90'} hover:text-primary transition-colors duration-300`} href="/features/discover">
+              <Link
+                className={`flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300`}
+                href="/features/discover"
+              >
                 <Compass className="h-5 w-5" />
                 <span>Keşfet</span>
               </Link>
 
-              <Link className={`flex items-center gap-2 ${isScrolled ? 'text-gray-600 dark:text-gray-300' : 'text-white/90'} hover:text-primary transition-colors duration-300`} href="/features/millet-kiraathanesi">
+              <Link
+                className={`flex items-center gap-2 text-primary transition-colors duration-300`}
+                href="/features/millet-kiraathanesi"
+              >
                 <Users className="h-5 w-5" />
                 <span>Millet Kıraathaneleri</span>
               </Link>
 
-              <Link className={`flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300`} href="/features/donate">
+              <Link
+                className={`flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300`}
+                href="/features/donate"
+              >
                 <Heart className="h-5 w-5" />
                 <span>Bağış Yap</span>
               </Link>
-
-              <SearchForm isScrolled={isScrolled} />
             </nav>
-            
-            <div className="flex items-center gap-4 border-l border-gray-200/30 dark:border-gray-800/30 pl-6">
+
+            <div className="flex items-center gap-4 border-l border-border pl-6">
               <button
                 onClick={toggleTheme}
-                className={`${isScrolled ? 'text-gray-600 dark:text-gray-300' : 'text-white/90'} hover:text-primary transition-colors duration-300`}
+                className="text-muted-foreground hover:text-primary transition-colors duration-300"
                 aria-label="Tema değiştir"
               >
-                {theme === 'light' ? (
-                  <Moon className="h-5 w-5" />
-                ) : (
-                  <Sun className="h-5 w-5" />
-                )}
+                {theme === "light" ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
               </button>
-              
-              <Link 
-                className={`flex items-center gap-2 ${isScrolled ? 'text-gray-600 dark:text-gray-300' : 'text-white/90'} hover:text-primary transition-colors duration-300`}
-                href="/features/profile"
+
+              <Link
+                className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300"
+                href={currentUser ? `/features/profile/${currentUser.id}` : "/"}
               >
                 <User className="h-5 w-5" />
-                <span>Profil</span>
+                <span>{currentUser?.username || "Giriş Yap"}</span>
               </Link>
             </div>
           </div>
 
           {/* Mobile Navigation */}
           <div className="md:hidden flex items-center gap-4">
-            <div className="flex items-center gap-4">
-              <SearchForm isScrolled={true} />
-            </div>
-            
             <button
               onClick={toggleTheme}
-              className={`${isScrolled ? 'text-gray-600 dark:text-gray-300' : 'text-white/90'} hover:text-primary transition-colors duration-300`}
+              className="text-muted-foreground hover:text-primary transition-colors duration-300"
               aria-label="Tema değiştir"
             >
-              {theme === 'light' ? (
-                <Moon className="h-5 w-5" />
-              ) : (
-                <Sun className="h-5 w-5" />
-              )}
+              {theme === "light" ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
             </button>
           </div>
         </div>
@@ -173,37 +185,75 @@ export default function MilletKiraathanesi() {
             <p className="text-gray-600 dark:text-gray-400 text-center mb-12 max-w-2xl mx-auto">
               Size en yakın kıraathaneyi bulun ve etkinliklere katılın
             </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              <KiraathaneCard
-                name="Sincan Millet Kıraathanesi"
-                address="Sincan, Ankara"
-                image="/sincan.png"
-                stats={{
-                  events: 10,
-                  members: 380,
-                  books: 2400
-                }}
-              />
-              <KiraathaneCard
-                name="Pursaklar Millet Kıraathanesi"
-                address="Pursaklar, Ankara"
-                image="/pursaklar.png"
-                stats={{
-                  events: 7,
-                  members: 290,
-                  books: 1800
-                }}
-              />
-              <KiraathaneCard
-                name="Mamak Millet Kıraathanesi"
-                address="Mamak, Ankara"
-                image="/mamak.png"
-                stats={{
-                  events: 9,
-                  members: 340,
-                  books: 2200
-                }}
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+              {[
+                {
+                  name: "Beyoğlu Millet Kıraathanesi",
+                  location: "Beyoğlu",
+                  currentOccupancy: 45,
+                  maxCapacity: 100,
+                  image: "https://images.unsplash.com/photo-1559925393-8be0ec4767c8?q=80&w=2071&auto=format&fit=crop&ixlib=rb-4.0.3",
+                },
+                {
+                  name: "Kadıköy Millet Kıraathanesi",
+                  location: "Kadıköy",
+                  currentOccupancy: 32,
+                  maxCapacity: 80,
+                  image: "https://images.unsplash.com/photo-1610632380989-680fe40816c6?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3",
+                },
+                {
+                  name: "Üsküdar Millet Kıraathanesi",
+                  location: "Üsküdar",
+                  currentOccupancy: 28,
+                  maxCapacity: 60,
+                  image: "https://images.unsplash.com/photo-1519682577862-22b62b24e493?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3",
+                },
+                {
+                  name: "Beşiktaş Millet Kıraathanesi",
+                  location: "Beşiktaş",
+                  currentOccupancy: 38,
+                  maxCapacity: 70,
+                  image: "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3",
+                },
+                {
+                  name: "Fatih Millet Kıraathanesi",
+                  location: "Fatih",
+                  currentOccupancy: 25,
+                  maxCapacity: 50,
+                  image: "https://images.unsplash.com/photo-1507842217343-583bb7270b66?q=80&w=2053&auto=format&fit=crop&ixlib=rb-4.0.3",
+                },
+              ].map((kiraathane, index) => (
+                <Card key={index} className="relative shadow-md h-full flex flex-col hover:shadow-xl hover:scale-[1.02] transition-all duration-300">
+                  <div className="p-0">
+                    <div className="relative">
+                      <img
+                        src={kiraathane.image || "/placeholder.svg"}
+                        alt={`${kiraathane.name} görüntüsü`}
+                        className="w-full h-48 object-cover rounded-t-lg transition-transform duration-300 hover:scale-105"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex-grow p-4 flex flex-col">
+                    <h3 className="text-xl font-semibold hover:text-primary transition-colors">{kiraathane.name}</h3>
+                    <p className="mt-2 text-gray-600 dark:text-gray-400 flex items-center">
+                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                      {kiraathane.location}
+                    </p>
+                    <p className="mt-2 text-gray-600 dark:text-gray-400 flex items-center">
+                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                      </svg>
+                      {kiraathane.currentOccupancy}/{kiraathane.maxCapacity}
+                    </p>
+                    <button className="mt-auto py-2 px-4 bg-primary hover:bg-primary/90 text-white rounded-lg transition-all duration-300 hover:scale-[1.02]">
+                      Katıl
+                    </button>
+                  </div>
+                </Card>
+              ))}
             </div>
           </div>
 
@@ -275,69 +325,6 @@ export default function MilletKiraathanesi() {
   );
 }
 
-function KiraathaneCard({ name, address, image, stats }: {
-  name: string;
-  address: string;
-  image: string;
-  stats: {
-    events: number;
-    members: number;
-    books: number;
-  };
-}) {
-  return (
-    <Card className="group overflow-hidden">
-      <div className="relative h-48">
-        <Image
-          src={image}
-          alt={name}
-          fill
-          className="object-cover transition-transform duration-300 group-hover:scale-105"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-      </div>
-      <div className="p-6">
-        <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-gray-100">{name}</h3>
-        <p className="text-gray-600 dark:text-gray-400 mb-4 flex items-center">
-          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-          </svg>
-          {address}
-        </p>
-        <div className="grid grid-cols-3 gap-4 mb-6 p-4 bg-gray-50 dark:bg-gray-900/30 rounded-lg">
-          <div className="text-center">
-            <p className="text-2xl font-semibold text-primary">{stats.events}</p>
-            <p className="text-sm text-gray-600 dark:text-gray-400">Etkinlik</p>
-          </div>
-          <div className="text-center">
-            <p className="text-2xl font-semibold text-primary">{stats.members}</p>
-            <p className="text-sm text-gray-600 dark:text-gray-400">Üye</p>
-          </div>
-          <div className="text-center">
-            <p className="text-2xl font-semibold text-primary">{stats.books}</p>
-            <p className="text-sm text-gray-600 dark:text-gray-400">Kitap</p>
-          </div>
-        </div>
-        <div className="flex gap-2">
-          <a 
-            href="#" 
-            className="flex-1 text-center py-2 px-4 bg-primary hover:bg-primary/90 text-white rounded-lg transition-all duration-300"
-          >
-            Etkinlikler
-          </a>
-          <a 
-            href="#" 
-            className="flex-1 text-center py-2 px-4 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg transition-all duration-300"
-          >
-            Detaylar
-          </a>
-        </div>
-      </div>
-    </Card>
-  );
-}
-
 function EventCard({ title, date, time, description, category, location, currentParticipants, maxParticipants }: {
   title: string;
   date: string;
@@ -386,7 +373,7 @@ function EventCard({ title, date, time, description, category, location, current
       </div>
       <a 
         href="#" 
-        className="block w-full text-center py-3 px-4 bg-primary hover:bg-primary/90 text-white rounded-lg transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg hover:shadow-primary/20"
+        className="block w-full text-center py-1.5 px-3 bg-primary hover:bg-primary/90 text-white rounded-lg transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg hover:shadow-primary/20"
       >
         Katıl
       </a>
@@ -426,7 +413,7 @@ function DiscussionCard({ title, author, participants, comments, lastActive }: {
       </div>
       <a 
         href="#" 
-        className="mt-4 block w-full text-center py-2 px-4 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg transition-all duration-300"
+        className="mt-4 block w-full text-center py-1.5 px-3 bg-primary hover:bg-primary/90 text-white rounded-lg transition-all duration-300"
       >
         Tartışmaya Katıl
       </a>
