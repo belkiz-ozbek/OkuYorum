@@ -5,6 +5,7 @@ import Link from "next/link"
 import { ChevronRight, Menu } from "lucide-react"
 import { Button } from "@/components/ui/form/button"
 import { Header } from "@/components/homepage/Header"
+import { Footer } from "@/components/homepage/Footer"
 
 export default function AboutPage() {
   return (
@@ -205,24 +206,7 @@ export default function AboutPage() {
           </div>
         </section>
       </main>
-      <footer className="w-full border-t bg-background py-6">
-        <div className="container flex flex-col items-center justify-center gap-4 px-4 md:px-6 md:flex-row md:justify-between">
-          <div className="flex items-center gap-2">
-            <p className="text-sm text-gray-500">© 2023 True Staging. All rights reserved.</p>
-          </div>
-          <nav className="flex gap-4 sm:gap-6">
-            <Link href="#" className="text-sm font-medium hover:underline underline-offset-4">
-              Privacy Policy
-            </Link>
-            <Link href="#" className="text-sm font-medium hover:underline underline-offset-4">
-              Terms of Service
-            </Link>
-            <Link href="#" className="text-sm font-medium hover:underline underline-offset-4">
-              Contact
-            </Link>
-          </nav>
-        </div>
-      </footer>
+      <Footer />
     </div>
   )
 }
