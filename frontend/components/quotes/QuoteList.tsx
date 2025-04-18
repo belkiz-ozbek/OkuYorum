@@ -1,7 +1,7 @@
 import { Quote } from '@/types/quote';
 import { QuoteCard } from './QuoteCard';
 import { quoteService } from '@/services/quoteService';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/components/ui/feedback/use-toast';
 
 interface QuoteListProps {
     quotes: Quote[];
@@ -38,7 +38,7 @@ export function QuoteList({ quotes, onQuotesChange }: QuoteListProps) {
     }
 
     return (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="space-y-6">
             {quotes.map((quote) => (
                 <QuoteCard
                     key={quote.id}

@@ -43,34 +43,38 @@ public class QuoteServiceImpl implements QuoteService {
         quote.setUser(user);
 
         Quote savedQuote = quoteRepository.save(quote);
-        return convertToDTO(savedQuote);
+        return convertToDTO(savedQuote, user);
     }
 
     @Override
     public QuoteDTO getQuote(Long id) {
         Quote quote = quoteRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Quote not found"));
-        return convertToDTO(quote);
+        return convertToDTO(quote, null);
     }
 
     @Override
     public List<QuoteDTO> getUserQuotes(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
         return quoteRepository.findByUserId(userId).stream()
-                .map(this::convertToDTO)
+                .map(quote -> convertToDTO(quote, user))
                 .collect(Collectors.toList());
     }
 
     @Override
     public List<QuoteDTO> getBookQuotes(Long bookId) {
         return quoteRepository.findByBookId(bookId).stream()
-                .map(this::convertToDTO)
+                .map(quote -> convertToDTO(quote, null))
                 .collect(Collectors.toList());
     }
 
     @Override
     public List<QuoteDTO> getUserBookQuotes(Long userId, Long bookId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
         return quoteRepository.findByUserIdAndBookId(userId, bookId).stream()
-                .map(this::convertToDTO)
+                .map(quote -> convertToDTO(quote, user))
                 .collect(Collectors.toList());
     }
 
@@ -87,15 +91,67 @@ public class QuoteServiceImpl implements QuoteService {
         quoteRepository.delete(quote);
     }
 
-    private QuoteDTO convertToDTO(Quote quote) {
+    @Override
+    @Transactional
+    public QuoteDTO toggleLike(Long quoteId, Long userId) {
+        Quote quote = quoteRepository.findById(quoteId)
+                .orElseThrow(() -> new RuntimeException("Quote not found"));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        quote.toggleLike(user);
+        Quote savedQuote = quoteRepository.save(quote);
+        return convertToDTO(savedQuote, user);
+    }
+
+    @Override
+    @Transactional
+    public QuoteDTO toggleSave(Long quoteId, Long userId) {
+        Quote quote = quoteRepository.findById(quoteId)
+                .orElseThrow(() -> new RuntimeException("Quote not found"));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        quote.toggleSave(user);
+        Quote savedQuote = quoteRepository.save(quote);
+        return convertToDTO(savedQuote, user);
+    }
+
+    @Override
+    public List<QuoteDTO> getLikedQuotes(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return quoteRepository.findByLikedByContaining(user).stream()
+                .map(quote -> convertToDTO(quote, user))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<QuoteDTO> getSavedQuotes(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return quoteRepository.findBySavedByContaining(user).stream()
+                .map(quote -> convertToDTO(quote, user))
+                .collect(Collectors.toList());
+    }
+
+    private QuoteDTO convertToDTO(Quote quote, User currentUser) {
         QuoteDTO dto = new QuoteDTO();
         dto.setId(quote.getId());
         dto.setContent(quote.getContent());
         dto.setPageNumber(quote.getPageNumber());
         dto.setBookId(quote.getBook().getId());
         dto.setBookTitle(quote.getBook().getTitle());
+        dto.setBookAuthor(quote.getBook().getAuthor());
+        dto.setBookCoverImage(quote.getBook().getImageUrl());
         dto.setUserId(quote.getUser().getId());
         dto.setUsername(quote.getUser().getUsername());
+        dto.setUserAvatar(quote.getUser().getProfileImage());
+        dto.setLikes(quote.getLikedBy().size());
+        if (currentUser != null) {
+            dto.setIsLiked(quote.isLikedBy(currentUser));
+            dto.setIsSaved(quote.isSavedBy(currentUser));
+        }
         return dto;
     }
 } 

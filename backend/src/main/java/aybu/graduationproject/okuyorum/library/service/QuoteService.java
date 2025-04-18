@@ -12,4 +12,8 @@ public interface QuoteService {
     List<QuoteDTO> getBookQuotes(Long bookId);
     List<QuoteDTO> getUserBookQuotes(Long userId, Long bookId);
     void deleteQuote(Long id, Long userId);
+    QuoteDTO toggleLike(Long quoteId, Long userId);
+    QuoteDTO toggleSave(Long quoteId, Long userId);
+    List<QuoteDTO> getLikedQuotes(Long userId);
+    List<QuoteDTO> getSavedQuotes(Long userId);
 } 

@@ -1,5 +1,7 @@
 import { AxiosResponse, AxiosError } from 'axios'
 import { api } from './api'
+import axios from 'axios'
+import { User } from '../types/user'
 // Mock veri kullanımını kaldırıyoruz
 // import { mockUsers, findUserByEmail, mockAuthToken } from './mockData'
 
@@ -17,16 +19,62 @@ import { api } from './api'
 //   })
 // }
 
-export type User = {
-  id: number
-  username: string
-  email: string
-  firstName?: string
-  lastName?: string
-  nameSurname?: string
-  role: string
-  createdAt?: string
-  updatedAt?: string
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'
+
+export const userService = {
+  async getUsers(): Promise<User[]> {
+    const response = await axios.get(`${API_URL}/api/users`)
+    return response.data
+  },
+
+  async getUserById(id: number): Promise<User> {
+    const response = await axios.get(`${API_URL}/api/users/${id}`)
+    return response.data
+  },
+
+  async createUser(user: Partial<User>): Promise<User> {
+    const response = await axios.post(`${API_URL}/api/users`, user)
+    return response.data
+  },
+
+  async updateUser(id: number, user: Partial<User>): Promise<User> {
+    const response = await axios.put(`${API_URL}/api/users/${id}`, user)
+    return response.data
+  },
+
+  async deleteUser(id: number): Promise<void> {
+    await axios.delete(`${API_URL}/api/users/${id}`)
+  },
+
+  async updateProfile(id: number, data: Partial<User>): Promise<User> {
+    const response = await axios.put(`${API_URL}/api/users/${id}/profile`, data)
+    return response.data
+  },
+
+  async updatePassword(id: number, oldPassword: string, newPassword: string): Promise<void> {
+    await axios.put(`${API_URL}/api/users/${id}/password`, {
+      oldPassword,
+      newPassword,
+    })
+  },
+
+  async followUser(userId: number, targetUserId: number): Promise<void> {
+    await axios.post(`${API_URL}/api/users/${userId}/follow/${targetUserId}`)
+  },
+
+  async unfollowUser(userId: number, targetUserId: number): Promise<void> {
+    await axios.delete(`${API_URL}/api/users/${userId}/follow/${targetUserId}`)
+  },
+
+  async getFollowers(userId: number): Promise<User[]> {
+    const response = await axios.get(`${API_URL}/api/users/${userId}/followers`)
+    return response.data
+  },
+
+  async getFollowing(userId: number): Promise<User[]> {
+    const response = await axios.get(`${API_URL}/api/users/${userId}/following`)
+    return response.data
+  },
 }
 
 export class UserService {
@@ -44,18 +92,17 @@ export class UserService {
     return api.post('/api/auth/register', userData);
   }
 
-  static async getCurrentUser(): Promise<AxiosResponse<User | null>> {
+  static async getCurrentUser() {
     const token = localStorage.getItem('token');
     if (!token) {
-      return Promise.resolve({
-        data: null,
-        status: 200,
-        statusText: 'OK',
-        headers: {},
-        config: {} as never
-      });
+      throw new Error('No authentication token found');
     }
-    return api.get('/api/users/me');
+    
+    return axios.get(`${API_URL}/api/users/me`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
   }
 
   static async updateProfile(userData: Partial<User>): Promise<AxiosResponse<User>> {

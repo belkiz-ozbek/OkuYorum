@@ -46,8 +46,11 @@ import { AddBookModal } from "@/components/ui/book/add-book-modal"
 import { bookEventEmitter } from '@/services/bookService'
 import { api } from '@/services/api'
 import StatusBadge from "@/components/ui/book/StatusBadge"
-import { quoteService, Quote as QuoteType } from "@/services/quoteService"
+import { quoteService } from "@/services/quoteService"
+import { Quote } from "@/types/quote"
 import { postService, Post } from "@/services/postService"
+import { QuoteList } from "@/components/quotes/QuoteList"
+import { AuthProvider } from "@/contexts/AuthContext"
 
 const initialProfile: UserProfile = {
   id: 0,
@@ -184,8 +187,8 @@ export default function ProfilePage() {
   const [showAddBookModal, setShowAddBookModal] = useState(false)
   const [showBooksModal, setShowBooksModal] = useState(false)
   const [selectedState, setSelectedState] = useState<string | null>(null)
-  const [quotes, setQuotes] = useState<QuoteType[]>([])
-  const [newPostTitle, setNewPostTitle] = useState("");
+  const [quotes, setQuotes] = useState<Quote[]>([])
+  const [newPostTitle, setNewPostTitle] = useState("")
   const [newPost, setNewPost] = useState("")
 
   const { fetchPosts } = usePosts(params, toast, setPosts, router);
@@ -1112,31 +1115,29 @@ export default function ProfilePage() {
                     <TabsContent value="quotes" className="p-6">
                       <div className="space-y-6">
                         {quotes.length > 0 ? (
-                          quotes.map((quote) => (
-                            <Card key={quote.id} className="overflow-hidden border-none bg-white/70 backdrop-blur-sm shadow-md">
-                              <CardContent className="p-6">
-                                <div className="space-y-4">
-                                  <div className="flex items-center justify-between">
-                                    <div className="flex items-center space-x-2">
-                                      <BookOpen className="h-5 w-5 text-gray-500" />
-                                      <span className="font-medium">{quote.book?.title}</span>
-                                    </div>
-                                    <span className="text-sm text-gray-500">
-                                      {formatDate(quote.createdAt)}
-                                    </span>
-                                  </div>
-                                  <blockquote className="text-lg italic text-gray-700 border-l-4 border-gray-300 pl-4">
-                                    &#34;{quote.content}&#34;
-                                  </blockquote>
-                                  {quote.pageNumber && (
-                                    <div className="text-sm text-gray-500">
-                                      Sayfa: {quote.pageNumber}
-                                    </div>
-                                  )}
-                                </div>
-                              </CardContent>
-                            </Card>
-                          ))
+                          <AuthProvider>
+                            <QuoteList quotes={quotes} onQuotesChange={async () => {
+                              if (!params.id) {
+                                toast({
+                                  title: "Hata",
+                                  description: "Kullanıcı ID'si bulunamadı.",
+                                  variant: "destructive"
+                                });
+                                return;
+                              }
+                              try {
+                                const quotesData = await quoteService.getQuotesByUser(params.id.toString());
+                                setQuotes(quotesData);
+                              } catch (err) {
+                                console.error('Alıntılar yüklenirken hata:', err);
+                                toast({
+                                  title: "Hata",
+                                  description: "Alıntılar yüklenirken bir hata oluştu.",
+                                  variant: "destructive"
+                                });
+                              }
+                            }} />
+                          </AuthProvider>
                         ) : (
                           <div className="text-center py-8">
                             <QuoteIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />

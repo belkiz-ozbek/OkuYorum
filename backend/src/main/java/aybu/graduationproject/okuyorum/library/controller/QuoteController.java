@@ -65,4 +65,34 @@ public class QuoteController {
         quoteService.deleteQuote(id, userId);
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping("/{id}/like")
+    public ResponseEntity<QuoteDTO> toggleLike(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        Long userId = userService.findUserIdByUsername(userDetails.getUsername());
+        return ResponseEntity.ok(quoteService.toggleLike(id, userId));
+    }
+
+    @PostMapping("/{id}/save")
+    public ResponseEntity<QuoteDTO> toggleSave(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        Long userId = userService.findUserIdByUsername(userDetails.getUsername());
+        return ResponseEntity.ok(quoteService.toggleSave(id, userId));
+    }
+
+    @GetMapping("/liked")
+    public ResponseEntity<List<QuoteDTO>> getLikedQuotes(
+            @AuthenticationPrincipal UserDetails userDetails) {
+        Long userId = userService.findUserIdByUsername(userDetails.getUsername());
+        return ResponseEntity.ok(quoteService.getLikedQuotes(userId));
+    }
+
+    @GetMapping("/saved")
+    public ResponseEntity<List<QuoteDTO>> getSavedQuotes(
+            @AuthenticationPrincipal UserDetails userDetails) {
+        Long userId = userService.findUserIdByUsername(userDetails.getUsername());
+        return ResponseEntity.ok(quoteService.getSavedQuotes(userId));
+    }
 } 

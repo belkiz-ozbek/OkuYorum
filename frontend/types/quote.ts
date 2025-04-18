@@ -7,8 +7,14 @@ export interface Quote {
     pageNumber?: number;
     bookId: number;
     bookTitle: string;
+    bookAuthor?: string;
+    bookCoverImage?: string;
     userId: number;
     username: string;
+    userAvatar?: string;
+    likes?: number;
+    isLiked?: boolean;
+    isSaved?: boolean;
     createdAt?: string;
     updatedAt?: string;
 }

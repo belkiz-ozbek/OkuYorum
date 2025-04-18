@@ -55,7 +55,6 @@ public class SecurityConfig {
                 .requestMatchers("/api/messages/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
                 .requestMatchers(HttpMethod.PUT, "/api/books/*/status").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
                 .requestMatchers(HttpMethod.POST, "/api/books/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
-                .requestMatchers(HttpMethod.PUT, "/api/books/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/api/books/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
                 .requestMatchers(HttpMethod.POST, "/api/quotes/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
                 .requestMatchers(HttpMethod.PUT, "/api/quotes/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")

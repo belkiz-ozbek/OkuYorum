@@ -6,6 +6,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "quotes")
@@ -27,6 +29,22 @@ public class Quote {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    @ManyToMany
+    @JoinTable(
+        name = "quote_likes",
+        joinColumns = @JoinColumn(name = "quote_id"),
+        inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private Set<User> likedBy = new HashSet<>();
+
+    @ManyToMany
+    @JoinTable(
+        name = "quote_saves",
+        joinColumns = @JoinColumn(name = "quote_id"),
+        inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private Set<User> savedBy = new HashSet<>();
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -89,6 +107,22 @@ public class Quote {
         this.user = user;
     }
 
+    public Set<User> getLikedBy() {
+        return likedBy;
+    }
+
+    public void setLikedBy(Set<User> likedBy) {
+        this.likedBy = likedBy;
+    }
+
+    public Set<User> getSavedBy() {
+        return savedBy;
+    }
+
+    public void setSavedBy(Set<User> savedBy) {
+        this.savedBy = savedBy;
+    }
+
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
@@ -103,5 +137,29 @@ public class Quote {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public boolean isLikedBy(User user) {
+        return likedBy.contains(user);
+    }
+
+    public boolean isSavedBy(User user) {
+        return savedBy.contains(user);
+    }
+
+    public void toggleLike(User user) {
+        if (isLikedBy(user)) {
+            likedBy.remove(user);
+        } else {
+            likedBy.add(user);
+        }
+    }
+
+    public void toggleSave(User user) {
+        if (isSavedBy(user)) {
+            savedBy.remove(user);
+        } else {
+            savedBy.add(user);
+        }
     }
 }
