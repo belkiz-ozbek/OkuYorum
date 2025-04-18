@@ -35,6 +35,12 @@ public class BookLending {
     @Enumerated(EnumType.STRING)
     private LendingStatus status;
 
+    @Column(name = "rating")
+    private Integer rating;
+
+    @Column(name = "feedback")
+    private String feedback;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -42,6 +48,22 @@ public class BookLending {
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+    public String getFeedback() {
+        return feedback;
+    }
+
+    public void setFeedback(String feedback) {
+        this.feedback = feedback;
+    }
+
+    public Integer getRating() {
+        return rating;
+    }
+
+    public void setRating(Integer rating) {
+        this.rating = rating;
+    }
 
     public enum LendingStatus {
         BORROWED,
