@@ -29,9 +29,6 @@ public class Book {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<UserBook> userBooks = new ArrayList<>();
-
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -58,6 +55,9 @@ public class Book {
         WILL_READ,
         DROPPED
     }
+
+    @Column(name = "pathname", nullable = false)
+    private String pathname;
 
     // Getters and Setters
     public Long getId() {
@@ -100,14 +100,6 @@ public class Book {
         this.user = user;
     }
 
-    public List<UserBook> getUserBooks() {
-        return userBooks;
-    }
-
-    public void setUserBooks(List<UserBook> userBooks) {
-        this.userBooks = userBooks;
-    }
-
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
@@ -147,4 +139,12 @@ public class Book {
     public void setPageCount(Integer pageCount) {
         this.pageCount = pageCount;
     }
-} 
+
+    public String getPathname() {
+        return pathname;
+    }
+
+    public void setPathname(String pathname) {
+        this.pathname = pathname;
+    }
+}
