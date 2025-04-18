@@ -4,7 +4,8 @@ import { Lens } from "@/components/ui/lens"
 import { useMediaQuery } from "@/components/ui/use-media-query"
 
 export function MilletKiraathaneleri() {
-  useMediaQuery("(max-width: 768px)");
+  const isMobile = useMediaQuery("(max-width: 768px)")
+
   const kiraathaneData = [
     {
       name: "Beyoğlu Millet Kıraathanesi",

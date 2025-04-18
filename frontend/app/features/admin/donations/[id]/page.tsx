@@ -309,7 +309,7 @@ export default function AdminDonationDetailPage() {
           </div>
         </div>
         <Button asChild variant="outline">
-          <Link href="/features/admin/donations">
+          <Link href="/admin/features/donations">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Bağışlara Dön
           </Link>
@@ -324,7 +324,7 @@ export default function AdminDonationDetailPage() {
         <h1 className="text-2xl font-bold text-gray-900">Bağış Yönetimi</h1>
         <div className="flex gap-2">
           <Button asChild variant="outline">
-            <Link href="/features/admin/donations">
+            <Link href="/admin/features/donations">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Bağışlara Dön
             </Link>

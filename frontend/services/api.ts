@@ -49,7 +49,7 @@ api.interceptors.response.use(
     const originalRequest = error.config
     
     // 401 Unauthorized hatası ve token refresh denememiş ise
-    if (error.response?.status === 401 && !originalRequest._retry && originalRequest.url !== '/api/users/me') {
+    if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true
       
       try {
@@ -75,11 +75,7 @@ api.interceptors.response.use(
           // Token yenilenemezse veya refresh token yoksa oturumu kapat
           localStorage.removeItem('token')
           localStorage.removeItem('refreshToken')
-          // Sadece özel sayfalar için yönlendirme yap
-          if (window.location.pathname.includes('/features/library') || 
-              window.location.pathname.includes('/features/profile')) {
-            window.location.href = '/features/auth/login'
-          }
+          window.location.href = '/features/auth/login'
         }
       } catch (refreshError) {
         return Promise.reject(refreshError)

@@ -3,12 +3,10 @@ import Link from "next/link"
 import { BookOpen, Library, Compass, Users, Heart, Moon, Sun, User } from "lucide-react"
 import { SearchForm } from "@/components/ui/form/search-form"
 import { useEffect, useState } from "react"
-import { UserService } from "@/services/UserService"
 
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [theme, setTheme] = useState<"light" | "dark">("light")
-  const [currentUser, setCurrentUser] = useState<{ id: number; username: string } | null>(null)
 
   useEffect(() => {
     if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
@@ -21,27 +19,8 @@ export function Header() {
       setIsScrolled(scrollPosition > 50)
     }
 
-    const loadUserInfo = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-          setCurrentUser(null);
-          return;
-        }
-        const response = await UserService.getCurrentUser()
-        setCurrentUser(response.data)
-      } catch (error) {
-        console.error('Error loading user info:', error)
-        setCurrentUser(null)
-      }
-    }
-
     window.addEventListener("scroll", handleScroll)
-    loadUserInfo()
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll)
-    }
+    return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
   const toggleTheme = () => {
@@ -59,13 +38,11 @@ export function Header() {
       <div className="max-w-7xl mx-auto h-full flex items-center justify-between px-6">
         {/* Logo */}
         <Link className="flex items-center justify-center group relative" href="/features/homepage">
-          <div className="relative">
-            <BookOpen
-              className={`${
-                isScrolled ? "h-5 w-5" : "h-6 w-6"
-              } text-foreground group-hover:text-purple-400 transition-all duration-300`}
-            />
-          </div>
+          <BookOpen
+            className={`${
+              isScrolled ? "h-5 w-5" : "h-6 w-6"
+            } text-foreground group-hover:text-primary transition-all duration-300`}
+          />
           <span
             className={`ml-2 font-medium text-foreground transition-all duration-300 ${
               isScrolled ? "text-base" : "text-lg"
@@ -110,12 +87,9 @@ export function Header() {
               {theme === "light" ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
             </button>
 
-            <Link 
-              className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300" 
-              href={currentUser ? `/features/profile/${currentUser.id}` : '/'}
-            >
+            <Link className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300" href="/features/profile">
               <User className="h-5 w-5" />
-              <span>{currentUser?.username || 'Giriş Yap'}</span>
+              <span>Profil</span>
             </Link>
           </div>
         </div>
