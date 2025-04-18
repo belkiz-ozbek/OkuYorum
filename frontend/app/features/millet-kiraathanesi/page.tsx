@@ -413,7 +413,7 @@ function DiscussionCard({ title, author, participants, comments, lastActive }: {
       </div>
       <a 
         href="#" 
-        className="mt-4 block w-full text-center py-2 px-2 bg-primary hover:bg-primary/90 text-white rounded-lg transition-all duration-300"
+        className="mt-4 block w-full text-center py-2 px-4 bg-primary hover:bg-primary/90 text-white rounded-lg transition-all duration-300"
       >
         Tartışmaya Katıl
       </a>
