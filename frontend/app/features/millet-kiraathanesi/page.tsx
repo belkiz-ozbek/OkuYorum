@@ -365,15 +365,9 @@ function EventCard({ title, date, time, description, category, location, current
           {currentParticipants}/{maxParticipants} katılımcı
         </div>
       </div>
-      <div className="relative w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full mb-4">
-        <div 
-          className="absolute left-0 top-0 h-full bg-primary rounded-full transition-all duration-300"
-          style={{ width: `${(currentParticipants / maxParticipants) * 100}%` }}
-        />
-      </div>
       <a 
         href="#" 
-        className="block w-full text-center py-1.5 px-3 bg-primary hover:bg-primary/90 text-white rounded-lg transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg hover:shadow-primary/20"
+        className="inline-block text-center py-3 px-9 bg-primary hover:bg-primary/90 text-white rounded-lg transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg hover:shadow-primary/20"
       >
         Katıl
       </a>
@@ -413,7 +407,7 @@ function DiscussionCard({ title, author, participants, comments, lastActive }: {
       </div>
       <a 
         href="#" 
-        className="mt-4 block w-full text-center py-1.5 px-3 bg-primary hover:bg-primary/90 text-white rounded-lg transition-all duration-300"
+        className="mt-4 inline-block text-center py-2 px-2 bg-primary hover:bg-primary/90 text-white rounded-lg transition-all duration-300"
       >
         Tartışmaya Katıl
       </a>
