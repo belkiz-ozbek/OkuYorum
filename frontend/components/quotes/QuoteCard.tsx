@@ -1,9 +1,26 @@
-import { Heart, Share2, Bookmark, MessageCircle, Quote as QuoteIcon, Trash2 } from 'lucide-react';
-import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/Card';
+import { Heart, Share2, Bookmark, MessageCircle, Trash2, MoreVertical, Edit } from 'lucide-react';
+import { Card, CardContent, CardFooter } from '@/components/ui/Card';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
 import { Quote } from '@/types/quote';
+import { useState } from 'react';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface QuoteCardProps {
     quote: Quote;
@@ -13,51 +30,62 @@ interface QuoteCardProps {
 export function QuoteCard({ quote, onDelete }: QuoteCardProps) {
     const { user } = useAuth();
     const isOwner = user?.id === quote.userId;
+    const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+
+    const handleDelete = () => {
+        if (onDelete) {
+            onDelete(quote.id);
+        }
+        setShowDeleteDialog(false);
+    };
 
     return (
         <Card className="w-full overflow-hidden border border-purple-100 dark:border-purple-900/30 hover:border-purple-200 dark:hover:border-purple-800/50">
-            <CardHeader className="p-4 flex items-center justify-between border-b border-purple-50 dark:border-purple-900/20 group">
-                <div className="flex items-center">
-                    <div className="h-10 w-10 rounded-full border border-purple-100 dark:border-purple-900/50 transition-all duration-300 group-hover:border-purple-300 dark:group-hover:border-purple-700 group-hover:shadow-sm overflow-hidden">
-                        {quote.userAvatar ? (
-                            <img src={quote.userAvatar} alt={quote.username} className="h-full w-full object-cover" />
-                        ) : (
-                            <div className="h-full w-full bg-purple-100 dark:bg-purple-900/50 flex items-center justify-center text-purple-600 dark:text-purple-300">
-                                {quote.username.charAt(0)}
-                            </div>
-                        )}
+            <div className="p-4 border-b border-purple-50 dark:border-purple-900/20">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                        <Link href={`/features/profile/${quote.userId}`} className="text-sm font-medium text-gray-800 dark:text-gray-200 hover:text-purple-700 dark:hover:text-purple-400 transition-colors duration-200">
+                            {quote.username}
+                        </Link>
+                        <span className="mx-2 text-gray-400 dark:text-gray-500">•</span>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                            {new Date(quote.createdAt || '').toLocaleString('tr-TR', {
+                                year: 'numeric',
+                                month: 'numeric',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                            })}
+                        </p>
                     </div>
-                    <div className="ml-3">
-                        <div className="flex items-center">
-                            <Link href={`/features/profile/${quote.userId}`} className="font-medium text-gray-800 dark:text-gray-200 group-hover:text-purple-700 dark:group-hover:text-purple-400 transition-colors duration-200">
-                                {quote.username}
-                            </Link>
-                            <span className="mx-2 text-gray-400 dark:text-gray-500">•</span>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">
-                                {new Date(quote.createdAt || '').toLocaleDateString('tr-TR')}
-                            </p>
-                        </div>
-                        <div className="flex items-center mt-0.5">
-                            <span className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
-                                <div className="flex items-center justify-center w-4 h-4 bg-purple-100 dark:bg-purple-900/50 rounded-full">
-                                    <QuoteIcon className="h-3 w-3 text-purple-600 dark:text-purple-300" />
-                                </div>
-                                Alıntı
-                            </span>
-                        </div>
-                    </div>
+                    {isOwner && (
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-7 w-7 text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-50/50 dark:hover:bg-purple-900/10 rounded-full transition-all duration-200"
+                                >
+                                    <MoreVertical className="h-4 w-4" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuItem className="text-gray-600 dark:text-gray-300">
+                                    <Edit className="mr-2 h-4 w-4" />
+                                    Düzenle
+                                </DropdownMenuItem>
+                                <DropdownMenuItem 
+                                    className="text-red-600 dark:text-red-400"
+                                    onClick={() => setShowDeleteDialog(true)}
+                                >
+                                    <Trash2 className="mr-2 h-4 w-4" />
+                                    Sil
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    )}
                 </div>
-                {isOwner && onDelete && (
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => onDelete(quote.id)}
-                        className="h-8 w-8 text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50/50 dark:hover:bg-red-900/10 rounded-full transition-all duration-200"
-                    >
-                        <Trash2 className="h-4 w-4" />
-                    </Button>
-                )}
-            </CardHeader>
+            </div>
             <CardContent className="p-4 pt-5 pb-6">
                 {/* Book Info */}
                 <div className="flex items-start mb-4 group">
@@ -81,11 +109,11 @@ export function QuoteCard({ quote, onDelete }: QuoteCardProps) {
 
                 {/* Content Text */}
                 <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg border-l-4 border-purple-300 dark:border-purple-700 relative mb-4">
-                    <div className="absolute top-2 left-2 text-4xl text-purple-200 dark:text-purple-800 font-serif leading-none">"</div>
+                    <div className="absolute top-2 left-2 text-4xl text-purple-200 dark:text-purple-800 font-serif leading-none">&#34;</div>
                     <p className="text-gray-800 dark:text-gray-200 relative z-10 text-lg italic font-serif leading-relaxed pl-6">
                         {quote.content}
                     </p>
-                    <div className="absolute bottom-2 right-4 text-4xl text-purple-200 dark:text-purple-800 font-serif leading-none">"</div>
+                    <div className="absolute bottom-2 right-4 text-4xl text-purple-200 dark:text-purple-800 font-serif leading-none">&#34;</div>
                 </div>
                 
                 {quote.pageNumber && (
@@ -117,6 +145,23 @@ export function QuoteCard({ quote, onDelete }: QuoteCardProps) {
                     </button>
                 </div>
             </CardFooter>
+
+            <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Alıntıyı Sil</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Bu işlem kalıcı olarak alıntıyı silecektir. Bu işlem geri alınamaz.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>İptal</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">
+                            Sil
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </Card>
     );
 } 
