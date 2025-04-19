@@ -9,6 +9,7 @@ import { followService } from "@/services/followService"
 import { BaseUser } from "@/services/profileService"
 import { UserService } from "@/services/UserService"
 import { toast } from "sonner"
+import { useRouter } from "next/navigation"
 
 interface FollowListModalProps {
   isOpen: boolean
@@ -24,6 +25,7 @@ interface ExtendedUser extends BaseUser {
 }
 
 export function FollowListModal({ isOpen, onClose, userId, type, title }: FollowListModalProps) {
+  const router = useRouter()
   const [users, setUsers] = useState<ExtendedUser[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -196,7 +198,13 @@ export function FollowListModal({ isOpen, onClose, userId, type, title }: Follow
                 <div className="space-y-4">
                   {users.map((user, index) => (
                     <div key={`${user.id}-${index}`} className="flex items-center justify-between p-2 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg">
-                      <div className="flex items-center space-x-3">
+                      <div 
+                        className="flex items-center space-x-3 cursor-pointer"
+                        onClick={() => {
+                          router.push(`/features/profile/${user.id}`)
+                          onClose()
+                        }}
+                      >
                         <Avatar className="h-10 w-10">
                           <AvatarImage src={user.profileImage || undefined} alt={user.nameSurname} />
                           <AvatarFallback>{user.nameSurname.charAt(0)}</AvatarFallback>
