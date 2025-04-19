@@ -502,6 +502,31 @@ export default function ProfilePage() {
     }
   };
 
+  useEffect(() => {
+    const fetchQuotes = async () => {
+      if (!params.id) {
+        toast({
+          title: "Hata",
+          description: "Kullanıcı ID'si bulunamadı.",
+          variant: "destructive"
+        });
+        return;
+      }
+      try {
+        const quotesData = await quoteService.getQuotesByUser(params.id.toString());
+        setQuotes(quotesData);
+      } catch (err) {
+        console.error('Alıntılar yüklenirken hata:', err);
+        toast({
+          title: "Hata",
+          description: "Alıntılar yüklenirken bir hata oluştu.",
+          variant: "destructive"
+        });
+      }
+    };
+
+    fetchQuotes();
+  }, [params.id, toast]);
 
   // Date formatting helper function
   const formatDate = (dateString: string | undefined) => {
