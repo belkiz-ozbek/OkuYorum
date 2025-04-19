@@ -1,6 +1,6 @@
 "use client"
 
-import { BookOpen, Quote, Calendar, BookText, Heart, Share2, Bookmark, Users, MessageSquare, ChevronRight, Sparkles, Clock, Award } from 'lucide-react'
+import { BookOpen, Quote, Calendar, BookText, Heart, Share2, Bookmark, MessageSquare, ChevronRight, Sparkles, Clock, Award } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useEffect, useState } from 'react'
@@ -449,11 +449,11 @@ export default function BookPage({ params }: PageProps) {
 
                                                     {/* Content Text */}
                                                     <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg border-l-4 border-purple-300 dark:border-purple-700 relative mb-4">
-                                                        <div className="absolute top-2 left-2 text-4xl text-purple-200 dark:text-purple-800 font-serif leading-none">"</div>
+                                                        <div className="absolute top-2 left-2 text-4xl text-purple-200 dark:text-purple-800 font-serif leading-none">&#34;</div>
                                                         <p className="text-gray-800 dark:text-gray-200 relative z-10 text-lg italic font-serif leading-relaxed pl-6">
                                                             {quote.content}
                                                         </p>
-                                                        <div className="absolute bottom-2 right-4 text-4xl text-purple-200 dark:text-purple-800 font-serif leading-none">"</div>
+                                                        <div className="absolute bottom-2 right-4 text-4xl text-purple-200 dark:text-purple-800 font-serif leading-none">&#34;</div>
                                                     </div>
                                                     
                                                     {quote.pageNumber && (
@@ -464,8 +464,18 @@ export default function BookPage({ params }: PageProps) {
                                                 {/* Card Footer - Actions */}
                                                 <div className="px-4 py-3 border-t border-purple-50 dark:border-purple-900/20 flex items-center justify-between bg-purple-50/30 dark:bg-purple-900/10">
                                                     <div className="flex items-center space-x-6">
-                                                        <button className="flex items-center gap-1.5 px-2 py-1 rounded-full text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50/50 dark:hover:bg-red-900/10 transition-all duration-200">
-                                                            <Heart className="h-5 w-5" />
+                                                        <button
+                                                            className={`flex items-center gap-1.5 px-2 py-1 rounded-full transition-all duration-200 ${quote.isLiked ? 'text-red-500 bg-red-50 dark:bg-red-900/20' : 'text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50/50 dark:hover:bg-red-900/10'}`}
+                                                            onClick={async () => {
+                                                                try {
+                                                                    const updatedQuote = await quoteService.likeQuote(quote.id);
+                                                                    setQuotes(prevQuotes => prevQuotes.map(q => q.id === quote.id ? { ...q, likes: updatedQuote.likes, isLiked: updatedQuote.isLiked } : q));
+                                                                } catch (error) {
+                                                                    console.error('Beğeni işlemi başarısız:', error);
+                                                                }
+                                                            }}
+                                                        >
+                                                            <Heart className="h-5 w-5" fill={quote.isLiked ? "currentColor" : "none"} />
                                                             <span className="text-sm font-medium">{quote.likes || 0}</span>
                                                         </button>
 
