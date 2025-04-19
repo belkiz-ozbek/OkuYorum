@@ -35,6 +35,7 @@ export function QuoteCard({ quote, onDelete, onEdit }: QuoteCardProps) {
     const [showEditDialog, setShowEditDialog] = useState(false);
     const [editContent, setEditContent] = useState(quote.content);
     const [editPageNumber, setEditPageNumber] = useState(quote.pageNumber?.toString() || '');
+    const [dropdownOpen, setDropdownOpen] = useState(false);
 
     const handleDelete = () => {
         if (onDelete) {
@@ -63,7 +64,7 @@ export function QuoteCard({ quote, onDelete, onEdit }: QuoteCardProps) {
                         </p>
                     </div>
                     {isOwner && (
-                        <DropdownMenu>
+                        <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
                             <DropdownMenuTrigger asChild>
                                 <Button
                                     variant="ghost"
@@ -76,14 +77,20 @@ export function QuoteCard({ quote, onDelete, onEdit }: QuoteCardProps) {
                             <DropdownMenuContent align="end">
                                 <DropdownMenuItem 
                                     className="text-gray-600 dark:text-gray-300"
-                                    onClick={() => setShowEditDialog(true)}
+                                    onClick={() => {
+                                        setShowEditDialog(true);
+                                        setDropdownOpen(false);
+                                    }}
                                 >
                                     <Edit className="mr-2 h-4 w-4" />
                                     Düzenle
                                 </DropdownMenuItem>
                                 <DropdownMenuItem 
                                     className="text-red-600 dark:text-red-400"
-                                    onClick={() => setShowDeleteDialog(true)}
+                                    onClick={() => {
+                                        setShowDeleteDialog(true);
+                                        setDropdownOpen(false);
+                                    }}
                                 >
                                     <Trash2 className="mr-2 h-4 w-4" />
                                     Sil
