@@ -7,9 +7,12 @@ import aybu.graduationproject.okuyorum.library.repository.BookRepository;
 import aybu.graduationproject.okuyorum.library.repository.UserBookRepository;
 import aybu.graduationproject.okuyorum.user.entity.User;
 import aybu.graduationproject.okuyorum.user.repository.UserRepository;
+import aybu.graduationproject.okuyorum.user.service.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,15 +28,18 @@ public class BookService {
     private final UserRepository userRepository;
     private final UserBookRepository userBookRepository;
     private final GoogleBooksService googleBooksService;
+    private final UserService userService;
 
     public BookService(BookRepository bookRepository, 
                       UserRepository userRepository, 
                       UserBookRepository userBookRepository,
-                      GoogleBooksService googleBooksService) {
+                      GoogleBooksService googleBooksService,
+                      UserService userService) {
         this.bookRepository = bookRepository;
         this.userRepository = userRepository;
         this.userBookRepository = userBookRepository;
         this.googleBooksService = googleBooksService;
+        this.userService = userService;
     }
 
     @Transactional
@@ -70,7 +76,17 @@ public class BookService {
     public BookDto getBookById(Long id) {
         Book book = bookRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Book not found"));
-        return convertToDto(book);
+        
+        // Get the current user's ID from SecurityContext
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        Long userId = userService.getUserIdByUsername(username);
+        
+        // Get user's reading status for this book
+        UserBook userBook = userBookRepository.findByUserIdAndBookId(userId, id)
+                .orElse(null);
+        
+        return convertToDto(book, userBook);
     }
 
     public BookDto updateBook(Long id, BookDto bookDto) {

@@ -53,6 +53,8 @@ export default function BookPage({ params }: PageProps) {
                     throw new Error('Oturum bulunamadı')
                 }
 
+                console.log('Kitap detayı için API isteği yapılıyor...')
+
                 const response = await fetch(`http://localhost:8080/api/books/${resolvedParams.id}`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
@@ -64,12 +66,19 @@ export default function BookPage({ params }: PageProps) {
                 }
 
                 const data = await response.json()
-                console.log('Book data from API:', data); // Debug için eklendi
+                console.log('Kitap detay API yanıtı:', {
+                    id: data.id,
+                    title: data.title,
+                    status: data.status,
+                    fullResponse: data
+                })
+                
                 setBook({
                     ...data,
                     id: Number(data.id)
                 })
             } catch (err) {
+                console.error('Kitap detayı getirme hatası:', err)
                 setError(err instanceof Error ? err.message : 'Bir hata oluştu')
             } finally {
                 setLoading(false)
@@ -122,6 +131,12 @@ export default function BookPage({ params }: PageProps) {
                 throw new Error('Oturum bulunamadı')
             }
 
+            console.log('Durum güncelleme isteği:', {
+                bookId: book.id,
+                currentStatus: book.status,
+                newStatus: newStatus
+            })
+
             const response = await fetch(`http://localhost:8080/api/books/${book.id}/status`, {
                 method: 'PUT',
                 headers: {
@@ -135,12 +150,34 @@ export default function BookPage({ params }: PageProps) {
                 throw new Error('Okuma durumu güncellenemedi')
             }
 
-            setBook(prev => prev ? { ...prev, status: newStatus } : null)
+            // Backend'den gelen güncel kitap bilgisini al
+            const updatedBook = await response.json()
+            console.log('Durum güncelleme API yanıtı:', {
+                id: updatedBook.id,
+                title: updatedBook.title,
+                oldStatus: book.status,
+                newStatus: updatedBook.status,
+                fullResponse: updatedBook
+            })
+            
+            // State'i güncel kitap bilgisiyle güncelle
+            setBook(prev => {
+                const newState = prev ? { ...prev, ...updatedBook } : null
+                console.log('Güncellenmiş state:', {
+                    id: newState?.id,
+                    title: newState?.title,
+                    oldStatus: prev?.status,
+                    newStatus: newState?.status
+                })
+                return newState
+            })
+            
             toast({
                 title: "Başarılı!",
                 description: "Okuma durumu güncellendi.",
             })
         } catch (err) {
+            console.error('Durum güncelleme hatası:', err)
             toast({
                 title: "Hata!",
                 description: err instanceof Error ? err.message : 'Okuma durumu güncellenirken bir hata oluştu',

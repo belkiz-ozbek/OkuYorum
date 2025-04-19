@@ -1065,23 +1065,25 @@ export default function ProfilePage() {
                                   whileHover={{ y: -5 }}
                                   transition={{ duration: 0.2 }}
                                 >
-                                  <div className="relative aspect-[2/3] w-full overflow-hidden rounded-xl shadow-lg transition-all duration-300 group-hover:shadow-xl">
-                                    <Image
-                                      src={book.imageUrl ?? "/placeholder.svg"}
-                                      alt={book.title}
-                                      fill
-                                      className="object-cover transition-transform duration-300 group-hover:scale-105"
-                                    />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                                    
-                                    <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-full transition-transform duration-300 group-hover:translate-y-0">
-                                      <p className="text-white font-medium line-clamp-2 text-sm">{book.title}</p>
-                                      <p className="text-white/80 text-xs mt-1">{book.author}</p>
-                                    </div>
+                                  <Link href={`/features/book/${book.id}`}>
+                                    <div className="relative aspect-[2/3] w-full overflow-hidden rounded-xl shadow-lg transition-all duration-300 group-hover:shadow-xl">
+                                      <Image
+                                        src={book.imageUrl ?? "/placeholder.svg"}
+                                        alt={book.title}
+                                        fill
+                                        className="object-cover transition-transform duration-300 group-hover:scale-105"
+                                      />
+                                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                      
+                                      <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-full transition-transform duration-300 group-hover:translate-y-0">
+                                        <p className="text-white font-medium line-clamp-2 text-sm">{book.title}</p>
+                                        <p className="text-white/80 text-xs mt-1">{book.author}</p>
+                                      </div>
 
-                                    {/* Status Badge */}
-                                    <StatusBadge status={book.status?.toUpperCase() as 'READING' | 'READ' | 'WILL_READ' | 'DROPPED' | null} />
-                                  </div>
+                                      {/* Status Badge */}
+                                      <StatusBadge status={book.status?.toUpperCase() as 'READING' | 'READ' | 'WILL_READ' | 'DROPPED' | null} />
+                                    </div>
+                                  </Link>
                                 </motion.div>
                               ))}
                           </div>

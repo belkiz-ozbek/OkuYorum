@@ -48,8 +48,8 @@ public class UserService {
 
     public Long getUserIdByUsername(String username) {
         return userRepository.findByUsername(username)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"))
-                .getId();
+                .map(User::getId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
     }
 
     public User getUserById(Long id) {

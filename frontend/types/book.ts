@@ -19,7 +19,6 @@ export type Book = {
   popularity?: number;
   weeklyReaders?: number;
   status?: 'READING' | 'READ' | 'WILL_READ' | 'DROPPED' | null;
-  readingStatus?: 'READING' | 'READ' | 'WILL_READ' | 'DROPPED' | null;
   userId?: number;
   createdAt?: string;
   updatedAt?: string;
