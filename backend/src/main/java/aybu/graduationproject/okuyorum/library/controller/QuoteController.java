@@ -95,4 +95,13 @@ public class QuoteController {
         Long userId = userService.getUserIdByUsername(userDetails.getUsername());
         return ResponseEntity.ok(quoteService.getSavedQuotes(userId));
     }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<QuoteDTO> updateQuote(
+            @PathVariable Long id,
+            @RequestBody CreateQuoteRequest request,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        Long userId = userService.getUserIdByUsername(userDetails.getUsername());
+        return ResponseEntity.ok(quoteService.updateQuote(id, request, userId));
+    }
 } 

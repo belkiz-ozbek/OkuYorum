@@ -25,12 +25,16 @@ import {
 interface QuoteCardProps {
     quote: Quote;
     onDelete?: (id: number) => void;
+    onEdit?: (id: number, content: string, pageNumber?: string) => void;
 }
 
-export function QuoteCard({ quote, onDelete }: QuoteCardProps) {
+export function QuoteCard({ quote, onDelete, onEdit }: QuoteCardProps) {
     const { user } = useAuth();
     const isOwner = user?.id === quote.userId;
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+    const [showEditDialog, setShowEditDialog] = useState(false);
+    const [editContent, setEditContent] = useState(quote.content);
+    const [editPageNumber, setEditPageNumber] = useState(quote.pageNumber?.toString() || '');
 
     const handleDelete = () => {
         if (onDelete) {
@@ -70,7 +74,10 @@ export function QuoteCard({ quote, onDelete }: QuoteCardProps) {
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                                <DropdownMenuItem className="text-gray-600 dark:text-gray-300">
+                                <DropdownMenuItem 
+                                    className="text-gray-600 dark:text-gray-300"
+                                    onClick={() => setShowEditDialog(true)}
+                                >
                                     <Edit className="mr-2 h-4 w-4" />
                                     Düzenle
                                 </DropdownMenuItem>
@@ -158,6 +165,52 @@ export function QuoteCard({ quote, onDelete }: QuoteCardProps) {
                         <AlertDialogCancel>İptal</AlertDialogCancel>
                         <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">
                             Sil
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
+            <AlertDialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Alıntıyı Düzenle</AlertDialogTitle>
+                    </AlertDialogHeader>
+                    <div className="space-y-4 py-4">
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Alıntı</label>
+                            <textarea
+                                value={editContent}
+                                onChange={(e) => setEditContent(e.target.value)}
+                                className="w-full min-h-[100px] p-3 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                placeholder="Alıntıyı buraya yazın..."
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Sayfa Numarası</label>
+                            <input
+                                type="text"
+                                value={editPageNumber}
+                                onChange={(e) => setEditPageNumber(e.target.value)}
+                                className="w-full p-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                placeholder="Sayfa numarası"
+                            />
+                        </div>
+                    </div>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel onClick={() => {
+                            setEditContent(quote.content);
+                            setEditPageNumber(quote.pageNumber?.toString() || '');
+                        }}>İptal</AlertDialogCancel>
+                        <AlertDialogAction 
+                            onClick={() => {
+                                if (onEdit) {
+                                    onEdit(quote.id, editContent, editPageNumber);
+                                }
+                                setShowEditDialog(false);
+                            }} 
+                            className="bg-purple-600 hover:bg-purple-700"
+                        >
+                            Kaydet
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>

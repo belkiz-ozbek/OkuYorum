@@ -135,6 +135,23 @@ public class QuoteServiceImpl implements QuoteService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    @Transactional
+    public QuoteDTO updateQuote(Long id, CreateQuoteRequest request, Long userId) {
+        Quote quote = quoteRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Quote not found"));
+
+        if (!quote.getUser().getId().equals(userId)) {
+            throw new RuntimeException("Unauthorized to update this quote");
+        }
+
+        quote.setContent(request.getContent());
+        quote.setPageNumber(request.getPageNumber());
+
+        Quote savedQuote = quoteRepository.save(quote);
+        return convertToDTO(savedQuote, quote.getUser());
+    }
+
     private QuoteDTO convertToDTO(Quote quote, User currentUser) {
         QuoteDTO dto = new QuoteDTO();
         dto.setId(quote.getId());

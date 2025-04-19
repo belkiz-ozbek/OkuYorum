@@ -29,6 +29,27 @@ export function QuoteList({ quotes, onQuotesChange }: QuoteListProps) {
         }
     };
 
+    const handleEdit = async (id: number, content: string, pageNumber?: string) => {
+        try {
+            await quoteService.updateQuote(id, {
+                content,
+                pageNumber: pageNumber ? parseInt(pageNumber) : undefined
+            });
+            toast({
+                title: 'Başarılı',
+                description: 'Alıntı başarıyla güncellendi.',
+            });
+            onQuotesChange();
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        } catch (error) {
+            toast({
+                title: 'Hata',
+                description: 'Alıntı güncellenirken bir hata oluştu.',
+                variant: 'destructive',
+            });
+        }
+    };
+
     if (quotes.length === 0) {
         return (
             <div className="text-center text-gray-500 py-8">
@@ -44,6 +65,7 @@ export function QuoteList({ quotes, onQuotesChange }: QuoteListProps) {
                     key={quote.id}
                     quote={quote}
                     onDelete={handleDelete}
+                    onEdit={handleEdit}
                 />
             ))}
         </div>

@@ -17,8 +17,8 @@ export const quoteService = {
         return response.data;
     },
 
-    updateQuote: async (quoteId: number, content: string, pageNumber?: number): Promise<Quote> => {
-        const response = await api.put(`/api/quotes/${quoteId}`, { content, pageNumber });
+    updateQuote: async (quoteId: number, data: { content: string; pageNumber?: number }): Promise<Quote> => {
+        const response = await api.patch(`/api/quotes/${quoteId}`, data);
         return response.data;
     },
 

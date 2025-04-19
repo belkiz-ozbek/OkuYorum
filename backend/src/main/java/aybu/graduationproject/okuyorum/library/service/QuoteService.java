@@ -16,4 +16,5 @@ public interface QuoteService {
     QuoteDTO toggleSave(Long quoteId, Long userId);
     List<QuoteDTO> getLikedQuotes(Long userId);
     List<QuoteDTO> getSavedQuotes(Long userId);
+    QuoteDTO updateQuote(Long id, CreateQuoteRequest request, Long userId);
 } 
