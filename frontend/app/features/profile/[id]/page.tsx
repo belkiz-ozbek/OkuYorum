@@ -199,69 +199,15 @@ export default function ProfilePage() {
   }, [fetchPosts]);
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const token = localStorage.getItem('token')
-        if (!token) {
-          // Token yoksa sadece public verileri getir
-          const profileData = await profileService.getUserProfile(params.id.toString());
-          setProfile(profileData);
-          return;
-        }
-
-        // Token varsa tüm verileri getir
-        const [profileData, achievementsData, readingActivityData] = await Promise.all([
-          profileService.getUserProfile(params.id.toString()),
-          profileService.getUserAchievements(params.id.toString()),
-          profileService.getUserReadingActivity(params.id.toString())
-        ]);
-
-        setProfile(profileData);
-        setAchievements(achievementsData);
-        setReadingActivity(readingActivityData);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Bir hata oluştu')
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    const fetchBooks = async () => {
-      try {
-        if (!params.id) return;
-        const booksData = await bookService.getBooks(params.id.toString());
-        setBooks(booksData);
-      } catch (err) {
-        console.error('Kitaplar yüklenirken hata:', err);
-      }
-    };
-
-    const fetchQuotes = async () => {
-      try {
-        if (!params.id) return;
-        const quotesData = await quoteService.getQuotesByUser(params.id.toString());
-        setQuotes(quotesData);
-      } catch (err) {
-        console.error('Alıntılar yüklenirken hata:', err);
-      }
-    };
-
-    const loadData = async () => {
-      await Promise.all([
-        fetchProfile(),
-        fetchBooks(),
-        fetchQuotes()
-      ]);
-    };
-
-    loadData();
-  }, [params.id]);
-
-  useEffect(() => {
     const loadUserInfo = async () => {
       try {
         const response = await UserService.getCurrentUser();
         setCurrentUser(response.data);
+        // Kullanıcı giriş yapmışsa ve profil sayfası başka bir kullanıcıya aitse takip durumunu kontrol et
+        if (response.data && params.id && response.data.id.toString() !== params.id.toString()) {
+          const isFollowingStatus = await followService.isFollowing(params.id.toString());
+          setIsFollowing(isFollowingStatus);
+        }
       } catch (error) {
         console.error('Error loading user info:', error);
         setCurrentUser(null);
@@ -269,7 +215,7 @@ export default function ProfilePage() {
     };
 
     loadUserInfo();
-  }, []);
+  }, [params.id]);
 
   const fetchProfileData = async () => {
     if (!params.id) {
@@ -277,10 +223,9 @@ export default function ProfilePage() {
       return;
     }
     try {
-      setLoading(true)
-      setError(null)
+      setLoading(true);
+      setError(null);
 
-      // Kendi profilimiz için de profileService.getUserProfile kullanıyoruz
       const profileData = await profileService.getUserProfile(params.id.toString());
       
       // Takip durumunu kontrol et
@@ -290,32 +235,32 @@ export default function ProfilePage() {
           profileService.getUserAchievements(params.id.toString()),
           profileService.getUserReadingActivity(params.id.toString()),
           bookService.getBooks(params.id.toString())
-        ])
+        ]);
         
-        setIsFollowing(isFollowingStatus)
-        setProfile(profileData)
-        setAchievements(achievementsData)
-        setReadingActivity(readingActivityData)
-        setBooks(booksData)
+        setIsFollowing(isFollowingStatus);
+        setProfile(profileData);
+        setAchievements(achievementsData);
+        setReadingActivity(readingActivityData);
+        setBooks(booksData);
       } else {
         const [achievementsData, readingActivityData, booksData] = await Promise.all([
           profileService.getUserAchievements(params.id.toString()),
           profileService.getUserReadingActivity(params.id.toString()),
           bookService.getBooks(params.id.toString())
-        ])
+        ]);
         
-        setProfile(profileData)
-        setAchievements(achievementsData)
-        setReadingActivity(readingActivityData)
-        setBooks(booksData)
+        setProfile(profileData);
+        setAchievements(achievementsData);
+        setReadingActivity(readingActivityData);
+        setBooks(booksData);
       }
     } catch (error) {
-      console.error("Error fetching profile data:", error)
-      setError("Profil bilgileri yüklenirken bir hata oluştu.")
+      console.error("Error fetching profile data:", error);
+      setError("Profil bilgileri yüklenirken bir hata oluştu.");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -449,17 +394,15 @@ export default function ProfilePage() {
     return achievementIcons[achievementType as keyof typeof achievementIcons] || <Award className="h-6 w-6" />
   }
   const handleFollow = async () => {
-    if (!params.id || Array.isArray(params.id)) return;
+    const targetUserId = params.id;
+    if (!targetUserId || Array.isArray(targetUserId)) return;
     setIsFollowLoading(true);
     try {
-      const response = await followService.follow(params.id);
-      if (response.success && response.user) {
-        const { followers, following } = response.user;
-        setProfile((prev) => ({
-          ...prev,
-          followers,
-          following,
-        }));
+      const response = await followService.follow(targetUserId);
+      if (response.success) {
+        setIsFollowing(true);
+        // Profil verilerini güncelle
+        await fetchProfileData();
         toast({
           title: "Başarılı",
           description: "Kullanıcı takip edildi",
@@ -478,17 +421,15 @@ export default function ProfilePage() {
   };
 
   const handleUnfollow = async () => {
-    if (!params.id || Array.isArray(params.id)) return;
+    const targetUserId = params.id;
+    if (!targetUserId || Array.isArray(targetUserId)) return;
     setIsFollowLoading(true);
     try {
-      const response = await followService.unfollow(params.id);
-      if (response.success && response.user) {
-        const { followers, following } = response.user;
-        setProfile((prev) => ({
-          ...prev,
-          followers,
-          following,
-        }));
+      const response = await followService.unfollow(targetUserId);
+      if (response.success) {
+        setIsFollowing(false);
+        // Profil verilerini güncelle
+        await fetchProfileData();
         toast({
           title: "Başarılı",
           description: "Takipten çıkıldı",
@@ -770,7 +711,7 @@ export default function ProfilePage() {
                           ? 'bg-white hover:bg-red-50 border-gray-200 text-gray-700' 
                           : 'bg-purple-400 hover:bg-purple-500 text-white border-transparent'
                       } transition-all duration-200`}
-                      onClick={isFollowing ? () => setShowUnfollowConfirm(true) : handleFollow}
+                      onClick={isFollowing ? handleUnfollow : handleFollow}
                     >
                       {isFollowLoading ? (
                         <div className="flex items-center justify-center">
