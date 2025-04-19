@@ -152,6 +152,12 @@ public class QuoteServiceImpl implements QuoteService {
             dto.setIsLiked(quote.isLikedBy(currentUser));
             dto.setIsSaved(quote.isSavedBy(currentUser));
         }
+        if (quote.getCreatedAt() != null) {
+            dto.setCreatedAt(quote.getCreatedAt().toString());
+        }
+        if (quote.getUpdatedAt() != null) {
+            dto.setUpdatedAt(quote.getUpdatedAt().toString());
+        }
         return dto;
     }
 } 

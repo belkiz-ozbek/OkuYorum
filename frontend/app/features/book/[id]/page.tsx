@@ -16,6 +16,25 @@ type PageProps = {
     params: Promise<{ id: string }>
 }
 
+// Tarih formatlama yardımcı fonksiyonu
+const formatDate = (dateString: string | undefined) => {
+    if (!dateString) return '';
+    try {
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return '';
+        return date.toLocaleDateString('tr-TR', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    } catch (error) {
+        console.error('Tarih formatlanırken hata:', error);
+        return '';
+    }
+};
+
 export default function BookPage({ params }: PageProps) {
     const resolvedParams = use(params)
     const [book, setBook] = useState<Book | null>(null)
@@ -391,7 +410,7 @@ export default function BookPage({ params }: PageProps) {
                                                                 </Link>
                                                                 <span className="mx-2 text-gray-400 dark:text-gray-500">•</span>
                                                                 <p className="text-xs text-gray-500 dark:text-gray-400">
-                                                                    {new Date(quote.createdAt || '').toLocaleDateString('tr-TR')}
+                                                                    {formatDate(quote.createdAt)}
                                                                 </p>
                                                             </div>
                                                             <div className="flex items-center mt-0.5">
