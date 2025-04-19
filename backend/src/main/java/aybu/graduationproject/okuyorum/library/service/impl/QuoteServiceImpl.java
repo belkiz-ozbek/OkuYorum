@@ -15,16 +15,20 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import aybu.graduationproject.okuyorum.notification.service.NotificationService;
+
 @Service
 public class QuoteServiceImpl implements QuoteService {
     private final QuoteRepository quoteRepository;
     private final BookRepository bookRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
-    public QuoteServiceImpl(QuoteRepository quoteRepository, BookRepository bookRepository, UserRepository userRepository) {
+    public QuoteServiceImpl(QuoteRepository quoteRepository, BookRepository bookRepository, UserRepository userRepository, NotificationService notificationService) {
         this.quoteRepository = quoteRepository;
         this.bookRepository = bookRepository;
         this.userRepository = userRepository;
+        this.notificationService = notificationService;
     }
 
     @Override
@@ -47,25 +51,31 @@ public class QuoteServiceImpl implements QuoteService {
     }
 
     @Override
-    public QuoteDTO getQuote(Long id) {
+    public QuoteDTO getQuote(Long id, Long userId) {
         Quote quote = quoteRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Quote not found"));
-        return convertToDTO(quote, null);
+        User currentUser = userId != null ? userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found")) : null;
+        return convertToDTO(quote, currentUser);
     }
 
     @Override
-    public List<QuoteDTO> getUserQuotes(Long userId) {
+    public List<QuoteDTO> getUserQuotes(Long userId, Long currentUserId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+        User currentUser = currentUserId != null ? userRepository.findById(currentUserId)
+                .orElseThrow(() -> new RuntimeException("User not found")) : null;
         return quoteRepository.findByUserId(userId).stream()
-                .map(quote -> convertToDTO(quote, user))
+                .map(quote -> convertToDTO(quote, currentUser))
                 .collect(Collectors.toList());
     }
 
     @Override
-    public List<QuoteDTO> getBookQuotes(Long bookId) {
+    public List<QuoteDTO> getBookQuotes(Long bookId, Long userId) {
+        User currentUser = userId != null ? userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found")) : null;
         return quoteRepository.findByBookId(bookId).stream()
-                .map(quote -> convertToDTO(quote, null))
+                .map(quote -> convertToDTO(quote, currentUser))
                 .collect(Collectors.toList());
     }
 
@@ -99,8 +109,21 @@ public class QuoteServiceImpl implements QuoteService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
+        boolean wasLiked = quote.isLikedBy(user);
         quote.toggleLike(user);
         Quote savedQuote = quoteRepository.save(quote);
+
+        // Eğer alıntı beğenildiyse ve beğenen kişi alıntının sahibi değilse bildirim gönder
+        if (!wasLiked && !quote.getUser().getId().equals(userId)) {
+            notificationService.createNotification(
+                quote.getUser().getId(),
+                userId,
+                "LIKE",
+                String.format("%s alıntınızı beğendi", user.getUsername()),
+                String.format("/quotes/%d", quote.getId())
+            );
+        }
+
         return convertToDTO(savedQuote, user);
     }
 
@@ -152,29 +175,55 @@ public class QuoteServiceImpl implements QuoteService {
         return convertToDTO(savedQuote, quote.getUser());
     }
 
+    @Override
+    public String shareQuote(Long id, Long userId) {
+        Quote quote = quoteRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Quote not found"));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Şimdilik sadece frontend'e paylaşım URL'i döndürüyoruz
+        // İleride sosyal medya entegrasyonu eklenebilir
+        return String.format("/quotes/%d", quote.getId());
+    }
+
     private QuoteDTO convertToDTO(Quote quote, User currentUser) {
+        if (quote == null) {
+            return null;
+        }
+
         QuoteDTO dto = new QuoteDTO();
         dto.setId(quote.getId());
         dto.setContent(quote.getContent());
         dto.setPageNumber(quote.getPageNumber());
-        dto.setBookId(quote.getBook().getId());
-        dto.setBookTitle(quote.getBook().getTitle());
-        dto.setBookAuthor(quote.getBook().getAuthor());
-        dto.setBookCoverImage(quote.getBook().getImageUrl());
-        dto.setUserId(quote.getUser().getId());
-        dto.setUsername(quote.getUser().getUsername());
-        dto.setUserAvatar(quote.getUser().getProfileImage());
-        dto.setLikes(quote.getLikedBy().size());
+
+        Book book = quote.getBook();
+        if (book != null) {
+            dto.setBookId(book.getId());
+            dto.setBookTitle(book.getTitle());
+            dto.setBookAuthor(book.getAuthor());
+            dto.setBookCoverImage(book.getImageUrl());
+        }
+
+        User user = quote.getUser();
+        if (user != null) {
+            dto.setUserId(user.getId());
+            dto.setUsername(user.getUsername());
+            dto.setUserAvatar(user.getProfileImage());
+        }
+
+        dto.setLikes(quote.getLikedBy() != null ? quote.getLikedBy().size() : 0);
+        
         if (currentUser != null) {
-            dto.setIsLiked(quote.isLikedBy(currentUser));
-            dto.setIsSaved(quote.isSavedBy(currentUser));
+            dto.setLiked(quote.isLikedBy(currentUser));
+            dto.setSaved(quote.isSavedBy(currentUser));
+        } else {
+            dto.setLiked(false);
+            dto.setSaved(false);
         }
-        if (quote.getCreatedAt() != null) {
-            dto.setCreatedAt(quote.getCreatedAt().toString());
-        }
-        if (quote.getUpdatedAt() != null) {
-            dto.setUpdatedAt(quote.getUpdatedAt().toString());
-        }
+
+        dto.setCreatedAt(quote.getCreatedAt() != null ? quote.getCreatedAt().toString() : null);
+        dto.setUpdatedAt(quote.getUpdatedAt() != null ? quote.getUpdatedAt().toString() : null);
         return dto;
     }
 } 

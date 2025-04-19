@@ -1,5 +1,7 @@
 package aybu.graduationproject.okuyorum.library.dto;
 
+import java.time.LocalDateTime;
+
 public class QuoteDTO {
     private Long id;
     private String content;
@@ -11,16 +13,16 @@ public class QuoteDTO {
     private Long userId;
     private String username;
     private String userAvatar;
-    private Integer likes;
-    private Boolean isLiked;
-    private Boolean isSaved;
+    private int likes;
+    private boolean isLiked;
+    private boolean isSaved;
     private String createdAt;
     private String updatedAt;
 
     public QuoteDTO() {
     }
 
-    public QuoteDTO(Long id, String content, Integer pageNumber, Long bookId, String bookTitle, String bookAuthor, String bookCoverImage, Long userId, String username, String userAvatar, Integer likes, Boolean isLiked, Boolean isSaved, String createdAt, String updatedAt) {
+    public QuoteDTO(Long id, String content, Integer pageNumber, Long bookId, String bookTitle, String bookAuthor, String bookCoverImage, Long userId, String username, String userAvatar, int likes, boolean isLiked, boolean isSaved, String createdAt, String updatedAt) {
         this.id = id;
         this.content = content;
         this.pageNumber = pageNumber;
@@ -126,20 +128,20 @@ public class QuoteDTO {
         this.likes = likes;
     }
 
-    public Boolean getIsLiked() {
+    public boolean isLiked() {
         return isLiked;
     }
 
-    public void setIsLiked(Boolean isLiked) {
-        this.isLiked = isLiked;
+    public void setLiked(boolean liked) {
+        isLiked = liked;
     }
 
-    public Boolean getIsSaved() {
+    public boolean isSaved() {
         return isSaved;
     }
 
-    public void setIsSaved(Boolean isSaved) {
-        this.isSaved = isSaved;
+    public void setSaved(boolean saved) {
+        isSaved = saved;
     }
 
     public String getCreatedAt() {

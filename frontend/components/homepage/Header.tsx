@@ -1,6 +1,7 @@
 "use client"
 import Link from "next/link"
 import { BookOpen, Library, Compass, Users, Heart, Moon, Sun, User, MessageSquare } from "lucide-react"
+import { NotificationBell } from "@/components/ui/notification/NotificationBell"
 import { SearchForm } from "@/components/ui/form/search-form"
 import { useEffect, useState } from "react"
 import { UserService } from "@/services/UserService"
@@ -123,6 +124,8 @@ export function Header() {
                 </span>
               )}
             </Link>
+
+            <NotificationBell />
 
             <SearchForm isScrolled={isScrolled} />
           </nav>

@@ -7,9 +7,9 @@ import java.util.List;
 
 public interface QuoteService {
     QuoteDTO createQuote(CreateQuoteRequest request, Long userId);
-    QuoteDTO getQuote(Long id);
-    List<QuoteDTO> getUserQuotes(Long userId);
-    List<QuoteDTO> getBookQuotes(Long bookId);
+    QuoteDTO getQuote(Long id, Long userId);
+    List<QuoteDTO> getUserQuotes(Long userId, Long currentUserId);
+    List<QuoteDTO> getBookQuotes(Long bookId, Long userId);
     List<QuoteDTO> getUserBookQuotes(Long userId, Long bookId);
     void deleteQuote(Long id, Long userId);
     QuoteDTO toggleLike(Long quoteId, Long userId);
@@ -17,4 +17,5 @@ public interface QuoteService {
     List<QuoteDTO> getLikedQuotes(Long userId);
     List<QuoteDTO> getSavedQuotes(Long userId);
     QuoteDTO updateQuote(Long id, CreateQuoteRequest request, Long userId);
+    String shareQuote(Long id, Long userId);
 } 

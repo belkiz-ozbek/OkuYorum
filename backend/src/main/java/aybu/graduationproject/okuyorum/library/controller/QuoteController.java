@@ -28,25 +28,34 @@ public class QuoteController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<QuoteDTO> getQuote(@PathVariable Long id) {
-        return ResponseEntity.ok(quoteService.getQuote(id));
+    public ResponseEntity<QuoteDTO> getQuote(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        Long userId = userDetails != null ? userService.getUserIdByUsername(userDetails.getUsername()) : null;
+        return ResponseEntity.ok(quoteService.getQuote(id, userId));
     }
 
     @GetMapping("/user")
     public ResponseEntity<List<QuoteDTO>> getUserQuotes(
             @AuthenticationPrincipal UserDetails userDetails) {
         Long userId = userService.getUserIdByUsername(userDetails.getUsername());
-        return ResponseEntity.ok(quoteService.getUserQuotes(userId));
+        return ResponseEntity.ok(quoteService.getUserQuotes(userId, userId));
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<QuoteDTO>> getQuotesByUser(@PathVariable Long userId) {
-        return ResponseEntity.ok(quoteService.getUserQuotes(userId));
+    public ResponseEntity<List<QuoteDTO>> getQuotesByUser(
+            @PathVariable Long userId,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        Long currentUserId = userDetails != null ? userService.getUserIdByUsername(userDetails.getUsername()) : null;
+        return ResponseEntity.ok(quoteService.getUserQuotes(userId, currentUserId));
     }
 
     @GetMapping("/book/{bookId}")
-    public ResponseEntity<List<QuoteDTO>> getBookQuotes(@PathVariable Long bookId) {
-        return ResponseEntity.ok(quoteService.getBookQuotes(bookId));
+    public ResponseEntity<List<QuoteDTO>> getBookQuotes(
+            @PathVariable Long bookId,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        Long userId = userDetails != null ? userService.getUserIdByUsername(userDetails.getUsername()) : null;
+        return ResponseEntity.ok(quoteService.getBookQuotes(bookId, userId));
     }
 
     @GetMapping("/user/book/{bookId}")
@@ -103,5 +112,14 @@ public class QuoteController {
             @AuthenticationPrincipal UserDetails userDetails) {
         Long userId = userService.getUserIdByUsername(userDetails.getUsername());
         return ResponseEntity.ok(quoteService.updateQuote(id, request, userId));
+    }
+
+    @PostMapping("/{id}/share")
+    public ResponseEntity<String> shareQuote(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        Long userId = userService.getUserIdByUsername(userDetails.getUsername());
+        String shareUrl = quoteService.shareQuote(id, userId);
+        return ResponseEntity.ok(shareUrl);
     }
 } 

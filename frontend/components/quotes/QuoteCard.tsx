@@ -5,6 +5,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
 import { Quote } from '@/types/quote';
 import { useState } from 'react';
+import { motion } from 'framer-motion';
+import { cn } from '@/lib/utils';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -21,14 +23,23 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface QuoteCardProps {
     quote: Quote;
     onDelete?: (id: number) => void;
     onEdit?: (id: number, content: string, pageNumber?: string) => void;
+    onLike?: (id: number) => void;
+    onSave?: (id: number) => void;
+    onShare?: () => Promise<void>;
 }
 
-export function QuoteCard({ quote, onDelete, onEdit }: QuoteCardProps) {
+export function QuoteCard({ quote, onDelete, onEdit, onLike, onSave, onShare }: QuoteCardProps) {
     const { user } = useAuth();
     const isOwner = user?.id === quote.userId;
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -36,12 +47,32 @@ export function QuoteCard({ quote, onDelete, onEdit }: QuoteCardProps) {
     const [editContent, setEditContent] = useState(quote.content);
     const [editPageNumber, setEditPageNumber] = useState(quote.pageNumber?.toString() || '');
     const [dropdownOpen, setDropdownOpen] = useState(false);
+    const [isLiked, setIsLiked] = useState(quote.isLiked);
+    const [likesCount, setLikesCount] = useState(quote.likes || 0);
+
+    const iconVariants = {
+        initial: { scale: 1 },
+        hover: { scale: 1.1, transition: { duration: 0.2 } },
+        tap: { scale: 0.9, transition: { duration: 0.1 } },
+    };
 
     const handleDelete = () => {
         if (onDelete) {
             onDelete(quote.id);
         }
         setShowDeleteDialog(false);
+    };
+
+    const handleLike = async (id: number) => {
+        try {
+            if (onLike) {
+                await onLike(id);
+                setIsLiked(!isLiked);
+                setLikesCount(prev => isLiked ? prev - 1 : prev + 1);
+            }
+        } catch (error) {
+            console.error('Beğeni işlemi başarısız:', error);
+        }
     };
 
     return (
@@ -138,25 +169,94 @@ export function QuoteCard({ quote, onDelete, onEdit }: QuoteCardProps) {
             </CardContent>
             <CardFooter className="px-4 py-3 border-t border-purple-50 dark:border-purple-900/20 flex items-center justify-between bg-purple-50/30 dark:bg-purple-900/10">
                 <div className="flex items-center space-x-6">
-                    <button className="flex items-center gap-1.5 px-2 py-1 rounded-full text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50/50 dark:hover:bg-red-900/10 transition-all duration-200">
-                        <Heart className="h-5 w-5" />
-                        <span className="text-sm font-medium">{quote.likes || 0}</span>
-                    </button>
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <motion.button
+                                    variants={iconVariants}
+                                    whileHover="hover"
+                                    whileTap="tap"
+                                    className={cn(
+                                        "flex items-center gap-1.5 px-2 py-1 rounded-full transition-all duration-200",
+                                        isLiked
+                                            ? "text-red-500 bg-red-50 dark:bg-red-900/20"
+                                            : "text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50/50 dark:hover:bg-red-900/10",
+                                    )}
+                                    onClick={() => handleLike(quote.id)}
+                                >
+                                    <Heart className="h-5 w-5" fill={isLiked ? "currentColor" : "none"} />
+                                    <span className="text-sm font-medium">{likesCount}</span>
+                                </motion.button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>{isLiked ? "Beğenildi" : "Beğen"}</p>
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
 
-                    <button className="flex items-center gap-1.5 px-2 py-1 rounded-full text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-50/70 dark:hover:bg-purple-900/20 transition-all duration-200">
-                        <MessageCircle className="h-5 w-5" />
-                        <span className="text-sm font-medium">Yorum</span>
-                    </button>
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <motion.button
+                                    variants={iconVariants}
+                                    whileHover="hover"
+                                    whileTap="tap"
+                                    className="flex items-center gap-1.5 px-2 py-1 rounded-full text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-50/70 dark:hover:bg-purple-900/20 transition-all duration-200"
+                                >
+                                    <MessageCircle className="h-5 w-5" />
+                                    <span className="text-sm font-medium">Yorum</span>
+                                </motion.button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>Yorum Yap</p>
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
                 </div>
 
                 <div className="flex items-center space-x-3">
-                    <button className="flex items-center justify-center h-8 w-8 rounded-full text-gray-500 dark:text-gray-400 hover:text-green-500 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 transition-all duration-200">
-                        <Share2 className="h-5 w-5" />
-                    </button>
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <motion.button
+                                    variants={iconVariants}
+                                    whileHover="hover"
+                                    whileTap="tap"
+                                    className="flex items-center justify-center h-8 w-8 rounded-full text-gray-500 dark:text-gray-400 hover:text-green-500 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 transition-all duration-200"
+                                    onClick={() => onShare && onShare()}
+                                >
+                                    <Share2 className="h-5 w-5" />
+                                </motion.button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>Paylaş</p>
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
 
-                    <button className="flex items-center justify-center h-8 w-8 rounded-full text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all duration-200">
-                        <Bookmark className="h-5 w-5" />
-                    </button>
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <motion.button
+                                    variants={iconVariants}
+                                    whileHover="hover"
+                                    whileTap="tap"
+                                    className={cn(
+                                        "flex items-center justify-center h-8 w-8 rounded-full transition-all duration-200",
+                                        quote.isSaved
+                                            ? "text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/30"
+                                            : "text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20",
+                                    )}
+                                    onClick={() => onSave && onSave(quote.id)}
+                                >
+                                    <Bookmark className="h-5 w-5" fill={quote.isSaved ? "currentColor" : "none"} />
+                                </motion.button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>{quote.isSaved ? "Kaydedildi" : "Kaydet"}</p>
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
                 </div>
             </CardFooter>
 

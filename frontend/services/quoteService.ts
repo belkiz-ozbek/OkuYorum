@@ -34,5 +34,20 @@ export const quoteService = {
 
     deleteQuote: async (quoteId: number): Promise<void> => {
         await api.delete(`/api/quotes/${quoteId}`);
+    },
+
+    likeQuote: async (quoteId: number): Promise<Quote> => {
+        const response = await api.post(`/api/quotes/${quoteId}/like`);
+        return response.data;
+    },
+
+    saveQuote: async (quoteId: number): Promise<Quote> => {
+        const response = await api.post(`/api/quotes/${quoteId}/save`);
+        return response.data;
+    },
+
+    shareQuote: async (quoteId: number): Promise<{ url: string }> => {
+        const response = await api.post(`/api/quotes/${quoteId}/share`);
+        return response.data;
     }
 }; 

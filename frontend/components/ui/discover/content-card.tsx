@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/layout/avat
 import { Card } from "@/components/ui/layout/Card"
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
 import {DropdownMenu,DropdownMenuContent,DropdownMenuItem,DropdownMenuSeparator,DropdownMenuTrigger,} from "@/components/ui/dropdown-menu"
+import { useState } from "react"
 
 // Content types
 export type ContentType = "quote" | "review"
@@ -50,6 +51,19 @@ interface ContentCardProps {
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const ContentCard = ({ item, index = 0, onLike, onSave, onFollow, onShare }: ContentCardProps) => {
+  const [isLiked, setIsLiked] = useState(item.isLiked);
+  const [likesCount, setLikesCount] = useState(item.likes);
+
+  const handleLike = async (id: string) => {
+    try {
+      await onLike(id);
+      setIsLiked(!isLiked);
+      setLikesCount(prev => isLiked ? prev - 1 : prev + 1);
+    } catch (error) {
+      console.error('Beğeni işlemi başarısız:', error);
+    }
+  };
+
   const cardVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: {
@@ -265,18 +279,18 @@ export const ContentCard = ({ item, index = 0, onLike, onSave, onFollow, onShare
                     whileTap="tap"
                     className={cn(
                       "flex items-center gap-1.5 px-2 py-1 rounded-full transition-all duration-200",
-                      item.isLiked
+                      isLiked
                         ? "text-red-500 bg-red-50 dark:bg-red-900/20"
                         : "text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50/50 dark:hover:bg-red-900/10",
                     )}
-                    onClick={() => onLike(item.id)}
+                    onClick={() => handleLike(item.id)}
                   >
-                    <Heart className="h-5 w-5" fill={item.isLiked ? "currentColor" : "none"} />
-                    <span className="text-sm font-medium">{item.likes}</span>
+                    <Heart className="h-5 w-5" fill={isLiked ? "currentColor" : "none"} />
+                    <span className="text-sm font-medium">{likesCount}</span>
                   </motion.button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>{item.isLiked ? "Beğenildi" : "Beğen"}</p>
+                  <p>{isLiked ? "Beğenildi" : "Beğen"}</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
