@@ -789,13 +789,13 @@ export default function ProfilePage() {
                           <div className="space-y-4">
                             <div>
                               <Label className="block text-sm font-medium mb-1">İsim</Label>
-                              <Input value={profile.nameSurname} onChange={(e) => handleProfileUpdate("nameSurname", e.target.value)} />
+                              <Input value={profile.nameSurname || ""} onChange={(e) => handleProfileUpdate("nameSurname", e.target.value)} />
                             </div>
                             <div>
                               <Label className="block text-sm font-medium mb-1">Doğum Tarihi</Label>
                               <Input
                                   type="date"
-                                  value={profile.birthDate}
+                                  value={profile.birthDate || ""}
                                   onChange={(e) => handleProfileUpdate("birthDate", e.target.value)}
                               />
                             </div>
