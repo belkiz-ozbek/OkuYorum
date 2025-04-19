@@ -2,6 +2,7 @@ import { Quote } from '@/types/quote';
 import { QuoteCard } from './QuoteCard';
 import { quoteService } from '@/services/quoteService';
 import { useToast } from '@/components/ui/feedback/use-toast';
+import { useState, useEffect } from 'react';
 
 interface QuoteListProps {
     quotes: Quote[];
@@ -10,6 +11,28 @@ interface QuoteListProps {
 
 export function QuoteList({ quotes, onQuotesChange }: QuoteListProps) {
     const { toast } = useToast();
+    const [processedQuotes, setProcessedQuotes] = useState<Quote[]>([]);
+
+    // Sayfa yüklendiğinde beğenilen alıntıları al ve quotes state'ini güncelle
+    useEffect(() => {
+        const fetchLikedQuotes = async () => {
+            try {
+                const likedQuotesData = await quoteService.getLikedQuotes();
+                const likedQuoteIds = new Set(likedQuotesData.map(quote => quote.id));
+                
+                // Mevcut quotes'ları likedQuotes bilgisiyle güncelle
+                const updatedQuotes = quotes.map(quote => ({
+                    ...quote,
+                    isLiked: likedQuoteIds.has(quote.id)
+                }));
+                setProcessedQuotes(updatedQuotes);
+            } catch (error) {
+                console.error('Beğenilen alıntılar alınırken hata:', error);
+            }
+        };
+
+        fetchLikedQuotes();
+    }, [quotes]);
 
     const handleDelete = async (id: number) => {
         try {
@@ -52,7 +75,17 @@ export function QuoteList({ quotes, onQuotesChange }: QuoteListProps) {
 
     const handleLike = async (id: number) => {
         try {
-            await quoteService.likeQuote(id);
+            const updatedQuote = await quoteService.likeQuote(id);
+            
+            // ProcessedQuotes'u güncelle
+            setProcessedQuotes(prev => 
+                prev.map(quote => 
+                    quote.id === id 
+                        ? { ...quote, isLiked: updatedQuote.isLiked, likes: updatedQuote.likes } 
+                        : quote
+                )
+            );
+            
             onQuotesChange();
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (error) {
@@ -81,7 +114,7 @@ export function QuoteList({ quotes, onQuotesChange }: QuoteListProps) {
     const handleShare = async (id: number) => {
         try {
             const { url } = await quoteService.shareQuote(id);
-            await navigator.clipboard.writeText(`${window.location.origin}${url}`);
+            await navigator.clipboard.writeText(url);
             toast({
                 title: 'Başarılı',
                 description: 'Alıntı bağlantısı panoya kopyalandı.',
@@ -96,7 +129,7 @@ export function QuoteList({ quotes, onQuotesChange }: QuoteListProps) {
         }
     };
 
-    if (quotes.length === 0) {
+    if (processedQuotes.length === 0) {
         return (
             <div className="text-center text-gray-500 py-8">
                 Henüz alıntı eklenmemiş.
@@ -106,7 +139,7 @@ export function QuoteList({ quotes, onQuotesChange }: QuoteListProps) {
 
     return (
         <div className="space-y-6">
-            {quotes.map((quote) => (
+            {processedQuotes.map((quote) => (
                 <QuoteCard
                     key={quote.id}
                     quote={quote}

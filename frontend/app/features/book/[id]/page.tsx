@@ -11,6 +11,7 @@ import { toast } from "@/components/ui/feedback/use-toast"
 import { AddQuoteModal } from "@/components/ui/quote/add-quote-modal"
 import { Quote as QuoteType } from "@/types/quote"
 import { quoteService } from "@/services/quoteService"
+import { cn } from "@/lib/utils"
 
 type PageProps = {
     params: Promise<{ id: string }>
@@ -42,6 +43,7 @@ export default function BookPage({ params }: PageProps) {
     const [error, setError] = useState<string | null>(null)
     const [updatingStatus, setUpdatingStatus] = useState(false)
     const [quotes, setQuotes] = useState<QuoteType[]>([])
+    const [processedQuotes, setProcessedQuotes] = useState<QuoteType[]>([])
 
     useEffect(() => {
         const fetchBook = async () => {
@@ -62,6 +64,7 @@ export default function BookPage({ params }: PageProps) {
                 }
 
                 const data = await response.json()
+                console.log('Book data from API:', data); // Debug için eklendi
                 setBook({
                     ...data,
                     id: Number(data.id)
@@ -75,6 +78,39 @@ export default function BookPage({ params }: PageProps) {
 
         fetchBook()
     }, [resolvedParams.id])
+
+    useEffect(() => {
+        const fetchLikedQuotes = async () => {
+            try {
+                const likedQuotesData = await quoteService.getLikedQuotes();
+                const likedQuoteIds = new Set(likedQuotesData.map((quote: QuoteType) => quote.id));
+                
+                // Mevcut quotes'ları likedQuotes bilgisiyle güncelle
+                setProcessedQuotes(quotes.map(quote => ({
+                    ...quote,
+                    isLiked: likedQuoteIds.has(quote.id)
+                })));
+            } catch (error) {
+                console.error('Beğenilen alıntılar alınırken hata:', error);
+            }
+        };
+
+        fetchLikedQuotes();
+    }, [quotes]);
+
+    useEffect(() => {
+        const fetchQuotes = async () => {
+            try {
+                if (!book) return;
+                const bookQuotes = await quoteService.getBookQuotes(book.id);
+                setQuotes(bookQuotes);
+            } catch (error) {
+                console.error('Alıntılar yüklenirken hata:', error);
+            }
+        };
+
+        fetchQuotes();
+    }, [book]);
 
     const handleStatusChange = async (newStatus: Book['status']) => {
         if (!book) return
@@ -119,19 +155,46 @@ export default function BookPage({ params }: PageProps) {
         setQuotes(prev => [newQuote, ...prev]);
     };
 
-    useEffect(() => {
-        const fetchQuotes = async () => {
-            try {
-                if (!book) return;
-                const bookQuotes = await quoteService.getBookQuotes(book.id);
-                setQuotes(bookQuotes);
-            } catch (error) {
-                console.error('Alıntılar yüklenirken hata:', error);
-            }
-        };
+    const handleLikeQuote = async (quoteId: number) => {
+        try {
+            // Optimistic update
+            setProcessedQuotes(prevQuotes => prevQuotes.map(q => 
+                q.id === quoteId 
+                    ? { 
+                        ...q, 
+                        isLiked: !q.isLiked,
+                        likes: q.likes ? (q.isLiked ? q.likes - 1 : q.likes + 1) : 1
+                    } 
+                    : q
+            ));
 
-        fetchQuotes();
-    }, [book]);
+            // API call
+            const updatedQuote = await quoteService.likeQuote(quoteId);
+            
+            // Update with server response
+            setProcessedQuotes(prevQuotes => prevQuotes.map(q => 
+                q.id === quoteId 
+                    ? { 
+                        ...q, 
+                        likes: updatedQuote.likes, 
+                        isLiked: updatedQuote.isLiked 
+                    } 
+                    : q
+            ));
+        } catch (error) {
+            // Hata durumunda UI'ı eski haline döndür
+            setProcessedQuotes(prevQuotes => prevQuotes.map(q => 
+                q.id === quoteId 
+                    ? { 
+                        ...q, 
+                        isLiked: !q.isLiked,
+                        likes: q.likes ? (q.isLiked ? q.likes + 1 : q.likes - 1) : 0
+                    } 
+                    : q
+            ));
+            console.error('Beğeni işlemi başarısız:', error);
+        }
+    };
 
     if (loading) {
         return (
@@ -381,7 +444,7 @@ export default function BookPage({ params }: PageProps) {
                                     <AddQuoteModal bookId={book.id} onQuoteAdded={handleQuoteAdded} />
                                 </div>
 
-                                {quotes.length === 0 ? (
+                                {processedQuotes.length === 0 ? (
                                     <div className="text-center py-8 text-gray-500">
                                         <Quote className="w-12 h-12 mx-auto mb-4 opacity-20" />
                                         <p>Henüz bu kitap için alıntı eklenmemiş.</p>
@@ -389,7 +452,7 @@ export default function BookPage({ params }: PageProps) {
                                     </div>
                                 ) :
                                     <div className="space-y-6">
-                                        {quotes.map((quote) => (
+                                        {processedQuotes.map((quote) => (
                                             <div key={quote.id} className="bg-white/50 backdrop-blur-sm rounded-xl overflow-hidden border border-purple-100 dark:border-purple-900/30 hover:border-purple-200 dark:hover:border-purple-800/50">
                                                 {/* Card Header - User Info */}
                                                 <div className="p-4 flex items-center justify-between border-b border-purple-50 dark:border-purple-900/20 group">
@@ -465,15 +528,13 @@ export default function BookPage({ params }: PageProps) {
                                                 <div className="px-4 py-3 border-t border-purple-50 dark:border-purple-900/20 flex items-center justify-between bg-purple-50/30 dark:bg-purple-900/10">
                                                     <div className="flex items-center space-x-6">
                                                         <button
-                                                            className={`flex items-center gap-1.5 px-2 py-1 rounded-full transition-all duration-200 ${quote.isLiked ? 'text-red-500 bg-red-50 dark:bg-red-900/20' : 'text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50/50 dark:hover:bg-red-900/10'}`}
-                                                            onClick={async () => {
-                                                                try {
-                                                                    const updatedQuote = await quoteService.likeQuote(quote.id);
-                                                                    setQuotes(prevQuotes => prevQuotes.map(q => q.id === quote.id ? { ...q, likes: updatedQuote.likes, isLiked: updatedQuote.isLiked } : q));
-                                                                } catch (error) {
-                                                                    console.error('Beğeni işlemi başarısız:', error);
-                                                                }
-                                                            }}
+                                                            className={cn(
+                                                                "flex items-center gap-1.5 px-2 py-1 rounded-full transition-all duration-200",
+                                                                quote.isLiked
+                                                                    ? "text-red-500 bg-red-50 dark:bg-red-900/20"
+                                                                    : "text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50/50 dark:hover:bg-red-900/10"
+                                                            )}
+                                                            onClick={() => handleLikeQuote(quote.id)}
                                                         >
                                                             <Heart className="h-5 w-5" fill={quote.isLiked ? "currentColor" : "none"} />
                                                             <span className="text-sm font-medium">{quote.likes || 0}</span>
@@ -504,26 +565,7 @@ export default function BookPage({ params }: PageProps) {
                     </div>
                 </div>
 
-                {/* Benzer Kitaplar - Genel */}
-                <div className="mt-16">
-                    <h2 className="text-2xl font-light text-gray-700 mb-8">Benzer Kitaplar</h2>
-                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8">
-                        {[1, 2, 3, 4, 5, 6].map((i) => (
-                            <div key={i} className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)]
-                overflow-hidden hover:shadow-lg transition-all duration-300 border border-gray-100/50 group">
-                                <div className="aspect-w-2 aspect-h-3 bg-gray-50 relative overflow-hidden">
-                                    <div className="w-full h-full bg-gray-100" />
-                                </div>
-                                <div className="p-4">
-                                    <h3 className="font-medium text-sm mb-1 text-gray-700 truncate">Örnek Kitap {i}</h3>
-                                    <p className="text-xs text-gray-400 truncate">Yazar Adı</p>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
             </main>
         </div>
     )
 }
-

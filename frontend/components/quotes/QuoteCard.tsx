@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
 import { Quote } from '@/types/quote';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import {
@@ -47,7 +47,7 @@ export function QuoteCard({ quote, onDelete, onEdit, onLike, onSave, onShare }: 
     const [editContent, setEditContent] = useState(quote.content);
     const [editPageNumber, setEditPageNumber] = useState(quote.pageNumber?.toString() || '');
     const [dropdownOpen, setDropdownOpen] = useState(false);
-    const [isLiked, setIsLiked] = useState(quote.isLiked);
+    const [isLiked, setIsLiked] = useState(quote.isLiked || false);
     const [likesCount, setLikesCount] = useState(quote.likes || 0);
 
     const iconVariants = {
@@ -56,6 +56,11 @@ export function QuoteCard({ quote, onDelete, onEdit, onLike, onSave, onShare }: 
         tap: { scale: 0.9, transition: { duration: 0.1 } },
     };
 
+    useEffect(() => {
+        setIsLiked(quote.isLiked || false);
+        setLikesCount(quote.likes || 0);
+    }, [quote]);
+
     const handleDelete = () => {
         if (onDelete) {
             onDelete(quote.id);
@@ -63,15 +68,21 @@ export function QuoteCard({ quote, onDelete, onEdit, onLike, onSave, onShare }: 
         setShowDeleteDialog(false);
     };
 
-    const handleLike = async (id: number) => {
+    const handleLike = async () => {
+        const previousLikeState = isLiked;
+        const previousLikesCount = likesCount;
+
         try {
+            setIsLiked(!isLiked);
+            setLikesCount(prev => isLiked ? prev - 1 : prev + 1);
+
             if (onLike) {
-                await onLike(id);
-                setIsLiked(!isLiked);
-                setLikesCount(prev => isLiked ? prev - 1 : prev + 1);
+                await onLike(quote.id);
             }
         } catch (error) {
             console.error('Beğeni işlemi başarısız:', error);
+            setIsLiked(previousLikeState);
+            setLikesCount(previousLikesCount);
         }
     };
 
@@ -133,7 +144,13 @@ export function QuoteCard({ quote, onDelete, onEdit, onLike, onSave, onShare }: 
             </div>
             <CardContent className="p-4 pt-5 pb-6">
                 {/* Book Info */}
-                <div className="flex items-start mb-4 group">
+                <Link 
+                    href={`/features/book/${quote.bookId}`} 
+                    className="flex items-start mb-4 group cursor-pointer"
+                    onClick={() => {
+                        console.log('Navigating to book:', quote.bookId); // Debug için eklendi
+                    }}
+                >
                     {quote.bookCoverImage && (
                         <div className="relative h-24 w-16 rounded-md overflow-hidden shadow-md mr-4 flex-shrink-0 transition-all duration-300 group-hover:shadow-lg transform group-hover:scale-105">
                             <img
@@ -150,7 +167,7 @@ export function QuoteCard({ quote, onDelete, onEdit, onLike, onSave, onShare }: 
                         </h3>
                         <p className="text-gray-600 dark:text-gray-400 text-sm mb-2">{quote.bookAuthor}</p>
                     </div>
-                </div>
+                </Link>
 
                 {/* Content Text */}
                 <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg border-l-4 border-purple-300 dark:border-purple-700 relative mb-4">
@@ -182,7 +199,7 @@ export function QuoteCard({ quote, onDelete, onEdit, onLike, onSave, onShare }: 
                                             ? "text-red-500 bg-red-50 dark:bg-red-900/20"
                                             : "text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50/50 dark:hover:bg-red-900/10",
                                     )}
-                                    onClick={() => handleLike(quote.id)}
+                                    onClick={handleLike}
                                 >
                                     <Heart className="h-5 w-5" fill={isLiked ? "currentColor" : "none"} />
                                     <span className="text-sm font-medium">{likesCount}</span>

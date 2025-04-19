@@ -49,5 +49,10 @@ export const quoteService = {
     shareQuote: async (quoteId: number): Promise<{ url: string }> => {
         const response = await api.post(`/api/quotes/${quoteId}/share`);
         return response.data;
+    },
+
+    getLikedQuotes: async (): Promise<Quote[]> => {
+        const response = await api.get('/api/quotes/liked');
+        return response.data;
     }
 }; 
