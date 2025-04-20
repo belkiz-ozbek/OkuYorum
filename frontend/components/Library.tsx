@@ -7,6 +7,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {BookOpen, CheckCircle, Clock, Star, Library as LibraryIcon, Compass, Users, Heart, Moon, Sun, Check, Bookmark, UserPlus} from "lucide-react";
 import { ScratchToReveal } from "@/components/ui/scratch-to-reveal";
+import { Header } from "@/components/homepage/Header";
 
 interface Book {
   id: number;
@@ -534,48 +535,9 @@ const Library = ({ activeTab = 'all' }: LibraryProps): JSX.Element => {
   };
 
   return (
-    <div className={`min-h-screen ${theme === 'dark' ? 'bg-gradient-to-br from-gray-900 to-slate-800' : 'bg-gradient-to-br from-[#FDF3E7] to-[#EADBC8]'}`}>
-      <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-opacity-90 backdrop-blur-lg shadow-lg border-b border-white/10' : 'bg-transparent'} ${theme === 'dark' ? 'bg-gray-900' : 'bg-[#8B4513]'}`}>
-        <div className="flex justify-between items-center h-20">
-          <Link href="/" className="flex items-center gap-2 w-48">
-            <LibraryIcon className="h-8 w-8 text-white" />
-            <span className="text-2xl font-bold text-white">OkuYorum</span>
-          </Link>
-
-          <div className="flex-1 flex justify-center">
-            <nav className="hidden md:flex items-center space-x-2 bg-white/10 px-3 py-2 rounded-full">
-              {[
-                { name: 'Kitaplığım', href: '/features/library/all', icon: BookOpen },
-                { name: 'Keşfet', href: '/features/explore', icon: Compass },
-                { name: 'Millet Kıraathaneleri', href: '/features/reading-halls', icon: Users },
-                { name: 'Bağış Yap', href: '/features/donations', icon: Heart },
-              ].map((item) => (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-200 ${
-                    pathname?.startsWith(item.href.split('/').slice(0, 3).join('/'))
-                      ? 'bg-white text-[#8B4513] shadow-md'
-                      : 'text-white hover:bg-white/20'
-                  }`}
-                >
-                  <item.icon className="w-5 h-5" />
-                  <span className="font-medium text-sm">{item.name}</span>
-                </Link>
-              ))}
-            </nav>
-          </div>
-
-          <div className="w-48 flex justify-end pr-4">
-            <button onClick={toggleTheme} className="text-white p-2 rounded-full hover:bg-white/20 transition-colors">
-              {theme === 'light' ? <Moon className="h-6 w-6" /> : <Sun className="h-6 w-6" />}
-            </button>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content with Padding for Fixed Navbar */}
-      <div className="pt-24">
+    <div className="flex min-h-screen flex-col">
+      <Header />
+      <div className="flex-1 mt-16">
         {/* Scratch To Reveal Component */}
         <div className="max-w-7xl mx-auto px-6 mb-8">
           {isClient && (
@@ -620,7 +582,7 @@ const Library = ({ activeTab = 'all' }: LibraryProps): JSX.Element => {
         </div>
 
         {/* Sol taraftaki ince dikey tab bar */}
-        <div className="fixed left-0 top-20 bottom-0 w-48 bg-[#8B4513]/90 dark:bg-gray-900/90 backdrop-blur-md shadow-xl border-r border-white/10">
+        <div className="fixed left-0 top-16 bottom-0 w-48 bg-[#8B4513]/90 dark:bg-gray-900/90 backdrop-blur-md shadow-xl border-r border-white/10">
           <div className="flex flex-col h-full py-8 space-y-6">
             <Link
               href="/features/library/all"
