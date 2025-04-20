@@ -8,6 +8,7 @@ import { usePathname } from "next/navigation";
 import {BookOpen, CheckCircle, Clock, Star, Library as LibraryIcon, Compass, Users, Heart, Moon, Sun, Check, Bookmark, UserPlus, ChevronLeft, ChevronRight} from "lucide-react";
 import { ScratchToReveal } from "@/components/ui/scratch-to-reveal";
 import { Header } from "@/components/homepage/Header";
+import KitapKaziKazan from "./KitapKaziKazan"
 
 interface Book {
   id: number;
@@ -539,47 +540,9 @@ const Library = ({ activeTab = 'all' }: LibraryProps): JSX.Element => {
     <div className="flex min-h-screen flex-col">
       <Header />
       <div className="flex-1 mt-16">
-        {/* Scratch To Reveal Component */}
-        <div className="max-w-7xl mx-auto px-6 mb-8">
-          {isClient && (
-            <ScratchToReveal
-              width={800}
-              height={200}
-              minScratchPercentage={70}
-              className="mx-auto rounded-2xl overflow-hidden"
-              gradientColors={['#1a1f2c', '#0f1219', '#070a10']}
-              onComplete={() => {
-                const randomBook = getRandomBook();
-                if (randomBook) {
-                  setRevealedBook(randomBook);
-                }
-              }}
-            >
-              <div className="w-full h-full flex flex-col items-center justify-center bg-[#0f1219]">
-                {!revealedBook ? (
-                  <div className="text-center">
-                    <h2 className="text-4xl font-bold text-white mb-2 font-playfair tracking-wide">
-                      Sıradaki Kitap Maceran Seni Bekliyor
-                    </h2>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-8">
-                    <div className="w-32 h-48 relative">
-                      <img
-                        src={revealedBook.coverImage}
-                        alt={revealedBook.title}
-                        className="w-full h-full object-cover rounded-lg shadow-lg"
-                      />
-                    </div>
-                    <div className="text-left">
-                      <h3 className="text-2xl font-bold text-white mb-2">{revealedBook.title}</h3>
-                      <p className="text-gray-400 text-lg">{revealedBook.author}</p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </ScratchToReveal>
-          )}
+        {/* Kitap Kazı Kazan Component - Moved to top */}
+        <div className="border-b border-border">
+          <KitapKaziKazan />
         </div>
 
         {/* Sol taraftaki ince dikey tab bar */}
