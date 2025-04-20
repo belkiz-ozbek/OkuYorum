@@ -13,12 +13,17 @@ export interface FollowResponse {
 
 export const followService = {
     // Kullanıcının takip edilip edilmediğini kontrol et
-    isFollowing: async (targetUserId: string): Promise<boolean> => {
+    isFollowing: async (targetUserId: string, currentUserId?: string): Promise<boolean> => {
         try {
             const token = localStorage.getItem('token');
             if (!token) return false;
 
-            const response = await fetch(`${API_URL}/users/${targetUserId}/is-following`, {
+            // Eğer currentUserId verilmişse, o kullanıcının takip durumunu kontrol et
+            const checkUrl = currentUserId
+                ? `${API_URL}/users/${currentUserId}/is-following/${targetUserId}`
+                : `${API_URL}/users/${targetUserId}/is-following`;
+
+            const response = await fetch(checkUrl, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
@@ -65,7 +70,7 @@ export const followService = {
                     'Content-Type': 'application/json'
                 }
             });
-            
+
             const data = await response.json();
 
             if (!response.ok) {
@@ -154,7 +159,7 @@ export const followService = {
                     'Content-Type': 'application/json'
                 }
             });
-            
+
             if (!response.ok) {
                 console.error('Failed to fetch followers:', response.statusText);
                 return [];
@@ -179,7 +184,7 @@ export const followService = {
                     'Content-Type': 'application/json'
                 }
             });
-            
+
             if (!response.ok) {
                 console.error('Failed to fetch following:', response.statusText);
                 return [];

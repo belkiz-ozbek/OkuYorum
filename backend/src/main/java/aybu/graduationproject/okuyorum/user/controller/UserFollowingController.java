@@ -46,6 +46,13 @@ public class UserFollowingController {
         return ResponseEntity.ok(userFollowingService.getFollowing(userId));
     }
 
+    @GetMapping("/{userId}/is-following/{targetUserId}")
+    public ResponseEntity<Boolean> isUserFollowing(
+            @PathVariable Long userId,
+            @PathVariable Long targetUserId) {
+        return ResponseEntity.ok(userFollowingService.isFollowing(userId, targetUserId));
+    }
+
     @GetMapping("/{userId}/is-following")
     public ResponseEntity<Boolean> isFollowing(
             Authentication authentication,
