@@ -412,7 +412,7 @@ export default function DiscoverPage() {
         }`}
       >
         <div className="max-w-7xl mx-auto h-full flex items-center justify-between px-6">
-          <Link className="flex items-center justify-center group relative" href="/auth/homepage">
+          <Link className="flex items-center justify-center group relative" href="/features/homepage">
             <div className="relative">
               <BookOpen
                 className={`${isScrolled ? "h-5 w-5" : "h-6 w-6"} text-foreground group-hover:text-primary transition-all duration-300`}
