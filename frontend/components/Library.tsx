@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/Card";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {BookOpen, CheckCircle, Clock, Star, Library as LibraryIcon, Compass, Users, Heart, Moon, Sun, Check, Bookmark, UserPlus} from "lucide-react";
+import {BookOpen, CheckCircle, Clock, Star, Library as LibraryIcon, Compass, Users, Heart, Moon, Sun, Check, Bookmark, UserPlus, ChevronLeft, ChevronRight} from "lucide-react";
 import { ScratchToReveal } from "@/components/ui/scratch-to-reveal";
 import { Header } from "@/components/homepage/Header";
 
@@ -64,6 +64,7 @@ const Library = ({ activeTab = 'all' }: LibraryProps): JSX.Element => {
     { id: 4, username: 'ozbekbelkiz', nameSurname: 'Belkız Özbek' }
   ]);
   const [selectedUser, setSelectedUser] = useState<string>('');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   
   // İstemci tarafında olduğumuzu kontrol et ve localStorage'dan verileri yükle
   useEffect(() => {
@@ -582,87 +583,104 @@ const Library = ({ activeTab = 'all' }: LibraryProps): JSX.Element => {
         </div>
 
         {/* Sol taraftaki ince dikey tab bar */}
-        <div className="fixed left-0 top-16 bottom-0 w-48 bg-[#8B4513]/90 dark:bg-gray-900/90 backdrop-blur-md shadow-xl border-r border-white/10">
+        <div className={`fixed left-0 top-16 bottom-0 transition-all duration-300 ${isSidebarOpen ? 'w-48' : 'w-12'} bg-background/60 backdrop-blur-lg border-r border-border`}>
           <div className="flex flex-col h-full py-8 space-y-6">
+            <button
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              className="absolute -right-3 top-1/2 transform -translate-y-1/2 bg-background/60 backdrop-blur-lg rounded-full p-1 border border-border hover:bg-background/80 transition-colors"
+            >
+              {isSidebarOpen ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+            </button>
+
             <Link
               href="/features/library/all"
               className={`flex items-center gap-2 px-4 py-3 transition-all duration-300 border-l-4 ${
                 activeTab === 'all'
-                  ? 'bg-white/10 border-white text-white'
-                  : 'border-transparent text-white/80 hover:bg-white/5 hover:border-white/50'
+                  ? 'bg-primary/10 border-primary text-primary'
+                  : 'border-transparent text-muted-foreground hover:bg-primary/5 hover:border-primary/50'
               }`}
             >
-              <BookOpen className="w-5 h-5" />
-              <span className="font-medium text-sm">Tümü</span>
-              <span className="ml-auto text-xs bg-white/20 px-2 py-0.5 rounded-full">
-                {getTabCount('all')}
-              </span>
+              <BookOpen className="w-5 h-5 flex-shrink-0" />
+              <div className={`transition-all duration-300 ${isSidebarOpen ? 'opacity-100' : 'opacity-0 w-0'}`}>
+                <span className="font-medium text-sm">Tümü</span>
+                <span className="ml-auto text-xs bg-primary/20 px-2 py-0.5 rounded-full">
+                  {getTabCount('all')}
+                </span>
+              </div>
             </Link>
 
             <Link
               href="/features/library/favorites"
               className={`flex items-center gap-2 px-4 py-3 transition-all duration-300 border-l-4 ${
                 activeTab === 'favorites'
-                  ? 'bg-white/10 border-white text-white'
-                  : 'border-transparent text-white/80 hover:bg-white/5 hover:border-white/50'
+                  ? 'bg-primary/10 border-primary text-primary'
+                  : 'border-transparent text-muted-foreground hover:bg-primary/5 hover:border-primary/50'
               }`}
             >
-              <Star className="w-5 h-5" />
-              <span className="font-medium text-sm">Favoriler</span>
-              <span className="ml-auto text-xs bg-white/20 px-2 py-0.5 rounded-full">
-                {getTabCount('favorite')}
-              </span>
+              <Star className="w-5 h-5 flex-shrink-0" />
+              <div className={`transition-all duration-300 ${isSidebarOpen ? 'opacity-100' : 'opacity-0 w-0'}`}>
+                <span className="font-medium text-sm">Favoriler</span>
+                <span className="ml-auto text-xs bg-primary/20 px-2 py-0.5 rounded-full">
+                  {getTabCount('favorite')}
+                </span>
+              </div>
             </Link>
 
             <Link
               href="/features/library/to-read"
               className={`flex items-center gap-2 px-4 py-3 transition-all duration-300 border-l-4 ${
                 activeTab === 'to-read'
-                  ? 'bg-white/10 border-white text-white'
-                  : 'border-transparent text-white/80 hover:bg-white/5 hover:border-white/50'
+                  ? 'bg-primary/10 border-primary text-primary'
+                  : 'border-transparent text-muted-foreground hover:bg-primary/5 hover:border-primary/50'
               }`}
             >
-              <Clock className="w-5 h-5" />
-              <span className="font-medium text-sm">Okunacaklar</span>
-              <span className="ml-auto text-xs bg-white/20 px-2 py-0.5 rounded-full">
-                {getTabCount('to-read')}
-              </span>
+              <Clock className="w-5 h-5 flex-shrink-0" />
+              <div className={`transition-all duration-300 ${isSidebarOpen ? 'opacity-100' : 'opacity-0 w-0'}`}>
+                <span className="font-medium text-sm">Okunacaklar</span>
+                <span className="ml-auto text-xs bg-primary/20 px-2 py-0.5 rounded-full">
+                  {getTabCount('to-read')}
+                </span>
+              </div>
             </Link>
 
             <Link
               href="/features/library/read"
               className={`flex items-center gap-2 px-4 py-3 transition-all duration-300 border-l-4 ${
                 activeTab === 'read'
-                  ? 'bg-white/10 border-white text-white'
-                  : 'border-transparent text-white/80 hover:bg-white/5 hover:border-white/50'
+                  ? 'bg-primary/10 border-primary text-primary'
+                  : 'border-transparent text-muted-foreground hover:bg-primary/5 hover:border-primary/50'
               }`}
             >
-              <CheckCircle className="w-5 h-5" />
-              <span className="font-medium text-sm">Okunanlar</span>
-              <span className="ml-auto text-xs bg-white/20 px-2 py-0.5 rounded-full">
-                {getTabCount('read')}
-              </span>
+              <CheckCircle className="w-5 h-5 flex-shrink-0" />
+              <div className={`transition-all duration-300 ${isSidebarOpen ? 'opacity-100' : 'opacity-0 w-0'}`}>
+                <span className="font-medium text-sm">Okunanlar</span>
+                <span className="ml-auto text-xs bg-primary/20 px-2 py-0.5 rounded-full">
+                  {getTabCount('read')}
+                </span>
+              </div>
             </Link>
 
             <Link
               href="/features/library/borrowed"
               className={`flex items-center gap-2 px-4 py-3 transition-all duration-300 border-l-4 ${
                 activeTab === 'borrowed'
-                  ? 'bg-white/10 border-white text-white'
-                  : 'border-transparent text-white/80 hover:bg-white/5 hover:border-white/50'
+                  ? 'bg-primary/10 border-primary text-primary'
+                  : 'border-transparent text-muted-foreground hover:bg-primary/5 hover:border-primary/50'
               }`}
             >
-              <UserPlus className="w-5 h-5" />
-              <span className="font-medium text-sm">Ödünç Verilenler</span>
-              <span className="ml-auto text-xs bg-white/20 px-2 py-0.5 rounded-full">
-                {getTabCount('borrowed')}
-              </span>
+              <UserPlus className="w-5 h-5 flex-shrink-0" />
+              <div className={`transition-all duration-300 ${isSidebarOpen ? 'opacity-100' : 'opacity-0 w-0'}`}>
+                <span className="font-medium text-sm">Ödünç Verilenler</span>
+                <span className="ml-auto text-xs bg-primary/20 px-2 py-0.5 rounded-full">
+                  {getTabCount('borrowed')}
+                </span>
+              </div>
             </Link>
           </div>
         </div>
 
         {/* Ana içerik - sol tab bar'a göre ayarlanmış margin */}
-        <div className="ml-48">
+        <div className={`transition-all duration-300 ${isSidebarOpen ? 'ml-48' : 'ml-12'}`}>
           <div className="max-w-7xl mx-auto px-6 pb-12">
             <div className="relative bg-[#6B4423] dark:bg-[#523018] rounded-3xl p-8 shadow-2xl">
               <div className="absolute inset-0 opacity-30 rounded-3xl" style={{
