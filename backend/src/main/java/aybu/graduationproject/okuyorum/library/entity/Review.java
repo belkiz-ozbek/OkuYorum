@@ -28,6 +28,9 @@ public class Review {
     @Column(columnDefinition = "TEXT")
     private String content;
 
+    @Column(name = "is_deleted", nullable = false)
+    private boolean isDeleted = false;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -75,6 +78,14 @@ public class Review {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public boolean isDeleted() {
+        return isDeleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        isDeleted = deleted;
     }
 
     public LocalDateTime getCreatedAt() {

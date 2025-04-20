@@ -9,7 +9,7 @@ export type Book = {
   pageCount?: number;
   rating?: number;
   ratingCount?: number;
-  readCount?: number;
+  readCount: number;
   reviewCount?: number;
   categories?: string[];
   language?: string;

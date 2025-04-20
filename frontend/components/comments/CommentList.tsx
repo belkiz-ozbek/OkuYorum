@@ -20,8 +20,13 @@ export function CommentList({ comments: initialComments, onCommentCreated }: Com
     const updateComments = async () => {
         try {
             if (comments.length > 0) {
-                const updatedComments = await commentService.getQuoteComments(comments[0].quoteId);
-                setComments(updatedComments);
+                if (comments[0].quoteId) {
+                    const updatedComments = await commentService.getQuoteComments(comments[0].quoteId);
+                    setComments(updatedComments);
+                } else if (comments[0].reviewId) {
+                    const updatedComments = await commentService.getReviewComments(comments[0].reviewId);
+                    setComments(updatedComments);
+                }
             }
             onCommentCreated?.();
         } catch (error) {
@@ -109,16 +114,10 @@ export function CommentList({ comments: initialComments, onCommentCreated }: Com
             await commentService.toggleLike(commentId);
             
             // Başarılı olursa gerçek verileri getir
-            if (comments.length > 0) {
-                const updatedComments = await commentService.getQuoteComments(comments[0].quoteId);
-                setComments(updatedComments);
-            }
+            await updateComments();
         } catch (error) {
             // Hata durumunda eski yorumları geri yükle
-            if (comments.length > 0) {
-                const updatedComments = await commentService.getQuoteComments(comments[0].quoteId);
-                setComments(updatedComments);
-            }
+            await updateComments();
             console.error('Error toggling like:', error);
             toast({
                 title: 'Hata',
@@ -132,10 +131,13 @@ export function CommentList({ comments: initialComments, onCommentCreated }: Com
         try {
             if (!comments.length) return;
             
-            await commentService.replyToComment(parentCommentId, {
+            const request = {
                 quoteId: comments[0].quoteId,
-                content,
-            });
+                reviewId: comments[0].reviewId,
+                content
+            };
+            
+            await commentService.replyToComment(parentCommentId, request);
             await updateComments();
             toast({
                 title: 'Başarılı',

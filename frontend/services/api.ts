@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { Review } from '@/types/review'
 
 // API temel URL'sini ayarla
 const baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'
@@ -49,5 +50,15 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 )
+
+export const fetchUserReviews = async (userId: number): Promise<Review[]> => {
+  try {
+    const response = await axios.get(`${baseURL}/reviews/user/${userId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching user reviews:', error);
+    throw error;
+  }
+};
 
 export { api } 

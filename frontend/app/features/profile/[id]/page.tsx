@@ -53,6 +53,8 @@ import { postService, Post } from "@/services/postService"
 import { QuoteList } from "@/components/quotes/QuoteList"
 import { AuthProvider } from "@/contexts/AuthContext"
 import { EmptyState } from '@/components/ui/empty-state/EmptyState'
+import { Review, reviewService } from '@/services/reviewService'
+import { ReviewList } from '@/components/reviews/ReviewList'
 
 const initialProfile: UserProfile = {
   id: 0,
@@ -125,6 +127,8 @@ export default function ProfilePage() {
   const [editContent, setEditContent] = useState("");
   const [menuOpenId, setMenuOpenId] = useState<number | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [isLoadingReviews, setIsLoadingReviews] = useState(false);
 
   // --- DÜZENLEME FONKSİYONLARI ---
   const handleEditPost = (post: Post) => {
@@ -529,6 +533,33 @@ export default function ProfilePage() {
 
     fetchQuotes();
   }, [params.id, toast]);
+
+  // Kullanıcının incelemelerini çeken fonksiyon
+  const fetchUserReviews = useCallback(async () => {
+    if (!profile?.id) return;
+    
+    try {
+      setIsLoadingReviews(true);
+      const userReviews = await reviewService.getReviewsByUser(profile.id.toString());
+      setReviews(userReviews);
+    } catch (error) {
+      console.error('İncelemeler yüklenirken hata:', error);
+      toast({
+        title: 'Hata',
+        description: 'İncelemeler yüklenirken bir hata oluştu.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoadingReviews(false);
+    }
+  }, [profile?.id, toast]);
+
+  // Profile bilgileri yüklendiğinde incelemeleri de çek
+  useEffect(() => {
+    if (profile?.id) {
+      fetchUserReviews();
+    }
+  }, [profile?.id, fetchUserReviews]);
 
   // Date formatting helper function
   const formatDate = (dateString: string | undefined) => {
@@ -1125,10 +1156,15 @@ export default function ProfilePage() {
 
                     <TabsContent value="reviews" className="p-6">
                       <div className="space-y-6">
-                        {posts.filter(post => post.type === 'review').length > 0 ? (
-                          <div className="text-center py-8">
-                            <p className="text-gray-500">İncelemeler burada listelenecek</p>
+                        {isLoadingReviews ? (
+                          <div className="flex justify-center py-8">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
                           </div>
+                        ) : reviews.length > 0 ? (
+                          <ReviewList
+                            reviews={reviews}
+                            onReviewsChange={fetchUserReviews}
+                          />
                         ) : (
                           <EmptyState
                             icon={BookText}
@@ -1139,6 +1175,7 @@ export default function ProfilePage() {
                               "Yukarıdaki arama çubuğundan kitap aratıp, kitap detay sayfasından inceleme ekleyebilirsiniz." :
                               "Kullanıcı kitap incelemeleri paylaştığında burada görüntülenecek."}
                             ctaText={currentUser?.id === profile.id ? "Kitap Ara" : undefined}
+                            ctaAction={() => router.push('/features/discover')}
                           />
                         )}
                       </div>

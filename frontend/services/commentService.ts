@@ -2,7 +2,8 @@ import { api } from '@/lib/api';
 
 export interface Comment {
     id: number;
-    quoteId: number;
+    quoteId?: number;
+    reviewId?: number;
     userId: number;
     username: string;
     content: string;
@@ -15,43 +16,50 @@ export interface Comment {
 }
 
 export interface CreateCommentRequest {
-    quoteId: number;
+    quoteId?: number;
+    reviewId?: number;
+    content: string;
+    parentCommentId?: number;
+}
+
+export interface ReplyCommentRequest {
+    quoteId?: number;
+    reviewId?: number;
     content: string;
 }
 
-class CommentService {
-    async createComment(request: CreateCommentRequest): Promise<Comment> {
-        const response = await api.post('/api/comments', request);
-        return response.data;
-    }
-
-    async deleteComment(commentId: number): Promise<void> {
-        await api.delete(`/api/comments/${commentId}`);
-    }
-
-    async updateComment(commentId: number, content: string): Promise<Comment> {
-        const response = await api.put(`/api/comments/${commentId}`, content);
-        return response.data;
-    }
-
-    async toggleLike(commentId: number): Promise<void> {
-        await api.post(`/api/comments/${commentId}/like`);
-    }
-
-    async replyToComment(parentCommentId: number, request: CreateCommentRequest): Promise<Comment> {
-        const response = await api.post(`/api/comments/${parentCommentId}/reply`, request);
-        return response.data;
-    }
-
-    async getQuoteComments(quoteId: number): Promise<Comment[]> {
+export const commentService = {
+    getQuoteComments: async (quoteId: number): Promise<Comment[]> => {
         const response = await api.get(`/api/comments/quote/${quoteId}`);
         return response.data;
-    }
+    },
 
-    async getUserComments(userId: number): Promise<Comment[]> {
-        const response = await api.get(`/api/comments/user/${userId}`);
+    getReviewComments: async (reviewId: number): Promise<Comment[]> => {
+        const response = await api.get(`/api/comments/review/${reviewId}`);
+        return response.data;
+    },
+
+    createComment: async (request: CreateCommentRequest): Promise<Comment> => {
+        const response = await api.post('/api/comments', request);
+        return response.data;
+    },
+
+    updateComment: async (commentId: number, content: string): Promise<Comment> => {
+        const response = await api.patch(`/api/comments/${commentId}`, { content });
+        return response.data;
+    },
+
+    deleteComment: async (commentId: number): Promise<void> => {
+        await api.delete(`/api/comments/${commentId}`);
+    },
+
+    toggleLike: async (commentId: number): Promise<Comment> => {
+        const response = await api.post(`/api/comments/${commentId}/like`);
+        return response.data;
+    },
+
+    replyToComment: async (commentId: number, request: ReplyCommentRequest): Promise<Comment> => {
+        const response = await api.post(`/api/comments/${commentId}/reply`, request);
         return response.data;
     }
-}
-
-export const commentService = new CommentService(); 
+}; 

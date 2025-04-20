@@ -1,19 +1,19 @@
 import { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/form/button';
 import { Input } from '@/components/ui/form/input';
 import { Textarea } from '@/components/ui/form/textarea';
 import { useToast } from '@/components/ui/feedback/use-toast';
 import { quoteService } from '@/services/quoteService';
-import { Quote } from '@/types/quote';
 
 interface AddQuoteModalProps {
     bookId: number;
-    onQuoteAdded?: (quote: Quote) => void;
+    isOpen: boolean;
+    onClose: () => void;
+    onQuoteCreated: () => void;
 }
 
-export function AddQuoteModal({ bookId, onQuoteAdded }: AddQuoteModalProps) {
-    const [isOpen, setIsOpen] = useState(false);
+export function AddQuoteModal({ bookId, isOpen, onClose, onQuoteCreated }: AddQuoteModalProps) {
     const [content, setContent] = useState('');
     const [pageNumber, setPageNumber] = useState('');
     const { toast } = useToast();
@@ -32,7 +32,7 @@ export function AddQuoteModal({ bookId, onQuoteAdded }: AddQuoteModalProps) {
 
         try {
             setIsLoading(true);
-            const newQuote = await quoteService.createQuote({
+            await quoteService.createQuote({
                 content,
                 pageNumber: pageNumber ? parseInt(pageNumber) : undefined,
                 bookId
@@ -45,11 +45,8 @@ export function AddQuoteModal({ bookId, onQuoteAdded }: AddQuoteModalProps) {
 
             setContent('');
             setPageNumber('');
-            setIsOpen(false);
-            
-            if (onQuoteAdded) {
-                onQuoteAdded(newQuote);
-            }
+            onClose();
+            onQuoteCreated();
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (error) {
             toast({
@@ -63,10 +60,7 @@ export function AddQuoteModal({ bookId, onQuoteAdded }: AddQuoteModalProps) {
     };
 
     return (
-        <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogTrigger asChild>
-                <Button variant="outline">Alıntı Ekle</Button>
-            </DialogTrigger>
+        <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent>
                 <DialogHeader>
                     <DialogTitle>Yeni Alıntı Ekle</DialogTitle>
@@ -92,7 +86,7 @@ export function AddQuoteModal({ bookId, onQuoteAdded }: AddQuoteModalProps) {
                         <Button
                             type="button"
                             variant="outline"
-                            onClick={() => setIsOpen(false)}
+                            onClick={onClose}
                         >
                             İptal
                         </Button>

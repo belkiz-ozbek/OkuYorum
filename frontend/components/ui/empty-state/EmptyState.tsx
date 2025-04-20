@@ -2,18 +2,17 @@
 
 import { LucideIcon } from "lucide-react"
 import { motion } from "framer-motion"
-import { Button } from "@/components/ui/form/button"
-import Link from "next/link"
+import { Button } from "@/components/ui/button"
 
 interface EmptyStateProps {
   icon: LucideIcon
   title: string
   description: string
   ctaText?: string
-  ctaHref?: string
+  ctaAction?: () => void
 }
 
-export function EmptyState({ icon: Icon, title, description, ctaText, ctaHref }: EmptyStateProps) {
+export function EmptyState({ icon: Icon, title, description, ctaText, ctaAction }: EmptyStateProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -30,15 +29,10 @@ export function EmptyState({ icon: Icon, title, description, ctaText, ctaHref }:
       <p className="text-gray-600 dark:text-gray-400 text-center mb-6">
         {description}
       </p>
-      {ctaText && ctaHref && (
-        <Link href={ctaHref}>
-          <Button
-            variant="outline"
-            className="bg-purple-50 hover:bg-purple-100 text-purple-700 border-purple-200 hover:border-purple-300 dark:bg-purple-900/20 dark:hover:bg-purple-900/30 dark:text-purple-400 dark:border-purple-800 dark:hover:border-purple-700"
-          >
-            {ctaText}
-          </Button>
-        </Link>
+      {ctaText && ctaAction && (
+        <Button onClick={ctaAction} variant="default">
+          {ctaText}
+        </Button>
       )}
     </motion.div>
   )

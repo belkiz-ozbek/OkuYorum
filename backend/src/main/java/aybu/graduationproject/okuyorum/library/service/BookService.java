@@ -7,6 +7,7 @@ import aybu.graduationproject.okuyorum.library.repository.BookRepository;
 import aybu.graduationproject.okuyorum.library.repository.UserBookRepository;
 import aybu.graduationproject.okuyorum.user.entity.User;
 import aybu.graduationproject.okuyorum.user.repository.UserRepository;
+import aybu.graduationproject.okuyorum.library.repository.ReviewRepository;
 import aybu.graduationproject.okuyorum.user.service.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.data.domain.Page;
@@ -29,17 +30,20 @@ public class BookService {
     private final UserBookRepository userBookRepository;
     private final GoogleBooksService googleBooksService;
     private final UserService userService;
+    private final ReviewRepository reviewRepository;
 
     public BookService(BookRepository bookRepository, 
                       UserRepository userRepository, 
                       UserBookRepository userBookRepository,
                       GoogleBooksService googleBooksService,
-                      UserService userService) {
+                      UserService userService,
+                      ReviewRepository reviewRepository) {
         this.bookRepository = bookRepository;
         this.userRepository = userRepository;
         this.userBookRepository = userBookRepository;
         this.googleBooksService = googleBooksService;
         this.userService = userService;
+        this.reviewRepository = reviewRepository;
     }
 
     @Transactional
@@ -221,6 +225,16 @@ public class BookService {
         if (userBook != null) {
             dto.setStatus(userBook.getStatus());
         }
+
+        // Calculate total readers (users who have read the book)
+        int readCount = userBookRepository.findByBookIdAndStatus(book.getId(), Book.ReadingStatus.READ).size();
+        dto.setReadCount(readCount);
+        
+        // Calculate average rating and review count
+        Double avgRating = reviewRepository.getAverageRatingByBookId(book.getId());
+        Long reviewCount = reviewRepository.getReviewCountByBookId(book.getId());
+        dto.setRating(avgRating != null ? avgRating : null);
+        dto.setReviewCount(reviewCount != null ? reviewCount.intValue() : 0);
         
         return dto;
     }

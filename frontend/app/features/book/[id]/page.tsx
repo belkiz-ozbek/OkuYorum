@@ -1,6 +1,6 @@
 "use client"
 
-import { BookOpen, Quote, Calendar, BookText, Heart, Share2, Bookmark, MessageCircle, ChevronRight, Sparkles, Clock, Award } from 'lucide-react'
+import { BookOpen, Quote, Calendar, BookText, Heart, Share2, Bookmark, MessageCircle, ChevronRight, Sparkles, Award } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useEffect, useState } from 'react'
@@ -12,6 +12,11 @@ import { Quote as QuoteType } from "@/types/quote"
 import { quoteService } from "@/services/quoteService"
 import { QuoteCard } from "@/components/quotes/QuoteCard"
 import { useToast } from "@/components/ui/use-toast"
+import { Review } from "@/services/reviewService"
+import { ReviewList } from "@/components/reviews/ReviewList"
+import { CreateReviewModal } from "@/components/reviews/CreateReviewModal"
+import { api } from '@/lib/api'
+import { AnimatePresence, motion } from 'framer-motion'
 
 type PageProps = {
     params: Promise<{ id: string }>
@@ -26,7 +31,10 @@ export default function BookPage({ params }: PageProps) {
     const [error, setError] = useState<string | null>(null)
     const [updatingStatus, setUpdatingStatus] = useState(false)
     const [quotes, setQuotes] = useState<QuoteType[]>([])
-    const [processedQuotes, setProcessedQuotes] = useState<QuoteType[]>([])
+    const [reviews, setReviews] = useState<Review[]>([])
+    const [showQuoteModal, setShowQuoteModal] = useState(false)
+    const [showReviewModal, setShowReviewModal] = useState(false)
+    const [activeTab, setActiveTab] = useState('quotes')
 
     useEffect(() => {
         const fetchBook = async () => {
@@ -72,25 +80,6 @@ export default function BookPage({ params }: PageProps) {
     }, [resolvedParams.id])
 
     useEffect(() => {
-        const fetchLikedQuotes = async () => {
-            try {
-                const likedQuotesData = await quoteService.getLikedQuotes();
-                const likedQuoteIds = new Set(likedQuotesData.map((quote: QuoteType) => quote.id));
-                
-                // Mevcut quotes'ları likedQuotes bilgisiyle güncelle
-                setProcessedQuotes(quotes.map(quote => ({
-                    ...quote,
-                    isLiked: likedQuoteIds.has(quote.id)
-                })));
-            } catch (error) {
-                console.error('Beğenilen alıntılar alınırken hata:', error);
-            }
-        };
-
-        fetchLikedQuotes();
-    }, [quotes]);
-
-    useEffect(() => {
         const fetchQuotes = async () => {
             try {
                 if (!book) return;
@@ -103,6 +92,24 @@ export default function BookPage({ params }: PageProps) {
 
         fetchQuotes();
     }, [book]);
+
+    useEffect(() => {
+        const fetchReviews = async () => {
+            try {
+                const response = await api.get(`/api/reviews/book/${resolvedParams.id}`);
+                setReviews(response.data);
+            } catch (err) {
+                console.error('İncelemeler yüklenirken hata:', err);
+                toast({
+                    title: 'Hata',
+                    description: 'İncelemeler yüklenirken bir hata oluştu.',
+                    variant: 'destructive',
+                });
+            }
+        };
+
+        fetchReviews();
+    }, [resolvedParams.id]);
 
     const handleStatusChange = async (newStatus: Book['status']) => {
         if (!book) return
@@ -145,15 +152,21 @@ export default function BookPage({ params }: PageProps) {
             
             // State'i güncel kitap bilgisiyle güncelle
             setBook(prev => {
-                const newState = prev ? { ...prev, ...updatedBook } : null
+                if (!prev) return null;
+                const newState = { 
+                    ...prev, 
+                    ...updatedBook,
+                    readCount: updatedBook.readCount
+                };
                 console.log('Güncellenmiş state:', {
                     id: newState?.id,
                     title: newState?.title,
                     oldStatus: prev?.status,
-                    newStatus: newState?.status
-                })
-                return newState
-            })
+                    newStatus: newState?.status,
+                    readCount: newState?.readCount
+                });
+                return newState;
+            });
             
             toast({
                 title: "Başarılı!",
@@ -171,100 +184,32 @@ export default function BookPage({ params }: PageProps) {
         }
     }
 
-    const handleQuoteAdded = (newQuote: QuoteType) => {
-        setQuotes(prev => [newQuote, ...prev]);
-    };
-
-    const handleQuoteDelete = async (id: number) => {
+    const handleQuoteCreated = async () => {
         try {
-            await quoteService.deleteQuote(id);
+            const data = await quoteService.getBookQuotes(Number(resolvedParams.id))
+            setQuotes(data)
             toast({
                 title: 'Başarılı',
-                description: 'Alıntı başarıyla silindi.',
-            });
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-expect-error
-            handleQuoteAdded();
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        } catch (error) {
-            toast({
-                title: 'Hata',
-                description: 'Alıntı silinirken bir hata oluştu.',
-                variant: 'destructive',
-            });
+                description: 'Alıntı başarıyla eklendi.',
+            })
+        } catch (err) {
+            console.error('Alıntılar yüklenirken hata:', err)
         }
-    };
+    }
 
-    const handleQuoteEdit = async (id: number, content: string, pageNumber?: string) => {
+    const handleReviewCreated = async () => {
         try {
-            await quoteService.updateQuote(id, {
-                content,
-                pageNumber: pageNumber ? parseInt(pageNumber) : undefined
-            });
+            const response = await api.get(`/api/reviews/book/${resolvedParams.id}`);
+            setReviews(response.data);
             toast({
                 title: 'Başarılı',
-                description: 'Alıntı başarıyla güncellendi.',
+                description: 'İnceleme başarıyla eklendi.',
             });
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-expect-error
-            handleQuoteAdded();
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        } catch (error) {
+        } catch (err) {
+            console.error('İncelemeler yüklenirken hata:', err);
             toast({
                 title: 'Hata',
-                description: 'Alıntı güncellenirken bir hata oluştu.',
-                variant: 'destructive',
-            });
-        }
-    };
-
-    const handleQuoteLike = async (id: number) => {
-        try {
-            const updatedQuote = await quoteService.likeQuote(id);
-            setProcessedQuotes(prev => 
-                prev.map(quote => 
-                    quote.id === id 
-                        ? { ...quote, isLiked: updatedQuote.isLiked, likes: updatedQuote.likes } 
-                        : quote
-                )
-            );
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        } catch (error) {
-            toast({
-                title: 'Hata',
-                description: 'Alıntı beğenilirken bir hata oluştu.',
-                variant: 'destructive',
-            });
-        }
-    };
-
-    const handleQuoteSave = async (id: number) => {
-        try {
-            await quoteService.saveQuote(id);
-            handleQuoteAdded();
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        } catch (error) {
-            toast({
-                title: 'Hata',
-                description: 'Alıntı kaydedilirken bir hata oluştu.',
-                variant: 'destructive',
-            });
-        }
-    };
-
-    const handleQuoteShare = async (id: number) => {
-        try {
-            const { url } = await quoteService.shareQuote(id);
-            await navigator.clipboard.writeText(url);
-            toast({
-                title: 'Başarılı',
-                description: 'Alıntı bağlantısı panoya kopyalandı.',
-            });
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        } catch (error) {
-            toast({
-                title: 'Hata',
-                description: 'Alıntı paylaşılırken bir hata oluştu.',
+                description: 'İncelemeler yüklenirken bir hata oluştu.',
                 variant: 'destructive',
             });
         }
@@ -406,17 +351,27 @@ export default function BookPage({ params }: PageProps) {
                                 <div className="w-full mt-8 grid grid-cols-2 gap-6">
                                     <div className="bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)]
                     text-center hover:bg-white transition-colors duration-300">
-                                        <Clock className="w-5 h-5 text-purple-400 mx-auto mb-3" />
-                                        <div className="text-2xl font-light text-gray-700">{book.weeklyReaders || 0}</div>
-                                        <div className="text-sm text-gray-400 mt-1">Bu Hafta Okuyan</div>
+                                        <BookOpen className="w-5 h-5 text-purple-400 mx-auto mb-3" />
+                                        <div className="text-2xl font-light text-gray-700">{book.readCount || 0}</div>
+                                        <div className="text-sm text-gray-400 mt-1">Toplam Okuyan</div>
                                     </div>
                                     <div className="bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)]
                     text-center hover:bg-white transition-colors duration-300">
                                         <Award className="w-5 h-5 text-purple-400 mx-auto mb-3" />
                                         <div className="text-2xl font-light text-gray-700">
-                                            {book.rating ? `${book.rating.toFixed(1)}/10` : '-'}
+                                            {book.rating 
+                                                ? `${(book.rating).toFixed(1)}/5` 
+                                                : book.reviewCount === 0 
+                                                    ? '-' 
+                                                    : '0/5'
+                                            }
                                         </div>
-                                        <div className="text-sm text-gray-400 mt-1">Ortalama Puan</div>
+                                        <div className="text-sm text-gray-400 mt-1">
+                                            {book.reviewCount 
+                                                ? `${book.reviewCount} değerlendirme` 
+                                                : 'Henüz puan yok'
+                                            }
+                                        </div>
                                     </div>
                                 </div>
 
@@ -479,26 +434,36 @@ export default function BookPage({ params }: PageProps) {
 
                             {/* Etiketler */}
                             <div className="flex flex-wrap gap-2 mb-6">
-                <span className="px-3 py-1 bg-amber-50 text-amber-600 rounded-full text-sm hover:bg-amber-100 transition-colors">
-                  Fantastik
-                </span>
+                                <span className="px-3 py-1 bg-amber-50 text-amber-600 rounded-full text-sm hover:bg-amber-100 transition-colors">
+                                    Fantastik
+                                </span>
                                 <span className="px-3 py-1 bg-indigo-50 text-indigo-600 rounded-full text-sm hover:bg-indigo-100 transition-colors">
-                  Büyü ve Sihir
-                </span>
+                                    Büyü ve Sihir
+                                </span>
                                 <span className="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-full text-sm hover:bg-emerald-100 transition-colors">
-                  Macera
-                </span>
+                                    Macera
+                                </span>
                                 <span className="px-3 py-1 bg-purple-50 text-purple-600 rounded-full text-sm hover:bg-purple-100 transition-colors">
-                  Hogwarts
-                </span>
+                                    Hogwarts
+                                </span>
                                 <span className="px-3 py-1 bg-rose-50 text-rose-600 rounded-full text-sm hover:bg-rose-100 transition-colors">
-                  Genç-Yetişkin
-                </span>
+                                    Genç-Yetişkin
+                                </span>
                             </div>
 
-                            {/* İnceleme Yazma Butonu */}
-                            <div className="mb-8">
-                                <Button className="w-full bg-purple-600 hover:bg-purple-700">
+                            {/* Alıntı ve İnceleme Ekleme Butonları */}
+                            <div className="flex gap-4 mb-8">
+                                <Button 
+                                    className="flex-1 bg-purple-600 hover:bg-purple-700"
+                                    onClick={() => setShowQuoteModal(true)}
+                                >
+                                    <Quote className="w-4 h-4 mr-2" />
+                                    Alıntı Ekle
+                                </Button>
+                                <Button 
+                                    className="flex-1 bg-purple-600 hover:bg-purple-700"
+                                    onClick={() => setShowReviewModal(true)}
+                                >
                                     <MessageCircle className="w-4 h-4 mr-2" />
                                     İnceleme Yaz
                                 </Button>
@@ -511,40 +476,169 @@ export default function BookPage({ params }: PageProps) {
                                 </p>
                             </div>
 
-                            {/* Alıntılar Bölümü */}
-                            <div className="mt-8">
-                                <div className="flex items-center justify-between mb-6">
-                                    <h2 className="text-xl font-semibold text-gray-800">Alıntılar</h2>
-                                    <AddQuoteModal bookId={book.id} onQuoteAdded={handleQuoteAdded} />
+                            {/* Sekmeler - Modern Tasarım */}
+                            <div className="mt-12">
+                                {/* Sekme Başlıkları */}
+                                <div className="flex flex-col items-center">
+                                    <div className="flex gap-4 p-1.5 bg-gray-50 rounded-full">
+                                        <button
+                                            onClick={() => setActiveTab('quotes')}
+                                            className={`relative flex items-center px-6 py-2.5 rounded-full transition-all duration-200 ${
+                                                activeTab === 'quotes'
+                                                    ? 'bg-purple-50 text-purple-700 font-medium shadow-sm'
+                                                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+                                            }`}
+                                        >
+                                            <Quote className={`w-4 h-4 mr-2 transition-colors duration-200 ${
+                                                activeTab === 'quotes' ? 'text-purple-500' : 'text-gray-400'
+                                            }`} />
+                                            <span>Alıntılar</span>
+                                            <span className={`ml-2 text-sm ${
+                                                activeTab === 'quotes' ? 'text-purple-500' : 'text-gray-400'
+                                            }`}>
+                                                ({quotes.length})
+                                            </span>
+                                        </button>
+                                        <button
+                                            onClick={() => setActiveTab('reviews')}
+                                            className={`relative flex items-center px-6 py-2.5 rounded-full transition-all duration-200 ${
+                                                activeTab === 'reviews'
+                                                    ? 'bg-purple-50 text-purple-700 font-medium shadow-sm'
+                                                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+                                            }`}
+                                        >
+                                            <MessageCircle className={`w-4 h-4 mr-2 transition-colors duration-200 ${
+                                                activeTab === 'reviews' ? 'text-purple-500' : 'text-gray-400'
+                                            }`} />
+                                            <span>İncelemeler</span>
+                                            <span className={`ml-2 text-sm ${
+                                                activeTab === 'reviews' ? 'text-purple-500' : 'text-gray-400'
+                                            }`}>
+                                                ({reviews.length})
+                                            </span>
+                                        </button>
+                                    </div>
+                                    
+                                    {/* Sekme Açıklaması */}
+                                    <p className="mt-4 text-sm text-gray-500">
+                                        {activeTab === 'quotes' 
+                                            ? 'Kitaptan yapılan alıntıları görüntüleyin ve yeni alıntılar ekleyin.'
+                                            : 'Okuyucuların kitap hakkındaki düşüncelerini okuyun ve kendi incelemenizi paylaşın.'}
+                                    </p>
                                 </div>
 
-                                {processedQuotes.length === 0 ? (
-                                    <div className="text-center py-8 text-gray-500">
-                                        <Quote className="w-12 h-12 mx-auto mb-4 opacity-20" />
-                                        <p>Henüz bu kitap için alıntı eklenmemiş.</p>
-                                        <p className="text-sm mt-2">İlk alıntıyı siz ekleyin!</p>
-                                    </div>
-                                ) : (
-                                    <div className="space-y-6">
-                                        {processedQuotes.map((quote) => (
-                                            <QuoteCard
-                                                key={quote.id}
-                                                quote={quote}
-                                                onDelete={handleQuoteDelete}
-                                                onEdit={handleQuoteEdit}
-                                                onLike={handleQuoteLike}
-                                                onSave={handleQuoteSave}
-                                                onShare={() => handleQuoteShare(quote.id)}
-                                            />
-                                        ))}
-                                    </div>
-                                )}
+                                {/* İnce Ayırıcı Çizgi */}
+                                <div className="mt-6 border-b border-gray-100"></div>
+
+                                {/* Sekme İçerikleri */}
+                                <div className="mt-8">
+                                    <AnimatePresence mode="wait">
+                                        {activeTab === 'quotes' && (
+                                            <motion.div
+                                                key="quotes"
+                                                initial={{ opacity: 0, y: 10 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                exit={{ opacity: 0, y: -10 }}
+                                                transition={{ duration: 0.2 }}
+                                                className="space-y-6"
+                                            >
+                                                {quotes.length === 0 ? (
+                                                    <div className="text-center py-12">
+                                                        <Quote className="w-12 h-12 text-gray-200 mx-auto mb-4" />
+                                                        <p className="text-gray-500 mb-4">Henüz alıntı eklenmemiş.</p>
+                                                        <Button
+                                                            onClick={() => setShowQuoteModal(true)}
+                                                            variant="outline"
+                                                            className="text-purple-600 border-purple-200 hover:bg-purple-50"
+                                                        >
+                                                            İlk alıntıyı siz ekleyin
+                                                        </Button>
+                                                    </div>
+                                                ) : (
+                                                    <div className="grid grid-cols-1 gap-6">
+                                                        {quotes.map((quote) => (
+                                                            <QuoteCard
+                                                                key={quote.id}
+                                                                quote={quote}
+                                                                onDelete={handleQuoteCreated}
+                                                                onEdit={handleQuoteCreated}
+                                                                onLike={handleQuoteCreated}
+                                                                onSave={handleQuoteCreated}
+                                                                onShare={async () => {
+                                                                    try {
+                                                                        const { url } = await quoteService.shareQuote(quote.id);
+                                                                        await navigator.clipboard.writeText(url);
+                                                                        toast({
+                                                                            title: 'Başarılı',
+                                                                            description: 'Alıntı bağlantısı panoya kopyalandı.',
+                                                                        });
+                                                                        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                                                                    } catch (error) {
+                                                                        toast({
+                                                                            title: 'Hata',
+                                                                            description: 'Alıntı paylaşılırken bir hata oluştu.',
+                                                                            variant: 'destructive',
+                                                                        });
+                                                                    }
+                                                                }}
+                                                            />
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </motion.div>
+                                        )}
+
+                                        {activeTab === 'reviews' && (
+                                            <motion.div
+                                                key="reviews"
+                                                initial={{ opacity: 0, y: 10 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                exit={{ opacity: 0, y: -10 }}
+                                                transition={{ duration: 0.2 }}
+                                            >
+                                                {reviews.length === 0 ? (
+                                                    <div className="text-center py-12">
+                                                        <MessageCircle className="w-12 h-12 text-gray-200 mx-auto mb-4" />
+                                                        <p className="text-gray-500 mb-4">Henüz inceleme yazılmamış.</p>
+                                                        <Button
+                                                            onClick={() => setShowReviewModal(true)}
+                                                            variant="outline"
+                                                            className="text-purple-600 border-purple-200 hover:bg-purple-50"
+                                                        >
+                                                            İlk incelemeyi siz yazın
+                                                        </Button>
+                                                    </div>
+                                                ) : (
+                                                    <ReviewList reviews={reviews} onReviewsChange={handleReviewCreated} />
+                                                )}
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
             </main>
+
+            {/* Modals */}
+            {book && (
+                <>
+                    <AddQuoteModal
+                        bookId={Number(resolvedParams.id)}
+                        isOpen={showQuoteModal}
+                        onClose={() => setShowQuoteModal(false)}
+                        onQuoteCreated={handleQuoteCreated}
+                    />
+                    <CreateReviewModal
+                        bookId={Number(resolvedParams.id)}
+                        isOpen={showReviewModal}
+                        onClose={() => setShowReviewModal(false)}
+                        onReviewCreated={handleReviewCreated}
+                    />
+                </>
+            )}
         </div>
     )
 }

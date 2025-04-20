@@ -13,6 +13,9 @@ public class BookDto {
     private String publishedDate;
     private Integer pageCount;
     private ReadingStatus status;
+    private Integer readCount;
+    private Double rating;
+    private Integer reviewCount;
 
     // Getters and Setters
     public Long getId() {
@@ -93,5 +96,29 @@ public class BookDto {
 
     public void setStatus(ReadingStatus status) {
         this.status = status;
+    }
+
+    public Integer getReadCount() {
+        return readCount;
+    }
+
+    public void setReadCount(Integer readCount) {
+        this.readCount = readCount;
+    }
+
+    public Double getRating() {
+        return rating;
+    }
+
+    public void setRating(Double rating) {
+        this.rating = rating;
+    }
+
+    public Integer getReviewCount() {
+        return reviewCount;
+    }
+
+    public void setReviewCount(Integer reviewCount) {
+        this.reviewCount = reviewCount;
     }
 } 

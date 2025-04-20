@@ -1,7 +1,9 @@
 package aybu.graduationproject.okuyorum.library.controller;
 
-import aybu.graduationproject.okuyorum.library.entity.Review;
+import aybu.graduationproject.okuyorum.library.dto.CreateReviewRequest;
+import aybu.graduationproject.okuyorum.library.dto.ReviewDTO;
 import aybu.graduationproject.okuyorum.library.service.ReviewService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,14 +24,16 @@ public class ReviewController {
 
     @PostMapping
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<Review> createReview(@RequestBody Review review) {
-        return ResponseEntity.ok(reviewService.createReview(review));
+    public ResponseEntity<ReviewDTO> createReview(@Valid @RequestBody CreateReviewRequest request) {
+        return ResponseEntity.ok(reviewService.createReview(request));
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<Review> updateReview(@PathVariable Long id, @RequestBody Review review) {
-        return ResponseEntity.ok(reviewService.updateReview(id, review));
+    public ResponseEntity<ReviewDTO> updateReview(
+            @PathVariable Long id,
+            @Valid @RequestBody CreateReviewRequest request) {
+        return ResponseEntity.ok(reviewService.updateReview(id, request));
     }
 
     @DeleteMapping("/{id}")
@@ -40,22 +44,32 @@ public class ReviewController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Review> getReview(@PathVariable Long id) {
+    public ResponseEntity<ReviewDTO> getReview(@PathVariable Long id) {
         return ResponseEntity.ok(reviewService.getReview(id));
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<Review>> getReviewsByUser(@PathVariable Long userId) {
+    public ResponseEntity<List<ReviewDTO>> getReviewsByUser(@PathVariable Long userId) {
         return ResponseEntity.ok(reviewService.getReviewsByUser(userId));
     }
 
+    @GetMapping("/user/{userId}/active")
+    public ResponseEntity<List<ReviewDTO>> getActiveReviewsByUser(@PathVariable Long userId) {
+        return ResponseEntity.ok(reviewService.getActiveReviewsByUser(userId));
+    }
+
     @GetMapping("/book/{bookId}")
-    public ResponseEntity<List<Review>> getReviewsByBook(@PathVariable Long bookId) {
+    public ResponseEntity<List<ReviewDTO>> getReviewsByBook(@PathVariable Long bookId) {
         return ResponseEntity.ok(reviewService.getReviewsByBook(bookId));
     }
 
+    @GetMapping("/book/{bookId}/active")
+    public ResponseEntity<List<ReviewDTO>> getActiveReviewsByBook(@PathVariable Long bookId) {
+        return ResponseEntity.ok(reviewService.getActiveReviewsByBook(bookId));
+    }
+
     @GetMapping("/user/{userId}/book/{bookId}")
-    public ResponseEntity<List<Review>> getReviewsByUserAndBook(
+    public ResponseEntity<List<ReviewDTO>> getReviewsByUserAndBook(
             @PathVariable Long userId,
             @PathVariable Long bookId) {
         return ResponseEntity.ok(reviewService.getReviewsByUserAndBook(userId, bookId));

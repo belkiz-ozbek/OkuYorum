@@ -12,8 +12,8 @@ import {useToast} from "@/components/ui/feedback/use-toast";
 export default function LoginPage() {
     const {toast} = useToast()
     const [formData, setFormData] = useState({
-        identifier: '',
-        password: '',
+        identifier: 'ozbekbelkiz',
+        password: 'admin123',
     })
     const [error, setError] = useState('')
     const [isLoading, setIsLoading] = useState(false)
@@ -333,4 +333,3 @@ export default function LoginPage() {
         </div>
     )
 }
-

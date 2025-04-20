@@ -1,0 +1,72 @@
+import { api } from '@/lib/api';
+
+export interface Review {
+    id: number;
+    bookId: number;
+    userId: number;
+    username: string;
+    userAvatar?: string;
+    rating: number;
+    content: string;
+    bookTitle: string;
+    bookAuthor: string;
+    bookCoverImage?: string;
+    likes?: number;
+    isLiked?: boolean;
+    isSaved?: boolean;
+    isDeleted?: boolean;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface CreateReviewRequest {
+    bookId: number;
+    rating: number;
+    content: string;
+}
+
+export const reviewService = {
+    getReviews: async (): Promise<Review[]> => {
+        const response = await api.get('/api/reviews');
+        return response.data;
+    },
+
+    getReviewsByUser: async (userId: string): Promise<Review[]> => {
+        const response = await api.get(`/api/reviews/user/${userId}`);
+        return response.data;
+    },
+
+    getReviewsByBook: async (bookId: number): Promise<Review[]> => {
+        const response = await api.get(`/api/reviews/book/${bookId}`);
+        return response.data;
+    },
+
+    createReview: async (request: CreateReviewRequest): Promise<Review> => {
+        const response = await api.post('/api/reviews', request);
+        return response.data;
+    },
+
+    updateReview: async (reviewId: number, data: { content: string; rating: number }): Promise<Review> => {
+        const response = await api.put(`/api/reviews/${reviewId}`, data);
+        return response.data;
+    },
+
+    deleteReview: async (reviewId: number): Promise<void> => {
+        await api.delete(`/api/reviews/${reviewId}`);
+    },
+
+    likeReview: async (reviewId: number): Promise<Review> => {
+        const response = await api.post(`/api/reviews/${reviewId}/like`);
+        return response.data;
+    },
+
+    saveReview: async (reviewId: number): Promise<Review> => {
+        const response = await api.post(`/api/reviews/${reviewId}/save`);
+        return response.data;
+    },
+
+    shareReview: async (reviewId: number): Promise<{ url: string }> => {
+        const response = await api.post(`/api/reviews/${reviewId}/share`);
+        return response.data;
+    }
+}; 
