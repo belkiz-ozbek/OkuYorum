@@ -7,12 +7,12 @@ export function MilletKiraathaneleri() {
   const kiraathaneData = [
     {
       name: "Saimekadın Millet Kıraathanesi",
-      city: "İstanbul",
+      city: "Ankara",
       images: ["/saime-1.jpg", "/saime-2.jpg", "/saime-3.jpg"],
     },
     {
       name: "Dede Bahçesi Millet Kıraathanesi",
-      city: "İstanbul",
+      city: "Konya",
       images: ["/dede-1.jpg", "/dede-2.jpg", "/dede-3.jpg"],
     },
     {
@@ -26,7 +26,7 @@ export function MilletKiraathaneleri() {
     },
     {
       name: "Karesi Millet Kıraathanesi",
-      city: "İstanbul",
+      city: "Balıkesir",
       images: ["/karesi-1.jpg", "/karesi-2.jpg", "/karesi-3.jpg"],
     },
     {
