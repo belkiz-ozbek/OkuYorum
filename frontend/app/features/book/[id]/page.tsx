@@ -1,6 +1,6 @@
 "use client"
 
-import { BookOpen, Quote, Calendar, BookText, Heart, Share2, Bookmark, MessageSquare, ChevronRight, Sparkles, Clock, Award } from 'lucide-react'
+import { BookOpen, Quote, Calendar, BookText, Heart, Share2, Bookmark, MessageCircle, ChevronRight, Sparkles, Clock, Award } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useEffect, useState } from 'react'
@@ -462,7 +462,7 @@ export default function BookPage({ params }: PageProps) {
                             {/* İnceleme Yazma Butonu */}
                             <div className="mb-8">
                                 <Button className="w-full bg-purple-600 hover:bg-purple-700">
-                                    <MessageSquare className="w-4 h-4 mr-2" />
+                                    <MessageCircle className="w-4 h-4 mr-2" />
                                     İnceleme Yaz
                                 </Button>
                             </div>
@@ -578,7 +578,7 @@ export default function BookPage({ params }: PageProps) {
                                                         </button>
 
                                                         <button className="flex items-center gap-1.5 px-2 py-1 rounded-full text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-50/70 dark:hover:bg-purple-900/20 transition-all duration-200">
-                                                            <MessageSquare className="h-5 w-5" />
+                                                            <MessageCircle className="h-5 w-5" />
                                                             <span className="text-sm font-medium">Yorum</span>
                                                         </button>
                                                     </div>

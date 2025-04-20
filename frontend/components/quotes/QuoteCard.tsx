@@ -7,6 +7,9 @@ import { Quote } from '@/types/quote';
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { Comment, commentService } from '@/services/commentService';
+import { CommentList } from '@/components/comments/CommentList';
+import { CreateComment } from '@/components/comments/CreateComment';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -49,6 +52,9 @@ export function QuoteCard({ quote, onDelete, onEdit, onLike, onSave, onShare }: 
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [isLiked, setIsLiked] = useState(quote.isLiked || false);
     const [likesCount, setLikesCount] = useState(quote.likes || 0);
+    const [showComments, setShowComments] = useState(false);
+    const [comments, setComments] = useState<Comment[]>([]);
+    const [isLoadingComments, setIsLoadingComments] = useState(false);
 
     const iconVariants = {
         initial: { scale: 1 },
@@ -60,6 +66,34 @@ export function QuoteCard({ quote, onDelete, onEdit, onLike, onSave, onShare }: 
         setIsLiked(quote.isLiked || false);
         setLikesCount(quote.likes || 0);
     }, [quote]);
+
+    const fetchComments = async () => {
+        try {
+            setIsLoadingComments(true);
+            const data = await commentService.getQuoteComments(quote.id);
+            setComments(data);
+        } catch (error) {
+            console.error('Yorumlar yüklenirken hata:', error);
+        } finally {
+            setIsLoadingComments(false);
+        }
+    };
+
+    const handleCommentClick = () => {
+        setShowComments(!showComments);
+        if (!showComments) {
+            fetchComments();
+        }
+    };
+
+    const handleCommentDelete = async (commentId: number) => {
+        try {
+            await commentService.deleteComment(commentId);
+            await fetchComments();
+        } catch (error) {
+            throw error;
+        }
+    };
 
     const handleDelete = () => {
         if (onDelete) {
@@ -218,14 +252,20 @@ export function QuoteCard({ quote, onDelete, onEdit, onLike, onSave, onShare }: 
                                     variants={iconVariants}
                                     whileHover="hover"
                                     whileTap="tap"
-                                    className="flex items-center gap-1.5 px-2 py-1 rounded-full text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-50/70 dark:hover:bg-purple-900/20 transition-all duration-200"
+                                    className={cn(
+                                        "flex items-center gap-1.5 px-2 py-1 rounded-full transition-all duration-200",
+                                        showComments
+                                            ? "text-purple-600 bg-purple-50 dark:bg-purple-900/20"
+                                            : "text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-50/70 dark:hover:bg-purple-900/20"
+                                    )}
+                                    onClick={handleCommentClick}
                                 >
                                     <MessageCircle className="h-5 w-5" />
                                     <span className="text-sm font-medium">Yorum</span>
                                 </motion.button>
                             </TooltipTrigger>
                             <TooltipContent>
-                                <p>Yorum Yap</p>
+                                <p>{showComments ? "Yorumları Gizle" : "Yorumları Göster"}</p>
                             </TooltipContent>
                         </Tooltip>
                     </TooltipProvider>
@@ -276,6 +316,27 @@ export function QuoteCard({ quote, onDelete, onEdit, onLike, onSave, onShare }: 
                     </TooltipProvider>
                 </div>
             </CardFooter>
+
+            {showComments && (
+                <div className="border-t border-purple-50 dark:border-purple-900/20 p-4 bg-purple-50/20 dark:bg-purple-900/5">
+                    {isLoadingComments ? (
+                        <div className="flex justify-center py-4">
+                            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-600"></div>
+                        </div>
+                    ) : (
+                        <div className="space-y-4">
+                            <CreateComment
+                                quoteId={quote.id}
+                                onCommentCreated={fetchComments}
+                            />
+                            <CommentList
+                                comments={comments}
+                                onCommentDelete={handleCommentDelete}
+                            />
+                        </div>
+                    )}
+                </div>
+            )}
 
             <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
                 <AlertDialogContent>
