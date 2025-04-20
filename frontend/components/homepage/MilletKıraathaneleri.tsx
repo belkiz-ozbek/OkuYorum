@@ -7,12 +7,12 @@ export function MilletKiraathaneleri() {
   const kiraathaneData = [
     {
       name: "Saimekadın Millet Kıraathanesi",
-      city: "Ankara",
+      city: "İstanbul",
       images: ["/saime-1.jpg", "/saime-2.jpg", "/saime-3.jpg"],
     },
     {
       name: "Dede Bahçesi Millet Kıraathanesi",
-      city: "Konya",
+      city: "İstanbul",
       images: ["/dede-1.jpg", "/dede-2.jpg", "/dede-3.jpg"],
     },
     {
@@ -26,7 +26,7 @@ export function MilletKiraathaneleri() {
     },
     {
       name: "Karesi Millet Kıraathanesi",
-      city: "Balıkesir",
+      city: "İstanbul",
       images: ["/karesi-1.jpg", "/karesi-2.jpg", "/karesi-3.jpg"],
     },
     {
@@ -67,10 +67,13 @@ export function MilletKiraathaneleri() {
       <p className="text-center text-lg text-gray-700 dark:text-gray-300 mb-6">
         Siz de millet kıraathanelerine gelin, paylaşın, okuyun, tartışın!
       </p>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
         {kiraathaneData.map((kiraathane, cardIndex) => (
-          <Card key={cardIndex} className="shadow-md h-full flex flex-col">
-            <CardHeader className="p-0 relative">
+          <Card
+            key={cardIndex}
+            className="shadow-md hover:shadow-xl hover:scale-[1.02] transition-transform duration-300 h-full flex flex-col"
+          >
+            <CardHeader className="p-0 relative overflow-hidden">
               <img
                 src={
                   kiraathane.images[currentImageIndex[cardIndex]] ||
@@ -117,7 +120,7 @@ export function MilletKiraathaneleri() {
                         return clone
                       })
                     }}
-                    className={`w-2 h-2 rounded-full transition-colors ${
+                    className={`w-2 h-2 rounded-full ${
                       currentImageIndex[cardIndex] === imgIndex
                         ? "bg-white"
                         : "bg-white/50"
@@ -129,10 +132,14 @@ export function MilletKiraathaneleri() {
             </CardHeader>
 
             <CardContent className="flex-grow pt-4">
-              <CardTitle className="text-xl">{kiraathane.name}</CardTitle>
-              <div className="flex items-center text-gray-600 dark:text-gray-300 mt-2">
+              <CardTitle className="text-xl mb-2">
+                {kiraathane.name}
+              </CardTitle>
+              <div className="flex items-center text-gray-600 dark:text-gray-300 mt-auto">
                 <MapPin className="w-5 h-5 mr-2 text-primary" />
-                <span className="text-sm font-medium">{kiraathane.city}</span>
+                <span className="text-sm font-medium">
+                  {kiraathane.city}
+                </span>
               </div>
             </CardContent>
             <CardFooter />
