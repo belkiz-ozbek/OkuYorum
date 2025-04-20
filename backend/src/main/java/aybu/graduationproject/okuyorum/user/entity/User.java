@@ -2,7 +2,9 @@ package aybu.graduationproject.okuyorum.user.entity;
 
 import aybu.graduationproject.okuyorum.user.enums.Role;
 import aybu.graduationproject.okuyorum.user.enums.UserStatus;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -15,7 +17,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "users")
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "password"})
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -119,6 +121,7 @@ public class User implements UserDetails {
         this.username = username;
     }
 
+    @JsonIgnore
     @Override
     public String getPassword() {
         return password;
@@ -144,6 +147,8 @@ public class User implements UserDetails {
         this.role = role;
     }
 
+    @JsonProperty
+    @Override
     public boolean isEnabled() {
         return enabled;
     }
@@ -265,21 +270,26 @@ public class User implements UserDetails {
     }
 
     // UserDetails implementation
+    @JsonIgnore
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
+        SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + role.name());
+        return List.of(authority);
     }
 
+    @JsonIgnore
     @Override
     public boolean isAccountNonExpired() {
         return true;
     }
 
+    @JsonIgnore
     @Override
     public boolean isAccountNonLocked() {
         return true;
     }
 
+    @JsonIgnore
     @Override
     public boolean isCredentialsNonExpired() {
         return true;

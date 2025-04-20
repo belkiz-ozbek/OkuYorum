@@ -1,5 +1,6 @@
-import { AxiosResponse } from 'axios'
+import { AxiosResponse, AxiosError } from 'axios'
 import { api } from './api'
+import { User } from '../types/user'
 // Mock veri kullanımını kaldırıyoruz
 // import { mockUsers, findUserByEmail, mockAuthToken } from './mockData'
 
@@ -17,16 +18,62 @@ import { api } from './api'
 //   })
 // }
 
-export type User = {
-  id: number
-  username: string
-  email: string
-  firstName?: string
-  lastName?: string
-  nameSurname?: string
-  role: string
-  createdAt?: string
-  updatedAt?: string
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'
+
+export const userService = {
+  async getUsers(): Promise<User[]> {
+    const response = await api.get('/api/users')
+    return response.data
+  },
+
+  async getUserById(id: number): Promise<User> {
+    const response = await api.get(`/api/users/${id}`)
+    return response.data
+  },
+
+  async createUser(user: Partial<User>): Promise<User> {
+    const response = await api.post('/api/users', user)
+    return response.data
+  },
+
+  async updateUser(id: number, user: Partial<User>): Promise<User> {
+    const response = await api.put(`/api/users/${id}`, user)
+    return response.data
+  },
+
+  async deleteUser(id: number): Promise<void> {
+    await api.delete(`/api/users/${id}`)
+  },
+
+  async updateProfile(id: number, data: Partial<User>): Promise<User> {
+    const response = await api.put(`/api/users/${id}/profile`, data)
+    return response.data
+  },
+
+  async updatePassword(id: number, oldPassword: string, newPassword: string): Promise<void> {
+    await api.put(`/api/users/${id}/password`, {
+      oldPassword,
+      newPassword,
+    })
+  },
+
+  async followUser(userId: number, targetUserId: number): Promise<void> {
+    await api.post(`/api/users/${userId}/follow/${targetUserId}`)
+  },
+
+  async unfollowUser(userId: number, targetUserId: number): Promise<void> {
+    await api.delete(`/api/users/${userId}/follow/${targetUserId}`)
+  },
+
+  async getFollowers(userId: number): Promise<User[]> {
+    const response = await api.get(`/api/users/${userId}/followers`)
+    return response.data
+  },
+
+  async getFollowing(userId: number): Promise<User[]> {
+    const response = await api.get(`/api/users/${userId}/following`)
+    return response.data
+  },
 }
 
 export class UserService {
@@ -44,7 +91,12 @@ export class UserService {
     return api.post('/api/auth/register', userData);
   }
 
-  static async getCurrentUser(): Promise<AxiosResponse<User>> {
+  static async getCurrentUser() {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No authentication token found');
+    }
+    
     return api.get('/api/users/me');
   }
 
@@ -63,6 +115,21 @@ export class UserService {
     } catch (error) {
       console.error('Error checking admin status:', error);
       return false;
+    }
+  }
+
+  static async getAllUsers() {
+    try {
+      const response = await api.get('/api/users');
+      return response;
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        if (error.response?.status === 401) {
+          throw new Error('Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.');
+        }
+        throw new Error(`Kullanıcılar alınırken bir hata oluştu: ${error.response?.data?.message || error.message}`);
+      }
+      throw new Error('Kullanıcılar alınırken beklenmeyen bir hata oluştu');
     }
   }
 } 

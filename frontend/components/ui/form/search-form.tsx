@@ -75,6 +75,16 @@ export function SearchForm({ isScrolled = false }: SearchFormProps) {
         }
     }
 
+    const handleUserClick = (userId: number) => {
+        setShowResults(false)
+        router.push(`/features/profile/${userId}`)
+    }
+
+    const handleBookClick = (bookId: number) => {
+        setShowResults(false)
+        router.push(`/features/book/${bookId}`)
+    }
+
     return (
         <div ref={searchContainerRef} className="relative">
             <form onSubmit={handleSearch} className="flex items-center">

@@ -1,5 +1,6 @@
 package aybu.graduationproject.okuyorum.user.controller;
 
+import aybu.graduationproject.okuyorum.user.dto.UserDto;
 import aybu.graduationproject.okuyorum.user.entity.User;
 import aybu.graduationproject.okuyorum.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +13,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/users")
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001", "http://127.0.0.1:3000", "http://127.0.0.1:3001"})
 public class UserController {
 
     private final UserService userService;
@@ -20,6 +21,24 @@ public class UserController {
     @Autowired
     public UserController(UserService userService) {
         this.userService = userService;
+    }
+
+    @GetMapping
+    public ResponseEntity<List<UserDto>> getAllUsers() {
+        List<User> users = userService.getAllUsers();
+        List<UserDto> userDtos = users.stream().map(user -> {
+            UserDto userDto = new UserDto();
+            userDto.setId(user.getId());
+            userDto.setUsername(user.getUsername());
+            userDto.setNameSurname(user.getNameSurname());
+            userDto.setEmail(user.getEmail());
+            userDto.setBio(user.getBio());
+            userDto.setProfileImage(user.getProfileImage());
+            userDto.setReaderScore(user.getReaderScore());
+            userDto.setCreatedAt(user.getCreatedAt());
+            return userDto;
+        }).toList();
+        return ResponseEntity.ok(userDtos);
     }
 
     @GetMapping("/me")
@@ -41,23 +60,34 @@ public class UserController {
         }
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<UserDto> getUserById(@PathVariable Long id) {
+        User user = userService.getUserById(id);
+        UserDto userDto = new UserDto();
+        userDto.setId(user.getId());
+        userDto.setUsername(user.getUsername());
+        userDto.setNameSurname(user.getNameSurname());
+        userDto.setEmail(user.getEmail());
+        userDto.setBio(user.getBio());
+        userDto.setBirthDate(user.getBirthDate());
+        userDto.setProfileImage(user.getProfileImage());
+        userDto.setHeaderImage(user.getHeaderImage());
+        userDto.setFollowers(user.getFollowers());
+        userDto.setFollowing(user.getFollowing());
+        userDto.setBooksRead(user.getBooksRead());
+        userDto.setReaderScore(user.getReaderScore());
+        userDto.setCreatedAt(user.getCreatedAt());
+        userDto.setUpdatedAt(user.getUpdatedAt());
+        return ResponseEntity.ok(userDto);
+    }
+
     @GetMapping("/search")
-    public ResponseEntity<List<User>> searchUsers(@RequestParam String q) {
-        try {
-            List<User> users = userService.searchUsers(q);
-            return ResponseEntity.ok(users);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
-        }
+    public ResponseEntity<List<User>> searchUsers(@RequestParam String query) {
+        return ResponseEntity.ok(userService.searchUsers(query));
     }
 
     @GetMapping("/quick-search")
     public ResponseEntity<List<User>> quickSearchUsers(@RequestParam String query) {
-        try {
-            List<User> users = userService.quickSearchUsers(query);
-            return ResponseEntity.ok(users);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
-        }
+        return ResponseEntity.ok(userService.quickSearchUsers(query));
     }
-} 
+}

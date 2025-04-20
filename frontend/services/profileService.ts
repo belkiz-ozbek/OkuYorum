@@ -1,5 +1,5 @@
-import axios, { AxiosError } from 'axios';
-import { API_URL } from '../config';
+import { api } from './api';
+import { AxiosError } from 'axios';
 
 // Temel kullanıcı bilgileri
 export interface BaseUser {
@@ -42,33 +42,14 @@ export interface ReadingActivity {
   updatedAt: string;
 }
 
-const getAuthHeaders = () => {
-  const token = localStorage.getItem('token');
-  if (!token) {
-    throw new Error('Token bulunamadı. Lütfen tekrar giriş yapın.');
-  }
-  return {
-    Authorization: `Bearer ${token}`,
-    'Content-Type': 'application/json'
-  };
-};
-
 const handleError = (error: unknown) => {
-  if (axios.isAxiosError(error)) {
-    const axiosError = error as AxiosError;
-    if (axiosError.response?.status === 403) {
+  if (error instanceof AxiosError) {
+    if (error.response?.status === 403 || error.response?.status === 401) {
       localStorage.removeItem('token');
       window.location.href = '/login';
       throw new Error('Oturum süresi doldu. Lütfen tekrar giriş yapın.');
     }
-    if (axiosError.response?.status === 401) {
-      localStorage.removeItem('token');
-      window.location.href = '/login';
-      throw new Error('Yetkilendirme hatası. Lütfen tekrar giriş yapın.');
-    }
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
-    throw new Error(axiosError.response?.data?.message || 'Bir hata oluştu.');
+    throw new Error(error.response?.data?.message || 'Bir hata oluştu.');
   }
   throw error;
 };
@@ -142,39 +123,61 @@ const mockReadingActivity: ReadingActivity[] = [
 export const profileService = {
   // Profil bilgilerini getir
   getProfile: async (): Promise<UserProfile> => {
-    return mockUserProfile;
+    try {
+      const response = await api.get('/api/profile');
+      return response.data;
+    } catch (error) {
+      throw handleError(error);
+    }
   },
 
   // Profil bilgilerini güncelle
   updateProfile: async (profile: Partial<UserProfile>): Promise<UserProfile> => {
-    return { ...mockUserProfile, ...profile };
+    try {
+      const response = await api.put('/api/profile', profile);
+      return response.data;
+    } catch (error) {
+      throw handleError(error);
+    }
   },
 
   // Başarıları getir
   getAchievements: async (): Promise<Achievement[]> => {
-    return mockAchievements;
+    try {
+      const response = await api.get('/api/profile/achievements');
+      return response.data;
+    } catch (error) {
+      throw handleError(error);
+    }
   },
 
   // Başarı ilerlemesini güncelle
   updateAchievementProgress: async (achievementId: number, progress: number): Promise<Achievement> => {
-    const achievement = mockAchievements.find(a => a.id === achievementId);
-    if (!achievement) throw new Error('Achievement not found');
-    return { ...achievement, progress };
+    try {
+      const response = await api.put(
+        `/api/profile/achievements/${achievementId}/progress`,
+        { progress }
+      );
+      return response.data;
+    } catch (error) {
+      throw handleError(error);
+    }
   },
 
   // Okuma aktivitesini getir
   getReadingActivity: async (): Promise<ReadingActivity[]> => {
-    return mockReadingActivity;
+    try {
+      const response = await api.get('/api/profile/reading-activity');
+      return response.data;
+    } catch (error) {
+      throw handleError(error);
+    }
   },
 
   // Yeni okuma aktivitesi ekle
   addReadingActivity: async (activity: Omit<ReadingActivity, "id" | "createdAt" | "updatedAt">): Promise<ReadingActivity> => {
     try {
-      const response = await axios.post(
-        `${API_URL}/profile/reading-activity`,
-        activity,
-        { headers: getAuthHeaders() }
-      );
+      const response = await api.post('/api/profile/reading-activity', activity);
       return response.data;
     } catch (error) {
       throw handleError(error);
@@ -184,27 +187,19 @@ export const profileService = {
   // Profil fotoğrafını güncelle
   updateProfileImage: async (file: File): Promise<UserProfile> => {
     try {
-      // Dosya boyutu kontrolü
-      if (file.size > 5 * 1024 * 1024) { // 5MB
+      if (file.size > 5 * 1024 * 1024) {
         throw new Error('Dosya boyutu 5MB\'dan büyük olamaz.');
       }
 
-      // Dosya tipi kontrolü
       if (!file.type.startsWith('image/')) {
         throw new Error('Lütfen geçerli bir resim dosyası seçin.');
-      }
-
-      const token = localStorage.getItem('token');
-      if (!token) {
-        throw new Error('Oturum bulunamadı. Lütfen tekrar giriş yapın.');
       }
 
       const formData = new FormData();
       formData.append('file', file);
 
-      const response = await axios.put(`${API_URL}/profile/image`, formData, {
+      const response = await api.put('/api/profile/image', formData, {
         headers: {
-          Authorization: `Bearer ${token}`,
           'Content-Type': 'multipart/form-data',
         },
       });
@@ -217,27 +212,19 @@ export const profileService = {
   // Kapak fotoğrafını güncelle
   updateHeaderImage: async (file: File): Promise<UserProfile> => {
     try {
-      // Dosya boyutu kontrolü
-      if (file.size > 5 * 1024 * 1024) { // 5MB
+      if (file.size > 5 * 1024 * 1024) {
         throw new Error('Dosya boyutu 5MB\'dan büyük olamaz.');
       }
 
-      // Dosya tipi kontrolü
       if (!file.type.startsWith('image/')) {
         throw new Error('Lütfen geçerli bir resim dosyası seçin.');
-      }
-
-      const token = localStorage.getItem('token');
-      if (!token) {
-        throw new Error('Oturum bulunamadı. Lütfen tekrar giriş yapın.');
       }
 
       const formData = new FormData();
       formData.append('file', file);
 
-      const response = await axios.put(`${API_URL}/profile/header-image`, formData, {
+      const response = await api.put('/api/profile/header', formData, {
         headers: {
-          Authorization: `Bearer ${token}`,
           'Content-Type': 'multipart/form-data',
         },
       });
@@ -249,16 +236,61 @@ export const profileService = {
 
   // Kullanıcı profilini getir
   getUserProfile: async (userId: string): Promise<UserProfile> => {
-    return mockUserProfile;
+    try {
+      const token = localStorage.getItem('token');
+      const headers: Record<string, string> = {};
+      
+      // Token varsa ekle, yoksa boş headers ile devam et
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+      
+      const response = await api.get(`/api/profile/${userId}`, {
+        headers
+      });
+      return response.data;
+    } catch (error) {
+      throw handleError(error);
+    }
   },
 
   // Kullanıcının başarılarını getir
   getUserAchievements: async (userId: string): Promise<Achievement[]> => {
-    return mockAchievements;
+    try {
+      const token = localStorage.getItem('token');
+      const headers: Record<string, string> = {};
+      
+      // Token varsa ekle, yoksa boş headers ile devam et
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+      
+      const response = await api.get(`/api/profile/${userId}/achievements`, {
+        headers
+      });
+      return response.data;
+    } catch (error) {
+      throw handleError(error);
+    }
   },
 
   // Kullanıcının okuma aktivitesini getir
   getUserReadingActivity: async (userId: string): Promise<ReadingActivity[]> => {
-    return mockReadingActivity;
+    try {
+      const token = localStorage.getItem('token');
+      const headers: Record<string, string> = {};
+      
+      // Token varsa ekle, yoksa boş headers ile devam et
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+      
+      const response = await api.get(`/api/profile/${userId}/reading-activity`, {
+        headers
+      });
+      return response.data;
+    } catch (error) {
+      throw handleError(error);
+    }
   },
 }; 

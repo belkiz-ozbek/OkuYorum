@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
@@ -8,9 +8,7 @@ import {
   BookOpen,
   Camera,
   Calendar,
-  Star,
   MessageSquare,
-  Quote,
   Zap,
   User,
   Library,
@@ -21,15 +19,15 @@ import {
   BookOpenCheck,
   Award,
   BarChart3,
-  BookMarked,
   Check,
   X,
   Moon,
   Sun,
-  Plus,
   UserPlus,
   UserMinus,
-  UserCheck
+  UserCheck,
+  Quote as QuoteIcon,
+  BookText
 } from "lucide-react"
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/form/button"
@@ -44,15 +42,17 @@ import { useToast } from "@/components/ui/feedback/use-toast"
 import { FollowListModal } from "@/components/ui/follow/follow-list-modal"
 import { UserService } from "@/services/UserService"
 import { followService } from "@/services/followService"
-
-
-type BookType = {
-  id: string
-  title: string
-  author: string
-  coverImage: string
-  rating: number
-}
+import { bookService, Book } from "@/services/bookService"
+import { AddBookModal } from "@/components/ui/book/add-book-modal"
+import { bookEventEmitter } from '@/services/bookService'
+import { api } from '@/services/api'
+import StatusBadge from "@/components/ui/book/StatusBadge"
+import { quoteService } from "@/services/quoteService"
+import { Quote } from "@/types/quote"
+import { postService, Post } from "@/services/postService"
+import { QuoteList } from "@/components/quotes/QuoteList"
+import { AuthProvider } from "@/contexts/AuthContext"
+import { EmptyState } from '@/components/ui/empty-state/EmptyState'
 
 const initialProfile: UserProfile = {
   id: 0,
@@ -74,32 +74,97 @@ const initialProfile: UserProfile = {
 const initialAchievements: Achievement[] = []
 const initialReadingActivity: ReadingActivity[] = []
 
-const recommendations: BookType[] = [
-  {
-    id: "5",
-    title: "Fahrenheit 451",
-    author: "Ray Bradbury",
-    coverImage: "/placeholder.svg?height=150&width=100",
-    rating: 4.2,
-  },
-  {
-    id: "6",
-    title: "Otomatik Portakal",
-    author: "Anthony Burgess",
-    coverImage: "/placeholder.svg?height=150&width=100",
-    rating: 4.0,
-  },
-]
-
 // Achievement icons mapping
 const achievementIcons = {
   "BOOK_WORM": <BookOpenCheck className="h-6 w-6" />,
   "SOCIAL_READER": <MessageSquare className="h-6 w-6" />,
-  "QUOTE_MASTER": <Quote className="h-6 w-6" />,
+  "QUOTE_MASTER": <QuoteIcon className="h-6 w-6" />,
   "MARATHON_READER": <Zap className="h-6 w-6" />
 }
 
+const usePosts = (
+  params: ReturnType<typeof useParams>,
+  toast: ReturnType<typeof useToast>["toast"],
+  setPosts: React.Dispatch<React.SetStateAction<Post[]>>,
+  router: { push: (path: string) => void }
+) => {
+  const fetchPosts = useCallback(async () => {
+    try {
+      if (!params.id) return;
+      const postsData = await postService.getUserPosts(params.id.toString());
+      setPosts(postsData);
+    } catch (err: unknown) {
+      console.error('İletiler yüklenirken hata:', err);
+      if (err && typeof err === 'object' && 'response' in err && err.response && typeof err.response === 'object' && 'status' in err.response) {
+        const status = err.response.status;
+        if (status === 401 || status === 403) {
+          localStorage.removeItem('token');
+          router.push('/');
+          return;
+        }
+      }
+      toast({
+        title: "Hata",
+        description: "İletiler yüklenirken bir hata oluştu.",
+        variant: "destructive"
+      });
+    }
+  }, [params.id, toast, setPosts, router]);
+
+  return { fetchPosts };
+};
+
+// --- Düzenleme ve Silme için ek state'ler ---
+
 export default function ProfilePage() {
+
+
+  // ... mevcut stateler ...
+  const [editingPostId, setEditingPostId] = useState<number | null>(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editContent, setEditContent] = useState("");
+  const [menuOpenId, setMenuOpenId] = useState<number | null>(null);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
+
+  // --- DÜZENLEME FONKSİYONLARI ---
+  const handleEditPost = (post: Post) => {
+    setEditingPostId(post.id);
+    setEditTitle(post.title || "");
+    setEditContent(post.content || "");
+  };
+  const handleCancelEdit = () => {
+    setEditingPostId(null);
+    setEditTitle("");
+    setEditContent("");
+  };
+  const handleUpdatePost = async (postId: number) => {
+    try {
+      if (!editTitle.trim() || !editContent.trim()) {
+        toast({ title: "Hata", description: "Başlık ve içerik boş olamaz.", variant: "destructive" });
+        return;
+      }
+      await postService.updatePost(postId, editTitle, editContent);
+      setEditingPostId(null);
+      setEditTitle("");
+      setEditContent("");
+      await fetchPosts();
+      toast({ title: "Başarılı", description: "Gönderi güncellendi." });
+    } catch (error: unknown) {
+      console.error('Güncelleme hatası:', error);
+      toast({ title: "Hata", description: "Güncelleme sırasında hata oluştu.", variant: "destructive" });
+    }
+  };
+  // --- SİLME FONKSİYONU ---
+  const handleDeletePost = async (postId: number) => {
+    try {
+      await postService.deletePost(postId);
+      await fetchPosts();
+      toast({ title: "Başarılı", description: "Gönderi silindi." });
+    } catch (error: unknown) {
+      console.error('Silme hatası:', error);
+      toast({ title: "Hata", description: "Silme sırasında hata oluştu.", variant: "destructive" });
+    }
+  };
   const params = useParams()
   const router = useRouter()
   const { toast } = useToast()
@@ -109,25 +174,42 @@ export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false)
   const [editSection, setEditSection] = useState<string | null>(null)
   const [showEditMenu, setShowEditMenu] = useState(false)
-  const [, setActiveTab] = useState("overview")
   const [isScrolled, setIsScrolled] = useState(false)
   const [theme, setTheme] = useState<"light" | "dark">("light")
-  const [isLoading, setIsLoading] = useState(true)
+  const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [setIsUploading] = useState<'profile' | 'header' | null>(null)
+  const [books, setBooks] = useState<Book[]>([])
   const [showFollowersModal, setShowFollowersModal] = useState(false)
   const [showFollowingModal, setShowFollowingModal] = useState(false)
   const [currentUser, setCurrentUser] = useState<{ id: number; username: string } | null>(null)
   const [isFollowing, setIsFollowing] = useState(false)
   const [showUnfollowConfirm, setShowUnfollowConfirm] = useState(false)
   const [isFollowLoading, setIsFollowLoading] = useState(false)
+  const [posts, setPosts] = useState<Post[]>([])
+  const [showAddBookModal, setShowAddBookModal] = useState(false)
+  const [showBooksModal, setShowBooksModal] = useState(false)
+  const [selectedState, setSelectedState] = useState<string | null>(null)
+  const [quotes, setQuotes] = useState<Quote[]>([])
+  const [newPostTitle, setNewPostTitle] = useState("")
+  const [newPost, setNewPost] = useState("")
+
+  const { fetchPosts } = usePosts(params, toast, setPosts, router);
+
+  // PROFİL İLETİLERİNİ HER ZAMAN YÜKLE
+  useEffect(() => {
+    fetchPosts();
+  }, [fetchPosts]);
 
   useEffect(() => {
     const loadUserInfo = async () => {
       try {
         const response = await UserService.getCurrentUser();
         setCurrentUser(response.data);
+        // Kullanıcı giriş yapmışsa ve profil sayfası başka bir kullanıcıya aitse takip durumunu kontrol et
+        if (response.data && params.id && response.data.id.toString() !== params.id.toString()) {
+          const isFollowingStatus = await followService.isFollowing(params.id.toString());
+          setIsFollowing(isFollowingStatus);
+        }
       } catch (error) {
         console.error('Error loading user info:', error);
         setCurrentUser(null);
@@ -135,52 +217,92 @@ export default function ProfilePage() {
     };
 
     loadUserInfo();
-  }, []);
+  }, [params.id]);
+
+  const fetchProfileData = async () => {
+    if (!params.id) {
+      setError('Kullanıcı ID\'si bulunamadı');
+      return;
+    }
+    try {
+      setLoading(true);
+      setError(null);
+
+      const profileData = await profileService.getUserProfile(params.id.toString());
+      
+      // Takip durumunu kontrol et
+      if (currentUser && params.id.toString() !== currentUser.id.toString()) {
+        const [isFollowingStatus, achievementsData, readingActivityData, booksData] = await Promise.all([
+          followService.isFollowing(params.id.toString()),
+          profileService.getUserAchievements(params.id.toString()),
+          profileService.getUserReadingActivity(params.id.toString()),
+          bookService.getBooks(params.id.toString())
+        ]);
+        
+        setIsFollowing(isFollowingStatus);
+        setProfile(profileData);
+        setAchievements(achievementsData);
+        setReadingActivity(readingActivityData);
+        setBooks(booksData);
+      } else {
+        const [achievementsData, readingActivityData, booksData] = await Promise.all([
+          profileService.getUserAchievements(params.id.toString()),
+          profileService.getUserReadingActivity(params.id.toString()),
+          bookService.getBooks(params.id.toString())
+        ]);
+        
+        setProfile(profileData);
+        setAchievements(achievementsData);
+        setReadingActivity(readingActivityData);
+        setBooks(booksData);
+      }
+    } catch (error) {
+      console.error("Error fetching profile data:", error);
+      setError("Profil bilgileri yüklenirken bir hata oluştu.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchProfileData = async () => {
-      try {
-        setIsLoading(true)
-        setError(null)
-
-        if (!params.id) {
-          throw new Error('Kullanıcı ID\'si bulunamadı')
-        }
-
-        // Takip durumunu kontrol et
-        if (currentUser && params.id.toString() !== currentUser.id.toString()) {
-          const [isFollowingStatus, profileData, achievementsData, readingActivityData] = await Promise.all([
-            followService.isFollowing(params.id.toString()),
-            profileService.getUserProfile(params.id.toString()),
-            profileService.getUserAchievements(params.id.toString()),
-            profileService.getUserReadingActivity(params.id.toString())
-          ])
-          
-          setIsFollowing(isFollowingStatus)
-          setProfile(profileData)
-          setAchievements(achievementsData)
-          setReadingActivity(readingActivityData)
-        } else {
-          const [profileData, achievementsData, readingActivityData] = await Promise.all([
-            profileService.getUserProfile(params.id.toString()),
-            profileService.getUserAchievements(params.id.toString()),
-            profileService.getUserReadingActivity(params.id.toString())
-          ])
-          
-          setProfile(profileData)
-          setAchievements(achievementsData)
-          setReadingActivity(readingActivityData)
-        }
-      } catch (error) {
-        console.error("Error fetching profile data:", error)
-        setError("Profil bilgileri yüklenirken bir hata oluştu.")
-      } finally {
-        setIsLoading(false)
+    const loadProfile = async () => {
+      if (!params.id) {
+        setError("Invalid profile ID");
+        return;
       }
-    }
 
-    fetchProfileData()
-  }, [params.id, router, currentUser])
+      try {
+        setLoading(true);
+        const [profileResponse, booksData] = await Promise.all([
+          api.get(`/api/users/${params.id}`),
+          bookService.getBooks(params.id.toString())
+        ]);
+        setProfile(profileResponse.data);
+        setBooks(booksData);
+        setLoading(false);
+      } catch (error) {
+        console.error("Error loading profile:", error);
+        setError("Failed to load profile");
+        setLoading(false);
+      }
+    };
+
+    loadProfile();
+
+    // Listen for profile update events
+    const handleProfileUpdate = () => {
+      loadProfile();
+    };
+
+    // Listen for both profile updates and book status updates
+    bookEventEmitter.on('profileNeedsUpdate', handleProfileUpdate);
+    bookEventEmitter.on('bookStatusUpdated', handleProfileUpdate);
+
+    return () => {
+      bookEventEmitter.off('profileNeedsUpdate', handleProfileUpdate);
+      bookEventEmitter.off('bookStatusUpdated', handleProfileUpdate);
+    };
+  }, [params.id]);
 
   useEffect(() => {
     // Sistem dark mode tercihini kontrol et
@@ -266,15 +388,6 @@ export default function ProfilePage() {
     setEditSection(null)
     // Değişiklikleri geri al
   }
-
-  const renderStars = (rating: number) => {
-    return Array(5)
-        .fill(0)
-        .map((_, i) => (
-            <Star key={i} className={`h-4 w-4 ${i < Math.floor(rating) ? "text-yellow-400" : "text-gray-300"}`} />
-        ))
-  }
-
   const getMaxBooks = () => {
     return Math.max(...readingActivity.map((item) => item.books))
   }
@@ -283,17 +396,15 @@ export default function ProfilePage() {
     return achievementIcons[achievementType as keyof typeof achievementIcons] || <Award className="h-6 w-6" />
   }
   const handleFollow = async () => {
-    if (!params.id || Array.isArray(params.id)) return;
+    const targetUserId = params.id;
+    if (!targetUserId || Array.isArray(targetUserId)) return;
     setIsFollowLoading(true);
     try {
-      const response = await followService.follow(params.id);
-      if (response.success && response.user) {
-        const { followers, following } = response.user;
-        setProfile((prev) => ({
-          ...prev,
-          followers,
-          following,
-        }));
+      const response = await followService.follow(targetUserId);
+      if (response.success) {
+        setIsFollowing(true);
+        // Profil verilerini güncelle
+        await fetchProfileData();
         toast({
           title: "Başarılı",
           description: "Kullanıcı takip edildi",
@@ -312,17 +423,15 @@ export default function ProfilePage() {
   };
 
   const handleUnfollow = async () => {
-    if (!params.id || Array.isArray(params.id)) return;
+    const targetUserId = params.id;
+    if (!targetUserId || Array.isArray(targetUserId)) return;
     setIsFollowLoading(true);
     try {
-      const response = await followService.unfollow(params.id);
-      if (response.success && response.user) {
-        const { followers, following } = response.user;
-        setProfile((prev) => ({
-          ...prev,
-          followers,
-          following,
-        }));
+      const response = await followService.unfollow(targetUserId);
+      if (response.success) {
+        setIsFollowing(false);
+        // Profil verilerini güncelle
+        await fetchProfileData();
         toast({
           title: "Başarılı",
           description: "Takipten çıkıldı",
@@ -340,7 +449,95 @@ export default function ProfilePage() {
     }
   };
 
-  if (isLoading) {
+  const handleAddBookSuccess = () => {
+    fetchProfileData();
+  }
+
+  const createPost = async () => {
+    try {
+      if (!newPostTitle.trim()) {
+        toast({
+          title: "Hata",
+          description: "Başlık boş olamaz.",
+          variant: "destructive"
+        });
+        return;
+      }
+      if (!newPost.trim()) {
+        toast({
+          title: "Hata",
+          description: "İleti boş olamaz.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      const token = localStorage.getItem('token');
+      if (!token) {
+        router.push('/');
+        return;
+      }
+
+      await postService.createPost(newPostTitle, newPost);
+      setNewPostTitle("");
+      setNewPost("");
+      await fetchPosts();
+      toast({
+        title: "Başarılı",
+        description: "İletiniz başarıyla oluşturuldu.",
+      });
+    } catch (err: unknown) {
+      console.error('İleti oluşturulurken hata:', err);
+      if (err && typeof err === 'object' && 'response' in err && err.response && typeof err.response === 'object' && 'status' in err.response) {
+        const status = err.response.status;
+        if (status === 401 || status === 403) {
+          localStorage.removeItem('token');
+          router.push('/');
+          return;
+        }
+      }
+      toast({
+        title: "Hata",
+        description: "İleti oluşturulurken bir hata oluştu.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  useEffect(() => {
+    const fetchQuotes = async () => {
+      if (!params.id) {
+        toast({
+          title: "Hata",
+          description: "Kullanıcı ID'si bulunamadı.",
+          variant: "destructive"
+        });
+        return;
+      }
+      try {
+        const quotesData = await quoteService.getQuotesByUser(params.id.toString());
+        setQuotes(quotesData);
+      } catch (err) {
+        console.error('Alıntılar yüklenirken hata:', err);
+        toast({
+          title: "Hata",
+          description: "Alıntılar yüklenirken bir hata oluştu.",
+          variant: "destructive"
+        });
+      }
+    };
+
+    fetchQuotes();
+  }, [params.id, toast]);
+
+  // Date formatting helper function
+  const formatDate = (dateString: string | undefined) => {
+    if (!dateString) return '';
+    return new Date(dateString).toLocaleDateString('tr-TR');
+  };
+
+  // Profile stats section
+  if (loading) {
     return (
         <div className="min-h-screen flex items-center justify-center">
           <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-purple-500"></div>
@@ -352,16 +549,41 @@ export default function ProfilePage() {
     return (
         <div className="min-h-screen flex items-center justify-center">
           <div className="text-center">
-            <h2 className="text-2xl font-semibold mb-2">Bir hata oluştu</h2>
+            <div className="text-red-500 text-xl font-semibold mb-4">Hata</div>
             <p className="text-gray-600 mb-4">{error}</p>
-            <Button onClick={() => window.location.reload()}>Yeniden Dene</Button>
+            <Button
+              onClick={() => router.push('/features/homepage')}
+              className="bg-purple-600 hover:bg-purple-700 text-white"
+            >
+              Ana Sayfaya Dön
+            </Button>
           </div>
         </div>
     )
   }
 
+  const deleteConfirmModal = deleteConfirmId !== null && (
+  <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/30 animate-fade-in">
+    <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-xs text-center">
+      <div className="text-xl font-semibold mb-2">Gönderi Silinsin mi?</div>
+      <div className="text-gray-600 mb-4">Bu gönderi kalıcı olarak silinecek. Emin misiniz?</div>
+      <div className="flex justify-center gap-3">
+        <Button
+          variant="destructive"
+          onClick={async () => {
+            await handleDeletePost(deleteConfirmId!);
+            setDeleteConfirmId(null);
+          }}
+        >Evet, Sil</Button>
+        <Button variant="outline" onClick={() => setDeleteConfirmId(null)}>Vazgeç</Button>
+      </div>
+    </div>
+  </div>
+);
+
   return (
-      <div className="min-h-screen bg-gradient-to-b from-purple-50 to-white dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen bg-gradient-to-b from-purple-50 to-white dark:from-gray-900 dark:to-gray-800">
+      {deleteConfirmModal}
         <header
             className={`fixed top-0 z-50 w-full transition-all duration-300 ${
                 isScrolled ? "h-14 bg-background/60 backdrop-blur-lg border-b" : "h-16"
@@ -474,16 +696,17 @@ export default function ProfilePage() {
                   {/* Profile Image */}
                   <div className="relative">
                     <div className="h-32 w-32 rounded-full border-4 border-white shadow-lg overflow-hidden bg-white">
-                      {profile.profileImage ? (
+                      {typeof profile.profileImage === 'string' ? (
                         <Image
                           src={profile.profileImage}
-                          alt={profile.nameSurname}
-                          fill
-                          className="object-cover"
+                          alt={`${profile.nameSurname}'s profile picture`}
+                          width={128}
+                          height={128}
+                          className="rounded-full object-cover"
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-gray-100">
-                          <User className="h-16 w-16 text-gray-400" />
+                        <div className="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center">
+                          <span className="text-4xl text-gray-500">{profile.nameSurname?.[0]?.toUpperCase() || '?'}</span>
                         </div>
                       )}
                     </div>
@@ -515,7 +738,7 @@ export default function ProfilePage() {
                           ? 'bg-white hover:bg-red-50 border-gray-200 text-gray-700' 
                           : 'bg-purple-400 hover:bg-purple-500 text-white border-transparent'
                       } transition-all duration-200`}
-                      onClick={isFollowing ? () => setShowUnfollowConfirm(true) : handleFollow}
+                      onClick={isFollowing ? handleUnfollow : handleFollow}
                     >
                       {isFollowLoading ? (
                         <div className="flex items-center justify-center">
@@ -593,13 +816,13 @@ export default function ProfilePage() {
                           <div className="space-y-4">
                             <div>
                               <Label className="block text-sm font-medium mb-1">İsim</Label>
-                              <Input value={profile.nameSurname} onChange={(e) => handleProfileUpdate("nameSurname", e.target.value)} />
+                              <Input value={profile.nameSurname || ""} onChange={(e) => handleProfileUpdate("nameSurname", e.target.value)} />
                             </div>
                             <div>
                               <Label className="block text-sm font-medium mb-1">Doğum Tarihi</Label>
                               <Input
                                   type="date"
-                                  value={profile.birthDate}
+                                  value={profile.birthDate || ""}
                                   onChange={(e) => handleProfileUpdate("birthDate", e.target.value)}
                               />
                             </div>
@@ -667,8 +890,13 @@ export default function ProfilePage() {
                                 <div className="text-xl font-bold text-purple-600">{profile.following}</div>
                                 <div className="text-sm text-gray-500">Takip</div>
                               </div>
-                              <div className="text-center">
-                                <div className="text-xl font-bold text-purple-600">{profile.booksRead}</div>
+                              <div
+                                className="text-center cursor-pointer hover:text-purple-700 transition-colors"
+                                onClick={() => setShowBooksModal(true)}
+                              >
+                                <div className="text-xl font-bold text-purple-600">
+                                  {books.filter(book => book.status?.toUpperCase() === "READ").length}
+                                </div>
                                 <div className="text-sm text-gray-500">Kitap</div>
                               </div>
                             </div>
@@ -720,39 +948,132 @@ export default function ProfilePage() {
               {/* Tabs */}
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
                 <Card className="overflow-hidden border-none bg-white/70 backdrop-blur-sm shadow-md">
-                  <Tabs defaultValue="library" onValueChange={setActiveTab}>
-                    <TabsList className="w-full bg-transparent p-0 border-b">
-                      <TabsTrigger
-                          value="wall"
-                          className="flex-1 py-3 rounded-none data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-purple-400 data-[state=active]:text-purple-500 transition-all duration-200"
-                      >
-                        Duvar
-                      </TabsTrigger>
-                      <TabsTrigger
-                          value="reviews"
-                          className="flex-1 py-3 rounded-none data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-purple-600 data-[state=active]:text-purple-700 transition-all duration-200"
-                      >
-                        İncelemeler
-                      </TabsTrigger>
-                      <TabsTrigger
-                          value="quotes"
-                          className="flex-1 py-3 rounded-none data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-purple-600 data-[state=active]:text-purple-700 transition-all duration-200"
-                      >
-                        Alıntılar
-                      </TabsTrigger>
+                  <Tabs defaultValue="books" className="w-full">
+                    <TabsList className="grid w-full grid-cols-5">
+                      <TabsTrigger value="books">Kitaplar</TabsTrigger>
+                      <TabsTrigger value="wall">Duvar</TabsTrigger>
+                      <TabsTrigger value="quotes">Alıntılar</TabsTrigger>
+                      <TabsTrigger value="reviews">İncelemeler</TabsTrigger>
+                      <TabsTrigger value="posts">İletiler</TabsTrigger>
                     </TabsList>
 
-                    <TabsContent value="library" className="p-6">
-                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                    <TabsContent value="books" className="p-6">
+                      <Card>
+                        <CardContent className="p-6">
+                          {/* State Filter Buttons */}
+                          <div className="flex flex-wrap gap-2 mb-6">
+                            <Button
+                              variant={selectedState === null ? "default" : "outline"}
+                              size="sm"
+                              onClick={() => setSelectedState(null)}
+                              className="text-sm flex items-center gap-2"
+                            >
+                              Tümü
+                              <span className="bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full text-xs">
+                                {books.length}
+                              </span>
+                            </Button>
+                            <Button
+                              variant={selectedState === "WILL_READ" ? "default" : "outline"}
+                              size="sm"
+                              onClick={() => setSelectedState("WILL_READ")}
+                              className="text-sm flex items-center gap-2"
+                            >
+                              Okunacak
+                              <span className="bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full text-xs">
+                                {books.filter(book => book.status?.toUpperCase() === "WILL_READ").length}
+                              </span>
+                            </Button>
+                            <Button
+                              variant={selectedState === "READING" ? "default" : "outline"}
+                              size="sm"
+                              onClick={() => setSelectedState("READING")}
+                              className="text-sm flex items-center gap-2"
+                            >
+                              Okunuyor
+                              <span className="bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full text-xs">
+                                {books.filter(book => book.status?.toUpperCase() === "READING").length}
+                              </span>
+                            </Button>
+                            <Button
+                              variant={selectedState === "READ" ? "default" : "outline"}
+                              size="sm"
+                              onClick={() => setSelectedState("READ")}
+                              className="text-sm flex items-center gap-2"
+                            >
+                              Okundu
+                              <span className="bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full text-xs">
+                                {books.filter(book => book.status?.toUpperCase() === "READ").length}
+                              </span>
+                            </Button>
+                            <Button
+                              variant={selectedState === "DROPPED" ? "default" : "outline"}
+                              size="sm"
+                              onClick={() => setSelectedState("DROPPED")}
+                              className="text-sm flex items-center gap-2"
+                            >
+                              Yarım Bırakıldı
+                              <span className="bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full text-xs">
+                                {books.filter(book => book.status?.toUpperCase() === "DROPPED").length}
+                              </span>
+                            </Button>
+                          </div>
 
-                        <motion.div
-                            whileHover={{ scale: 1.05 }}
-                            className="bg-purple-50/50 rounded-lg border-2 border-dashed border-purple-200 flex flex-col items-center justify-center p-4 h-full cursor-pointer hover:bg-purple-100/50 transition-colors duration-300"
-                        >
-                          <Plus className="h-8 w-8 text-purple-300 mb-2" />
-                          <span className="text-sm font-medium text-purple-500">Kitap Ekle</span>
-                        </motion.div>
-                      </div>
+                          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+                            {books
+                              .filter(book => {
+                                if (!selectedState) return true;
+                                const bookStatus = book.status?.toUpperCase();
+                                return bookStatus === selectedState;
+                              })
+                              .map((book) => (
+                                <motion.div
+                                  key={book.id}
+                                  className="group relative flex flex-col"
+                                  whileHover={{ y: -5 }}
+                                  transition={{ duration: 0.2 }}
+                                >
+                                  <Link href={`/features/book/${book.id}`}>
+                                    <div className="relative aspect-[2/3] w-full overflow-hidden rounded-xl shadow-lg transition-all duration-300 group-hover:shadow-xl">
+                                      <Image
+                                        src={book.imageUrl ?? "/placeholder.svg"}
+                                        alt={book.title}
+                                        fill
+                                        className="object-cover transition-transform duration-300 group-hover:scale-105"
+                                      />
+                                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                      
+                                      <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-full transition-transform duration-300 group-hover:translate-y-0">
+                                        <p className="text-white font-medium line-clamp-2 text-sm">{book.title}</p>
+                                        <p className="text-white/80 text-xs mt-1">{book.author}</p>
+                                      </div>
+
+                                      {/* Status Badge */}
+                                      <StatusBadge status={book.status?.toUpperCase() as 'READING' | 'READ' | 'WILL_READ' | 'DROPPED' | null} />
+                                    </div>
+                                  </Link>
+                                </motion.div>
+                              ))}
+                          </div>
+
+                          {books.filter(book => !selectedState || book.status?.toUpperCase() === selectedState).length === 0 && (
+                            <div className="text-center py-12">
+                              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-purple-50 flex items-center justify-center">
+                                <BookOpen className="h-8 w-8 text-purple-400" />
+                              </div>
+                              <p className="text-lg font-medium text-gray-900 mb-2">
+                                {selectedState ? `${selectedState === "WILL_READ" ? "Okunacak" : 
+                                  selectedState === "READING" ? "Okunuyor" : 
+                                  selectedState === "READ" ? "Okundu" : 
+                                  "Yarım Bırakıldı"} durumunda kitap bulunamadı` : "Henüz kitap eklenmemiş"}
+                              </p>
+                              <p className="text-sm text-gray-500">
+                                Kitap eklemek için arama çubuğunu kullanabilirsiniz
+                              </p>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
                     </TabsContent>
 
                     <TabsContent value="wall" className="p-6">
@@ -761,15 +1082,171 @@ export default function ProfilePage() {
                       </div>
                     </TabsContent>
 
-                    <TabsContent value="reviews" className="p-6">
-                      <div className="text-center py-8">
-                        <p className="text-gray-500">İncelemeler burada listelenecek</p>
+                    <TabsContent value="quotes" className="p-6">
+                      <div className="space-y-6">
+                        {quotes.length > 0 ? (
+                          <AuthProvider>
+                            <QuoteList quotes={quotes} onQuotesChange={async () => {
+                              if (!params.id) {
+                                toast({
+                                  title: "Hata",
+                                  description: "Kullanıcı ID'si bulunamadı.",
+                                  variant: "destructive"
+                                });
+                                return;
+                              }
+                              try {
+                                const quotesData = await quoteService.getQuotesByUser(params.id.toString());
+                                setQuotes(quotesData);
+                              } catch (err) {
+                                console.error('Alıntılar yüklenirken hata:', err);
+                                toast({
+                                  title: "Hata",
+                                  description: "Alıntılar yüklenirken bir hata oluştu.",
+                                  variant: "destructive"
+                                });
+                              }
+                            }} />
+                          </AuthProvider>
+                        ) : (
+                          <EmptyState
+                            icon={BookOpen}
+                            title={currentUser?.id === profile.id ? 
+                              "Henüz hiç alıntı paylaşmadınız" : 
+                              `${profile.nameSurname} henüz hiç alıntı paylaşmamış`}
+                            description={currentUser?.id === profile.id ?
+                              "Yukarıdaki arama çubuğundan kitap aratıp, kitap detay sayfasından alıntı ekleyebilirsiniz." :
+                              "Kullanıcı kitaplardan alıntı paylaştığında burada görüntülenecek."}
+                            ctaText={currentUser?.id === profile.id ? "Kitap Ara" : undefined}
+                          />
+                        )}
                       </div>
                     </TabsContent>
 
-                    <TabsContent value="quotes" className="p-6">
-                      <div className="text-center py-8">
-                        <p className="text-gray-500">Alıntılar burada gösterilecek</p>
+                    <TabsContent value="reviews" className="p-6">
+                      <div className="space-y-6">
+                        {posts.filter(post => post.type === 'review').length > 0 ? (
+                          <div className="text-center py-8">
+                            <p className="text-gray-500">İncelemeler burada listelenecek</p>
+                          </div>
+                        ) : (
+                          <EmptyState
+                            icon={BookText}
+                            title={currentUser?.id === profile.id ? 
+                              "Henüz hiç inceleme paylaşmadınız" : 
+                              `${profile.nameSurname} henüz hiç inceleme paylaşmamış`}
+                            description={currentUser?.id === profile.id ?
+                              "Yukarıdaki arama çubuğundan kitap aratıp, kitap detay sayfasından inceleme ekleyebilirsiniz." :
+                              "Kullanıcı kitap incelemeleri paylaştığında burada görüntülenecek."}
+                            ctaText={currentUser?.id === profile.id ? "Kitap Ara" : undefined}
+                          />
+                        )}
+                      </div>
+                    </TabsContent>
+
+                    <TabsContent value="posts" className="p-6">
+                      {currentUser && currentUser.id.toString() === params.id && (
+                        <Card className="mb-4">
+                          <CardContent className="p-4">
+                            <div className="flex flex-col gap-2 w-full">
+                              <Input
+                                placeholder="Başlık..."
+                                value={newPostTitle}
+                                onChange={(e) => setNewPostTitle(e.target.value)}
+                                className="flex-1"
+                                maxLength={100}
+                              />
+                              <div className="flex gap-2 w-full">
+                                <Input
+                                  placeholder="Bir şeyler yaz..."
+                                  value={newPost}
+                                  onChange={(e) => setNewPost(e.target.value)}
+                                  className="flex-1"
+                                  maxLength={500}
+                                />
+                                <Button onClick={createPost}>Paylaş</Button>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      )}
+                      <div className="space-y-6">
+                        {posts.map((post) => (
+                          <Card key={post.id} className="relative shadow-md hover:shadow-lg transition-shadow rounded-xl border border-gray-100">
+                            <CardContent className="p-6">
+                              <div className="space-y-4">
+                                <div className="flex items-center justify-between gap-2">
+                                  <h3 className="text-lg font-medium">{post.title}</h3>
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-sm text-gray-500">{formatDate(post.createdAt)}</span>
+                                    {currentUser && currentUser.id === profile.id && (
+                                      <div className="relative">
+                                        <button
+                                          className="p-1 rounded-full hover:bg-gray-100 transition"
+                                          onClick={() => setMenuOpenId(menuOpenId === post.id ? null : post.id)}
+                                          aria-label="İşlemler"
+                                        >
+                                          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <circle cx="4" cy="10" r="1.5" fill="#888" />
+                                            <circle cx="10" cy="10" r="1.5" fill="#888" />
+                                            <circle cx="16" cy="10" r="1.5" fill="#888" />
+                                          </svg>
+                                        </button>
+                                        {menuOpenId === post.id && (
+                                          <div className="absolute right-0 mt-2 w-32 bg-white rounded-lg shadow-lg border z-20 animate-fadeIn">
+                                            <button
+                                              className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                              onClick={() => {
+                                                setMenuOpenId(null);
+                                                handleEditPost(post);
+                                              }}
+                                            >Düzenle</button>
+                                            <button
+                                              className="block w-full text-left px-4 py-2 hover:bg-red-50 text-sm text-red-600"
+                                              onClick={() => {
+                                                setMenuOpenId(null);
+                                                setDeleteConfirmId(post.id);
+                                              }}
+                                            >Sil</button>
+                                          </div>
+                                        )}
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                                {editingPostId === post.id ? (
+                                  <div className="space-y-2">
+                                    <Input
+                                      value={editTitle}
+                                      onChange={e => setEditTitle(e.target.value)}
+                                      maxLength={100}
+                                      className="mb-2"
+                                      placeholder="Başlık"
+                                    />
+                                    <Input
+                                      value={editContent}
+                                      onChange={e => setEditContent(e.target.value)}
+                                      maxLength={500}
+                                      placeholder="İleti içeriği"
+                                    />
+                                    <div className="flex gap-2 mt-2">
+                                      <Button size="sm" onClick={() => handleUpdatePost(post.id)} className="bg-purple-600 hover:bg-purple-700 text-white">Kaydet</Button>
+                                      <Button size="sm" variant="outline" onClick={handleCancelEdit}>İptal</Button>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <p className="text-gray-700 whitespace-pre-line">{post.content}</p>
+                                )}
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                        {posts.length === 0 && (
+                          <div className="text-center py-8">
+                            <MessageSquare className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                            <p className="text-gray-500">Henüz ileti paylaşılmamış.</p>
+                          </div>
+                        )}
                       </div>
                     </TabsContent>
                   </Tabs>
@@ -880,50 +1357,6 @@ export default function ProfilePage() {
                   </CardContent>
                 </Card>
               </motion.div>
-
-              {/* Recommendations */}
-              <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.3 }}
-              >
-                <Card className="overflow-hidden border-none bg-white/70 backdrop-blur-sm shadow-md">
-                  <CardContent className="p-6">
-                    <div className="flex justify-between items-center mb-4">
-                      <h3 className="text-lg font-semibold flex items-center">
-                        <BookMarked className="mr-2 h-5 w-5 text-purple-400" /> Sizin İçin Öneriler
-                      </h3>
-                      <Button variant="ghost" size="sm" className="text-purple-500 hover:text-purple-600">
-                        Tümünü Gör
-                      </Button>
-                    </div>
-
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
-                      {recommendations.map((book) => (
-                          <motion.div
-                              key={book.id}
-                              className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-all duration-300"
-                              whileHover={{ y: -5 }}
-                          >
-                            <div className="relative h-32 w-full">
-                              <Image
-                                  src={ "/placeholder.svg"}
-                                  alt={book.title}
-                                  fill
-                                  className="object-cover"
-                              />
-                            </div>
-                            <div className="p-2">
-                              <h4 className="font-medium text-xs line-clamp-1">{book.title}</h4>
-                              <p className="text-xs text-gray-500 truncate">{book.author}</p>
-                              <div className="flex mt-1 scale-75 origin-left">{renderStars(book.rating)}</div>
-                            </div>
-                          </motion.div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
             </div>
           </div>
         </main>
@@ -968,6 +1401,52 @@ export default function ProfilePage() {
                   onClick={handleUnfollow}
                 >
                   Takibi Bırak
+                </Button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+
+        <AddBookModal
+          isOpen={showAddBookModal}
+          onClose={() => setShowAddBookModal(false)}
+          onSuccess={handleAddBookSuccess}
+        />
+
+        {/* Kitap Sayısı Modalı */}
+        {showBooksModal && (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50">
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="bg-white rounded-lg p-6 max-w-sm w-full"
+            >
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold">Okunan Kitaplar</h3>
+                <button
+                  onClick={() => setShowBooksModal(false)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+              <div className="text-center py-4">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-purple-50 flex items-center justify-center">
+                  <BookOpen className="h-8 w-8 text-purple-400" />
+                </div>
+                <p className="text-2xl font-bold text-gray-900 mb-2">
+                  {books.filter(book => book.status?.toUpperCase() === "READ").length}
+                </p>
+                <p className="text-gray-600">
+                  Toplam Okunan Kitap
+                </p>
+              </div>
+              <div className="flex justify-end mt-4">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowBooksModal(false)}
+                >
+                  Kapat
                 </Button>
               </div>
             </motion.div>

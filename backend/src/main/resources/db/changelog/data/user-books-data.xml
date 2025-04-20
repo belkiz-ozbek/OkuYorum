@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
+
+    <changeSet id="20250415 14:04" author="belkiz.ozbek">
+        <!-- Mevcut kitaplar için user_books kayıtları -->
+        <sql>
+            INSERT INTO user_books (user_id, book_id, status, created_at, updated_at)
+            SELECT b.user_id, b.id, 'READ', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+            FROM books b
+            LEFT JOIN user_books ub ON b.id = ub.book_id AND b.user_id = ub.user_id
+            WHERE ub.id IS NULL;
+        </sql>
+    </changeSet>
+
+</databaseChangeLog> 

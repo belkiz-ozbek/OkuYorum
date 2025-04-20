@@ -1,5 +1,7 @@
 package aybu.graduationproject.okuyorum.library.dto;
 
+import aybu.graduationproject.okuyorum.library.entity.Book.ReadingStatus;
+
 public class BookDto {
     private Long id;
     private String title;
@@ -10,6 +12,7 @@ public class BookDto {
     private String imageUrl;
     private String publishedDate;
     private Integer pageCount;
+    private ReadingStatus status;
 
     // Getters and Setters
     public Long getId() {
@@ -82,5 +85,13 @@ public class BookDto {
 
     public void setPageCount(Integer pageCount) {
         this.pageCount = pageCount;
+    }
+
+    public ReadingStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(ReadingStatus status) {
+        this.status = status;
     }
 } 

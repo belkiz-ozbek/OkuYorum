@@ -1,42 +1,32 @@
 "use client"
 
-import { BookOpen, Quote, Calendar, BookText, Heart, Share2, Bookmark, Users, MessageSquare, ChevronRight, Sparkles, Clock, Award } from 'lucide-react'
+import { BookOpen, Quote, Calendar, BookText, Heart, Share2, Bookmark, MessageCircle, ChevronRight, Sparkles, Clock, Award } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useEffect, useState } from 'react'
 import { use } from 'react'
 import { Button } from "@/components/ui/form/button"
-
-type Book = {
-    id: number;
-    title: string;
-    author: string;
-    summary: string;
-    imageUrl?: string;
-    publishedDate?: string;
-    pageCount?: number;
-    rating?: number;
-    ratingCount?: number;
-    readCount?: number;
-    reviewCount?: number;
-    categories?: string[];
-    language?: string;
-    publisher?: string;
-    isbn?: string;
-    firstPublishDate?: string;
-    popularity?: number;
-    weeklyReaders?: number;
-}
+import { Book } from "@/types/book"
+import { AddQuoteModal } from "@/components/ui/quote/add-quote-modal"
+import { Quote as QuoteType } from "@/types/quote"
+import { quoteService } from "@/services/quoteService"
+import { QuoteCard } from "@/components/quotes/QuoteCard"
+import { useToast } from "@/components/ui/use-toast"
 
 type PageProps = {
     params: Promise<{ id: string }>
 }
 
+// Tarih formatlama yardımcı fonksiyonu
 export default function BookPage({ params }: PageProps) {
     const resolvedParams = use(params)
+    const { toast } = useToast()
     const [book, setBook] = useState<Book | null>(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
+    const [updatingStatus, setUpdatingStatus] = useState(false)
+    const [quotes, setQuotes] = useState<QuoteType[]>([])
+    const [processedQuotes, setProcessedQuotes] = useState<QuoteType[]>([])
 
     useEffect(() => {
         const fetchBook = async () => {
@@ -45,6 +35,8 @@ export default function BookPage({ params }: PageProps) {
                 if (!token) {
                     throw new Error('Oturum bulunamadı')
                 }
+
+                console.log('Kitap detayı için API isteği yapılıyor...')
 
                 const response = await fetch(`http://localhost:8080/api/books/${resolvedParams.id}`, {
                     headers: {
@@ -57,8 +49,19 @@ export default function BookPage({ params }: PageProps) {
                 }
 
                 const data = await response.json()
-                setBook(data)
+                console.log('Kitap detay API yanıtı:', {
+                    id: data.id,
+                    title: data.title,
+                    status: data.status,
+                    fullResponse: data
+                })
+                
+                setBook({
+                    ...data,
+                    id: Number(data.id)
+                })
             } catch (err) {
+                console.error('Kitap detayı getirme hatası:', err)
                 setError(err instanceof Error ? err.message : 'Bir hata oluştu')
             } finally {
                 setLoading(false)
@@ -67,6 +70,205 @@ export default function BookPage({ params }: PageProps) {
 
         fetchBook()
     }, [resolvedParams.id])
+
+    useEffect(() => {
+        const fetchLikedQuotes = async () => {
+            try {
+                const likedQuotesData = await quoteService.getLikedQuotes();
+                const likedQuoteIds = new Set(likedQuotesData.map((quote: QuoteType) => quote.id));
+                
+                // Mevcut quotes'ları likedQuotes bilgisiyle güncelle
+                setProcessedQuotes(quotes.map(quote => ({
+                    ...quote,
+                    isLiked: likedQuoteIds.has(quote.id)
+                })));
+            } catch (error) {
+                console.error('Beğenilen alıntılar alınırken hata:', error);
+            }
+        };
+
+        fetchLikedQuotes();
+    }, [quotes]);
+
+    useEffect(() => {
+        const fetchQuotes = async () => {
+            try {
+                if (!book) return;
+                const bookQuotes = await quoteService.getBookQuotes(book.id);
+                setQuotes(bookQuotes);
+            } catch (error) {
+                console.error('Alıntılar yüklenirken hata:', error);
+            }
+        };
+
+        fetchQuotes();
+    }, [book]);
+
+    const handleStatusChange = async (newStatus: Book['status']) => {
+        if (!book) return
+
+        try {
+            setUpdatingStatus(true)
+            const token = localStorage.getItem('token')
+            if (!token) {
+                throw new Error('Oturum bulunamadı')
+            }
+
+            console.log('Durum güncelleme isteği:', {
+                bookId: book.id,
+                currentStatus: book.status,
+                newStatus: newStatus
+            })
+
+            const response = await fetch(`http://localhost:8080/api/books/${book.id}/status`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ status: newStatus })
+            })
+
+            if (!response.ok) {
+                throw new Error('Okuma durumu güncellenemedi')
+            }
+
+            // Backend'den gelen güncel kitap bilgisini al
+            const updatedBook = await response.json()
+            console.log('Durum güncelleme API yanıtı:', {
+                id: updatedBook.id,
+                title: updatedBook.title,
+                oldStatus: book.status,
+                newStatus: updatedBook.status,
+                fullResponse: updatedBook
+            })
+            
+            // State'i güncel kitap bilgisiyle güncelle
+            setBook(prev => {
+                const newState = prev ? { ...prev, ...updatedBook } : null
+                console.log('Güncellenmiş state:', {
+                    id: newState?.id,
+                    title: newState?.title,
+                    oldStatus: prev?.status,
+                    newStatus: newState?.status
+                })
+                return newState
+            })
+            
+            toast({
+                title: "Başarılı!",
+                description: "Okuma durumu güncellendi.",
+            })
+        } catch (err) {
+            console.error('Durum güncelleme hatası:', err)
+            toast({
+                title: "Hata!",
+                description: err instanceof Error ? err.message : 'Okuma durumu güncellenirken bir hata oluştu',
+                variant: "destructive",
+            })
+        } finally {
+            setUpdatingStatus(false)
+        }
+    }
+
+    const handleQuoteAdded = (newQuote: QuoteType) => {
+        setQuotes(prev => [newQuote, ...prev]);
+    };
+
+    const handleQuoteDelete = async (id: number) => {
+        try {
+            await quoteService.deleteQuote(id);
+            toast({
+                title: 'Başarılı',
+                description: 'Alıntı başarıyla silindi.',
+            });
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-expect-error
+            handleQuoteAdded();
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        } catch (error) {
+            toast({
+                title: 'Hata',
+                description: 'Alıntı silinirken bir hata oluştu.',
+                variant: 'destructive',
+            });
+        }
+    };
+
+    const handleQuoteEdit = async (id: number, content: string, pageNumber?: string) => {
+        try {
+            await quoteService.updateQuote(id, {
+                content,
+                pageNumber: pageNumber ? parseInt(pageNumber) : undefined
+            });
+            toast({
+                title: 'Başarılı',
+                description: 'Alıntı başarıyla güncellendi.',
+            });
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-expect-error
+            handleQuoteAdded();
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        } catch (error) {
+            toast({
+                title: 'Hata',
+                description: 'Alıntı güncellenirken bir hata oluştu.',
+                variant: 'destructive',
+            });
+        }
+    };
+
+    const handleQuoteLike = async (id: number) => {
+        try {
+            const updatedQuote = await quoteService.likeQuote(id);
+            setProcessedQuotes(prev => 
+                prev.map(quote => 
+                    quote.id === id 
+                        ? { ...quote, isLiked: updatedQuote.isLiked, likes: updatedQuote.likes } 
+                        : quote
+                )
+            );
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        } catch (error) {
+            toast({
+                title: 'Hata',
+                description: 'Alıntı beğenilirken bir hata oluştu.',
+                variant: 'destructive',
+            });
+        }
+    };
+
+    const handleQuoteSave = async (id: number) => {
+        try {
+            await quoteService.saveQuote(id);
+            handleQuoteAdded();
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        } catch (error) {
+            toast({
+                title: 'Hata',
+                description: 'Alıntı kaydedilirken bir hata oluştu.',
+                variant: 'destructive',
+            });
+        }
+    };
+
+    const handleQuoteShare = async (id: number) => {
+        try {
+            const { url } = await quoteService.shareQuote(id);
+            await navigator.clipboard.writeText(url);
+            toast({
+                title: 'Başarılı',
+                description: 'Alıntı bağlantısı panoya kopyalandı.',
+            });
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        } catch (error) {
+            toast({
+                title: 'Hata',
+                description: 'Alıntı paylaşılırken bir hata oluştu.',
+                variant: 'destructive',
+            });
+        }
+    };
 
     if (loading) {
         return (
@@ -224,13 +426,15 @@ export default function BookPage({ params }: PageProps) {
                                         className="w-full p-4 rounded-2xl border border-gray-100 bg-white/80 text-gray-600
                       cursor-pointer hover:border-purple-200 transition-colors duration-300
                       focus:outline-none focus:ring-2 focus:ring-purple-100"
-                                        defaultValue=""
+                                        value={book.status || ''}
+                                        onChange={(e) => handleStatusChange(e.target.value === '' ? null : e.target.value as Book['status'])}
+                                        disabled={updatingStatus}
                                     >
-                                        <option value="" disabled>📚 Okuma Durumu</option>
-                                        <option value="reading">📖 Okuyorum</option>
-                                        <option value="will-read">🔖 Okuyacağım</option>
-                                        <option value="finished">✅ Okudum</option>
-                                        <option value="dropped">⏸️ Yarım Bıraktım</option>
+                                        <option value="">📚 Durum Yok</option>
+                                        <option value="READING">📖 Okuyorum</option>
+                                        <option value="WILL_READ">🔖 Okuyacağım</option>
+                                        <option value="READ">✅ Okudum</option>
+                                        <option value="DROPPED">⏸️ Yarım Bıraktım</option>
                                     </select>
                                 </div>
                             </div>
@@ -295,7 +499,7 @@ export default function BookPage({ params }: PageProps) {
                             {/* İnceleme Yazma Butonu */}
                             <div className="mb-8">
                                 <Button className="w-full bg-purple-600 hover:bg-purple-700">
-                                    <MessageSquare className="w-4 h-4 mr-2" />
+                                    <MessageCircle className="w-4 h-4 mr-2" />
                                     İnceleme Yaz
                                 </Button>
                             </div>
@@ -307,70 +511,40 @@ export default function BookPage({ params }: PageProps) {
                                 </p>
                             </div>
 
-                            <div className="border-t border-gray-100 pt-8 mt-8">
-                                <h3 className="text-2xl font-semibold mb-6 text-gray-900">Alıntılar</h3>
-                                <div className="space-y-4">
-                                    <div className="bg-purple-50 p-6 rounded-lg border border-purple-100">
-                                        <Quote className="h-8 w-8 text-purple-600 mb-4" />
-                                        <p className="text-gray-700 italic text-lg mb-4">
-                                            Henüz alıntı eklenmemiş. İlk alıntıyı siz ekleyin!
-                                        </p>
-                                        <Button variant="outline" className="text-purple-600 border-purple-600">
-                                            Alıntı Ekle
-                                        </Button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Son İncelemeler */}
-                            <div className="border-t border-gray-100 pt-8 mt-8">
+                            {/* Alıntılar Bölümü */}
+                            <div className="mt-8">
                                 <div className="flex items-center justify-between mb-6">
-                                    <h3 className="text-2xl font-semibold text-gray-900">Son İncelemeler</h3>
-                                    <Button variant="link" className="text-purple-600">
-                                        Tümünü Gör
-                                    </Button>
+                                    <h2 className="text-xl font-semibold text-gray-800">Alıntılar</h2>
+                                    <AddQuoteModal bookId={book.id} onQuoteAdded={handleQuoteAdded} />
                                 </div>
-                                <div className="space-y-6">
-                                    <div className="bg-gray-50 rounded-lg p-6">
-                                        <div className="flex items-center gap-4 mb-4">
-                                            <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
-                                                <Users className="w-6 h-6 text-purple-600" />
-                                            </div>
-                                            <div>
-                                                <h4 className="font-semibold">Kullanıcı Adı</h4>
-                                                <p className="text-sm text-gray-500">2 gün önce</p>
-                                            </div>
-                                        </div>
-                                        <p className="text-gray-700">
-                                            Henüz bir inceleme yazılmamış. İlk incelemeyi siz yazın!
-                                        </p>
+
+                                {processedQuotes.length === 0 ? (
+                                    <div className="text-center py-8 text-gray-500">
+                                        <Quote className="w-12 h-12 mx-auto mb-4 opacity-20" />
+                                        <p>Henüz bu kitap için alıntı eklenmemiş.</p>
+                                        <p className="text-sm mt-2">İlk alıntıyı siz ekleyin!</p>
                                     </div>
-                                </div>
+                                ) : (
+                                    <div className="space-y-6">
+                                        {processedQuotes.map((quote) => (
+                                            <QuoteCard
+                                                key={quote.id}
+                                                quote={quote}
+                                                onDelete={handleQuoteDelete}
+                                                onEdit={handleQuoteEdit}
+                                                onLike={handleQuoteLike}
+                                                onSave={handleQuoteSave}
+                                                onShare={() => handleQuoteShare(quote.id)}
+                                            />
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {/* Benzer Kitaplar - Genel */}
-                <div className="mt-16">
-                    <h2 className="text-2xl font-light text-gray-700 mb-8">Benzer Kitaplar</h2>
-                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8">
-                        {[1, 2, 3, 4, 5, 6].map((i) => (
-                            <div key={i} className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)]
-                overflow-hidden hover:shadow-lg transition-all duration-300 border border-gray-100/50 group">
-                                <div className="aspect-w-2 aspect-h-3 bg-gray-50 relative overflow-hidden">
-                                    <div className="w-full h-full bg-gray-100" />
-                                </div>
-                                <div className="p-4">
-                                    <h3 className="font-medium text-sm mb-1 text-gray-700 truncate">Örnek Kitap {i}</h3>
-                                    <p className="text-xs text-gray-400 truncate">Yazar Adı</p>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
             </main>
         </div>
     )
 }
-
