@@ -15,7 +15,7 @@ export default function AboutPage() {
         {/* Left side - Dark section with image */}
         <div className="relative bg-background">
           <Image
-            src="/placeholder.svg?height=1080&width=960"
+            src="/about-us-3.webp"
             alt="Artistic installation"
             width={960}
             height={1080}
@@ -28,27 +28,24 @@ export default function AboutPage() {
           <div className="py-4">{/* Navigation removed as requested */}</div>
 
           <div className="flex-1 flex flex-col justify-center max-w-xl">
-            <h1 className="text-6xl md:text-7xl lg:text-8xl font-serif mb-12">About us.</h1>
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-black tracking-tight mb-12 font-serif">
+              Hakkımızda
+            </h1>
 
             <div className="grid gap-8 md:grid-cols-2">
               <div>
-                <p className="text-lg leading-relaxed">
-                  Focused on excellence for our clients, we are well established, with a reputation for great service
-                  and a high-quality finish.
+                <p className="text-lg leading-relaxed text-muted-foreground italic">
+                  OkuYorum, kitapların yalnızca raflarda değil, insanların hayatlarında dolaşmasını amaçlayan bir sosyal kitap paylaşım platformudur.
                 </p>
               </div>
 
               <div className="space-y-6">
-                <p className="text-sm leading-relaxed">
-                  With our roots in high end production, TRUE works on a wide spectrum of projects, with top
-                  international event organisers and designers. We delight in diversity, from luxury brand experiences
-                  to ambitious, large-scale live events.
+                <p className="text-base leading-relaxed text-muted-foreground">
+                  Millet kıraathaneleri ve bireyler arasında kitap dolaşımını teşvik ederken, kullanıcılar arasında kültürel bağlar kurmayı hedefliyoruz. <span className="italic">Paylaştığınız her kitap bir başkasının dünyasını değiştirebilir.</span>
                 </p>
 
-                <p className="text-sm leading-relaxed">
-                  The magic happens at TRUE HQ - a 4,000m2 manufacturing facility in Billericay, Essex. A large,
-                  flexible space that's reconfigured for every job, creating the optimum work environment with plenty of
-                  room to test-build your project prior to delivery.
+                <p className="text-base leading-relaxed text-muted-foreground">
+                  OkuYorum, sadece bir kitap paylaşım ağı değil; aynı zamanda insanların bir araya gelip fikir alışverişi yaptığı, ortak ilgi alanları etrafında buluştuğu bir kültür platformudur. <span className="italic">Her kitap, yeni bir sohbetin kapısını aralar, her etkinlik yeni dostluklara zemin hazırlar.</span> Biz, kitapların yalnızca raflarda değil, insanlar arasında dolaşarak hikâyelere dönüşmesini istiyoruz.
                 </p>
               </div>
             </div>
@@ -60,15 +57,12 @@ export default function AboutPage() {
         <section className="w-full py-12 md:py-24">
           <div className="container grid items-center gap-6 px-4 md:px-6 lg:grid-cols-2 lg:gap-12">
             <div className="space-y-4">
-              <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">Our Story</h2>
-              <p className="text-gray-500 md:text-lg">
-                True Staging was founded with a passion for interior design and a deep understanding of the real estate
-                market. Our journey began with a simple mission: to help property owners showcase their homes in the
-                best possible light.
+              <h2 className="text-4xl font-black tracking-tight md:text-5xl font-serif">Hikayemiz</h2>
+              <p className="text-lg leading-relaxed text-muted-foreground italic">
+                OkuYorum, okumayı ve paylaşmayı seven bireyleri bir araya getirmek için doğdu.
               </p>
-              <p className="text-gray-500 md:text-lg">
-                With years of experience in the industry, we've developed a keen eye for design and a strategic approach
-                to home staging that consistently delivers results for our clients.
+              <p className="text-lg leading-relaxed text-muted-foreground">
+                Her bireyin kitaplıkları sadece kendisine ait değil, topluma da katkı sağlayabilir düşüncesiyle yola çıktık. <span className="italic">Proje, millet kıraathanelerini dijitalleştirerek daha erişilebilir, etkileşimli ve katılımcı hale getirmeyi amaçlar.</span>
               </p>
             </div>
             <div className="aspect-video overflow-hidden rounded-lg">
@@ -86,25 +80,25 @@ export default function AboutPage() {
         <section className="w-full py-12 md:py-24 bg-background">
           <div className="container px-4 md:px-6">
             <div className="flex flex-col items-center justify-center space-y-4 text-center mb-12">
-              <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">Our Team</h2>
-              <p className="mx-auto max-w-[700px] text-gray-500 md:text-lg">
-                Meet the talented professionals behind True Staging's success.
+              <h2 className="text-4xl font-black tracking-tight md:text-5xl font-serif">Ekibimiz</h2>
+              <p className="mx-auto max-w-[700px] text-lg leading-relaxed text-muted-foreground italic">
+                Bizi tanıyın!
               </p>
             </div>
             <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
               <TeamMember
-                name="Jane Smith"
-                role="Founder & Lead Designer"
+                name="Ayşenur Şirin"
+                role="Dev"
                 bio="With over 15 years of experience in interior design, Jane leads our creative vision."
               />
               <TeamMember
-                name="John Davis"
-                role="Senior Stager"
+                name="Enfal Yetiş"
+                role="Dev"
                 bio="John specializes in contemporary design and has transformed hundreds of properties."
               />
               <TeamMember
-                name="Sarah Johnson"
-                role="Project Manager"
+                name="Belkız Özbek"
+                role="Dev"
                 bio="Sarah ensures every project runs smoothly from consultation to completion."
               />
             </div>
@@ -115,27 +109,29 @@ export default function AboutPage() {
           <div className="container px-4 md:px-6">
             <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 items-center">
               <div className="space-y-4">
-                <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">Our Approach</h2>
-                <p className="text-gray-500 md:text-lg">
-                  We believe that every property has unique potential. Our approach combines aesthetic expertise with
-                  market knowledge to create spaces that appeal to target buyers.
+                <h2 className="text-4xl font-black tracking-tight md:text-5xl font-serif">Yaklaşımımız</h2>
+                <p className="text-lg leading-relaxed text-muted-foreground italic">
+                  Millet kıraathanelerini sadece bir okuma alanı değil, paylaşım ve etkileşim merkezi olarak görüyoruz.
                 </p>
-                <ul className="space-y-2">
+                <p className="text-lg leading-relaxed text-muted-foreground">
+                  OkuYorum'da kitaplar bağışlanıyor, elden ele dolaşıyor ve tartışmalarla yeni fikirler doğuruyor.
+                </p>
+                <ul className="space-y-4">
                   <li className="flex items-start gap-2">
-                    <ChevronRight className="h-5 w-5 text-black flex-shrink-0 mt-0.5" />
-                    <span className="text-gray-500">Personalized consultation for each property</span>
+                    <ChevronRight className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                    <span className="text-lg leading-relaxed text-muted-foreground italic">Her kıraathane için özel etkinlik planlaması</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <ChevronRight className="h-5 w-5 text-black flex-shrink-0 mt-0.5" />
-                    <span className="text-gray-500">Strategic furniture and decor selection</span>
+                    <ChevronRight className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                    <span className="text-lg leading-relaxed text-muted-foreground italic">Kitap paylaşımını teşvik eden dijital altyapı</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <ChevronRight className="h-5 w-5 text-black flex-shrink-0 mt-0.5" />
-                    <span className="text-gray-500">Attention to detail in every room</span>
+                    <ChevronRight className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                    <span className="text-lg leading-relaxed text-muted-foreground italic">Topluluk etkileşimini artıran kültürel tartışma ortamları</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <ChevronRight className="h-5 w-5 text-black flex-shrink-0 mt-0.5" />
-                    <span className="text-gray-500">Focus on highlighting architectural features</span>
+                    <ChevronRight className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                    <span className="text-lg leading-relaxed text-muted-foreground italic">Kıraathanelerin sosyal rolünü güçlendirme odaklı yaklaşım</span>
                   </li>
                 </ul>
               </div>
@@ -152,56 +148,16 @@ export default function AboutPage() {
           </div>
         </section>
 
-        <section className="w-full py-12 md:py-24 bg-background">
-          <div className="container px-4 md:px-6">
-            <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 items-center">
-              <div className="space-y-4">
-                <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">Why Choose Us</h2>
-                <p className="md:text-lg">
-                  Our commitment to excellence and attention to detail sets us apart in the home staging industry.
-                </p>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="space-y-2">
-                    <h3 className="text-xl font-bold">Experience</h3>
-                    <p className="text-gray-300">Years of industry expertise</p>
-                  </div>
-                  <div className="space-y-2">
-                    <h3 className="text-xl font-bold">Quality</h3>
-                    <p className="text-gray-300">Premium furniture and decor</p>
-                  </div>
-                  <div className="space-y-2">
-                    <h3 className="text-xl font-bold">Results</h3>
-                    <p className="text-gray-300">Proven track record of success</p>
-                  </div>
-                  <div className="space-y-2">
-                    <h3 className="text-xl font-bold">Service</h3>
-                    <p className="text-gray-300">Personalized client experience</p>
-                  </div>
-                </div>
-              </div>
-              <div className="flex justify-center">
-                <div className="relative h-[400px] w-[400px] rounded-full bg-white/10 flex items-center justify-center">
-                  <div className="absolute inset-4 rounded-full bg-white/5 flex items-center justify-center">
-                    <div className="text-center space-y-2">
-                      <h3 className="text-4xl font-bold">500+</h3>
-                      <p className="text-xl">Properties Staged</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
         <section className="w-full py-12 md:py-24">
           <div className="container px-4 md:px-6">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
-              <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">Ready to Transform Your Property?</h2>
-              <p className="mx-auto max-w-[700px] text-gray-500 md:text-lg">
-                Contact us today to schedule a consultation and discover how True Staging can help you maximize your
-                property's potential.
+              <h2 className="text-4xl font-black tracking-tight md:text-5xl font-serif">Hadi Birlikte Okuyalım!</h2>
+              <p className="mx-auto max-w-[700px] text-lg leading-relaxed text-muted-foreground italic">
+                Kitabını kap, kıraathaneye gel! OkuYorum'la her kitap bir yolculuğa çıkar, her paylaşım bir iyiliğe dönüşür.
               </p>
-              <Button className="mt-4 bg-black text-white hover:bg-gray-800">Contact Us</Button>
+              <Button className="mt-4 bg-primary text-white hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all duration-300">
+                Hemen Başla
+              </Button>
             </div>
           </div>
         </section>
@@ -216,7 +172,7 @@ function TeamMember({ name, role, bio }: { name: string; role: string; bio: stri
     <div className="flex flex-col items-center space-y-4">
       <div className="h-40 w-40 overflow-hidden rounded-full">
         <Image
-          src="/placeholder.svg?height=160&width=160"
+          src="/placeholder.svg?height=720&width=1280"
           alt={name}
           width={160}
           height={160}
@@ -224,9 +180,9 @@ function TeamMember({ name, role, bio }: { name: string; role: string; bio: stri
         />
       </div>
       <div className="space-y-2 text-center">
-        <h3 className="text-xl font-bold">{name}</h3>
-        <p className="text-sm text-gray-500">{role}</p>
-        <p className="text-sm text-gray-500">{bio}</p>
+        <h3 className="text-2xl font-bold tracking-tight">{name}</h3>
+        <p className="text-base text-muted-foreground italic">{role}</p>
+        <p className="text-base text-muted-foreground">{bio}</p>
       </div>
     </div>
   )
