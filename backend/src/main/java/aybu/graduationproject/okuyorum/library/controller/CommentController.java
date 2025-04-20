@@ -40,9 +40,42 @@ public class CommentController {
         return ResponseEntity.ok().build();
     }
 
+    @PutMapping("/{commentId}")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<CommentDTO> updateComment(
+            @PathVariable Long commentId,
+            @RequestBody String content,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        Long userId = userService.getUserIdByUsername(userDetails.getUsername());
+        return ResponseEntity.ok(commentService.updateComment(commentId, content, userId));
+    }
+
+    @PostMapping("/{commentId}/like")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<Void> toggleLike(
+            @PathVariable Long commentId,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        Long userId = userService.getUserIdByUsername(userDetails.getUsername());
+        commentService.toggleLike(commentId, userId);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/{parentCommentId}/reply")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<CommentDTO> replyToComment(
+            @PathVariable Long parentCommentId,
+            @RequestBody CreateCommentRequest request,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        Long userId = userService.getUserIdByUsername(userDetails.getUsername());
+        return ResponseEntity.ok(commentService.replyToComment(parentCommentId, request, userId));
+    }
+
     @GetMapping("/quote/{quoteId}")
-    public ResponseEntity<List<CommentDTO>> getQuoteComments(@PathVariable Long quoteId) {
-        return ResponseEntity.ok(commentService.getQuoteComments(quoteId));
+    public ResponseEntity<List<CommentDTO>> getQuoteComments(
+            @PathVariable Long quoteId,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        Long userId = userDetails != null ? userService.getUserIdByUsername(userDetails.getUsername()) : null;
+        return ResponseEntity.ok(commentService.getQuoteComments(quoteId, userId));
     }
 
     @GetMapping("/user/{userId}")

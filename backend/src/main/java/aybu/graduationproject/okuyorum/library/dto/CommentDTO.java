@@ -1,6 +1,7 @@
 package aybu.graduationproject.okuyorum.library.dto;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class CommentDTO {
     private Long id;
@@ -8,6 +9,10 @@ public class CommentDTO {
     private Long userId;
     private String username;
     private String content;
+    private Long parentCommentId;
+    private List<CommentDTO> replies;
+    private int likesCount;
+    private boolean isLiked;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -49,6 +54,38 @@ public class CommentDTO {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public Long getParentCommentId() {
+        return parentCommentId;
+    }
+
+    public void setParentCommentId(Long parentCommentId) {
+        this.parentCommentId = parentCommentId;
+    }
+
+    public List<CommentDTO> getReplies() {
+        return replies;
+    }
+
+    public void setReplies(List<CommentDTO> replies) {
+        this.replies = replies;
+    }
+
+    public int getLikesCount() {
+        return likesCount;
+    }
+
+    public void setLikesCount(int likesCount) {
+        this.likesCount = likesCount;
+    }
+
+    public boolean isLiked() {
+        return isLiked;
+    }
+
+    public void setLiked(boolean liked) {
+        isLiked = liked;
     }
 
     public LocalDateTime getCreatedAt() {

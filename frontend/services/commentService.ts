@@ -6,6 +6,10 @@ export interface Comment {
     userId: number;
     username: string;
     content: string;
+    parentCommentId?: number;
+    replies?: Comment[];
+    likesCount: number;
+    isLiked: boolean;
     createdAt: string;
     updatedAt: string;
 }
@@ -23,6 +27,20 @@ class CommentService {
 
     async deleteComment(commentId: number): Promise<void> {
         await api.delete(`/api/comments/${commentId}`);
+    }
+
+    async updateComment(commentId: number, content: string): Promise<Comment> {
+        const response = await api.put(`/api/comments/${commentId}`, content);
+        return response.data;
+    }
+
+    async toggleLike(commentId: number): Promise<void> {
+        await api.post(`/api/comments/${commentId}/like`);
+    }
+
+    async replyToComment(parentCommentId: number, request: CreateCommentRequest): Promise<Comment> {
+        const response = await api.post(`/api/comments/${parentCommentId}/reply`, request);
+        return response.data;
     }
 
     async getQuoteComments(quoteId: number): Promise<Comment[]> {

@@ -8,6 +8,7 @@ export interface Post {
   username: string;
   nameSurname: string;
   profileImage: string | null;
+  type?: 'post' | 'review';
   createdAt: string;
   updatedAt: string;
 }

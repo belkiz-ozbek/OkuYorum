@@ -26,7 +26,8 @@ import {
   UserPlus,
   UserMinus,
   UserCheck,
-  Quote as QuoteIcon
+  Quote as QuoteIcon,
+  BookText
 } from "lucide-react"
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/form/button"
@@ -51,6 +52,7 @@ import { Quote } from "@/types/quote"
 import { postService, Post } from "@/services/postService"
 import { QuoteList } from "@/components/quotes/QuoteList"
 import { AuthProvider } from "@/contexts/AuthContext"
+import { EmptyState } from '@/components/ui/empty-state/EmptyState'
 
 const initialProfile: UserProfile = {
   id: 0,
@@ -1107,17 +1109,38 @@ export default function ProfilePage() {
                             }} />
                           </AuthProvider>
                         ) : (
-                          <div className="text-center py-8">
-                            <QuoteIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                            <p className="text-gray-500">Henüz alıntı paylaşılmamış.</p>
-                          </div>
+                          <EmptyState
+                            icon={BookOpen}
+                            title={currentUser?.id === profile.id ? 
+                              "Henüz hiç alıntı paylaşmadınız" : 
+                              `${profile.nameSurname} henüz hiç alıntı paylaşmamış`}
+                            description={currentUser?.id === profile.id ?
+                              "Yukarıdaki arama çubuğundan kitap aratıp, kitap detay sayfasından alıntı ekleyebilirsiniz." :
+                              "Kullanıcı kitaplardan alıntı paylaştığında burada görüntülenecek."}
+                            ctaText={currentUser?.id === profile.id ? "Kitap Ara" : undefined}
+                          />
                         )}
                       </div>
                     </TabsContent>
 
                     <TabsContent value="reviews" className="p-6">
-                      <div className="text-center py-8">
-                        <p className="text-gray-500">İncelemeler burada listelenecek</p>
+                      <div className="space-y-6">
+                        {posts.filter(post => post.type === 'review').length > 0 ? (
+                          <div className="text-center py-8">
+                            <p className="text-gray-500">İncelemeler burada listelenecek</p>
+                          </div>
+                        ) : (
+                          <EmptyState
+                            icon={BookText}
+                            title={currentUser?.id === profile.id ? 
+                              "Henüz hiç inceleme paylaşmadınız" : 
+                              `${profile.nameSurname} henüz hiç inceleme paylaşmamış`}
+                            description={currentUser?.id === profile.id ?
+                              "Yukarıdaki arama çubuğundan kitap aratıp, kitap detay sayfasından inceleme ekleyebilirsiniz." :
+                              "Kullanıcı kitap incelemeleri paylaştığında burada görüntülenecek."}
+                            ctaText={currentUser?.id === profile.id ? "Kitap Ara" : undefined}
+                          />
+                        )}
                       </div>
                     </TabsContent>
 

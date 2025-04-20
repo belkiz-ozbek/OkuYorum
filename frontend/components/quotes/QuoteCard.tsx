@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
 import { Quote } from '@/types/quote';
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { Comment, commentService } from '@/services/commentService';
 import { CommentList } from '@/components/comments/CommentList';
@@ -67,6 +67,25 @@ export function QuoteCard({ quote, onDelete, onEdit, onLike, onSave, onShare }: 
         setLikesCount(quote.likes || 0);
     }, [quote]);
 
+    useEffect(() => {
+        if (showComments) {
+            fetchComments();
+        }
+    }, [showComments]);
+
+    useEffect(() => {
+        const fetchInitialCommentCount = async () => {
+            try {
+                const data = await commentService.getQuoteComments(quote.id);
+                setComments(data);
+            } catch (error) {
+                console.error('Yorum sayısı alınırken hata:', error);
+            }
+        };
+
+        fetchInitialCommentCount();
+    }, [quote.id]);
+
     const fetchComments = async () => {
         try {
             setIsLoadingComments(true);
@@ -85,16 +104,6 @@ export function QuoteCard({ quote, onDelete, onEdit, onLike, onSave, onShare }: 
             fetchComments();
         }
     };
-
-    const handleCommentDelete = async (commentId: number) => {
-        try {
-            await commentService.deleteComment(commentId);
-            await fetchComments();
-        } catch (error) {
-            throw error;
-        }
-    };
-
     const handleDelete = () => {
         if (onDelete) {
             onDelete(quote.id);
@@ -261,11 +270,13 @@ export function QuoteCard({ quote, onDelete, onEdit, onLike, onSave, onShare }: 
                                     onClick={handleCommentClick}
                                 >
                                     <MessageCircle className="h-5 w-5" />
-                                    <span className="text-sm font-medium">Yorum</span>
+                                    {comments.length > 0 && (
+                                        <span className="text-sm font-medium">{comments.length}</span>
+                                    )}
                                 </motion.button>
                             </TooltipTrigger>
                             <TooltipContent>
-                                <p>{showComments ? "Yorumları Gizle" : "Yorumları Göster"}</p>
+                                <p>{showComments ? "Yorumları Gizle" : comments.length > 0 ? `${comments.length} yorum` : "Yorum Yap"}</p>
                             </TooltipContent>
                         </Tooltip>
                     </TooltipProvider>
@@ -329,10 +340,12 @@ export function QuoteCard({ quote, onDelete, onEdit, onLike, onSave, onShare }: 
                                 quoteId={quote.id}
                                 onCommentCreated={fetchComments}
                             />
-                            <CommentList
-                                comments={comments}
-                                onCommentDelete={handleCommentDelete}
-                            />
+                            <AnimatePresence mode="wait">
+                                <CommentList
+                                    comments={comments}
+                                    onCommentCreated={fetchComments}
+                                />
+                            </AnimatePresence>
                         </div>
                     )}
                 </div>

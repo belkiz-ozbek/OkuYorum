@@ -7,37 +7,20 @@ import { useEffect, useState } from 'react'
 import { use } from 'react'
 import { Button } from "@/components/ui/form/button"
 import { Book } from "@/types/book"
-import { toast } from "@/components/ui/feedback/use-toast"
 import { AddQuoteModal } from "@/components/ui/quote/add-quote-modal"
 import { Quote as QuoteType } from "@/types/quote"
 import { quoteService } from "@/services/quoteService"
-import { cn } from "@/lib/utils"
+import { QuoteCard } from "@/components/quotes/QuoteCard"
+import { useToast } from "@/components/ui/use-toast"
 
 type PageProps = {
     params: Promise<{ id: string }>
 }
 
 // Tarih formatlama yardımcı fonksiyonu
-const formatDate = (dateString: string | undefined) => {
-    if (!dateString) return '';
-    try {
-        const date = new Date(dateString);
-        if (isNaN(date.getTime())) return '';
-        return date.toLocaleDateString('tr-TR', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-    } catch (error) {
-        console.error('Tarih formatlanırken hata:', error);
-        return '';
-    }
-};
-
 export default function BookPage({ params }: PageProps) {
     const resolvedParams = use(params)
+    const { toast } = useToast()
     const [book, setBook] = useState<Book | null>(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
@@ -192,44 +175,98 @@ export default function BookPage({ params }: PageProps) {
         setQuotes(prev => [newQuote, ...prev]);
     };
 
-    const handleLikeQuote = async (quoteId: number) => {
+    const handleQuoteDelete = async (id: number) => {
         try {
-            // Optimistic update
-            setProcessedQuotes(prevQuotes => prevQuotes.map(q => 
-                q.id === quoteId 
-                    ? { 
-                        ...q, 
-                        isLiked: !q.isLiked,
-                        likes: q.likes ? (q.isLiked ? q.likes - 1 : q.likes + 1) : 1
-                    } 
-                    : q
-            ));
-
-            // API call
-            const updatedQuote = await quoteService.likeQuote(quoteId);
-            
-            // Update with server response
-            setProcessedQuotes(prevQuotes => prevQuotes.map(q => 
-                q.id === quoteId 
-                    ? { 
-                        ...q, 
-                        likes: updatedQuote.likes, 
-                        isLiked: updatedQuote.isLiked 
-                    } 
-                    : q
-            ));
+            await quoteService.deleteQuote(id);
+            toast({
+                title: 'Başarılı',
+                description: 'Alıntı başarıyla silindi.',
+            });
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-expect-error
+            handleQuoteAdded();
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (error) {
-            // Hata durumunda UI'ı eski haline döndür
-            setProcessedQuotes(prevQuotes => prevQuotes.map(q => 
-                q.id === quoteId 
-                    ? { 
-                        ...q, 
-                        isLiked: !q.isLiked,
-                        likes: q.likes ? (q.isLiked ? q.likes + 1 : q.likes - 1) : 0
-                    } 
-                    : q
-            ));
-            console.error('Beğeni işlemi başarısız:', error);
+            toast({
+                title: 'Hata',
+                description: 'Alıntı silinirken bir hata oluştu.',
+                variant: 'destructive',
+            });
+        }
+    };
+
+    const handleQuoteEdit = async (id: number, content: string, pageNumber?: string) => {
+        try {
+            await quoteService.updateQuote(id, {
+                content,
+                pageNumber: pageNumber ? parseInt(pageNumber) : undefined
+            });
+            toast({
+                title: 'Başarılı',
+                description: 'Alıntı başarıyla güncellendi.',
+            });
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-expect-error
+            handleQuoteAdded();
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        } catch (error) {
+            toast({
+                title: 'Hata',
+                description: 'Alıntı güncellenirken bir hata oluştu.',
+                variant: 'destructive',
+            });
+        }
+    };
+
+    const handleQuoteLike = async (id: number) => {
+        try {
+            const updatedQuote = await quoteService.likeQuote(id);
+            setProcessedQuotes(prev => 
+                prev.map(quote => 
+                    quote.id === id 
+                        ? { ...quote, isLiked: updatedQuote.isLiked, likes: updatedQuote.likes } 
+                        : quote
+                )
+            );
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        } catch (error) {
+            toast({
+                title: 'Hata',
+                description: 'Alıntı beğenilirken bir hata oluştu.',
+                variant: 'destructive',
+            });
+        }
+    };
+
+    const handleQuoteSave = async (id: number) => {
+        try {
+            await quoteService.saveQuote(id);
+            handleQuoteAdded();
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        } catch (error) {
+            toast({
+                title: 'Hata',
+                description: 'Alıntı kaydedilirken bir hata oluştu.',
+                variant: 'destructive',
+            });
+        }
+    };
+
+    const handleQuoteShare = async (id: number) => {
+        try {
+            const { url } = await quoteService.shareQuote(id);
+            await navigator.clipboard.writeText(url);
+            toast({
+                title: 'Başarılı',
+                description: 'Alıntı bağlantısı panoya kopyalandı.',
+            });
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        } catch (error) {
+            toast({
+                title: 'Hata',
+                description: 'Alıntı paylaşılırken bir hata oluştu.',
+                variant: 'destructive',
+            });
         }
     };
 
@@ -487,116 +524,21 @@ export default function BookPage({ params }: PageProps) {
                                         <p>Henüz bu kitap için alıntı eklenmemiş.</p>
                                         <p className="text-sm mt-2">İlk alıntıyı siz ekleyin!</p>
                                     </div>
-                                ) :
+                                ) : (
                                     <div className="space-y-6">
                                         {processedQuotes.map((quote) => (
-                                            <div key={quote.id} className="bg-white/50 backdrop-blur-sm rounded-xl overflow-hidden border border-purple-100 dark:border-purple-900/30 hover:border-purple-200 dark:hover:border-purple-800/50">
-                                                {/* Card Header - User Info */}
-                                                <div className="p-4 flex items-center justify-between border-b border-purple-50 dark:border-purple-900/20 group">
-                                                    <div className="flex items-center">
-                                                        <div className="h-10 w-10 rounded-full border border-purple-100 dark:border-purple-900/50 transition-all duration-300 group-hover:border-purple-300 dark:group-hover:border-purple-700 group-hover:shadow-sm overflow-hidden">
-                                                            {quote.userAvatar ? (
-                                                                <img src={quote.userAvatar} alt={quote.username} className="h-full w-full object-cover" />
-                                                            ) : (
-                                                                <div className="h-full w-full bg-purple-100 dark:bg-purple-900/50 flex items-center justify-center text-purple-600 dark:text-purple-300">
-                                                                    {quote.username.charAt(0)}
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                        <div className="ml-3">
-                                                            <div className="flex items-center">
-                                                                <Link href={`/features/profile/${quote.userId}`} className="font-medium text-gray-800 dark:text-gray-200 group-hover:text-purple-700 dark:group-hover:text-purple-400 transition-colors duration-200">
-                                                                    {quote.username}
-                                                                </Link>
-                                                                <span className="mx-2 text-gray-400 dark:text-gray-500">•</span>
-                                                                <p className="text-xs text-gray-500 dark:text-gray-400">
-                                                                    {formatDate(quote.createdAt)}
-                                                                </p>
-                                                            </div>
-                                                            <div className="flex items-center mt-0.5">
-                                                                <span className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
-                                                                    <div className="flex items-center justify-center w-4 h-4 bg-purple-100 dark:bg-purple-900/50 rounded-full">
-                                                                        <Quote className="h-3 w-3 text-purple-600 dark:text-purple-300" />
-                                                                    </div>
-                                                                    Alıntı
-                                                                </span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                {/* Card Content */}
-                                                <div className="p-4 pt-5 pb-6">
-                                                    {/* Book Info */}
-                                                    <div className="flex items-start mb-4 group">
-                                                        {quote.bookCoverImage && (
-                                                            <div className="relative h-24 w-16 rounded-md overflow-hidden shadow-md mr-4 flex-shrink-0 transition-all duration-300 group-hover:shadow-lg transform group-hover:scale-105">
-                                                                <img
-                                                                    src={quote.bookCoverImage || "/placeholder.svg"}
-                                                                    alt={quote.bookTitle}
-                                                                    className="object-cover w-full h-full"
-                                                                />
-                                                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300"></div>
-                                                            </div>
-                                                        )}
-                                                        <div className="flex-1 min-w-0">
-                                                            <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-1 group-hover:text-purple-700 dark:group-hover:text-purple-400 transition-colors duration-200">
-                                                                {quote.bookTitle}
-                                                            </h3>
-                                                            <p className="text-gray-600 dark:text-gray-400 text-sm mb-2">{quote.bookAuthor}</p>
-                                                        </div>
-                                                    </div>
-
-                                                    {/* Content Text */}
-                                                    <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg border-l-4 border-purple-300 dark:border-purple-700 relative mb-4">
-                                                        <div className="absolute top-2 left-2 text-4xl text-purple-200 dark:text-purple-800 font-serif leading-none">&#34;</div>
-                                                        <p className="text-gray-800 dark:text-gray-200 relative z-10 text-lg italic font-serif leading-relaxed pl-6">
-                                                            {quote.content}
-                                                        </p>
-                                                        <div className="absolute bottom-2 right-4 text-4xl text-purple-200 dark:text-purple-800 font-serif leading-none">&#34;</div>
-                                                    </div>
-                                                    
-                                                    {quote.pageNumber && (
-                                                        <p className="text-sm text-gray-500 mt-2">Sayfa: {quote.pageNumber}</p>
-                                                    )}
-                                                </div>
-
-                                                {/* Card Footer - Actions */}
-                                                <div className="px-4 py-3 border-t border-purple-50 dark:border-purple-900/20 flex items-center justify-between bg-purple-50/30 dark:bg-purple-900/10">
-                                                    <div className="flex items-center space-x-6">
-                                                        <button
-                                                            className={cn(
-                                                                "flex items-center gap-1.5 px-2 py-1 rounded-full transition-all duration-200",
-                                                                quote.isLiked
-                                                                    ? "text-red-500 bg-red-50 dark:bg-red-900/20"
-                                                                    : "text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50/50 dark:hover:bg-red-900/10"
-                                                            )}
-                                                            onClick={() => handleLikeQuote(quote.id)}
-                                                        >
-                                                            <Heart className="h-5 w-5" fill={quote.isLiked ? "currentColor" : "none"} />
-                                                            <span className="text-sm font-medium">{quote.likes || 0}</span>
-                                                        </button>
-
-                                                        <button className="flex items-center gap-1.5 px-2 py-1 rounded-full text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-50/70 dark:hover:bg-purple-900/20 transition-all duration-200">
-                                                            <MessageCircle className="h-5 w-5" />
-                                                            <span className="text-sm font-medium">Yorum</span>
-                                                        </button>
-                                                    </div>
-
-                                                    <div className="flex items-center space-x-3">
-                                                        <button className="flex items-center justify-center h-8 w-8 rounded-full text-gray-500 dark:text-gray-400 hover:text-green-500 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 transition-all duration-200">
-                                                            <Share2 className="h-5 w-5" />
-                                                        </button>
-
-                                                        <button className="flex items-center justify-center h-8 w-8 rounded-full text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all duration-200">
-                                                            <Bookmark className="h-5 w-5" />
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
+                                            <QuoteCard
+                                                key={quote.id}
+                                                quote={quote}
+                                                onDelete={handleQuoteDelete}
+                                                onEdit={handleQuoteEdit}
+                                                onLike={handleQuoteLike}
+                                                onSave={handleQuoteSave}
+                                                onShare={() => handleQuoteShare(quote.id)}
+                                            />
                                         ))}
                                     </div>
-                                }
+                                )}
                             </div>
                         </div>
                     </div>
