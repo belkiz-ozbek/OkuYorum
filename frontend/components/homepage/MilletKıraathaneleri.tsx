@@ -44,6 +44,9 @@ export function MilletKiraathaneleri() {
       <h1 className="text-3xl font-bold bg-clip-text text-transparent text-center bg-gradient-to-br from-purple-700 to-purple-900 dark:from-purple-400 dark:to-purple-600 mb-4">
         Millet Kıraathaneleri
       </h1>
+      <p className="text-center text-lg text-gray-700 dark:text-gray-300 mb-6">
+         Siz de millet kıraathanelerine gelin, paylaşın, okuyun, tartışın!
+      </p>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
         {kiraathaneData.map((kiraathane, index) => (
           <Card key={index} className="relative shadow-md h-full flex flex-col">
