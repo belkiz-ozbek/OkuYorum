@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { formatDistanceToNow } from 'date-fns';
 import { tr } from 'date-fns/locale';
 import { Heart, MoreVertical, MessageSquare, Pencil, Trash2, Send } from 'lucide-react';
+import Link from 'next/link';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -84,13 +85,18 @@ export function CommentCard({ comment, onDelete, onUpdate, onLike, onReply }: Co
             className="bg-white rounded-lg shadow-sm p-4 space-y-4"
         >
             <div className="flex items-start justify-between">
-                <div className="flex items-center space-x-3">
-                    <Avatar className="h-8 w-8">
+                <Link 
+                    href={`/features/profile/${comment.userId}`} 
+                    className="flex items-center space-x-3 group"
+                >
+                    <Avatar className="h-8 w-8 transition-transform duration-200 group-hover:scale-105">
                         <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${comment.username}`} />
                         <AvatarFallback>{comment.username[0]}</AvatarFallback>
                     </Avatar>
                     <div>
-                        <p className="font-medium text-sm">{comment.username}</p>
+                        <p className="font-medium text-sm group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors duration-200">
+                            {comment.username}
+                        </p>
                         <p className="text-xs text-gray-500">
                             {formatDistanceToNow(new Date(comment.createdAt), {
                                 addSuffix: true,
@@ -98,7 +104,7 @@ export function CommentCard({ comment, onDelete, onUpdate, onLike, onReply }: Co
                             })}
                         </p>
                     </div>
-                </div>
+                </Link>
                 {user?.id === comment.userId && (
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
