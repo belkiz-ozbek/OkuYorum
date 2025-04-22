@@ -46,8 +46,8 @@ export const reviewService = {
         return response.data;
     },
 
-    createReview: async (bookId: number, content: string, rating: number): Promise<Review> => {
-        const response = await api.post('/api/reviews', { bookId, content, rating });
+    createReview: async (request: CreateReviewRequest): Promise<Review> => {
+        const response = await api.post('/api/reviews', request);
         return response.data;
     },
 
