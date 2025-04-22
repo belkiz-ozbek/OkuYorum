@@ -4,7 +4,6 @@ import * as React from "react"
 import { Check, ChevronsUpDown, Search, Book, User } from "lucide-react"
 import { cn } from "@/lib/utils"
 import Image from 'next/image'
-// @ts-ignore
 import {
   Command,
   CommandEmpty,

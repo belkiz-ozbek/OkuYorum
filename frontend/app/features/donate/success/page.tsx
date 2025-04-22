@@ -14,7 +14,6 @@ import Image from 'next/image'
 import {Button} from "@/components/ui/form/button";
 import QRCode from 'qrcode';
 import {SearchForm} from "@/components/ui/form/search-form"
-import { UserService } from "@/services/UserService"
 
 type DonationData = {
   bookTitle: string;
@@ -69,7 +68,6 @@ export default function DonationSuccessPage() {
   const [certificateTheme, setCertificateTheme] = useState<"purple" | "blue" | "green">("purple")
   const [isScrolled, setIsScrolled] = useState(false)
   const [theme, setTheme] = useState<'light' | 'dark'>('light')
-  const [currentUser, setCurrentUser] = useState<{ id: number; username: string } | null>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const { toast } = useToast()
   
@@ -85,18 +83,7 @@ export default function DonationSuccessPage() {
       setIsScrolled(scrollPosition > 50)
     }
 
-    const loadUserInfo = async () => {
-      try {
-        const userInfo = await UserService.getCurrentUserInfo();
-        setCurrentUser(userInfo);
-      } catch (error) {
-        console.error('Error loading user info:', error);
-      }
-    };
-
     window.addEventListener('scroll', handleScroll)
-    loadUserInfo();
-    
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
@@ -600,10 +587,10 @@ export default function DonationSuccessPage() {
               
               <Link 
                 className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300"
-                href={`/features/profile/${currentUser?.id || ''}`}
+                href="/features/profile"
               >
                 <User className="h-5 w-5" />
-                <span>{currentUser?.username || 'Profil'}</span>
+                <span>Profil</span>
               </Link>
             </div>
           </div>

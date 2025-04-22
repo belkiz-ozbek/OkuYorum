@@ -54,6 +54,72 @@ const handleError = (error: unknown) => {
   throw error;
 };
 
+// Mock data for testing without backend
+const mockUserProfile: UserProfile = {
+  id: 1,
+  nameSurname: "John Doe",
+  username: "johndoe",
+  email: "john@example.com",
+  bio: "Kitap tutkunu ve yazılım geliştirici",
+  birthDate: "1990-01-01",
+  readerScore: 85,
+  booksRead: 42,
+  profileImage: "/placeholder.svg",
+  headerImage: "/placeholder.svg",
+  followers: 156,
+  following: 89,
+  createdAt: "2023-01-01T00:00:00Z",
+  updatedAt: "2024-01-01T00:00:00Z"
+};
+
+const mockAchievements: Achievement[] = [
+  {
+    id: 1,
+    type: "BOOK_WORM",
+    title: "Kitap Kurdu",
+    description: "50 kitap okudunuz",
+    progress: 84,
+    createdAt: "2024-01-01T00:00:00Z",
+    updatedAt: "2024-01-01T00:00:00Z"
+  },
+  {
+    id: 2,
+    type: "SOCIAL_READER",
+    title: "Sosyal Okuyucu",
+    description: "100 yorum yaptınız",
+    progress: 65,
+    createdAt: "2024-01-01T00:00:00Z",
+    updatedAt: "2024-01-01T00:00:00Z"
+  },
+  {
+    id: 3,
+    type: "QUOTE_MASTER",
+    title: "Alıntı Ustası",
+    description: "200 alıntı paylaştınız",
+    progress: 45,
+    createdAt: "2024-01-01T00:00:00Z",
+    updatedAt: "2024-01-01T00:00:00Z"
+  },
+  {
+    id: 4,
+    type: "MARATHON_READER",
+    title: "Maraton Okuyucu",
+    description: "30 gün boyunca her gün okudunuz",
+    progress: 90,
+    createdAt: "2024-01-01T00:00:00Z",
+    updatedAt: "2024-01-01T00:00:00Z"
+  }
+];
+
+const mockReadingActivity: ReadingActivity[] = [
+  { id: 1, month: "Ocak", books: 5, createdAt: "2024-01-01T00:00:00Z", updatedAt: "2024-01-01T00:00:00Z" },
+  { id: 2, month: "Şubat", books: 8, createdAt: "2024-01-01T00:00:00Z", updatedAt: "2024-01-01T00:00:00Z" },
+  { id: 3, month: "Mart", books: 6, createdAt: "2024-01-01T00:00:00Z", updatedAt: "2024-01-01T00:00:00Z" },
+  { id: 4, month: "Nisan", books: 4, createdAt: "2024-01-01T00:00:00Z", updatedAt: "2024-01-01T00:00:00Z" },
+  { id: 5, month: "Mayıs", books: 7, createdAt: "2024-01-01T00:00:00Z", updatedAt: "2024-01-01T00:00:00Z" },
+  { id: 6, month: "Haziran", books: 3, createdAt: "2024-01-01T00:00:00Z", updatedAt: "2024-01-01T00:00:00Z" }
+];
+
 export const profileService = {
   // Profil bilgilerini getir
   getProfile: async (): Promise<UserProfile> => {
@@ -168,7 +234,7 @@ export const profileService = {
     }
   },
 
-  // Belirli bir kullanıcının profil bilgilerini getir
+  // Kullanıcı profilini getir
   getUserProfile: async (userId: string): Promise<UserProfile> => {
     try {
       const token = localStorage.getItem('token');

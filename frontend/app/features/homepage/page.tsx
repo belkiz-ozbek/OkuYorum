@@ -12,22 +12,21 @@ import { HeroSection } from "@/components/homepage/HeroSection"
 import { Header } from "@/components/homepage/Header"
 
 export default function HomePage() {
-    return (
-        <div className="flex flex-col min-h-screen">
-            <Header/>
-            <main className="max-w-7xl mx-auto px-6">
-                <HeroSection/>
-                <FeatureHighlights/>
-                <LiteraryMinds/>
-                <div className="py-16">
-                    <MilletKiraathaneleri/>
-                </div>
-                <ReadingGroups/>
-                <BookReviewSection/>
-                <CommunityImpact/>
-                <CallToAction/>
-            </main>
-            <Footer/>
+  return (
+  <div className="flex flex-col min-h-screen">
+    <Header />
+    <main className="max-w-7xl mx-auto px-6">
+      <HeroSection />
+      <FeatureHighlights />
+      <LiteraryMinds />
+       <div className="py-16">
+        <MilletKiraathaneleri />
         </div>
-    )
-}
+        <ReadingGroups />
+        <BookReviewSection />
+        <CommunityImpact />
+        <CallToAction />
+        </main>
+        <Footer />
+        </div>
+         )}

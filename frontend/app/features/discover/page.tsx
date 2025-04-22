@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
 import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion"
 import { useInView } from "react-intersection-observer"
-import { BookOpen, PlusCircle, User, Library, Compass, Coffee, Heart, Search, Moon, Sun, Quote, FileText, Filter, ChevronDown } from "lucide-react"
+import {BookOpen,PlusCircle,User,Library,Compass,Coffee,Heart,Search,Moon,Sun,Quote,FileText,Filter,ChevronDown,Share2,Bookmark,TrendingUp,} from "lucide-react"
 import { Button } from "@/components/ui/form/button"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { Card } from "@/components/ui/layout/Card"
@@ -15,8 +15,6 @@ import { SearchDialog } from "@/components/ui/discover/search-dialog"
 import { MobileMenu } from "@/components/ui/discover/mobile-menu"
 import { LoadingIndicator } from "@/components/ui/discover/loading-indicator"
 import { FilterDialog } from "@/components/ui/discover/filter-dialog"
-import { SearchForm } from "@/components/ui/form/search-form"
-import { UserService } from "@/services/UserService"
 
 // Sample content data - filtered to only include quotes and reviews
 const sampleContent: ContentItem[] = [
@@ -185,10 +183,10 @@ export default function DiscoverPage() {
     genre: "",
     rating: 0,
   })
+  const [savedItems, setSavedItems] = useState<Set<string>>(new Set());
+  const [showQuickActions, setShowQuickActions] = useState(false);
   const { scrollY } = useScroll();
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const opacity = useTransform(scrollY, [0, 300], [1, 0]);
-  const [currentUser, setCurrentUser] = useState<{ id: number; username: string } | null>(null);
 
   // Ref for infinite scroll
   const loadMoreRef = useRef(null)
@@ -223,18 +221,7 @@ export default function DiscoverPage() {
       setIsScrolled(scrollPosition > 50)
     }
 
-    const loadUserInfo = async () => {
-      try {
-        const response = await UserService.getCurrentUser();
-        setCurrentUser(response.data);
-      } catch (error) {
-        console.error('Error loading user info:', error);
-        setCurrentUser(null);
-      }
-    };
-
     window.addEventListener("scroll", handleScroll)
-    loadUserInfo()
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
@@ -367,7 +354,33 @@ export default function DiscoverPage() {
 
 
   // Save item function
-// Share function
+  const toggleSaveItem = (itemId: string) => {
+    setSavedItems(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(itemId)) {
+        newSet.delete(itemId);
+      } else {
+        newSet.add(itemId);
+      }
+      return newSet;
+    });
+  };
+
+  // Share function
+  const shareContent = async (item: ContentItem) => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: item.book.title,
+          text: item.content,
+          url: window.location.href
+        });
+      } catch (error) {
+        console.error('Error sharing:', error);
+      }
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 via-rose-50 to-pink-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
 
@@ -399,7 +412,7 @@ export default function DiscoverPage() {
         }`}
       >
         <div className="max-w-7xl mx-auto h-full flex items-center justify-between px-6">
-          <Link className="flex items-center justify-center group relative" href="/auth/homepage">
+          <Link className="flex items-center justify-center group relative" href="/features/homepage">
             <div className="relative">
               <BookOpen
                 className={`${isScrolled ? "h-5 w-5" : "h-6 w-6"} text-foreground group-hover:text-primary transition-all duration-300`}
@@ -442,8 +455,6 @@ export default function DiscoverPage() {
                 <Heart className="h-5 w-5" />
                 <span>Bağış Yap</span>
               </Link>
-
-              <SearchForm isScrolled={isScrolled} />
             </nav>
 
             <div className="flex items-center gap-4 border-l border-border pl-6">
@@ -457,10 +468,10 @@ export default function DiscoverPage() {
 
               <Link
                 className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300"
-                href={currentUser ? `/features/profile/${currentUser.id}` : '/'}
+                href="/features/profile"
               >
                 <User className="h-5 w-5" />
-                <span>{currentUser?.username || 'Giriş Yap'}</span>
+                <span>Profil</span>
               </Link>
             </div>
           </div>

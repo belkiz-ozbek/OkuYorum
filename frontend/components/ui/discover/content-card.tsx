@@ -251,7 +251,9 @@ export const ContentCard = ({ item, index = 0, onLike, onSave, onFollow, onShare
             )}
           >
             {item.type === "quote" && (
-              <div className="absolute top-2 left-2 text-4xl text-purple-200 dark:text-purple-800 font-serif leading-none"></div>
+              <div className="absolute top-2 left-2 text-4xl text-purple-200 dark:text-purple-800 font-serif leading-none">
+                "
+              </div>
             )}
             <p
               className={cn(
@@ -262,7 +264,9 @@ export const ContentCard = ({ item, index = 0, onLike, onSave, onFollow, onShare
               {item.content}
             </p>
             {item.type === "quote" && (
-              <div className="absolute bottom-2 right-4 text-4xl text-purple-200 dark:text-purple-800 font-serif leading-none"></div>
+              <div className="absolute bottom-2 right-4 text-4xl text-purple-200 dark:text-purple-800 font-serif leading-none">
+                "
+              </div>
             )}
           </div>
         </div>

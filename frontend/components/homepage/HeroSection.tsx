@@ -66,8 +66,11 @@ export function HeroSection() {
           <Button
             variant="outline"
             className="btn rounded-full px-8 py-6 text-lg border-2 hover:border-primary/50 dark:border-gray-500"
+            asChild
           >
-            Daha Fazla Bilgi
+            <Link href="/features/about">
+              Daha Fazla Bilgi
+            </Link>
           </Button>
         </motion.div>
       </div>

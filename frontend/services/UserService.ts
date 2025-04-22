@@ -111,7 +111,7 @@ export class UserService {
   static async isAdmin(): Promise<boolean> {
     try {
       const response = await this.getCurrentUser();
-      return response.data?.role === 'ADMIN';
+      return response.data.role === 'ADMIN';
     } catch (error) {
       console.error('Error checking admin status:', error);
       return false;
