@@ -19,7 +19,9 @@
     <include file="/db/changelog/changes/add-pathname-to-books.xml"/>
     <include file="/db/changelog/changes/okuyorum-63.xml"/>
     <include file="/db/changelog/changes/okuyorum-65.xml"/>
+    <include file="/db/changelog/changes/add-is-favorite-column.xml"/>
 
     <!-- Veri değişikliklerini buraya include edeceğiz -->
     <include file="db/changelog/data/data-master.xml"/>
+
 </databaseChangeLog> 

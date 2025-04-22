@@ -86,6 +86,26 @@ public class BookController {
         return ResponseEntity.ok(bookService.updateBookStatus(bookId, userId, readingStatus));
     }
 
+    @PutMapping("/{bookId}/favorite")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<BookDto> toggleFavorite(@PathVariable Long bookId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        Long userId = userService.getUserIdByUsername(username);
+        
+        return ResponseEntity.ok(bookService.toggleFavorite(bookId, userId));
+    }
+
+    @GetMapping("/favorites")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<List<BookDto>> getFavoriteBooks() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        Long userId = userService.getUserIdByUsername(username);
+        
+        return ResponseEntity.ok(bookService.getFavoriteBooks(userId));
+    }
+
     static class StatusUpdateRequest {
         private String status;
 

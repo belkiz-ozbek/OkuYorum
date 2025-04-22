@@ -1,5 +1,6 @@
 package aybu.graduationproject.okuyorum.library.dto;
 
+import aybu.graduationproject.okuyorum.library.entity.Book;
 import aybu.graduationproject.okuyorum.library.entity.Book.ReadingStatus;
 
 public class BookDto {
@@ -16,6 +17,7 @@ public class BookDto {
     private Integer readCount;
     private Double rating;
     private Integer reviewCount;
+    private boolean isFavorite;
 
     // Getters and Setters
     public Long getId() {
@@ -120,5 +122,13 @@ public class BookDto {
 
     public void setReviewCount(Integer reviewCount) {
         this.reviewCount = reviewCount;
+    }
+
+    public boolean isFavorite() {
+        return isFavorite;
+    }
+
+    public void setFavorite(boolean favorite) {
+        isFavorite = favorite;
     }
 } 

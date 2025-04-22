@@ -1,7 +1,6 @@
 "use client"
 
-import { BookOpen, Quote, Calendar, BookText, Heart, Share2, Bookmark, MessageCircle, ChevronRight, Sparkles, Award } from 'lucide-react'
-import Link from 'next/link'
+import { BookOpen, Quote, Calendar, BookText, Heart, Share2, Bookmark, MessageCircle, Sparkles, Award } from 'lucide-react'
 import Image from 'next/image'
 import { useEffect, useState } from 'react'
 import { use } from 'react'
@@ -31,6 +30,7 @@ export default function BookPage({ params }: PageProps) {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
     const [updatingStatus, setUpdatingStatus] = useState(false)
+    const [updatingFavorite, setUpdatingFavorite] = useState(false)
     const [quotes, setQuotes] = useState<QuoteType[]>([])
     const [reviews, setReviews] = useState<Review[]>([])
     const [showQuoteModal, setShowQuoteModal] = useState(false)
@@ -236,15 +236,79 @@ export default function BookPage({ params }: PageProps) {
         }
     };
 
+    const handleFavoriteToggle = async () => {
+        if (!book) return;
+
+        try {
+            setUpdatingFavorite(true);
+            const token = localStorage.getItem('token');
+            if (!token) {
+                toast({
+                    title: "Hata!",
+                    description: "Oturum bulunamadı",
+                    variant: "destructive",
+                });
+                return;
+            }
+
+            const response = await fetch(`http://localhost:8080/api/books/${book.id}/favorite`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                toast({
+                    title: "Hata!",
+                    description: "Favori durumu güncellenemedi",
+                    variant: "destructive",
+                });
+                return;
+            }
+            await response.json();
+
+            // Önce state'i güncelle
+            const newFavoriteState = !book.isFavorite;
+            setBook(prev => {
+                if (!prev) return null;
+                return {
+                    ...prev,
+                    isFavorite: newFavoriteState
+                };
+            });
+
+            // Sonra toast mesajını göster
+            if (newFavoriteState) {
+                toast({
+                    title: "Favorilere eklendi!",
+                    description: "Kitap favorilerinize eklendi.",
+                    variant: "default",
+                });
+            } else {
+                toast({
+                    title: "Favorilerden çıkarıldı",
+                    description: "Kitap favorilerinizden çıkarıldı.",
+                    variant: "default",
+                });
+            }
+
+        } catch (err) {
+            console.error('Favori güncelleme hatası:', err);
+            toast({
+                title: "Hata!",
+                description: "Favori durumu güncellenirken bir hata oluştu",
+                variant: "destructive",
+            });
+        } finally {
+            setUpdatingFavorite(false);
+        }
+    };
+
     if (loading) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-pink-50 via-rose-50 to-pink-100">
-                <header className="px-6 h-20 flex items-center max-w-7xl mx-auto border-b border-gray-100">
-                    <Link href="/auth/homepage" className="flex items-center justify-center">
-                        <BookOpen className="h-6 w-6 text-purple-600" />
-                        <span className="ml-2 text-lg font-semibold">OkuYorum</span>
-                    </Link>
-                </header>
                 <div className="flex justify-center items-center h-[calc(100vh-5rem)]">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
                 </div>
@@ -255,12 +319,6 @@ export default function BookPage({ params }: PageProps) {
     if (error || !book) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-pink-50 via-rose-50 to-pink-100">
-                <header className="px-6 h-20 flex items-center max-w-7xl mx-auto border-b border-gray-100">
-                    <Link href="/auth/homepage" className="flex items-center justify-center">
-                        <BookOpen className="h-6 w-6 text-purple-600" />
-                        <span className="ml-2 text-lg font-semibold">OkuYorum</span>
-                    </Link>
-                </header>
                 <div className="max-w-4xl mx-auto px-6 py-12">
                     <div className="bg-red-50 border border-red-200 text-red-600 p-4 rounded-lg">
                         {error || 'Kitap bulunamadı'}
@@ -272,40 +330,8 @@ export default function BookPage({ params }: PageProps) {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-rose-50 via-slate-50 to-purple-50">
-            {/* Üst Banner - Daha minimal */}
-            <div className="bg-white/70 backdrop-blur-sm sticky top-0 z-50 border-b border-gray-100/50">
-                <header className="px-8 h-16 flex items-center justify-between max-w-7xl mx-auto">
-                    <Link href="/auth/homepage" className="flex items-center justify-center group">
-                        <BookOpen className="h-5 w-5 text-purple-500 group-hover:text-purple-600 transition-colors" />
-                        <span className="ml-2 text-base font-medium text-gray-700">OkuYorum</span>
-                    </Link>
-                    <h1 className="text-lg font-medium text-gray-700 truncate max-w-md">{book.title}</h1>
-                    <div className="flex items-center gap-4">
-                        <Button variant="ghost" size="sm" className="text-gray-500 hover:text-purple-600">
-                            <Share2 className="w-4 h-4" />
-                        </Button>
-                        <Button variant="ghost" size="sm" className="text-gray-500 hover:text-purple-600">
-                            <Bookmark className="w-4 h-4" />
-                        </Button>
-                    </div>
-                </header>
-            </div>
-
             <main className="max-w-6xl mx-auto px-8 py-16">
                 <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-sm overflow-hidden border border-gray-100/50">
-                    {/* Breadcrumb - Daha minimal */}
-                    <div className="px-10 py-4 border-b border-gray-100/50">
-                        <div className="flex items-center text-sm text-gray-400">
-                            <Link href="/auth/homepage" className="hover:text-purple-500 transition-colors">Ana Sayfa</Link>
-                            <ChevronRight className="w-3 h-3 mx-2 opacity-50" />
-                            <Link href="/categories" className="hover:text-purple-500 transition-colors">
-                                {book.categories?.[0] || 'Kategoriler'}
-                            </Link>
-                            <ChevronRight className="w-3 h-3 mx-2 opacity-50" />
-                            <span className="text-gray-600 font-medium truncate">{book.title}</span>
-                        </div>
-                    </div>
-
                     <div className="md:flex">
                         {/* Sol Taraf - Daha zarif */}
                         <div className="md:w-1/3 bg-gradient-to-b from-purple-50/50 to-rose-50/50 p-10">
@@ -444,14 +470,54 @@ export default function BookPage({ params }: PageProps) {
                                         className="relative group"
                                     >
                                         <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 via-pink-500 to-purple-600 rounded-xl blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-300"></div>
-                                        <Button className="relative flex items-center gap-3 px-6 py-3 bg-white dark:bg-gray-900 hover:bg-purple-50 dark:hover:bg-gray-800 border border-purple-100 dark:border-purple-800/30 rounded-lg shadow-xl shadow-purple-500/10 hover:shadow-purple-500/20 transition-all duration-300">
+                                        <Button 
+                                            className="relative flex items-center gap-3 px-6 py-3 bg-white dark:bg-gray-900 hover:bg-purple-50 dark:hover:bg-gray-800 border border-purple-100 dark:border-purple-800/30 rounded-lg shadow-xl shadow-purple-500/10 hover:shadow-purple-500/20 transition-all duration-300"
+                                            onClick={handleFavoriteToggle}
+                                            disabled={updatingFavorite}
+                                        >
                                             <div className="relative">
-                                                <Heart className="w-5 h-5 text-purple-500 dark:text-purple-400 group-hover:text-purple-600 dark:group-hover:text-purple-300 transition-colors duration-300" />
+                                                {book.isFavorite ? (
+                                                    <motion.div
+                                                        initial={{ scale: 0 }}
+                                                        animate={{ scale: 1 }}
+                                                        transition={{ type: "spring", stiffness: 260, damping: 20 }}
+                                                    >
+                                                        <Heart className="w-5 h-5 text-red-500 fill-red-500" />
+                                                    </motion.div>
+                                                ) : (
+                                                    <Heart className="w-5 h-5 text-purple-500 dark:text-purple-400 group-hover:text-purple-600 dark:group-hover:text-purple-300 transition-colors duration-300" />
+                                                )}
                                                 <div className="absolute inset-0 animate-ping opacity-30 text-purple-500 group-hover:opacity-50">
                                                     <Heart className="w-5 h-5" />
                                                 </div>
                                             </div>
-                                            <span className="font-medium bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent group-hover:from-purple-700 group-hover:to-pink-600 transition-all duration-300">Favorilere Ekle</span>
+                                            <span className={`font-medium ${
+                                                book.isFavorite ? 
+                                                'text-red-500' : 
+                                                'bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent group-hover:from-purple-700 group-hover:to-pink-600'
+                                            } transition-all duration-300`}>
+                                                {book.isFavorite ? 'Favorilerde' : 'Favorilere Ekle'}
+                                            </span>
+                                            {book.isFavorite && (
+                                                <motion.div
+                                                    initial={{ scale: 0, opacity: 0 }}
+                                                    animate={{ scale: 1, opacity: 1 }}
+                                                    transition={{ delay: 0.2, type: "spring", stiffness: 260, damping: 20 }}
+                                                    className="ml-1"
+                                                >
+                                                    <svg className="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <motion.path
+                                                            initial={{ pathLength: 0 }}
+                                                            animate={{ pathLength: 1 }}
+                                                            transition={{ duration: 0.5, ease: "easeInOut" }}
+                                                            strokeLinecap="round"
+                                                            strokeLinejoin="round"
+                                                            strokeWidth={2}
+                                                            d="M5 13l4 4L19 7"
+                                                        />
+                                                    </svg>
+                                                </motion.div>
+                                            )}
                                         </Button>
                                     </motion.div>
 

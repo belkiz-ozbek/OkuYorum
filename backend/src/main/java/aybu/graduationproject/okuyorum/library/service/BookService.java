@@ -205,6 +205,35 @@ public class BookService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
+    public BookDto toggleFavorite(Long bookId, Long userId) {
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new EntityNotFoundException("Book not found"));
+        
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+
+        UserBook userBook = userBookRepository.findByUserIdAndBookId(userId, bookId)
+                .orElseGet(() -> {
+                    UserBook newUserBook = new UserBook();
+                    newUserBook.setUser(user);
+                    newUserBook.setBook(book);
+                    return newUserBook;
+                });
+        
+        userBook.setFavorite(!userBook.isFavorite());
+        userBookRepository.save(userBook);
+        
+        return convertToDto(book, userBook);
+    }
+
+    public List<BookDto> getFavoriteBooks(Long userId) {
+        List<UserBook> favoriteBooks = userBookRepository.findByUserIdAndIsFavoriteTrue(userId);
+        return favoriteBooks.stream()
+                .map(userBook -> convertToDto(userBook.getBook(), userBook))
+                .collect(Collectors.toList());
+    }
+
     private BookDto convertToDto(Book book) {
         return convertToDto(book, null);
     }
@@ -224,6 +253,9 @@ public class BookService {
         // Get status from UserBook if available
         if (userBook != null) {
             dto.setStatus(userBook.getStatus());
+            dto.setFavorite(userBook.isFavorite());
+        } else {
+            dto.setFavorite(false);
         }
 
         // Calculate total readers (users who have read the book)

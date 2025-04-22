@@ -4,11 +4,13 @@ import aybu.graduationproject.okuyorum.user.entity.User;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import lombok.Data;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "user_books")
+@Data
 public class UserBook {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,6 +35,8 @@ public class UserBook {
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+    private boolean isFavorite = false;
 
     // Getters and Setters
     public Long getId() {

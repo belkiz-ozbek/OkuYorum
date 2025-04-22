@@ -22,4 +22,5 @@ export type Book = {
   userId?: number;
   createdAt?: string;
   updatedAt?: string;
+  isFavorite: boolean;
 } 
