@@ -118,9 +118,9 @@ public class QuoteServiceImpl implements QuoteService {
             notificationService.createNotification(
                 quote.getUser().getId(),
                 userId,
-                "LIKE",
+                "QUOTE_LIKE",
                 String.format("%s alıntınızı beğendi", user.getUsername()),
-                String.format("/quotes/%d", quote.getId())
+                String.format("/features/quotes/%d", quote.getId())
             );
         }
 

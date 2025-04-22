@@ -59,7 +59,16 @@ export function NotificationBell() {
                     n.id === notification.id ? { ...n, read: true } : n
                 ));
             }
-            router.push(notification.link);
+
+            // URL'leri düzelt
+            let redirectUrl = notification.link;
+            if (notification.link.startsWith('/quotes/')) {
+                redirectUrl = `/features${notification.link}`;
+            } else if (notification.link.startsWith('/profile/')) {
+                redirectUrl = `/features${notification.link}`;
+            }
+
+            router.push(redirectUrl);
             setIsOpen(false);
         } catch (error) {
             console.error('Failed to mark notification as read:', error);
@@ -78,7 +87,7 @@ export function NotificationBell() {
 
     const handleActorClick = (e: React.MouseEvent, actorId: number) => {
         e.stopPropagation(); // Bildirim tıklamasını engelle
-        router.push(`/profile/${actorId}`);
+        router.push(`/features/profile/${actorId}`);
         setIsOpen(false);
     };
 

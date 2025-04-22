@@ -70,7 +70,7 @@ public class CommentServiceImpl implements CommentService {
                     userId,
                     "QUOTE_COMMENT",
                     String.format("%s alıntınıza yorum yaptı", user.getUsername()),
-                    String.format("/quotes/%d", quote.getId())
+                    String.format("/features/quotes/%d", quote.getId())
                 );
             }
         } else if (request.getReviewId() != null) {
@@ -84,7 +84,7 @@ public class CommentServiceImpl implements CommentService {
                     userId,
                     "REVIEW_COMMENT",
                     String.format("%s incelemenize yorum yaptı", user.getUsername()),
-                    String.format("/reviews/%d", review.getId())
+                    String.format("/features/reviews/%d", review.getId())
                 );
             }
         } else {
@@ -149,8 +149,8 @@ public class CommentServiceImpl implements CommentService {
                     "COMMENT_LIKE",
                     String.format("%s yorumunuzu beğendi", user.getUsername()),
                     comment.getQuote() != null
-                        ? String.format("/quotes/%d", comment.getQuote().getId())
-                        : String.format("/reviews/%d", comment.getReview().getId())
+                        ? String.format("/features/quotes/%d", comment.getQuote().getId())
+                        : String.format("/features/reviews/%d", comment.getReview().getId())
                 );
             }
         }
@@ -206,8 +206,8 @@ public class CommentServiceImpl implements CommentService {
                 "COMMENT_REPLY",
                 String.format("%s yorumunuza yanıt verdi", user.getUsername()),
                 parentComment.getQuote() != null
-                    ? String.format("/quotes/%d", parentComment.getQuote().getId())
-                    : String.format("/reviews/%d", parentComment.getReview().getId())
+                    ? String.format("/features/quotes/%d", parentComment.getQuote().getId())
+                    : String.format("/features/reviews/%d", parentComment.getReview().getId())
             );
         }
 
