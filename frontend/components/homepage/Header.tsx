@@ -6,6 +6,13 @@ import { SearchForm } from "@/components/ui/form/search-form"
 import { useEffect, useState } from "react"
 import { UserService } from "@/services/UserService"
 import { messageService } from "@/services/messageService"
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false)
@@ -52,8 +59,7 @@ export function Header() {
     loadUserInfo()
     loadUnreadCount()
 
-    // Periyodik olarak okunmamış mesaj sayısını güncelle
-    const interval = setInterval(loadUnreadCount, 30000); // Her 30 saniyede bir güncelle
+    const interval = setInterval(loadUnreadCount, 30000);
 
     return () => {
       window.removeEventListener("scroll", handleScroll)
@@ -69,79 +75,118 @@ export function Header() {
 
   return (
     <header
-      className={`fixed top-0 z-50 w-full transition-all duration-300 ${
-        isScrolled ? "h-14 bg-background/60 backdrop-blur-lg border-b" : "h-16"
-      }`}
+      className="fixed top-0 z-50 w-full h-16 bg-background/95 backdrop-blur-lg border-b"
     >
-      <div className="max-w-7xl mx-auto h-full flex items-center justify-between px-6">
-        {/* Logo */}
-        <Link className="flex items-center justify-center group relative" href="/features/homepage">
-          <BookOpen
-            className={`${
-              isScrolled ? "h-5 w-5" : "h-6 w-6"
-            } text-foreground group-hover:text-primary transition-all duration-300`}
-          />
-          <span
-            className={`ml-2 font-medium text-foreground transition-all duration-300 ${
-              isScrolled ? "text-base" : "text-lg"
-            }`}
-          >
-            OkuYorum
-          </span>
-        </Link>
+      <div className="container mx-auto h-full flex items-center justify-between px-4 lg:px-6">
+        {/* Logo and Main Nav */}
+        <div className="flex items-center space-x-8">
+          <Link className="flex items-center justify-center group relative shrink-0" href="/features/homepage">
+            <BookOpen
+              className="h-6 w-6 text-foreground group-hover:text-primary transition-all duration-300"
+            />
+            <span
+              className="ml-2 font-medium text-foreground text-base"
+            >
+              OkuYorum
+            </span>
+          </Link>
 
-        {/* Desktop Nav */}
-        <div className="hidden md:flex items-center h-full">
-          <nav className="flex items-center gap-6 px-6">
+          <nav className="hidden md:flex items-center space-x-8">
             <Link className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300" href="/features/library">
               <Library className="h-5 w-5" />
-              <span>Kitaplığım</span>
+              <span className="text-sm">Kitaplığım</span>
             </Link>
 
             <Link className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300" href="/features/discover">
               <Compass className="h-5 w-5" />
-              <span>Keşfet</span>
+              <span className="text-sm">Keşfet</span>
             </Link>
 
             <Link className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300" href="/features/millet-kiraathanesi">
               <Users className="h-5 w-5" />
-              <span>Millet Kıraathaneleri</span>
+              <span className="text-sm">Millet Kıraathaneleri</span>
             </Link>
 
-            <Link className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300" href="/features/donate">
-              <Heart className="h-5 w-5" />
-              <span>Bağış Yap</span>
-            </Link>
-
-            <Link className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300 relative" href="/features/messages">
-              <MessageSquare className="h-5 w-5" />
-              <span>Mesajlar</span>
-              {unreadCount > 0 && (
-                <span className="absolute -top-2 -right-2 bg-primary text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                  {unreadCount}
-                </span>
-              )}
-            </Link>
-
-            <NotificationBell />
-
-            <SearchForm isScrolled={isScrolled} />
+            <div className="pl-2">
+              <Link className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300" href="/features/donate">
+                <Heart className="h-5 w-5" />
+                <span className="text-sm">Bağış Yap</span>
+              </Link>
+            </div>
           </nav>
+        </div>
 
-          <div className="flex items-center gap-4 border-l border-border pl-6">
-            <button
-              onClick={toggleTheme}
-              className="text-muted-foreground hover:text-primary transition-colors duration-300"
-              aria-label="Tema değiştir"
-            >
-              {theme === "light" ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
-            </button>
+        {/* Center Section with Search and Icons */}
+        <div className="hidden md:flex items-center justify-center flex-1 max-w-2xl mx-8">
+          <div className="flex items-center space-x-6 w-full">
+            <div className="flex-1">
+              <SearchForm isScrolled={true} />
+            </div>
+            
+            <div className="flex items-center space-x-6">
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Link className="flex items-center text-muted-foreground hover:text-primary transition-colors duration-300 relative" href="/features/messages">
+                      <MessageSquare className="h-5 w-5" />
+                      {unreadCount > 0 && (
+                        <span className="absolute -top-2 -right-2 bg-primary text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                          {unreadCount}
+                        </span>
+                      )}
+                    </Link>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Mesajlar</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
 
-            <Link className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300" href="/features/profile">
-              <User className="h-5 w-5" />
-              <span>Profil</span>
-            </Link>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="text-muted-foreground hover:text-primary transition-colors duration-300">
+                      <NotificationBell />
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Bildirimler</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
           </div>
+        </div>
+
+        {/* User Section */}
+        <div className="hidden md:flex items-center space-x-4">
+          <button
+            onClick={toggleTheme}
+            className="text-muted-foreground hover:text-primary transition-colors duration-300"
+            aria-label="Tema değiştir"
+          >
+            {theme === "light" ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
+          </button>
+
+          <Link 
+            className="flex items-center gap-2.5 text-muted-foreground hover:text-primary transition-colors duration-300" 
+            href={`/features/profile/${currentUser?.id}`}
+          >
+            {currentUser ? (
+              <div className="flex items-center gap-2.5">
+                <Avatar className="h-8 w-8 border border-purple-100 dark:border-purple-900/50 flex-shrink-0">
+                  <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser.username}`} alt={currentUser.username} />
+                  <AvatarFallback>{currentUser.username[0].toUpperCase()}</AvatarFallback>
+                </Avatar>
+                <span className="text-sm font-medium">{currentUser.username}</span>
+              </div>
+            ) : (
+              <>
+                <User className="h-5 w-5" />
+                <span className="text-sm">Profil</span>
+              </>
+            )}
+          </Link>
         </div>
 
         {/* Mobile Nav */}

@@ -1,10 +1,37 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import React, { useState, useEffect, useRef, useCallback } from "react"
 import Link from "next/link"
 import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion"
 import { useInView } from "react-intersection-observer"
-import {BookOpen,PlusCircle,User,Library,Compass,Coffee,Heart,Search,Moon,Sun,Quote,FileText,Filter,ChevronDown,Share2,Bookmark,TrendingUp,} from "lucide-react"
+import { useInfiniteQuery } from "@tanstack/react-query"
+import { format } from "date-fns"
+import { tr } from "date-fns/locale"
+import {
+  BookOpen,
+  PlusCircle,
+  User,
+  Library,
+  Compass,
+  Coffee,
+  Heart,
+  Search,
+  Moon,
+  Sun,
+  Quote,
+  FileText,
+  Filter,
+  ChevronDown,
+  Share2,
+  Bookmark,
+  TrendingUp,
+  Clock,
+  ThumbsUp,
+  MessageSquare,
+  Star,
+  Loader2,
+  XCircle,
+} from "lucide-react"
 import { Button } from "@/components/ui/form/button"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { Card } from "@/components/ui/layout/Card"
@@ -15,6 +42,43 @@ import { SearchDialog } from "@/components/ui/discover/search-dialog"
 import { MobileMenu } from "@/components/ui/discover/mobile-menu"
 import { LoadingIndicator } from "@/components/ui/discover/loading-indicator"
 import { FilterDialog } from "@/components/ui/discover/filter-dialog"
+import { ContentFilter } from "@/components/ui/discover/content-filter"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Badge } from "@/components/ui/badge"
+import { Skeleton } from "@/components/ui/skeleton"
+import { ContentService } from "@/services/ContentService"
+import { cn } from "@/lib/utils"
+import type { Content as ContentType, ContentFilters } from "@/services/ContentService"
+
+type SortType = "trending" | "recent"
+type QueryStatus = "loading" | "error" | "success"
+
+interface User {
+  id: string
+  name: string
+  avatar: string
+}
+
+interface Book {
+  id: string
+  title: string
+  author: string
+  coverImage: string
+  genre: string
+}
+
+interface Content {
+  id: string
+  type: string
+  user: User
+  book?: Book
+  content: string
+  likes: number
+  rating?: number
+  createdAt: string
+  isLiked?: boolean
+  isSaved?: boolean
+}
 
 // Sample content data - filtered to only include quotes and reviews
 const sampleContent: ContentItem[] = [
@@ -166,6 +230,14 @@ const allGenres = Array.from(sampleContent.reduce((genres, item) => {
   return genres
 }, new Set<string>()))
 
+interface FilterDialogProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  onFilterChange: (type: ContentFilters["type"]) => void
+  onSortChange: (sort: ContentFilters["sort"]) => void
+  selectedType: ContentFilters["type"]
+  selectedSort: ContentFilters["sort"]
+}
 
 export default function DiscoverPage() {
   const [content, setContent] = useState<ContentItem[]>(sampleContent)
@@ -178,15 +250,15 @@ export default function DiscoverPage() {
   const [showFilterDialog, setShowFilterDialog] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const [theme, setTheme] = useState<"light" | "dark">("light")
-  const [filters, setFilters] = useState({
-    author: "",
-    genre: "",
-    rating: 0,
+  const [filters, setFilters] = useState<ContentFilters>({
+    type: "all",
+    sort: "recent"
   })
-  const [savedItems, setSavedItems] = useState<Set<string>>(new Set());
-  const [showQuickActions, setShowQuickActions] = useState(false);
-  const { scrollY } = useScroll();
-  const opacity = useTransform(scrollY, [0, 300], [1, 0]);
+  const [savedItems, setSavedItems] = useState<Set<string>>(new Set())
+  const [showQuickActions, setShowQuickActions] = useState(false)
+  const { scrollY } = useScroll()
+  const opacity = useTransform(scrollY, [0, 300], [1, 0])
+  const [selectedFilter, setSelectedFilter] = useState<string>("all")
 
   // Ref for infinite scroll
   const loadMoreRef = useRef(null)
@@ -194,455 +266,400 @@ export default function DiscoverPage() {
     threshold: 0.5,
   })
 
-  // Set the ref to the loadMoreRef
-  useEffect(() => {
-    if (loadMoreRef.current) {
-      ref(loadMoreRef.current)
-    }
-  }, [loadMoreRef, ref])
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    status,
+  } = useInfiniteQuery({
+    queryKey: ["discover", filters],
+    queryFn: ({ pageParam = 1 }) => ContentService.getDiscoverContent(pageParam, filters),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => lastPage.nextPage,
+  })
 
-  // Load more content when the loadMoreRef is in view
-  useEffect(() => {
-    if (inView) {
-      loadMoreContent()
-    }
-  }, [inView])
+  const observer = useRef<IntersectionObserver | null>(null)
+  const lastContentRef = useCallback((node: HTMLDivElement | null) => {
+    if (!node || status === "pending") return
 
-  // Scroll handler for navbar
-  useEffect(() => {
-    // Sistem dark mode tercihini kontrol et
-    if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-      setTheme("dark")
-      document.documentElement.setAttribute("data-theme", "dark")
-    }
+    if (observer.current) observer.current.disconnect()
 
+    observer.current = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+        fetchNextPage()
+      }
+    })
+
+    observer.current.observe(node)
+  }, [status, hasNextPage, isFetchingNextPage, fetchNextPage])
+
+  // Filter content based on selected filter
+  const filteredContent = content.filter(item => {
+    if (selectedFilter === "all") return true
+    return item.type === selectedFilter
+  })
+
+  const handleFilterChange = (type: ContentFilters["type"]) => {
+    setFilters((prev: ContentFilters) => ({ ...prev, type }))
+  }
+
+  const handleSortChange = (sort: ContentFilters["sort"]) => {
+    setFilters((prev: ContentFilters) => ({ ...prev, sort }))
+  }
+
+  const handleSearch = (term: string) => {
+    setFilters((prev: ContentFilters) => ({ ...prev, search: term }))
+  }
+
+  useEffect(() => {
     const handleScroll = () => {
-      const scrollPosition = window.scrollY
-      setIsScrolled(scrollPosition > 50)
+      setIsScrolled(window.scrollY > 50)
     }
 
     window.addEventListener("scroll", handleScroll)
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
-  // Toggle theme
   const toggleTheme = () => {
     const newTheme = theme === "light" ? "dark" : "light"
     setTheme(newTheme)
     document.documentElement.setAttribute("data-theme", newTheme)
   }
 
-  // Filter content based on active tab and search/filters
-  const filteredContent = content.filter((item) => {
-    // Tab filter
-    if (activeTab !== "all" && item.type !== activeTab) return false
-
-    // Search filter
-    if (
-      searchTerm &&
-      !item.content.toLowerCase().includes(searchTerm.toLowerCase()) &&
-      !item.book.title.toLowerCase().includes(searchTerm.toLowerCase()) &&
-      !item.book.author.toLowerCase().includes(searchTerm.toLowerCase())
-    ) {
-      return false
-    }
-
-    // Author filter
-    if (filters.author && item.book.author !== filters.author) return false
-
-    // Genre filter
-    if (filters.genre && item.book.genre !== filters.genre) return false
-
-    // Rating filter (only for reviews)
-    if (filters.rating > 0 && (item.type !== "review" || !item.rating || item.rating < filters.rating)) {
-      return false
-    }
-
-    return true
-  })
-
-  // Load more content (simulated)
   const loadMoreContent = () => {
-    if (isLoading) return
-
     setIsLoading(true)
-
-    // Simulate loading delay
+    // Simulate loading more content
     setTimeout(() => {
-      // Add more content by duplicating existing content with new IDs
-      const newContent = [...content]
-      const moreContent = content.slice(0, 4).map((item) => ({
-        ...item,
-        id: `new-${item.id}-${Date.now()}`,
-      }))
-
-      setContent([...newContent, ...moreContent])
+      setContent(prevContent => [...prevContent, ...sampleContent])
       setIsLoading(false)
-    }, 1500)
+    }, 1000)
   }
 
-  // Toggle like on a content item
+  useEffect(() => {
+    if (inView) {
+      loadMoreContent()
+    }
+  }, [inView])
+
   const toggleLike = (id: string) => {
-    setContent(
-      content.map((item) => {
-        if (item.id === id) {
-          const isLiked = item.isLiked || false
-          return {
-            ...item,
-            isLiked: !isLiked,
-            likes: isLiked ? item.likes - 1 : item.likes + 1,
-          }
-        }
-        return item
-      }),
+    setContent(prevContent =>
+      prevContent.map(item =>
+        item.id === id
+          ? { ...item, likes: item.likes + (item.isLiked ? -1 : 1), isLiked: !item.isLiked }
+          : item
+      )
     )
   }
 
-  // Toggle save on a content item
   const toggleSave = (id: string) => {
-    setContent(
-      content.map((item) => {
-        if (item.id === id) {
-          return {
-            ...item,
-            isSaved: !(item.isSaved || false),
-          }
-        }
-        return item
-      }),
-    )
-  }
-
-  // Toggle follow on a user
-  const toggleFollow = (userId: string) => {
-    setContent(
-      content.map((item) => {
-        if (item.user.id === userId) {
-          return {
-            ...item,
-            user: {
-              ...item.user,
-              isFollowing: !(item.user.isFollowing || false),
-            },
-          }
-        }
-        return item
-      }),
-    )
-  }
-
-  // Handle search
-  const handleSearch = (term: string) => {
-    setSearchTerm(term)
-  }
-
-  // Handle filter changes
-  const handleFilterChange = (newFilters: typeof filters) => {
-    setFilters(newFilters)
-    setShowFilterDialog(false)
-  }
-
-  // Clear all filters
-  const clearFilters = () => {
-    setSearchTerm("")
-    setFilters({
-      author: "",
-      genre: "",
-      rating: 0,
+    setSavedItems(prevSaved => {
+      const newSaved = new Set(prevSaved)
+      if (newSaved.has(id)) {
+        newSaved.delete(id)
+      } else {
+        newSaved.add(id)
+      }
+      return newSaved
     })
   }
 
+  const toggleFollow = (userId: string) => {
+    setContent(prevContent =>
+      prevContent.map(item =>
+        item.user.id === userId
+          ? { ...item, user: { ...item.user, isFollowing: !item.user.isFollowing } }
+          : item
+      )
+    )
+  }
 
-  // Save item function
   const toggleSaveItem = (itemId: string) => {
-    setSavedItems(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(itemId)) {
-        newSet.delete(itemId);
+    setSavedItems(prevSaved => {
+      const newSaved = new Set(prevSaved)
+      if (newSaved.has(itemId)) {
+        newSaved.delete(itemId)
       } else {
-        newSet.add(itemId);
+        newSaved.add(itemId)
       }
-      return newSet;
-    });
-  };
+      return newSaved
+    })
+  }
 
-  // Share function
   const shareContent = async (item: ContentItem) => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: item.book.title,
-          text: item.content,
-          url: window.location.href
-        });
-      } catch (error) {
-        console.error('Error sharing:', error);
-      }
+    try {
+      await navigator.share({
+        title: `${item.book.title} - ${item.book.author}`,
+        text: item.content,
+        url: window.location.href,
+      })
+    } catch (error) {
+      console.error("Error sharing content:", error)
     }
-  };
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-rose-50 to-pink-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div className="min-h-screen bg-gradient-to-b from-background to-background/95">
+      <div className="container max-w-7xl mx-auto px-4 py-8">
+        <div className="flex flex-col space-y-8">
+          {/* Header Section */}
+          <div className="flex items-center justify-between">
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-purple-400 bg-clip-text text-transparent">
+              Keşfet
+            </h1>
+            <div className="flex items-center gap-3">
+              <Button
+                variant="outline"
+                size="icon"
+                className="rounded-full hover:bg-primary/10 hover:text-primary"
+                onClick={() => setShowSearchDialog(true)}
+              >
+                <Search className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                className="rounded-full hover:bg-primary/10 hover:text-primary"
+                onClick={() => setShowFilterDialog(true)}
+              >
+                <Filter className="h-4 w-4" />
+              </Button>
+              <Button
+                className="rounded-full"
+                onClick={() => setShowCreateDialog(true)}
+              >
+                <PlusCircle className="h-4 w-4 mr-2" />
+                İçerik Ekle
+              </Button>
+            </div>
+          </div>
 
+          {/* Filter and Sort Section */}
+          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between bg-card rounded-xl p-4">
+            <Tabs
+              value={filters.type}
+              onValueChange={(value) => handleFilterChange(value as ContentFilters["type"])}
+              className="w-full sm:w-auto"
+            >
+              <TabsList className="grid w-full sm:w-auto grid-cols-4 gap-1">
+                <TabsTrigger value="all" className="rounded-lg">Tümü</TabsTrigger>
+                <TabsTrigger value="quote" className="rounded-lg">Alıntılar</TabsTrigger>
+                <TabsTrigger value="review" className="rounded-lg">İncelemeler</TabsTrigger>
+                <TabsTrigger value="post" className="rounded-lg">İletiler</TabsTrigger>
+              </TabsList>
+            </Tabs>
 
+            <div className="flex gap-2">
+              <Button
+                variant={filters.sort === "trending" ? "default" : "outline"}
+                size="sm"
+                className="rounded-lg"
+                onClick={() => handleSortChange("trending")}
+              >
+                <TrendingUp className="h-4 w-4 mr-2" />
+                Trend
+              </Button>
+              <Button
+                variant={filters.sort === "recent" ? "default" : "outline"}
+                size="sm"
+                className="rounded-lg"
+                onClick={() => handleSortChange("recent")}
+              >
+                <Clock className="h-4 w-4 mr-2" />
+                Son Paylaşılanlar
+              </Button>
+            </div>
+          </div>
 
-      {/* Mobile Menu */}
-      <MobileMenu open={showMobileMenu} onOpenChange={setShowMobileMenu} />
+          {/* Content Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <AnimatePresence mode="popLayout">
+              {status === "pending" ? (
+                <motion.div
+                  key="loading"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="col-span-full flex items-center justify-center w-full h-96"
+                >
+                  <Loader2 className="w-8 h-8 animate-spin" />
+                </motion.div>
+              ) : status === "error" ? (
+                <motion.div
+                  key="error"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="col-span-full flex flex-col items-center justify-center w-full h-96 gap-4"
+                >
+                  <XCircle className="w-12 h-12 text-destructive" />
+                  <p className="text-lg font-medium">İçerik yüklenirken bir hata oluştu</p>
+                </motion.div>
+              ) : (
+                data?.pages.map((page, pageIndex) => (
+                  <React.Fragment key={`page-${pageIndex}`}>
+                    {page.items.map((item: ContentType, itemIndex) => {
+                      const isLastItem = pageIndex === data.pages.length - 1 && itemIndex === page.items.length - 1;
+                      
+                      return (
+                        <motion.div
+                          ref={isLastItem ? lastContentRef : null}
+                          key={`content-${item.id}`}
+                          layout
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: 20 }}
+                          transition={{ duration: 0.3, delay: itemIndex * 0.05 }}
+                          className={cn(
+                            "group bg-card hover:bg-card/80 rounded-xl p-4 space-y-4 transition-all duration-200",
+                            "border border-border/50 hover:border-border",
+                            "shadow-sm hover:shadow-md"
+                          )}
+                        >
+                          {/* User Info */}
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <Avatar className="h-10 w-10 border-2 border-primary/10">
+                                <AvatarImage src={item.user.avatar} />
+                                <AvatarFallback>
+                                  {item.user.name.charAt(0)}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <p className="font-medium text-sm">
+                                    {item.user.name}
+                                  </p>
+                                  <Badge
+                                    variant="outline"
+                                    className={cn(
+                                      "text-[10px] px-2 py-0 h-4",
+                                      item.type === "quote" && "text-amber-500 border-amber-200",
+                                      item.type === "review" && "text-emerald-500 border-emerald-200",
+                                      item.type === "post" && "text-blue-500 border-blue-200"
+                                    )}
+                                  >
+                                    {item.type === "quote" && "Alıntı"}
+                                    {item.type === "review" && "İnceleme"}
+                                    {item.type === "post" && "İleti"}
+                                  </Badge>
+                                </div>
+                                <p className="text-xs text-muted-foreground">
+                                  {format(new Date(item.createdAt), "d MMMM yyyy", { locale: tr })}
+                                </p>
+                              </div>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <MessageSquare className="h-4 w-4" />
+                            </Button>
+                          </div>
 
-      {/* Search Dialog */}
-      <SearchDialog open={showSearchDialog} onOpenChange={setShowSearchDialog} onSearch={handleSearch} />
+                          {/* Content */}
+                          {item.type !== "post" && item.book && (
+                            <div className="flex items-start gap-3 bg-muted/50 rounded-lg p-3">
+                              <img
+                                src={item.book.coverImage}
+                                alt={item.book.title}
+                                className="h-16 w-12 object-cover rounded"
+                              />
+                              <div>
+                                <p className="font-medium text-sm">{item.book.title}</p>
+                                <p className="text-xs text-muted-foreground">
+                                  {item.book.author}
+                                </p>
+                              </div>
+                            </div>
+                          )}
 
-      {/* Create Content Dialog */}
+                          <div className="space-y-2">
+                            {item.type === "review" && item.rating && (
+                              <div className="flex items-center gap-1">
+                                <Star className="w-4 h-4 fill-primary" />
+                                <span className="text-sm">{item.rating}/5</span>
+                              </div>
+                            )}
+                            <p className="text-sm leading-relaxed">
+                              {item.type === "quote" && (
+                                <Quote className="h-4 w-4 text-muted-foreground inline mr-2" />
+                              )}
+                              {item.content}
+                            </p>
+                          </div>
+
+                          {/* Actions */}
+                          <div className="flex items-center justify-between pt-2">
+                            <div className="flex items-center gap-1">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="hover:text-primary"
+                                onClick={() => ContentService.likeContent(item.id)}
+                              >
+                                <ThumbsUp className={cn(
+                                  "h-4 w-4",
+                                  item.isLiked && "fill-primary text-primary"
+                                )} />
+                              </Button>
+                              <span className="text-sm text-muted-foreground">
+                                {item.likes}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="hover:text-primary"
+                                onClick={() => ContentService.shareContent(item.id)}
+                              >
+                                <Share2 className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="hover:text-primary"
+                                onClick={() => ContentService.saveContent(item.id)}
+                              >
+                                <Bookmark className={cn(
+                                  "h-4 w-4",
+                                  item.isSaved && "fill-primary text-primary"
+                                )} />
+                              </Button>
+                            </div>
+                          </div>
+                        </motion.div>
+                      )
+                    })}
+                  </React.Fragment>
+                ))
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* Loading More Indicator */}
+          {isFetchingNextPage && (
+            <div className="flex justify-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Dialogs */}
       <CreateContentDialog open={showCreateDialog} onOpenChange={setShowCreateDialog} />
-
-      {/* Filter Dialog */}
+      <SearchDialog open={showSearchDialog} onOpenChange={setShowSearchDialog} onSearch={handleSearch} />
       <FilterDialog
         open={showFilterDialog}
         onOpenChange={setShowFilterDialog}
-        filters={filters}
+        selectedType={filters.type}
+        selectedSort={filters.sort}
         onFilterChange={handleFilterChange}
-        authors={allAuthors}
-        genres={allGenres}
+        onSortChange={handleSortChange}
       />
-
-      {/* Header */}
-      <header
-        className={`fixed top-0 z-50 w-full transition-all duration-300 ${
-          isScrolled ? "h-14 bg-background/60 backdrop-blur-lg border-b" : "h-16"
-        }`}
-      >
-        <div className="max-w-7xl mx-auto h-full flex items-center justify-between px-6">
-          <Link className="flex items-center justify-center group relative" href="/features/homepage">
-            <div className="relative">
-              <BookOpen
-                className={`${isScrolled ? "h-5 w-5" : "h-6 w-6"} text-foreground group-hover:text-primary transition-all duration-300`}
-              />
-            </div>
-            <span
-              className={`ml-2 font-medium text-foreground transition-all duration-300 ${isScrolled ? "text-base" : "text-lg"}`}
-            >
-              OkuYorum
-            </span>
-          </Link>
-
-          <div className="hidden md:flex items-center h-full">
-            <nav className="flex items-center gap-6 px-6">
-              <Link
-                className={`flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300`}
-                href="/features/library"
-              >
-                <Library className="h-5 w-5" />
-                <span>Kitaplığım</span>
-              </Link>
-
-              <Link
-                className={`flex items-center gap-2 text-primary transition-colors duration-300`}
-                href="/features/discover"
-              >
-                <Compass className="h-5 w-5" />
-                <span>Keşfet</span>
-              </Link>
-
-              <Link
-                className={`flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300`}
-                href="/features/kiraathane"
-              >
-                <Coffee className="h-5 w-5" />
-                <span>Millet Kıraathaneleri</span>
-              </Link>
-
-              <Link className={`flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300`} href="/features/donate">
-                <Heart className="h-5 w-5" />
-                <span>Bağış Yap</span>
-              </Link>
-            </nav>
-
-            <div className="flex items-center gap-4 border-l border-border pl-6">
-              <button
-                onClick={toggleTheme}
-                className="text-muted-foreground hover:text-primary transition-colors duration-300"
-                aria-label="Tema değiştir"
-              >
-                {theme === "light" ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
-              </button>
-
-              <Link
-                className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300"
-                href="/features/profile"
-              >
-                <User className="h-5 w-5" />
-                <span>Profil</span>
-              </Link>
-            </div>
-          </div>
-
-          {/* Mobile Navigation */}
-          <div className="md:hidden flex items-center gap-4">
-            <button
-              onClick={() => setShowMobileMenu(true)}
-              className="text-muted-foreground hover:text-primary transition-colors duration-300"
-            >
-              <ChevronDown className="h-5 w-5" />
-            </button>
-
-            <button
-              onClick={toggleTheme}
-              className="text-muted-foreground hover:text-primary transition-colors duration-300"
-              aria-label="Tema değiştir"
-            >
-              {theme === "light" ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
-            </button>
-          </div>
-        </div>
-      </header>
-
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-6">
-
-        {/* Search and Filter Bar */}
-        <motion.div
-          className="mb-6"
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          <Card className="overflow-hidden border-none shadow-md p-4">
-            <div className="flex flex-col sm:flex-row gap-4">
-              <div className="relative flex-grow">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input
-                  type="search"
-                  placeholder="Alıntı, inceleme veya kitap ara..."
-                  className="pl-10 pr-4 py-2 w-full"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-              <div className="flex gap-2">
-                <Button variant="outline" className="flex items-center gap-2" onClick={() => setShowFilterDialog(true)}>
-                  <Filter className="h-4 w-4" />
-                  <span>Filtrele</span>
-                </Button>
-                {(searchTerm || filters.author || filters.genre || filters.rating > 0) && (
-                  <Button variant="ghost" onClick={clearFilters}>
-                    Temizle
-                  </Button>
-                )}
-              </div>
-            </div>
-          </Card>
-        </motion.div>
-
-        {/* Active Filters Display */}
-        {(filters.author || filters.genre || filters.rating > 0) && (
-          <motion.div
-            className="mb-6"
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            <Card className="overflow-hidden border-none shadow-md p-4">
-              <div className="flex flex-wrap gap-2 items-center">
-                <span className="text-sm text-gray-500">Aktif Filtreler:</span>
-                {filters.author && (
-                  <span className="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded-full">
-                    Yazar: {filters.author}
-                  </span>
-                )}
-                {filters.genre && (
-                  <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">Tür: {filters.genre}</span>
-                )}
-                {filters.rating > 0 && (
-                  <span className="bg-amber-100 text-amber-800 text-xs px-2 py-1 rounded-full">
-                    Puan: {filters.rating}+
-                  </span>
-                )}
-              </div>
-            </Card>
-          </motion.div>
-        )}
-
-        {/* Tabs for Content Types */}
-        <motion.div
-          className="mb-6"
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          <Card className="overflow-hidden border-none shadow-md">
-            <Tabs defaultValue="all" onValueChange={(value) => setActiveTab(value)}>
-              <TabsList className="grid grid-cols-3 w-full">
-                <TabsTrigger value="all">
-                  <BookOpen className="h-4 w-4" />
-                  <span>Tümü</span>
-                </TabsTrigger>
-                <TabsTrigger value="quote">
-                  <Quote className="h-4 w-4" />
-                  <span>Alıntılar</span>
-                </TabsTrigger>
-                <TabsTrigger value="review">
-                  <FileText className="h-4 w-4" />
-                  <span>İncelemeler</span>
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
-          </Card>
-        </motion.div>
-
-        {/* Content Feed */}
-        <div className="space-y-4 max-w-3xl mx-auto">
-          <AnimatePresence>
-            {filteredContent.length > 0 ? (
-              filteredContent.map((item, index) => (
-                <motion.div
-                  key={item.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ delay: index * 0.1 }}
-                >
-                  <ContentCard
-                    item={item}
-                    onLike={() => toggleLike(item.id)}
-                    onSave={() => toggleSave(item.id)}
-                    onFollow={toggleFollow}
-                  />
-                </motion.div>
-              ))
-            ) : (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-12">
-                <p className="text-gray-500 dark:text-gray-400">Aramanıza uygun içerik bulunamadı.</p>
-                <Button variant="link" onClick={clearFilters} className="mt-2 text-purple-600 dark:text-purple-400">
-                  Filtreleri temizle
-                </Button>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Loading indicator */}
-          <div ref={loadMoreRef} className="w-full py-8 flex justify-center">
-            {isLoading && <LoadingIndicator />}
-          </div>
-        </div>
-      </main>
-
-      {/* Mobile Action Button */}
-      <motion.div
-        className="fixed bottom-6 right-6 md:hidden z-10"
-        initial={{ scale: 0.8, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ delay: 0.5 }}
-      >
-        <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-          <Button
-            size="lg"
-            className="h-14 w-14 rounded-full bg-purple-600 hover:bg-purple-700 shadow-lg flex items-center justify-center"
-            onClick={() => setShowCreateDialog(true)}
-          >
-            <PlusCircle className="h-6 w-6" />
-          </Button>
-        </motion.div>
-      </motion.div>
+      <MobileMenu open={showMobileMenu} onOpenChange={setShowMobileMenu} />
     </div>
   )
 }

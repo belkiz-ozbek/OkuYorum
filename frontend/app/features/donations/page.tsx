@@ -154,94 +154,7 @@ export default function DonationsPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-rose-50 to-pink-100">
-      <header className={`fixed top-0 z-50 w-full transition-all duration-300 ${
-        isScrolled 
-          ? 'h-14 bg-background/60 backdrop-blur-lg border-b' 
-          : 'h-16'
-      }`}>
-        <div className="max-w-7xl mx-auto h-full flex items-center justify-between px-6">
-          <Link 
-            className="flex items-center justify-center group relative" 
-            href="/features/homepage"
-          >
-            <div className="relative">
-              <BookOpen className={`${isScrolled ? 'h-5 w-5' : 'h-6 w-6'} text-foreground group-hover:text-primary transition-all duration-300`} />
-            </div>
-            <span className={`ml-2 font-medium text-foreground transition-all duration-300 ${isScrolled ? 'text-base' : 'text-lg'}`}>
-              OkuYorum
-            </span>
-          </Link>
-
-          <div className="hidden md:flex items-center h-full">
-            <nav className="flex items-center gap-6 px-6">
-              <Link className={`flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300`} href="/features/library">
-                <Library className="h-5 w-5" />
-                <span>Kitaplığım</span>
-              </Link>
-
-              <Link className={`flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300`} href="/features/discover">
-                <Compass className="h-5 w-5" />
-                <span>Keşfet</span>
-              </Link>
-
-              <Link className={`flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300`} href="/features/millet-kiraathanesi">
-                <Users className="h-5 w-5" />
-                <span>Millet Kıraathaneleri</span>
-              </Link>
-
-              <Link className={`flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300`} href="/features/donate">
-                <Heart className="h-5 w-5" />
-                <span>Bağış Yap</span>
-              </Link>
-
-              <SearchForm isScrolled={isScrolled} />
-            </nav>
-            
-            <div className="flex items-center gap-4 border-l border-border pl-6">
-              <button
-                onClick={toggleTheme}
-                className="text-muted-foreground hover:text-primary transition-colors duration-300"
-                aria-label="Tema değiştir"
-              >
-                {theme === 'light' ? (
-                  <Moon className="h-5 w-5" />
-                ) : (
-                  <Sun className="h-5 w-5" />
-                )}
-              </button>
-              
-              <Link 
-                className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300"
-                href="/features/profile"
-              >
-                <User className="h-5 w-5" />
-                <span>Profil</span>
-              </Link>
-            </div>
-          </div>
-
-          {/* Mobile Navigation */}
-          <div className="md:hidden flex items-center gap-4">
-            <div className="flex items-center gap-4">
-              <SearchForm isScrolled={true} />
-            </div>
-            
-            <button
-              onClick={toggleTheme}
-              className="text-muted-foreground hover:text-primary transition-colors duration-300"
-              aria-label="Tema değiştir"
-            >
-              {theme === 'light' ? (
-                <Moon className="h-5 w-5" />
-              ) : (
-                <Sun className="h-5 w-5" />
-              )}
-            </button>
-          </div>
-        </div>
-      </header>
-
-      <div className="container mx-auto py-8 px-4 pt-24">
+      <main className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-purple-800">Bağışlarım</h1>
           <Link href="/features/donate">
@@ -408,7 +321,7 @@ export default function DonationsPage() {
             </TabsContent>
           ))}
         </Tabs>
-      </div>
+      </main>
     </div>
   )
 } 

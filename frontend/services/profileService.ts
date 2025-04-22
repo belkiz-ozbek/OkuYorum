@@ -54,72 +54,6 @@ const handleError = (error: unknown) => {
   throw error;
 };
 
-// Mock data for testing without backend
-const mockUserProfile: UserProfile = {
-  id: 1,
-  nameSurname: "John Doe",
-  username: "johndoe",
-  email: "john@example.com",
-  bio: "Kitap tutkunu ve yazılım geliştirici",
-  birthDate: "1990-01-01",
-  readerScore: 85,
-  booksRead: 42,
-  profileImage: "/placeholder.svg",
-  headerImage: "/placeholder.svg",
-  followers: 156,
-  following: 89,
-  createdAt: "2023-01-01T00:00:00Z",
-  updatedAt: "2024-01-01T00:00:00Z"
-};
-
-const mockAchievements: Achievement[] = [
-  {
-    id: 1,
-    type: "BOOK_WORM",
-    title: "Kitap Kurdu",
-    description: "50 kitap okudunuz",
-    progress: 84,
-    createdAt: "2024-01-01T00:00:00Z",
-    updatedAt: "2024-01-01T00:00:00Z"
-  },
-  {
-    id: 2,
-    type: "SOCIAL_READER",
-    title: "Sosyal Okuyucu",
-    description: "100 yorum yaptınız",
-    progress: 65,
-    createdAt: "2024-01-01T00:00:00Z",
-    updatedAt: "2024-01-01T00:00:00Z"
-  },
-  {
-    id: 3,
-    type: "QUOTE_MASTER",
-    title: "Alıntı Ustası",
-    description: "200 alıntı paylaştınız",
-    progress: 45,
-    createdAt: "2024-01-01T00:00:00Z",
-    updatedAt: "2024-01-01T00:00:00Z"
-  },
-  {
-    id: 4,
-    type: "MARATHON_READER",
-    title: "Maraton Okuyucu",
-    description: "30 gün boyunca her gün okudunuz",
-    progress: 90,
-    createdAt: "2024-01-01T00:00:00Z",
-    updatedAt: "2024-01-01T00:00:00Z"
-  }
-];
-
-const mockReadingActivity: ReadingActivity[] = [
-  { id: 1, month: "Ocak", books: 5, createdAt: "2024-01-01T00:00:00Z", updatedAt: "2024-01-01T00:00:00Z" },
-  { id: 2, month: "Şubat", books: 8, createdAt: "2024-01-01T00:00:00Z", updatedAt: "2024-01-01T00:00:00Z" },
-  { id: 3, month: "Mart", books: 6, createdAt: "2024-01-01T00:00:00Z", updatedAt: "2024-01-01T00:00:00Z" },
-  { id: 4, month: "Nisan", books: 4, createdAt: "2024-01-01T00:00:00Z", updatedAt: "2024-01-01T00:00:00Z" },
-  { id: 5, month: "Mayıs", books: 7, createdAt: "2024-01-01T00:00:00Z", updatedAt: "2024-01-01T00:00:00Z" },
-  { id: 6, month: "Haziran", books: 3, createdAt: "2024-01-01T00:00:00Z", updatedAt: "2024-01-01T00:00:00Z" }
-];
-
 export const profileService = {
   // Profil bilgilerini getir
   getProfile: async (): Promise<UserProfile> => {
@@ -240,17 +174,31 @@ export const profileService = {
       const token = localStorage.getItem('token');
       const headers: Record<string, string> = {};
       
-      // Token varsa ekle, yoksa boş headers ile devam et
       if (token) {
         headers.Authorization = `Bearer ${token}`;
       }
       
+      console.log('Fetching user profile with headers:', headers);
       const response = await api.get(`/api/profile/${userId}`, {
         headers
       });
+      
+      console.log('Profile API response:', response.data);
+      
+      if (!response.data) {
+        throw new Error('Profil verisi alınamadı');
+      }
+      
       return response.data;
     } catch (error) {
-      throw handleError(error);
+      console.error('Error in getUserProfile:', error);
+      if (error instanceof AxiosError) {
+        if (error.response?.status === 401) {
+          throw new Error('Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.');
+        }
+        throw new Error(`Profil yüklenirken bir hata oluştu: ${error.response?.data?.message || error.message}`);
+      }
+      throw new Error('Profil yüklenirken beklenmeyen bir hata oluştu');
     }
   },
 
@@ -260,17 +208,31 @@ export const profileService = {
       const token = localStorage.getItem('token');
       const headers: Record<string, string> = {};
       
-      // Token varsa ekle, yoksa boş headers ile devam et
       if (token) {
         headers.Authorization = `Bearer ${token}`;
       }
       
+      console.log('Fetching user achievements with headers:', headers);
       const response = await api.get(`/api/profile/${userId}/achievements`, {
         headers
       });
+      
+      console.log('Achievements API response:', response.data);
+      
+      if (!response.data) {
+        throw new Error('Başarı verileri alınamadı');
+      }
+      
       return response.data;
     } catch (error) {
-      throw handleError(error);
+      console.error('Error in getUserAchievements:', error);
+      if (error instanceof AxiosError) {
+        if (error.response?.status === 401) {
+          throw new Error('Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.');
+        }
+        throw new Error(`Başarılar yüklenirken bir hata oluştu: ${error.response?.data?.message || error.message}`);
+      }
+      throw new Error('Başarılar yüklenirken beklenmeyen bir hata oluştu');
     }
   },
 
@@ -280,17 +242,31 @@ export const profileService = {
       const token = localStorage.getItem('token');
       const headers: Record<string, string> = {};
       
-      // Token varsa ekle, yoksa boş headers ile devam et
       if (token) {
         headers.Authorization = `Bearer ${token}`;
       }
       
+      console.log('Fetching reading activity with headers:', headers);
       const response = await api.get(`/api/profile/${userId}/reading-activity`, {
         headers
       });
+      
+      console.log('Reading activity API response:', response.data);
+      
+      if (!response.data) {
+        throw new Error('Okuma aktivitesi verileri alınamadı');
+      }
+      
       return response.data;
     } catch (error) {
-      throw handleError(error);
+      console.error('Error in getUserReadingActivity:', error);
+      if (error instanceof AxiosError) {
+        if (error.response?.status === 401) {
+          throw new Error('Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.');
+        }
+        throw new Error(`Okuma aktivitesi yüklenirken bir hata oluştu: ${error.response?.data?.message || error.message}`);
+      }
+      throw new Error('Okuma aktivitesi yüklenirken beklenmeyen bir hata oluştu');
     }
   },
 }; 

@@ -2,7 +2,6 @@
 
 import type React from "react"
 import {useEffect, useState} from "react"
-import Link from "next/link"
 import {
   ArrowRight,
   BookHeart,
@@ -18,9 +17,7 @@ import {
   Loader2,
   School,
   User,
-  Users,
-  Moon,
-  Sun
+  Users
 } from "lucide-react"
 import {useToast} from "@/components/ui/feedback/use-toast"
 import {MapSelector} from "@/components/ui/MapSelector"
@@ -38,8 +35,6 @@ import {Toaster} from "@/components/ui/feedback/toaster";
 import {Button} from "@/components/ui/form/button";
 import {Label} from "@/components/ui/form/label";
 import {Input} from "@/components/ui/form/input";
-import {SearchForm} from "@/components/ui/form/search-form"
-import {Compass, Heart} from "lucide-react"
 
 type DonationType = "schools" | "libraries" | "individual"
 type BookCondition = "new" | "likeNew" | "used" | "old"
@@ -1076,95 +1071,8 @@ export default function DonatePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-purple-100">
-      <header className={`fixed top-0 z-50 w-full transition-all duration-300 ${
-        isScrolled 
-          ? 'h-14 bg-background/60 backdrop-blur-lg border-b' 
-          : 'h-16'
-      }`}>
-        <div className="max-w-7xl mx-auto h-full flex items-center justify-between px-6">
-          <Link 
-            className="flex items-center justify-center group relative" 
-            href="/features/homepage"
-          >
-            <div className="relative">
-              <BookOpen className={`${isScrolled ? 'h-5 w-5' : 'h-6 w-6'} text-foreground group-hover:text-primary transition-all duration-300`} />
-            </div>
-            <span className={`ml-2 font-medium text-foreground transition-all duration-300 ${isScrolled ? 'text-base' : 'text-lg'}`}>
-              OkuYorum
-            </span>
-          </Link>
-
-          <div className="hidden md:flex items-center h-full">
-            <nav className="flex items-center gap-6 px-6">
-              <Link className={`flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300`} href="/features/library">
-                <Library className="h-5 w-5" />
-                <span>Kitaplığım</span>
-              </Link>
-
-              <Link className={`flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300`} href="/features/discover">
-                <Compass className="h-5 w-5" />
-                <span>Keşfet</span>
-              </Link>
-
-              <Link className={`flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300`} href="/features/millet-kiraathanesi">
-                <Users className="h-5 w-5" />
-                <span>Millet Kıraathaneleri</span>
-              </Link>
-
-              <Link className={`flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300`} href="/features/donate">
-                <Heart className="h-5 w-5" />
-                <span>Bağış Yap</span>
-              </Link>
-
-              <SearchForm isScrolled={isScrolled} />
-            </nav>
-            
-            <div className="flex items-center gap-4 border-l border-border pl-6">
-              <button
-                onClick={toggleTheme}
-                className="text-muted-foreground hover:text-primary transition-colors duration-300"
-                aria-label="Tema değiştir"
-              >
-                {theme === 'light' ? (
-                  <Moon className="h-5 w-5" />
-                ) : (
-                  <Sun className="h-5 w-5" />
-                )}
-              </button>
-              
-              <Link 
-                className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300"
-                href="/features/profile"
-              >
-                <User className="h-5 w-5" />
-                <span>Profil</span>
-              </Link>
-            </div>
-          </div>
-
-          {/* Mobile Navigation */}
-          <div className="md:hidden flex items-center gap-4">
-            <div className="flex items-center gap-4">
-              <SearchForm isScrolled={true} />
-            </div>
-            
-            <button
-              onClick={toggleTheme}
-              className="text-muted-foreground hover:text-primary transition-colors duration-300"
-              aria-label="Tema değiştir"
-            >
-              {theme === 'light' ? (
-                <Moon className="h-5 w-5" />
-              ) : (
-                <Sun className="h-5 w-5" />
-              )}
-            </button>
-          </div>
-        </div>
-      </header>
-
-      <main className="max-w-6xl mx-auto px-6 py-12 pt-24">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-rose-50 to-pink-100">
+      <main className="container mx-auto px-4 py-8">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-purple-600 to-pink-600 text-transparent bg-clip-text">
             Kitap Bağışı Yap

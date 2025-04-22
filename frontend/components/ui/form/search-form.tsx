@@ -75,16 +75,6 @@ export function SearchForm({ isScrolled = false }: SearchFormProps) {
         }
     }
 
-    const handleUserClick = (userId: number) => {
-        setShowResults(false)
-        router.push(`/features/profile/${userId}`)
-    }
-
-    const handleBookClick = (bookId: number) => {
-        setShowResults(false)
-        router.push(`/features/book/${bookId}`)
-    }
-
     return (
         <div ref={searchContainerRef} className="relative">
             <form onSubmit={handleSearch} className="flex items-center">
@@ -105,7 +95,7 @@ export function SearchForm({ isScrolled = false }: SearchFormProps) {
                 </div>
                 <Button
                     type="submit"
-                    className={`ml-2 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-300 ${
+                    className={`ml-2 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors ${
                         isScrolled ? 'text-xs py-1 px-3' : 'text-sm py-2 px-4'
                     }`}
                     size="sm"
@@ -122,7 +112,7 @@ export function SearchForm({ isScrolled = false }: SearchFormProps) {
                         {quickResults.map((result) => (
                             <Link
                                 key={result.id}
-                                href={`/auth/book/${result.id}`}
+                                href={`/features/book/${result.id}`}
                                 className="flex items-center gap-3 p-2 hover:bg-muted rounded-md transition-colors"
                                 onClick={() => setShowResults(false)}
                             >

@@ -4,15 +4,19 @@ import { quoteService } from '@/services/quoteService';
 import { QuoteList } from '@/components/quotes/QuoteList';
 import { CreateQuoteForm } from '@/components/quotes/CreateQuoteForm';
 import { useToast } from '@/components/ui/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function QuotesPage() {
     const [quotes, setQuotes] = useState<Quote[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const { toast } = useToast();
+    const { user } = useAuth();
 
     const fetchQuotes = async () => {
+        if (!user?.id) return;
+        
         try {
-            const data = await quoteService.getUserQuotes();
+            const data = await quoteService.getQuotesByUser(user.id.toString());
             setQuotes(data);
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (error) {
@@ -28,7 +32,7 @@ export default function QuotesPage() {
 
     useEffect(() => {
         fetchQuotes();
-    }, []);
+    }, [user?.id]);
 
     if (isLoading) {
         return (

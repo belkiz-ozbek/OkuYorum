@@ -86,7 +86,7 @@ export function CommentCard({ comment, onDelete, onUpdate, onLike, onReply }: Co
         >
             <div className="flex items-start justify-between">
                 <Link 
-                    href={`/features/profile/${comment.userId}`} 
+                    href={`/profile/${comment.userId}`} 
                     className="flex items-center space-x-3 group"
                 >
                     <Avatar className="h-8 w-8 transition-transform duration-200 group-hover:scale-105">

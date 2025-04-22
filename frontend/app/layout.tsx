@@ -4,6 +4,7 @@ import { Playfair_Display } from 'next/font/google';
 import "./globals.css";
 import { Toaster } from "@/components/ui/feedback/toaster"
 import { AuthProvider } from "@/contexts/AuthContext";
+import { Providers } from "./providers"
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -37,7 +38,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} antialiased`}
       >
         <AuthProvider>
-          {children}
+          <Providers>
+            {children}
+          </Providers>
         </AuthProvider>
         <Toaster />
       </body>

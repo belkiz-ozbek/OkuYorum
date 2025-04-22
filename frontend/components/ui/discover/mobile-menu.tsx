@@ -5,13 +5,15 @@ import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/form/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { X, Home, Compass, User, Library, Coffee, Heart, Settings, LogOut, BookOpen } from "lucide-react"
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 
 interface MobileMenuProps {
   open: boolean
   onOpenChange: (open: boolean) => void
+  currentUser?: { id: string; username: string } | null
 }
 
-export function MobileMenu({ open, onOpenChange }: MobileMenuProps) {
+export function MobileMenu({ open, onOpenChange, currentUser }: MobileMenuProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md p-0 gap-0">
@@ -45,9 +47,21 @@ export function MobileMenu({ open, onOpenChange }: MobileMenuProps) {
               </Link>
             </Button>
             <Button variant="ghost" className="w-full justify-start" asChild>
-              <Link href="/features/profile" className="flex items-center">
-                <User className="h-5 w-5 mr-2" />
-                <span>Profil</span>
+              <Link href={`/features/profile/${currentUser?.id}`} className="flex items-center">
+                {currentUser ? (
+                  <>
+                    <Avatar className="h-7 w-7 mr-2">
+                      <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser.username}`} alt={currentUser.username} />
+                      <AvatarFallback>{currentUser.username[0].toUpperCase()}</AvatarFallback>
+                    </Avatar>
+                    <span>{currentUser.username}</span>
+                  </>
+                ) : (
+                  <>
+                    <User className="h-5 w-5 mr-2" />
+                    <span>Profil</span>
+                  </>
+                )}
               </Link>
             </Button>
             <Button variant="ghost" className="w-full justify-start" asChild>

@@ -163,7 +163,7 @@ export function ReviewCard({ review, onDelete, onEdit, onLike, onSave, onShare }
             <div className="p-4 border-b border-purple-50 dark:border-purple-900/20">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center">
-                        <Link href={`/features/profile/${review.userId}`} className="flex items-center gap-2 group">
+                        <Link href={`/profile/${review.userId}`} className="flex items-center gap-2 group">
                             <Avatar className="h-8 w-8">
                                 <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${review.username}`} alt={review.username} />
                                 <AvatarFallback>{review.username[0].toUpperCase()}</AvatarFallback>
