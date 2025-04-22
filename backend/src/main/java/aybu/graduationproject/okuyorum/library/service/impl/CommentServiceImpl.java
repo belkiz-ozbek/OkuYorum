@@ -233,8 +233,16 @@ public class CommentServiceImpl implements CommentService {
             dto.setParentCommentId(comment.getParentComment().getId());
         }
 
-        List<CommentDTO> replies = comment.getReplies().stream()
+        // Get non-deleted replies
+        List<Comment> activeReplies = comment.getReplies().stream()
                 .filter(reply -> !reply.isDeleted())
+                .collect(Collectors.toList());
+
+        // Set reply count
+        dto.setReplyCount(activeReplies.size());
+
+        // Convert replies to DTOs
+        List<CommentDTO> replies = activeReplies.stream()
                 .map(reply -> convertToDTO(reply, currentUserId))
                 .collect(Collectors.toList());
         dto.setReplies(replies);

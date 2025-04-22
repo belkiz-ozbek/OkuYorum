@@ -25,12 +25,6 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipProvider,
-    TooltipTrigger,
-} from "@/components/ui/tooltip";
 
 interface CommentProps {
     comment: CommentType;
@@ -186,54 +180,25 @@ export function Comment({ comment, onCommentCreated }: CommentProps) {
                 <p className="text-sm text-gray-700 dark:text-gray-300">{comment.content}</p>
             )}
 
-            <div className="flex items-center space-x-4">
-                <TooltipProvider>
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                            <motion.button
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.9 }}
-                                className={cn(
-                                    "flex items-center gap-1.5 px-2 py-1 rounded-full transition-all duration-200",
-                                    isLiked
-                                        ? "text-red-500 bg-red-50 dark:bg-red-900/20"
-                                        : "text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50/50 dark:hover:bg-red-900/10",
-                                )}
-                                onClick={handleLike}
-                            >
-                                <Heart className="h-4 w-4" fill={isLiked ? "currentColor" : "none"} />
-                                <span className="text-xs font-medium">{likesCount}</span>
-                            </motion.button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                            <p>{isLiked ? "Beğenildi" : "Beğen"}</p>
-                        </TooltipContent>
-                    </Tooltip>
-                </TooltipProvider>
+            <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+                <button
+                    onClick={() => handleLike()}
+                    className={cn(
+                        "flex items-center gap-1 hover:text-purple-600 dark:hover:text-purple-400 transition-colors",
+                        comment.isLiked && "text-purple-600 dark:text-purple-400"
+                    )}
+                >
+                    <Heart className={cn("h-4 w-4", comment.isLiked && "fill-current")} />
+                    <span>{comment.likesCount}</span>
+                </button>
 
-                <TooltipProvider>
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                            <motion.button
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.9 }}
-                                className={cn(
-                                    "flex items-center gap-1.5 px-2 py-1 rounded-full transition-all duration-200",
-                                    showReplyForm
-                                        ? "text-purple-600 bg-purple-50 dark:bg-purple-900/20"
-                                        : "text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-50/70 dark:hover:bg-purple-900/20"
-                                )}
-                                onClick={() => setShowReplyForm(!showReplyForm)}
-                            >
-                                <MessageCircle className="h-4 w-4" />
-                                <span className="text-xs font-medium">Yanıtla</span>
-                            </motion.button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                            <p>{showReplyForm ? "Yanıtı İptal Et" : "Yanıtla"}</p>
-                        </TooltipContent>
-                    </Tooltip>
-                </TooltipProvider>
+                <button
+                    onClick={() => setShowReplyForm(!showReplyForm)}
+                    className="flex items-center gap-1 hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
+                >
+                    <MessageCircle className="h-4 w-4" />
+                    <span>{comment.replyCount > 0 ? `${comment.replyCount} yanıt` : "Yanıtla"}</span>
+                </button>
             </div>
 
             <AnimatePresence>

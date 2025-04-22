@@ -16,6 +16,7 @@ public class CommentDTO {
     private Boolean isLiked;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private Integer replyCount;
 
     public Long getId() {
         return id;
@@ -111,5 +112,13 @@ public class CommentDTO {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public Integer getReplyCount() {
+        return replyCount;
+    }
+
+    public void setReplyCount(Integer replyCount) {
+        this.replyCount = replyCount;
     }
 } 
