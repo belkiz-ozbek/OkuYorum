@@ -11,8 +11,8 @@ export interface Review {
     bookTitle: string;
     bookAuthor: string;
     bookCoverImage?: string;
-    likes?: number;
-    isLiked?: boolean;
+    likesCount: number;
+    isLiked: boolean;
     isSaved?: boolean;
     isDeleted?: boolean;
     createdAt: string;
@@ -23,6 +23,11 @@ export interface CreateReviewRequest {
     bookId: number;
     rating: number;
     content: string;
+}
+
+export interface ReviewUpdateRequest {
+    content: string;
+    rating: number;
 }
 
 export const reviewService = {
@@ -41,13 +46,13 @@ export const reviewService = {
         return response.data;
     },
 
-    createReview: async (request: CreateReviewRequest): Promise<Review> => {
-        const response = await api.post('/api/reviews', request);
+    createReview: async (bookId: number, content: string, rating: number): Promise<Review> => {
+        const response = await api.post('/api/reviews', { bookId, content, rating });
         return response.data;
     },
 
-    updateReview: async (reviewId: number, data: { content: string; rating: number }): Promise<Review> => {
-        const response = await api.put(`/api/reviews/${reviewId}`, data);
+    updateReview: async (reviewId: number, request: ReviewUpdateRequest): Promise<Review> => {
+        const response = await api.put(`/api/reviews/${reviewId}`, request);
         return response.data;
     },
 
@@ -60,13 +65,12 @@ export const reviewService = {
         return response.data;
     },
 
-    saveReview: async (reviewId: number): Promise<Review> => {
-        const response = await api.post(`/api/reviews/${reviewId}/save`);
-        return response.data;
+    saveReview: async (reviewId: number): Promise<void> => {
+        await api.post(`/api/reviews/${reviewId}/save`);
     },
 
-    shareReview: async (reviewId: number): Promise<{ url: string }> => {
-        const response = await api.post(`/api/reviews/${reviewId}/share`);
-        return response.data;
+    shareReview: async (reviewId: number): Promise<string> => {
+        const response = await api.get(`/api/reviews/${reviewId}/share`);
+        return response.data.url;
     }
 }; 

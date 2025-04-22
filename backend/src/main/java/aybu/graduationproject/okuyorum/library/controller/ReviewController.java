@@ -43,6 +43,12 @@ public class ReviewController {
         return ResponseEntity.ok().build();
     }
 
+    @PostMapping("/{id}/like")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<ReviewDTO> toggleLike(@PathVariable Long id) {
+        return ResponseEntity.ok(reviewService.toggleLike(id));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<ReviewDTO> getReview(@PathVariable Long id) {
         return ResponseEntity.ok(reviewService.getReview(id));

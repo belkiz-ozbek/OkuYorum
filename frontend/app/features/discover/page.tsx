@@ -4,9 +4,9 @@ import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
 import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion"
 import { useInView } from "react-intersection-observer"
-import {BookOpen,PlusCircle,User,Library,Compass,Coffee,Heart,Search,Moon,Sun,Quote,FileText,Filter,ChevronDown} from "lucide-react"
+import { BookOpen, PlusCircle, User, Library, Compass, Coffee, Heart, Search, Moon, Sun, Quote, FileText, Filter, ChevronDown } from "lucide-react"
 import { Button } from "@/components/ui/form/button"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { Card } from "@/components/ui/layout/Card"
 import { Input } from "@/components/ui/form/input"
 import { ContentCard, type ContentItem } from "@/components/ui/discover/content-card"
@@ -560,33 +560,18 @@ export default function DiscoverPage() {
         >
           <Card className="overflow-hidden border-none shadow-md">
             <Tabs defaultValue="all" onValueChange={(value) => setActiveTab(value)}>
-              <TabsList className="grid grid-cols-3 w-full bg-white dark:bg-gray-800 p-1">
-                <TabsTrigger
-                  value="all"
-                  className="data-[state=active]:bg-purple-100 dark:data-[state=active]:bg-purple-900/30 data-[state=active]:text-purple-700 dark:data-[state=active]:text-purple-300 transition-all duration-200"
-                >
-                  <span className="flex items-center gap-2">
-                    <BookOpen className="h-4 w-4" />
-                    Tümü
-                  </span>
+              <TabsList className="grid grid-cols-3 w-full">
+                <TabsTrigger value="all">
+                  <BookOpen className="h-4 w-4" />
+                  <span>Tümü</span>
                 </TabsTrigger>
-                <TabsTrigger
-                  value="quote"
-                  className="data-[state=active]:bg-purple-100 dark:data-[state=active]:bg-purple-900/30 data-[state=active]:text-purple-700 dark:data-[state=active]:text-purple-300 transition-all duration-200"
-                >
-                  <span className="flex items-center gap-2">
-                    <Quote className="h-4 w-4" />
-                    Alıntılar
-                  </span>
+                <TabsTrigger value="quote">
+                  <Quote className="h-4 w-4" />
+                  <span>Alıntılar</span>
                 </TabsTrigger>
-                <TabsTrigger
-                  value="review"
-                  className="data-[state=active]:bg-purple-100 dark:data-[state=active]:bg-purple-900/30 data-[state=active]:text-purple-700 dark:data-[state=active]:text-purple-300 transition-all duration-200"
-                >
-                  <span className="flex items-center gap-2">
-                    <FileText className="h-4 w-4" />
-                    İncelemeler
-                  </span>
+                <TabsTrigger value="review">
+                  <FileText className="h-4 w-4" />
+                  <span>İncelemeler</span>
                 </TabsTrigger>
               </TabsList>
             </Tabs>

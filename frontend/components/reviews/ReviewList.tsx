@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Review, reviewService } from '@/services/reviewService';
 import { ReviewCard } from './ReviewCard';
 import { useToast } from '@/components/ui/use-toast';
@@ -6,11 +6,17 @@ import { useToast } from '@/components/ui/use-toast';
 interface ReviewListProps {
     reviews: Review[];
     onReviewsChange?: () => void;
+    onLike?: (id: number) => Promise<Review>;
 }
 
-export function ReviewList({ reviews: initialReviews, onReviewsChange }: ReviewListProps) {
+export function ReviewList({ reviews: initialReviews, onReviewsChange, onLike }: ReviewListProps) {
     const { toast } = useToast();
     const [reviews, setReviews] = useState<Review[]>(initialReviews);
+
+    // Parent'tan gelen reviews prop'unu takip et
+    useEffect(() => {
+        setReviews(initialReviews);
+    }, [initialReviews]);
 
     const handleDelete = async (id: number) => {
         try {
@@ -57,24 +63,32 @@ export function ReviewList({ reviews: initialReviews, onReviewsChange }: ReviewL
     const handleLike = async (id: number) => {
         try {
             const updatedReview = await reviewService.likeReview(id);
-            setReviews(prev => prev.map(review => review.id === id ? updatedReview : review));
+            
+            // State'i güncelleyelim
+            setReviews(prevReviews => 
+                prevReviews.map(review => 
+                    review.id === id ? updatedReview : review
+                )
+            );
+            
             if (onReviewsChange) {
                 onReviewsChange();
             }
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            
+            return updatedReview;
         } catch (error) {
             toast({
                 title: 'Hata',
                 description: 'Beğeni işlemi başarısız oldu.',
                 variant: 'destructive',
             });
+            throw error;
         }
     };
 
     const handleSave = async (id: number) => {
         try {
-            const updatedReview = await reviewService.saveReview(id);
-            setReviews(prev => prev.map(review => review.id === id ? updatedReview : review));
+            await reviewService.saveReview(id);
             if (onReviewsChange) {
                 onReviewsChange();
             }
@@ -90,7 +104,7 @@ export function ReviewList({ reviews: initialReviews, onReviewsChange }: ReviewL
 
     const handleShare = async (id: number) => {
         try {
-            const { url } = await reviewService.shareReview(id);
+            const url = await reviewService.shareReview(id);
             await navigator.clipboard.writeText(url);
             toast({
                 title: 'Başarılı',

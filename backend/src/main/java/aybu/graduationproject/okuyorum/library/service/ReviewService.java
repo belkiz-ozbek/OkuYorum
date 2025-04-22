@@ -4,11 +4,15 @@ import aybu.graduationproject.okuyorum.library.dto.CreateReviewRequest;
 import aybu.graduationproject.okuyorum.library.dto.ReviewDTO;
 import aybu.graduationproject.okuyorum.library.entity.Book;
 import aybu.graduationproject.okuyorum.library.entity.Review;
+import aybu.graduationproject.okuyorum.library.entity.ReviewLike;
 import aybu.graduationproject.okuyorum.library.repository.BookRepository;
 import aybu.graduationproject.okuyorum.library.repository.ReviewRepository;
+import aybu.graduationproject.okuyorum.library.repository.ReviewLikeRepository;
+import aybu.graduationproject.okuyorum.notification.service.NotificationService;
 import aybu.graduationproject.okuyorum.user.entity.User;
 import aybu.graduationproject.okuyorum.user.service.UserService;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,12 +27,24 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final BookRepository bookRepository;
     private final UserService userService;
+    private final ReviewLikeRepository reviewLikeRepository;
+    private final NotificationService notificationService;
+    private final EntityManager entityManager;
 
     @Autowired
-    public ReviewService(ReviewRepository reviewRepository, BookRepository bookRepository, UserService userService) {
+    public ReviewService(
+            ReviewRepository reviewRepository,
+            BookRepository bookRepository,
+            UserService userService,
+            ReviewLikeRepository reviewLikeRepository,
+            NotificationService notificationService,
+            EntityManager entityManager) {
         this.reviewRepository = reviewRepository;
         this.bookRepository = bookRepository;
         this.userService = userService;
+        this.reviewLikeRepository = reviewLikeRepository;
+        this.notificationService = notificationService;
+        this.entityManager = entityManager;
     }
 
     @Transactional
@@ -49,7 +65,7 @@ public class ReviewService {
             if (!existingReview.isDeleted()) {
                 throw new IllegalStateException("You have already reviewed this book");
             }
-            // If the existing review was soft deleted, update it
+            // If the existing review was softly deleted, update it
             existingReview.setRating(request.getRating());
             existingReview.setContent(request.getContent());
             existingReview.setDeleted(false);
@@ -155,6 +171,69 @@ public class ReviewService {
                 .orElse(Collections.emptyList());
     }
 
+    @Transactional
+    public ReviewDTO toggleLike(Long reviewId) {
+        // Get current user
+        User currentUser = userService.getCurrentUser();
+        
+        // Get review
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new EntityNotFoundException("Review not found with id: " + reviewId));
+        
+        // Check if user has already liked the review
+        boolean hasLiked = reviewLikeRepository.existsByReviewIdAndUserId(reviewId, currentUser.getId());
+        
+        if (hasLiked) {
+            // Unlike
+            reviewLikeRepository.deleteByReviewIdAndUserId(reviewId, currentUser.getId());
+        } else {
+            // Like
+            ReviewLike like = new ReviewLike();
+            like.setReview(review);
+            like.setUser(currentUser);
+            reviewLikeRepository.save(like);
+
+            // Send notification if the review is not user's own
+            if (!review.getUser().getId().equals(currentUser.getId())) {
+                notificationService.createNotification(
+                    review.getUser().getId(),
+                    currentUser.getId(),
+                    "REVIEW_LIKE",
+                    String.format("%s incelemenizi beğendi", currentUser.getUsername()),
+                    String.format("/reviews/%d", review.getId())
+                );
+            }
+        }
+
+        // Commit the changes
+        reviewRepository.flush();
+        reviewLikeRepository.flush();
+        
+        // Check the current like status after the transaction
+        boolean currentLikeStatus = !hasLiked; // If it was liked, now it's unliked and vice versa
+        int likeCount = reviewLikeRepository.countByReviewId(reviewId);
+        
+        // Create DTO
+        ReviewDTO dto = new ReviewDTO();
+        dto.setId(review.getId());
+        dto.setBookId(review.getBook().getId());
+        dto.setBookTitle(review.getBook().getTitle());
+        dto.setBookAuthor(review.getBook().getAuthor());
+        dto.setBookCoverImage(review.getBook().getImageUrl());
+        dto.setUserId(review.getUser().getId());
+        dto.setUsername(review.getUser().getUsername());
+        dto.setUserAvatar(review.getUser().getProfileImage());
+        dto.setRating(review.getRating());
+        dto.setContent(review.getContent());
+        dto.setCreatedAt(review.getCreatedAt());
+        dto.setUpdatedAt(review.getUpdatedAt());
+        dto.setLikesCount(likeCount);
+        dto.setIsLiked(currentLikeStatus);
+        dto.setIsSaved(false);
+        
+        return dto;
+    }
+
     private ReviewDTO convertToDTO(Review review) {
         ReviewDTO dto = new ReviewDTO();
         dto.setId(review.getId());
@@ -169,10 +248,20 @@ public class ReviewService {
         dto.setContent(review.getContent());
         dto.setCreatedAt(review.getCreatedAt());
         dto.setUpdatedAt(review.getUpdatedAt());
-        // These fields might need to be populated from other services
-        dto.setLikesCount(0); // TODO: Implement likes count
-        dto.setIsLiked(false); // TODO: Implement is liked check
-        dto.setIsSaved(false); // TODO: Implement is saved check
+        
+        // Get current user
+        User currentUser = userService.getCurrentUser();
+        
+        // Set likes count
+        dto.setLikesCount(review.getLikes().size());
+        
+        // Set is liked
+        dto.setIsLiked(review.getLikes().stream()
+                .anyMatch(like -> like.getUser().getId().equals(currentUser.getId())));
+        
+        // Set is saved (TODO: Implement save feature)
+        dto.setIsSaved(false);
+        
         return dto;
     }
 } 

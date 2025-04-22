@@ -7,7 +7,8 @@ const nextConfig = {
       'images.unsplash.com',
       'localhost',
       'r2.1k-cdn.com',
-      '1k-cdn.com'
+      '1k-cdn.com',
+      'api.dicebear.com'
     ],
   },
 };

@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { messageService, Message } from '@/services/messageService';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
-
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Send, Search, Trash2, Check, CheckCheck } from 'lucide-react';
 import { format } from 'date-fns';
 import { tr } from 'date-fns/locale';
@@ -30,6 +30,20 @@ interface User {
 interface ExtendedUser extends User {
   nameSurname?: string;
 }
+
+// Rastgele bir renk döndüren yardımcı fonksiyon
+const getRandomColor = (name: string) => {
+  const colors = [
+    'bg-purple-500',
+    'bg-indigo-500',
+    'bg-blue-500',
+    'bg-pink-500',
+    'bg-rose-500',
+    'bg-violet-500'
+  ];
+  const index = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  return colors[index % colors.length];
+};
 
 export default function MessagesPage() {
   const router = useRouter();
@@ -113,7 +127,7 @@ export default function MessagesPage() {
     try {
       // Önce API'ye gönder ve gerçek ID al
       const response = await messageService.sendMessage({
-        sender: currentUser as ExtendedUser,
+        sender: { id: currentUser.id },
         receiver: { id: selectedUser },
         content: newMessage,
       });
@@ -133,7 +147,7 @@ export default function MessagesPage() {
           id: currentUser.id,
           nameSurname: `${currentUser.firstName} ${currentUser.lastName}`,
           username: currentUser.username,
-          profileImage: currentUser.profileImage
+          profileImage: `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser.username}`
         },
         receiver: {
           id: selectedUser,
@@ -242,19 +256,27 @@ export default function MessagesPage() {
                 <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar">
                   {messages.map((message) => {
                     const isOwn = message.sender && message.sender.id === currentUser?.id;
+                    const userColor = getRandomColor(message.sender?.nameSurname || message.sender?.username || '');
+                    const avatarUrl = `https://api.dicebear.com/7.x/avataaars/svg?seed=${message.sender?.username}`;
                     return (
                       <div
                         key={getUniqueMessageKey(message)}
                         className={`flex items-end gap-3 ${isOwn ? 'justify-end' : 'justify-start'} group animate-fadeIn`}
                       >
-                        {!isOwn && message.sender?.profileImage && (
-                          <div className="w-10 h-10 rounded-full overflow-hidden ring-2 ring-white/30 shadow-xl transition-transform hover:scale-110">
-                            <img
-                              src={message.sender.profileImage}
-                              alt={message.sender.username}
-                              className="w-full h-full object-cover"
+                        {!isOwn && (
+                          <Avatar className="h-10 w-10 ring-2 ring-white/30 shadow-xl transition-transform hover:scale-110">
+                            <AvatarImage 
+                              src={avatarUrl}
+                              alt={message.sender?.username}
+                              className="object-cover"
                             />
-                          </div>
+                            <AvatarFallback className={`${userColor} text-white font-medium`}>
+                              {(message.sender?.nameSurname || message.sender?.username || '')
+                                .split(' ')
+                                .map((n) => n[0])
+                                .join('')}
+                            </AvatarFallback>
+                          </Avatar>
                         )}
                         <div
                           className={`message-bubble relative max-w-[70%] group ${
@@ -287,14 +309,20 @@ export default function MessagesPage() {
                             </button>
                           )}
                         </div>
-                        {isOwn && message.sender?.profileImage && (
-                          <div className="w-10 h-10 rounded-full overflow-hidden ring-2 ring-white/30 shadow-xl transition-transform hover:scale-110">
-                            <img
-                              src={message.sender.profileImage}
-                              alt={message.sender.username}
-                              className="w-full h-full object-cover"
+                        {isOwn && (
+                          <Avatar className="h-10 w-10 ring-2 ring-white/30 shadow-xl transition-transform hover:scale-110">
+                            <AvatarImage 
+                              src={avatarUrl}
+                              alt={message.sender?.username}
+                              className="object-cover"
                             />
-                          </div>
+                            <AvatarFallback className={`${userColor} text-white font-medium`}>
+                              {(message.sender?.nameSurname || message.sender?.username || '')
+                                .split(' ')
+                                .map((n) => n[0])
+                                .join('')}
+                            </AvatarFallback>
+                          </Avatar>
                         )}
                       </div>
                     );

@@ -59,7 +59,11 @@ class MessageService {
         }
     }
 
-    async sendMessage(messageData: { sender: any; receiver: { id: number }; content: string }): Promise<Message | null> {
+    async sendMessage(messageData: { 
+        sender: { id: number }; 
+        receiver: { id: number }; 
+        content: string 
+    }): Promise<Message | null> {
         try {
             const token = localStorage.getItem('token');
             if (!token) return null;

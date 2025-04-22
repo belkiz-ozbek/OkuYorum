@@ -1,7 +1,14 @@
 package aybu.graduationproject.okuyorum.library.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
 public class CreateCommentRequest {
     private Long quoteId;
+    private Long reviewId;
+
+    @NotBlank(message = "Content cannot be empty")
+    @Size(min = 1, max = 1000, message = "Content must be between 1 and 1000 characters")
     private String content;
 
     public Long getQuoteId() {
@@ -10,6 +17,14 @@ public class CreateCommentRequest {
 
     public void setQuoteId(Long quoteId) {
         this.quoteId = quoteId;
+    }
+
+    public Long getReviewId() {
+        return reviewId;
+    }
+
+    public void setReviewId(Long reviewId) {
+        this.reviewId = reviewId;
     }
 
     public String getContent() {

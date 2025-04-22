@@ -33,14 +33,15 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { toast } from "@/components/ui/use-toast";
 
 interface ReviewCardProps {
     review: Review;
     onDelete?: (id: number) => void;
     onEdit?: (id: number, content: string, rating: number) => void;
-    onLike?: (id: number) => void;
+    onLike?: (id: number) => Promise<Review>;
     onSave?: (id: number) => void;
-    onShare?: () => Promise<void>;
+    onShare?: () => void;
 }
 
 export function ReviewCard({ review, onDelete, onEdit, onLike, onSave, onShare }: ReviewCardProps) {
@@ -51,11 +52,10 @@ export function ReviewCard({ review, onDelete, onEdit, onLike, onSave, onShare }
     const [editContent, setEditContent] = useState(review.content);
     const [editRating, setEditRating] = useState(review.rating);
     const [dropdownOpen, setDropdownOpen] = useState(false);
-    const [isLiked, setIsLiked] = useState(review.isLiked || false);
-    const [likesCount, setLikesCount] = useState(review.likes || 0);
     const [showComments, setShowComments] = useState(false);
     const [comments, setComments] = useState<Comment[]>([]);
     const [isLoadingComments, setIsLoadingComments] = useState(false);
+    const [isLikeProcessing, setIsLikeProcessing] = useState(false);
 
     const iconVariants = {
         initial: { scale: 1 },
@@ -64,9 +64,17 @@ export function ReviewCard({ review, onDelete, onEdit, onLike, onSave, onShare }
     };
 
     useEffect(() => {
-        setIsLiked(review.isLiked || false);
-        setLikesCount(review.likes || 0);
-    }, [review]);
+        const fetchInitialComments = async () => {
+            try {
+                const data = await commentService.getReviewComments(review.id);
+                setComments(data);
+            } catch (error) {
+                console.error('Yorumlar yüklenirken hata:', error);
+            }
+        };
+
+        fetchInitialComments();
+    }, [review.id]);
 
     useEffect(() => {
         if (showComments) {
@@ -101,20 +109,40 @@ export function ReviewCard({ review, onDelete, onEdit, onLike, onSave, onShare }
     };
 
     const handleLike = async () => {
-        const previousLikeState = isLiked;
-        const previousLikesCount = likesCount;
-
+        if (isLikeProcessing) return;
+        
+        // Mevcut durumu saklayalım
+        const currentLikeStatus = review.isLiked;
+        const currentLikesCount = review.likesCount;
+        
         try {
-            setIsLiked(!isLiked);
-            setLikesCount(prev => isLiked ? prev - 1 : prev + 1);
-
+            setIsLikeProcessing(true);
+            
+            // Optimistic update
+            review.isLiked = !currentLikeStatus;
+            review.likesCount = currentLikeStatus ? currentLikesCount - 1 : currentLikesCount + 1;
+            
             if (onLike) {
-                await onLike(review.id);
+                // API çağrısı
+                const updatedReview = await onLike(review.id);
+                
+                // API yanıtıyla güncelleme
+                review.isLiked = updatedReview.isLiked;
+                review.likesCount = updatedReview.likesCount;
             }
         } catch (error) {
+            // Hata durumunda eski haline döndür
+            review.isLiked = currentLikeStatus;
+            review.likesCount = currentLikesCount;
+            
             console.error('Beğeni işlemi başarısız:', error);
-            setIsLiked(previousLikeState);
-            setLikesCount(previousLikesCount);
+            toast({
+                title: 'Hata',
+                description: 'Beğeni işlemi sırasında bir hata oluştu.',
+                variant: 'destructive',
+            });
+        } finally {
+            setIsLikeProcessing(false);
         }
     };
 
@@ -238,18 +266,19 @@ export function ReviewCard({ review, onDelete, onEdit, onLike, onSave, onShare }
                                     whileTap="tap"
                                     className={cn(
                                         "flex items-center gap-1.5 px-2 py-1 rounded-full transition-all duration-200",
-                                        isLiked
+                                        review.isLiked
                                             ? "text-red-500 bg-red-50 dark:bg-red-900/20"
                                             : "text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50/50 dark:hover:bg-red-900/10",
                                     )}
                                     onClick={handleLike}
+                                    disabled={isLikeProcessing}
                                 >
-                                    <Heart className="h-5 w-5" fill={isLiked ? "currentColor" : "none"} />
-                                    <span className="text-sm font-medium">{likesCount}</span>
+                                    <Heart className="h-5 w-5" fill={review.isLiked ? "currentColor" : "none"} />
+                                    <span className="text-sm font-medium">{review.likesCount}</span>
                                 </motion.button>
                             </TooltipTrigger>
                             <TooltipContent>
-                                <p>{isLiked ? "Beğenildi" : "Beğen"}</p>
+                                <p>{review.isLiked ? "Beğenildi" : "Beğen"}</p>
                             </TooltipContent>
                         </Tooltip>
                     </TooltipProvider>

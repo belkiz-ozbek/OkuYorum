@@ -17,6 +17,7 @@ import { ReviewList } from "@/components/reviews/ReviewList"
 import { CreateReviewModal } from "@/components/reviews/CreateReviewModal"
 import { api } from '@/lib/api'
 import { AnimatePresence, motion } from 'framer-motion'
+import { reviewService } from "@/services/reviewService"
 
 type PageProps = {
     params: Promise<{ id: string }>
@@ -212,6 +213,26 @@ export default function BookPage({ params }: PageProps) {
                 description: 'İncelemeler yüklenirken bir hata oluştu.',
                 variant: 'destructive',
             });
+        }
+    };
+
+    const handleLike = async (reviewId: number) => {
+        try {
+            const updatedReview = await reviewService.likeReview(reviewId);
+            setReviews(prevReviews => 
+                prevReviews.map(review => 
+                    review.id === reviewId ? updatedReview : review
+                )
+            );
+            return updatedReview;
+        } catch (error) {
+            console.error('Beğeni işlemi başarısız:', error);
+            toast({
+                title: 'Hata',
+                description: 'Beğeni işlemi sırasında bir hata oluştu.',
+                variant: 'destructive',
+            });
+            throw error;
         }
     };
 
@@ -416,19 +437,57 @@ export default function BookPage({ params }: PageProps) {
                                     )}
                                 </div>
 
-                                <div className="flex gap-3 mb-8">
-                                    <Button className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700">
-                                        <Heart className="w-4 h-4" />
-                                        Favorilere Ekle
-                                    </Button>
-                                    <Button variant="outline" className="flex items-center gap-2">
-                                        <Bookmark className="w-4 h-4" />
-                                        Okuma Listeme Ekle
-                                    </Button>
-                                    <Button variant="outline" className="flex items-center gap-2">
-                                        <Share2 className="w-4 h-4" />
-                                        Paylaş
-                                    </Button>
+                                <div className="flex gap-4 mb-8">
+                                    <motion.div
+                                        whileHover={{ scale: 1.02 }}
+                                        whileTap={{ scale: 0.98 }}
+                                        className="relative group"
+                                    >
+                                        <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 via-pink-500 to-purple-600 rounded-xl blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-300"></div>
+                                        <Button className="relative flex items-center gap-3 px-6 py-3 bg-white dark:bg-gray-900 hover:bg-purple-50 dark:hover:bg-gray-800 border border-purple-100 dark:border-purple-800/30 rounded-lg shadow-xl shadow-purple-500/10 hover:shadow-purple-500/20 transition-all duration-300">
+                                            <div className="relative">
+                                                <Heart className="w-5 h-5 text-purple-500 dark:text-purple-400 group-hover:text-purple-600 dark:group-hover:text-purple-300 transition-colors duration-300" />
+                                                <div className="absolute inset-0 animate-ping opacity-30 text-purple-500 group-hover:opacity-50">
+                                                    <Heart className="w-5 h-5" />
+                                                </div>
+                                            </div>
+                                            <span className="font-medium bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent group-hover:from-purple-700 group-hover:to-pink-600 transition-all duration-300">Favorilere Ekle</span>
+                                        </Button>
+                                    </motion.div>
+
+                                    <motion.div
+                                        whileHover={{ scale: 1.02 }}
+                                        whileTap={{ scale: 0.98 }}
+                                        className="relative group"
+                                    >
+                                        <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 via-pink-500 to-purple-600 rounded-xl blur opacity-0 group-hover:opacity-25 transition duration-1000 group-hover:duration-300"></div>
+                                        <Button className="relative flex items-center gap-3 px-6 py-3 bg-white dark:bg-gray-900 hover:bg-purple-50 dark:hover:bg-gray-800 border border-purple-100 dark:border-purple-800/30 rounded-lg shadow-xl shadow-purple-500/10 hover:shadow-purple-500/20 transition-all duration-300">
+                                            <div className="relative">
+                                                <Bookmark className="w-5 h-5 text-purple-500 dark:text-purple-400 group-hover:text-purple-600 dark:group-hover:text-purple-300 transition-colors duration-300" />
+                                                <div className="absolute inset-0 animate-pulse opacity-30 text-purple-500 group-hover:opacity-50">
+                                                    <Bookmark className="w-5 h-5" />
+                                                </div>
+                                            </div>
+                                            <span className="font-medium text-gray-700 dark:text-gray-300 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors duration-300">Okuma Listeme Ekle</span>
+                                        </Button>
+                                    </motion.div>
+
+                                    <motion.div
+                                        whileHover={{ scale: 1.02 }}
+                                        whileTap={{ scale: 0.98 }}
+                                        className="relative group"
+                                    >
+                                        <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 via-pink-500 to-purple-600 rounded-xl blur opacity-0 group-hover:opacity-25 transition duration-1000 group-hover:duration-300"></div>
+                                        <Button className="relative flex items-center gap-3 px-6 py-3 bg-white dark:bg-gray-900 hover:bg-purple-50 dark:hover:bg-gray-800 border border-purple-100 dark:border-purple-800/30 rounded-lg shadow-xl shadow-purple-500/10 hover:shadow-purple-500/20 transition-all duration-300">
+                                            <div className="relative">
+                                                <Share2 className="w-5 h-5 text-purple-500 dark:text-purple-400 group-hover:text-purple-600 dark:group-hover:text-purple-300 transition-colors duration-300" />
+                                                <div className="absolute inset-0 animate-pulse opacity-30 text-purple-500 group-hover:opacity-50">
+                                                    <Share2 className="w-5 h-5" />
+                                                </div>
+                                            </div>
+                                            <span className="font-medium text-gray-700 dark:text-gray-300 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors duration-300">Paylaş</span>
+                                        </Button>
+                                    </motion.div>
                                 </div>
                             </div>
 
@@ -452,21 +511,72 @@ export default function BookPage({ params }: PageProps) {
                             </div>
 
                             {/* Alıntı ve İnceleme Ekleme Butonları */}
-                            <div className="flex gap-4 mb-8">
-                                <Button 
-                                    className="flex-1 bg-purple-600 hover:bg-purple-700"
-                                    onClick={() => setShowQuoteModal(true)}
+                            <div className="grid grid-cols-2 gap-6 mb-8">
+                                <motion.div
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ duration: 0.4 }}
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
                                 >
-                                    <Quote className="w-4 h-4 mr-2" />
-                                    Alıntı Ekle
-                                </Button>
-                                <Button 
-                                    className="flex-1 bg-purple-600 hover:bg-purple-700"
-                                    onClick={() => setShowReviewModal(true)}
+                                    <Button 
+                                        className="group relative w-full h-[140px] bg-gradient-to-br from-white via-purple-50 to-white dark:from-gray-900 dark:via-purple-900/20 dark:to-gray-900 rounded-2xl overflow-hidden transition-all duration-300 border border-purple-100 dark:border-purple-800/30 hover:border-purple-300 dark:hover:border-purple-700"
+                                        onClick={() => setShowQuoteModal(true)}
+                                    >
+                                        {/* Animated background gradient */}
+                                        <div className="absolute inset-0 bg-gradient-to-br from-purple-500/0 via-purple-500/5 to-purple-500/0 dark:from-purple-400/0 dark:via-purple-400/10 dark:to-purple-400/0 opacity-0 group-hover:opacity-100 transition-all duration-500 blur-2xl"></div>
+                                        
+                                        {/* Sparkle effects */}
+                                        <div className="absolute top-0 left-0 w-full h-full">
+                                            <div className="absolute top-[20%] left-[20%] w-1 h-1 bg-purple-400 rounded-full animate-ping opacity-70"></div>
+                                            <div className="absolute bottom-[30%] right-[20%] w-1 h-1 bg-purple-400 rounded-full animate-ping opacity-70 animation-delay-700"></div>
+                                        </div>
+
+                                        {/* Content */}
+                                        <div className="relative h-full flex flex-col items-center justify-center gap-4 p-4">
+                                            <div className="p-3 rounded-xl bg-gradient-to-br from-purple-100 to-white dark:from-purple-900/40 dark:to-purple-800/20 group-hover:from-purple-200 dark:group-hover:from-purple-800/40 transition-colors duration-300 shadow-lg shadow-purple-500/5 group-hover:shadow-purple-500/10">
+                                                <Quote className="w-6 h-6 text-purple-500 dark:text-purple-400 group-hover:text-purple-600 dark:group-hover:text-purple-300 transition-colors duration-300" />
+                                            </div>
+                                            <div className="flex flex-col items-center">
+                                                <span className="text-base font-medium bg-gradient-to-r from-purple-600 to-purple-500 dark:from-purple-400 dark:to-purple-300 bg-clip-text text-transparent group-hover:from-purple-700 group-hover:to-purple-600 dark:group-hover:from-purple-300 dark:group-hover:to-purple-200 transition-all duration-300">Alıntı Ekle</span>
+                                                <span className="text-xs text-gray-500 dark:text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300 mt-1">Etkileyici alıntıları paylaş</span>
+                                            </div>
+                                        </div>
+                                    </Button>
+                                </motion.div>
+
+                                <motion.div
+                                    initial={{ opacity: 0, x: 20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ duration: 0.4, delay: 0.1 }}
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
                                 >
-                                    <MessageCircle className="w-4 h-4 mr-2" />
-                                    İnceleme Yaz
-                                </Button>
+                                    <Button 
+                                        className="group relative w-full h-[140px] bg-gradient-to-br from-white via-purple-50 to-white dark:from-gray-900 dark:via-purple-900/20 dark:to-gray-900 rounded-2xl overflow-hidden transition-all duration-300 border border-purple-100 dark:border-purple-800/30 hover:border-purple-300 dark:hover:border-purple-700"
+                                        onClick={() => setShowReviewModal(true)}
+                                    >
+                                        {/* Animated background gradient */}
+                                        <div className="absolute inset-0 bg-gradient-to-br from-purple-500/0 via-purple-500/5 to-purple-500/0 dark:from-purple-400/0 dark:via-purple-400/10 dark:to-purple-400/0 opacity-0 group-hover:opacity-100 transition-all duration-500 blur-2xl"></div>
+                                        
+                                        {/* Sparkle effects */}
+                                        <div className="absolute top-0 left-0 w-full h-full">
+                                            <div className="absolute top-[30%] right-[20%] w-1 h-1 bg-purple-400 rounded-full animate-ping opacity-70"></div>
+                                            <div className="absolute bottom-[20%] left-[20%] w-1 h-1 bg-purple-400 rounded-full animate-ping opacity-70 animation-delay-500"></div>
+                                        </div>
+
+                                        {/* Content */}
+                                        <div className="relative h-full flex flex-col items-center justify-center gap-4 p-4">
+                                            <div className="p-3 rounded-xl bg-gradient-to-br from-purple-100 to-white dark:from-purple-900/40 dark:to-purple-800/20 group-hover:from-purple-200 dark:group-hover:from-purple-800/40 transition-colors duration-300 shadow-lg shadow-purple-500/5 group-hover:shadow-purple-500/10">
+                                                <MessageCircle className="w-6 h-6 text-purple-500 dark:text-purple-400 group-hover:text-purple-600 dark:group-hover:text-purple-300 transition-colors duration-300" />
+                                            </div>
+                                            <div className="flex flex-col items-center">
+                                                <span className="text-base font-medium bg-gradient-to-r from-purple-600 to-purple-500 dark:from-purple-400 dark:to-purple-300 bg-clip-text text-transparent group-hover:from-purple-700 group-hover:to-purple-600 dark:group-hover:from-purple-300 dark:group-hover:to-purple-200 transition-all duration-300">İnceleme Yaz</span>
+                                                <span className="text-xs text-gray-500 dark:text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300 mt-1">Düşüncelerini paylaş</span>
+                                            </div>
+                                        </div>
+                                    </Button>
+                                </motion.div>
                             </div>
 
                             <div className="prose max-w-none">
@@ -609,7 +719,19 @@ export default function BookPage({ params }: PageProps) {
                                                         </Button>
                                                     </div>
                                                 ) : (
-                                                    <ReviewList reviews={reviews} onReviewsChange={handleReviewCreated} />
+                                                    <div className="space-y-6">
+                                                        <div className="flex justify-between items-center">
+                                                            <h3 className="text-xl font-semibold text-gray-800">İncelemeler</h3>
+                                                            <Button onClick={() => setShowReviewModal(true)}>
+                                                                İnceleme Ekle
+                                                            </Button>
+                                                        </div>
+                                                        <ReviewList 
+                                                            reviews={reviews} 
+                                                            onReviewsChange={handleReviewCreated}
+                                                            onLike={handleLike}
+                                                        />
+                                                    </div>
                                                 )}
                                             </motion.div>
                                         )}

@@ -67,7 +67,8 @@ export function UserList({ onSelectUser, selectedUserId, searchQuery }: UserList
             return {
               ...user,
               lastMessage,
-              unreadCount: unreadCount > 0 ? unreadCount : undefined
+              unreadCount: unreadCount > 0 ? unreadCount : undefined,
+              profileImage: `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`
             };
           } catch (error) {
             console.error(`Error loading messages for user ${user.id}:`, error);
@@ -126,6 +127,7 @@ export function UserList({ onSelectUser, selectedUserId, searchQuery }: UserList
     <div className="space-y-2">
       {users.map((user) => {
         const userColor = getRandomColor(user.nameSurname);
+        const avatarUrl = `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`;
         return (
           <button
             key={user.id}
@@ -141,7 +143,7 @@ export function UserList({ onSelectUser, selectedUserId, searchQuery }: UserList
                 selectedUserId === user.id ? 'ring-purple-300' : ''
               }`}>
                 <AvatarImage 
-                  src={user.profileImage || undefined} 
+                  src={avatarUrl}
                   className="object-cover"
                 />
                 <AvatarFallback className={`${userColor} text-white font-medium`}>

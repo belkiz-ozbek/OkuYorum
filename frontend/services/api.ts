@@ -42,7 +42,7 @@ api.interceptors.response.use(
       // Eğer API çağrısı GET değilse login sayfasına yönlendir
       if (originalRequest.method !== 'get') {
         if (typeof window !== 'undefined') {
-          window.location.href = '/auth/login';
+          window.location.href = '/';
         }
         return Promise.reject(error);
       }

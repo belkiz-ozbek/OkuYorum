@@ -13,6 +13,8 @@ export default function VerifyPage() {
   const [countdown, setCountdown] = useState(600) // 10 dakika
   const router = useRouter()
   const searchParams = useSearchParams()
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-expect-error
   const tokenId = searchParams.get('tokenId')
   const { toast } = useToast()
 
@@ -62,7 +64,7 @@ export default function VerifyPage() {
 
       // 3 saniye sonra yönlendir
       setTimeout(() => {
-        router.push('/auth/login')
+        router.push('/')
       }, 3000)
 
     } catch (error: unknown) {

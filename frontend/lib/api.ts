@@ -32,7 +32,7 @@ api.interceptors.response.use(
             if (typeof window !== 'undefined') {
                 localStorage.removeItem('token');
                 sessionStorage.removeItem('token');
-                window.location.href = '/auth/login';
+                window.location.href = '/';
             }
         }
         return Promise.reject(error);

@@ -2,9 +2,11 @@ package aybu.graduationproject.okuyorum.library.controller;
 
 import aybu.graduationproject.okuyorum.library.dto.CommentDTO;
 import aybu.graduationproject.okuyorum.library.dto.CreateCommentRequest;
+import aybu.graduationproject.okuyorum.library.dto.UpdateCommentRequest;
 import aybu.graduationproject.okuyorum.library.service.CommentService;
 import aybu.graduationproject.okuyorum.user.service.UserService;
-import lombok.RequiredArgsConstructor;
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -15,16 +17,20 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/comments")
-@RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class CommentController {
     private final CommentService commentService;
     private final UserService userService;
 
+    @Autowired
+    public CommentController(CommentService commentService, UserService userService) {
+        this.commentService = commentService;
+        this.userService = userService;
+    }
+
     @PostMapping
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<CommentDTO> createComment(
-            @RequestBody CreateCommentRequest request,
+            @Valid @RequestBody CreateCommentRequest request,
             @AuthenticationPrincipal UserDetails userDetails) {
         Long userId = userService.getUserIdByUsername(userDetails.getUsername());
         return ResponseEntity.ok(commentService.createComment(request, userId));
@@ -40,14 +46,14 @@ public class CommentController {
         return ResponseEntity.ok().build();
     }
 
-    @PutMapping("/{commentId}")
+    @PatchMapping("/{commentId}")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<CommentDTO> updateComment(
             @PathVariable Long commentId,
-            @RequestBody String content,
+            @Valid @RequestBody UpdateCommentRequest request,
             @AuthenticationPrincipal UserDetails userDetails) {
         Long userId = userService.getUserIdByUsername(userDetails.getUsername());
-        return ResponseEntity.ok(commentService.updateComment(commentId, content, userId));
+        return ResponseEntity.ok(commentService.updateComment(commentId, request.getContent(), userId));
     }
 
     @PostMapping("/{commentId}/like")
@@ -60,26 +66,23 @@ public class CommentController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/{parentCommentId}/reply")
+    @GetMapping("/quote/{quoteId}")
+    public ResponseEntity<List<CommentDTO>> getQuoteComments(@PathVariable Long quoteId) {
+        return ResponseEntity.ok(commentService.getQuoteComments(quoteId));
+    }
+
+    @GetMapping("/review/{reviewId}")
+    public ResponseEntity<List<CommentDTO>> getReviewComments(@PathVariable Long reviewId) {
+        return ResponseEntity.ok(commentService.getReviewComments(reviewId));
+    }
+
+    @PostMapping("/{commentId}/reply")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<CommentDTO> replyToComment(
-            @PathVariable Long parentCommentId,
-            @RequestBody CreateCommentRequest request,
+            @PathVariable Long commentId,
+            @Valid @RequestBody CreateCommentRequest request,
             @AuthenticationPrincipal UserDetails userDetails) {
         Long userId = userService.getUserIdByUsername(userDetails.getUsername());
-        return ResponseEntity.ok(commentService.replyToComment(parentCommentId, request, userId));
-    }
-
-    @GetMapping("/quote/{quoteId}")
-    public ResponseEntity<List<CommentDTO>> getQuoteComments(
-            @PathVariable Long quoteId,
-            @AuthenticationPrincipal UserDetails userDetails) {
-        Long userId = userDetails != null ? userService.getUserIdByUsername(userDetails.getUsername()) : null;
-        return ResponseEntity.ok(commentService.getQuoteComments(quoteId, userId));
-    }
-
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<CommentDTO>> getUserComments(@PathVariable Long userId) {
-        return ResponseEntity.ok(commentService.getUserComments(userId));
+        return ResponseEntity.ok(commentService.replyToComment(commentId, request, userId));
     }
 } 

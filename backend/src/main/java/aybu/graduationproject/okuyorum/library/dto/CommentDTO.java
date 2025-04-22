@@ -6,13 +6,14 @@ import java.util.List;
 public class CommentDTO {
     private Long id;
     private Long quoteId;
+    private Long reviewId;
     private Long userId;
     private String username;
     private String content;
     private Long parentCommentId;
     private List<CommentDTO> replies;
-    private int likesCount;
-    private boolean isLiked;
+    private Integer likesCount;
+    private Boolean isLiked;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -30,6 +31,14 @@ public class CommentDTO {
 
     public void setQuoteId(Long quoteId) {
         this.quoteId = quoteId;
+    }
+
+    public Long getReviewId() {
+        return reviewId;
+    }
+
+    public void setReviewId(Long reviewId) {
+        this.reviewId = reviewId;
     }
 
     public Long getUserId() {
@@ -72,20 +81,20 @@ public class CommentDTO {
         this.replies = replies;
     }
 
-    public int getLikesCount() {
+    public Integer getLikesCount() {
         return likesCount;
     }
 
-    public void setLikesCount(int likesCount) {
+    public void setLikesCount(Integer likesCount) {
         this.likesCount = likesCount;
     }
 
-    public boolean isLiked() {
+    public Boolean getIsLiked() {
         return isLiked;
     }
 
-    public void setLiked(boolean liked) {
-        isLiked = liked;
+    public void setIsLiked(Boolean isLiked) {
+        this.isLiked = isLiked;
     }
 
     public LocalDateTime getCreatedAt() {

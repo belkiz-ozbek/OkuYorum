@@ -1,4 +1,4 @@
-import { Bell } from 'lucide-react';
+import { Bell, Heart, MessageSquare, Users, ThumbsUp, Quote, Reply } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useEffect, useState } from 'react';
@@ -76,6 +76,36 @@ export function NotificationBell() {
         }
     };
 
+    const handleActorClick = (e: React.MouseEvent, actorId: number) => {
+        e.stopPropagation(); // Bildirim tıklamasını engelle
+        router.push(`/profile/${actorId}`);
+        setIsOpen(false);
+    };
+
+    const getNotificationIcon = (type: string) => {
+        switch (type) {
+            case 'LIKE':
+            case 'REVIEW_LIKE':
+            case 'COMMENT_LIKE':
+                return <Heart className="h-4 w-4 text-red-500" />;
+            case 'COMMENT':
+                return <MessageSquare className="h-4 w-4 text-blue-500" />;
+            case 'COMMENT_REPLY':
+            case 'QUOTE_COMMENT_REPLY':
+            case 'REVIEW_COMMENT_REPLY':
+                return <Reply className="h-4 w-4 text-blue-500" />;
+            case 'QUOTE_COMMENT':
+            case 'REVIEW_COMMENT':
+                return <MessageSquare className="h-4 w-4 text-blue-500" />;
+            case 'FOLLOW':
+                return <Users className="h-4 w-4 text-green-500" />;
+            case 'QUOTE_LIKE':
+                return <Quote className="h-4 w-4 text-purple-500" />;
+            default:
+                return <ThumbsUp className="h-4 w-4 text-gray-500" />;
+        }
+    };
+
     return (
         <DropdownMenu open={isOpen} onOpenChange={handleOpen}>
             <DropdownMenuTrigger asChild>
@@ -134,15 +164,24 @@ export function NotificationBell() {
                                     )}
                                 </div>
                                 <div className="flex-1 space-y-1">
-                                    <p className="text-sm text-gray-700 dark:text-gray-300">
-                                        {notification.message}
-                                    </p>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                                    <div className="flex items-center justify-between gap-2">
+                                        <p className="text-sm text-gray-700 dark:text-gray-300">
+                                            <button
+                                                onClick={(e) => handleActorClick(e, notification.actorId)}
+                                                className="font-semibold hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
+                                            >
+                                                {notification.actorUsername}
+                                            </button>{' '}
+                                            {notification.message}
+                                        </p>
+                                        {getNotificationIcon(notification.type)}
+                                    </div>
+                                    <div className="flex items-center justify-end text-xs text-gray-500 dark:text-gray-400">
                                         {new Date(notification.createdAt).toLocaleDateString('tr-TR', {
                                             hour: '2-digit',
                                             minute: '2-digit'
                                         })}
-                                    </p>
+                                    </div>
                                 </div>
                             </DropdownMenuItem>
                         ))

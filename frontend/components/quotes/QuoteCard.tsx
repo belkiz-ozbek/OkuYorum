@@ -69,23 +69,23 @@ export function QuoteCard({ quote, onDelete, onEdit, onLike, onSave, onShare }: 
     }, [quote]);
 
     useEffect(() => {
-        if (showComments) {
-            fetchComments();
-        }
-    }, [showComments]);
-
-    useEffect(() => {
-        const fetchInitialCommentCount = async () => {
+        const fetchInitialComments = async () => {
             try {
                 const data = await commentService.getQuoteComments(quote.id);
                 setComments(data);
             } catch (error) {
-                console.error('Yorum sayısı alınırken hata:', error);
+                console.error('Yorumlar yüklenirken hata:', error);
             }
         };
 
-        fetchInitialCommentCount();
+        fetchInitialComments();
     }, [quote.id]);
+
+    useEffect(() => {
+        if (showComments) {
+            fetchComments();
+        }
+    }, [showComments]);
 
     const fetchComments = async () => {
         try {

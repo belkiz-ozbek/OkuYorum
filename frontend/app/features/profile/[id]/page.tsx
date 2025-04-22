@@ -27,7 +27,9 @@ import {
   UserMinus,
   UserCheck,
   Quote as QuoteIcon,
-  BookText
+  BookText,
+  MoreVertical,
+  Trash2
 } from "lucide-react"
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/form/button"
@@ -55,6 +57,11 @@ import { AuthProvider } from "@/contexts/AuthContext"
 import { EmptyState } from '@/components/ui/empty-state/EmptyState'
 import { Review, reviewService } from '@/services/reviewService'
 import { ReviewList } from '@/components/reviews/ReviewList'
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
+import { QuoteCard } from "@/components/quotes/QuoteCard"
+import { ReviewCard } from "@/components/reviews/ReviewCard"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Textarea } from "@/components/ui/textarea"
 
 const initialProfile: UserProfile = {
   id: 0,
@@ -119,9 +126,18 @@ const usePosts = (
 // --- Düzenleme ve Silme için ek state'ler ---
 
 export default function ProfilePage() {
+  const params = useParams();
+  const router = useRouter();
+  const { toast } = useToast();
 
+  // Params kontrolü
+  if (!params?.id) {
+    router.push('/');
+    return null;
+  }
 
-  // ... mevcut stateler ...
+  const userId = params.id.toString();
+
   const [editingPostId, setEditingPostId] = useState<number | null>(null);
   const [editTitle, setEditTitle] = useState("");
   const [editContent, setEditContent] = useState("");
@@ -129,49 +145,9 @@ export default function ProfilePage() {
   const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [isLoadingReviews, setIsLoadingReviews] = useState(false);
+  const [combinedContent, setCombinedContent] = useState<Array<{ type: 'post' | 'quote' | 'review', content: any, timestamp: string }>>([]);
 
-  // --- DÜZENLEME FONKSİYONLARI ---
-  const handleEditPost = (post: Post) => {
-    setEditingPostId(post.id);
-    setEditTitle(post.title || "");
-    setEditContent(post.content || "");
-  };
-  const handleCancelEdit = () => {
-    setEditingPostId(null);
-    setEditTitle("");
-    setEditContent("");
-  };
-  const handleUpdatePost = async (postId: number) => {
-    try {
-      if (!editTitle.trim() || !editContent.trim()) {
-        toast({ title: "Hata", description: "Başlık ve içerik boş olamaz.", variant: "destructive" });
-        return;
-      }
-      await postService.updatePost(postId, editTitle, editContent);
-      setEditingPostId(null);
-      setEditTitle("");
-      setEditContent("");
-      await fetchPosts();
-      toast({ title: "Başarılı", description: "Gönderi güncellendi." });
-    } catch (error: unknown) {
-      console.error('Güncelleme hatası:', error);
-      toast({ title: "Hata", description: "Güncelleme sırasında hata oluştu.", variant: "destructive" });
-    }
-  };
-  // --- SİLME FONKSİYONU ---
-  const handleDeletePost = async (postId: number) => {
-    try {
-      await postService.deletePost(postId);
-      await fetchPosts();
-      toast({ title: "Başarılı", description: "Gönderi silindi." });
-    } catch (error: unknown) {
-      console.error('Silme hatası:', error);
-      toast({ title: "Hata", description: "Silme sırasında hata oluştu.", variant: "destructive" });
-    }
-  };
-  const params = useParams()
-  const router = useRouter()
-  const { toast } = useToast()
+  // ... mevcut stateler ...
   const [profile, setProfile] = useState<UserProfile>(initialProfile)
   const [achievements, setAchievements] = useState<Achievement[]>(initialAchievements)
   const [readingActivity, setReadingActivity] = useState<ReadingActivity[]>(initialReadingActivity)
@@ -210,8 +186,8 @@ export default function ProfilePage() {
         const response = await UserService.getCurrentUser();
         setCurrentUser(response.data);
         // Kullanıcı giriş yapmışsa ve profil sayfası başka bir kullanıcıya aitse takip durumunu kontrol et
-        if (response.data && params.id && response.data.id.toString() !== params.id.toString()) {
-          const isFollowingStatus = await followService.isFollowing(params.id.toString());
+        if (response.data && userId !== response.data.id.toString()) {
+          const isFollowingStatus = await followService.isFollowing(userId);
           setIsFollowing(isFollowingStatus);
         }
       } catch (error) {
@@ -221,26 +197,22 @@ export default function ProfilePage() {
     };
 
     loadUserInfo();
-  }, [params.id]);
+  }, [userId]);
 
   const fetchProfileData = async () => {
-    if (!params.id) {
-      setError('Kullanıcı ID\'si bulunamadı');
-      return;
-    }
     try {
       setLoading(true);
       setError(null);
 
-      const profileData = await profileService.getUserProfile(params.id.toString());
+      const profileData = await profileService.getUserProfile(userId);
       
       // Takip durumunu kontrol et
-      if (currentUser && params.id.toString() !== currentUser.id.toString()) {
+      if (currentUser && userId !== currentUser.id.toString()) {
         const [isFollowingStatus, achievementsData, readingActivityData, booksData] = await Promise.all([
-          followService.isFollowing(params.id.toString()),
-          profileService.getUserAchievements(params.id.toString()),
-          profileService.getUserReadingActivity(params.id.toString()),
-          bookService.getBooks(params.id.toString())
+          followService.isFollowing(userId),
+          profileService.getUserAchievements(userId),
+          profileService.getUserReadingActivity(userId),
+          bookService.getBooks(userId)
         ]);
         
         setIsFollowing(isFollowingStatus);
@@ -250,9 +222,9 @@ export default function ProfilePage() {
         setBooks(booksData);
       } else {
         const [achievementsData, readingActivityData, booksData] = await Promise.all([
-          profileService.getUserAchievements(params.id.toString()),
-          profileService.getUserReadingActivity(params.id.toString()),
-          bookService.getBooks(params.id.toString())
+          profileService.getUserAchievements(userId),
+          profileService.getUserReadingActivity(userId),
+          bookService.getBooks(userId)
         ]);
         
         setProfile(profileData);
@@ -261,8 +233,8 @@ export default function ProfilePage() {
         setBooks(booksData);
       }
     } catch (error) {
-      console.error("Error fetching profile data:", error);
-      setError("Profil bilgileri yüklenirken bir hata oluştu.");
+      console.error('Error loading profile data:', error);
+      setError('Profil yüklenirken bir hata oluştu');
     } finally {
       setLoading(false);
     }
@@ -565,6 +537,184 @@ export default function ProfilePage() {
   const formatDate = (dateString: string | undefined) => {
     if (!dateString) return '';
     return new Date(dateString).toLocaleDateString('tr-TR');
+  };
+
+  // Düzenleme ve silme fonksiyonları
+  const handleDelete = async (id: number) => {
+    try {
+      await postService.deletePost(id);
+      await fetchPosts();
+      toast({
+        title: "Başarılı",
+        description: "İçerik başarıyla silindi.",
+      });
+    } catch (error) {
+      console.error('Silme hatası:', error);
+      toast({
+        title: "Hata",
+        description: "Silme sırasında bir hata oluştu.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleQuoteEdit = async (id: number, content: string, pageNumber?: string) => {
+    try {
+      await quoteService.updateQuote(id, { content, pageNumber: pageNumber ? parseInt(pageNumber) : undefined });
+      await fetchPosts();
+      toast({
+        title: "Başarılı",
+        description: "Alıntı başarıyla güncellendi.",
+      });
+    } catch (error) {
+      console.error('Güncelleme hatası:', error);
+      toast({
+        title: "Hata",
+        description: "Güncelleme sırasında bir hata oluştu.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleReviewEdit = async (id: number, content: string, rating: number) => {
+    try {
+      await reviewService.updateReview(id, { content, rating });
+      await fetchPosts();
+      toast({
+        title: "Başarılı",
+        description: "İnceleme başarıyla güncellendi.",
+      });
+    } catch (error) {
+      console.error('Güncelleme hatası:', error);
+      toast({
+        title: "Hata",
+        description: "Güncelleme sırasında bir hata oluştu.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleLike = async (id: number): Promise<Review> => {
+    try {
+      const updatedReview = await reviewService.likeReview(id);
+      await fetchPosts();
+      return updatedReview;
+    } catch (error) {
+      console.error('Beğenme hatası:', error);
+      toast({
+        title: "Hata",
+        description: "Beğenme sırasında bir hata oluştu.",
+        variant: "destructive",
+      });
+      throw error;
+    }
+  };
+
+  const handleSave = async (id: number) => {
+    try {
+      await reviewService.saveReview(id);
+      toast({
+        title: "Başarılı",
+        description: "İçerik kaydedildi.",
+      });
+    } catch (error) {
+      console.error('Kaydetme hatası:', error);
+      toast({
+        title: "Hata",
+        description: "Kaydetme sırasında bir hata oluştu.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleShare = async (id: number) => {
+    try {
+      const shareUrl = await reviewService.shareReview(id);
+      await navigator.clipboard.writeText(shareUrl);
+      toast({
+        title: "Başarılı",
+        description: "Paylaşım bağlantısı kopyalandı.",
+      });
+    } catch (error) {
+      console.error('Paylaşma hatası:', error);
+      toast({
+        title: "Hata",
+        description: "Paylaşma sırasında bir hata oluştu.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Tüm içerikleri birleştirip sıralayan fonksiyon
+  const combineAndSortContent = useCallback(() => {
+    const combined = [
+      ...posts.map(post => ({
+        type: 'post' as const,
+        content: post,
+        timestamp: post.createdAt || new Date().toISOString()
+      })),
+      ...quotes.map(quote => ({
+        type: 'quote' as const,
+        content: quote,
+        timestamp: quote.createdAt || new Date().toISOString()
+      })),
+      ...reviews.map(review => ({
+        type: 'review' as const,
+        content: review,
+        timestamp: review.createdAt || new Date().toISOString()
+      }))
+    ];
+
+    // Tarihe göre sıralama (en yeni en üstte)
+    combined.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+    setCombinedContent(combined);
+  }, [posts, quotes, reviews]);
+
+  // İçerikleri güncelleme
+  useEffect(() => {
+    combineAndSortContent();
+  }, [posts, quotes, reviews, combineAndSortContent]);
+
+  // Post düzenleme fonksiyonları
+  const handleEditPost = (post: Post) => {
+    setEditingPostId(post.id);
+    setEditTitle(post.title || "");
+    setEditContent(post.content || "");
+  };
+
+  const handleCancelEdit = () => {
+    setEditingPostId(null);
+    setEditTitle("");
+    setEditContent("");
+  };
+
+  const handleUpdatePost = async (postId: number) => {
+    try {
+      if (!editTitle.trim() || !editContent.trim()) {
+        toast({ title: "Hata", description: "Başlık ve içerik boş olamaz.", variant: "destructive" });
+        return;
+      }
+      await postService.updatePost(postId, editTitle, editContent);
+      setEditingPostId(null);
+      setEditTitle("");
+      setEditContent("");
+      await fetchPosts();
+      toast({ title: "Başarılı", description: "Gönderi güncellendi." });
+    } catch (error: unknown) {
+      console.error('Güncelleme hatası:', error);
+      toast({ title: "Hata", description: "Güncelleme sırasında hata oluştu.", variant: "destructive" });
+    }
+  };
+
+  const handleDeletePost = async (postId: number) => {
+    try {
+      await postService.deletePost(postId);
+      await fetchPosts();
+      toast({ title: "Başarılı", description: "Gönderi silindi." });
+    } catch (error: unknown) {
+      console.error('Silme hatası:', error);
+      toast({ title: "Hata", description: "Silme sırasında hata oluştu.", variant: "destructive" });
+    }
   };
 
   // Profile stats section
@@ -981,11 +1131,26 @@ export default function ProfilePage() {
                 <Card className="overflow-hidden border-none bg-white/70 backdrop-blur-sm shadow-md">
                   <Tabs defaultValue="books" className="w-full">
                     <TabsList className="grid w-full grid-cols-5">
-                      <TabsTrigger value="books">Kitaplar</TabsTrigger>
-                      <TabsTrigger value="wall">Duvar</TabsTrigger>
-                      <TabsTrigger value="quotes">Alıntılar</TabsTrigger>
-                      <TabsTrigger value="reviews">İncelemeler</TabsTrigger>
-                      <TabsTrigger value="posts">İletiler</TabsTrigger>
+                      <TabsTrigger value="books">
+                        <Library className="h-4 w-4" />
+                        <span>Kitaplar</span>
+                      </TabsTrigger>
+                      <TabsTrigger value="wall">
+                        <BarChart3 className="h-4 w-4" />
+                        <span>Duvar</span>
+                      </TabsTrigger>
+                      <TabsTrigger value="quotes">
+                        <QuoteIcon className="h-4 w-4" />
+                        <span>Alıntılar</span>
+                      </TabsTrigger>
+                      <TabsTrigger value="reviews">
+                        <BookText className="h-4 w-4" />
+                        <span>İncelemeler</span>
+                      </TabsTrigger>
+                      <TabsTrigger value="posts">
+                        <MessageSquare className="h-4 w-4" />
+                        <span>İletiler</span>
+                      </TabsTrigger>
                     </TabsList>
 
                     <TabsContent value="books" className="p-6">
@@ -1108,8 +1273,111 @@ export default function ProfilePage() {
                     </TabsContent>
 
                     <TabsContent value="wall" className="p-6">
-                      <div className="text-center py-8">
-                        <p className="text-gray-500">Duvar içeriği burada gösterilecek</p>
+                      <div className="space-y-6">
+                        {combinedContent.length === 0 ? (
+                          <div className="text-center text-gray-500 py-8">
+                            Henüz hiç paylaşım yapılmamış.
+                          </div>
+                        ) : (
+                          combinedContent.map((item, index) => (
+                            <motion.div
+                              key={`${item.type}-${item.content.id}`}
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ duration: 0.3, delay: index * 0.1 }}
+                              className="transform transition-all duration-300 hover:scale-[1.02]"
+                            >
+                              {item.type === 'post' && (
+                                <Card className="overflow-hidden bg-white dark:bg-gray-800/50 backdrop-blur-lg border border-purple-100/20 dark:border-purple-900/20 shadow-sm hover:shadow-md transition-shadow duration-300">
+                                  <CardContent className="p-6">
+                                    <div className="flex items-start space-x-4">
+                                      <Avatar className="h-10 w-10">
+                                        <AvatarImage src={profile.profileImage || ''} alt={profile.username} />
+                                        <AvatarFallback>{profile.username[0]}</AvatarFallback>
+                                      </Avatar>
+                                      <div className="flex-1 min-w-0">
+                                        <div className="flex items-center justify-between">
+                                          <div>
+                                            <p className="font-medium text-gray-900 dark:text-gray-100">{profile.username}</p>
+                                            <p className="text-sm text-gray-500 dark:text-gray-400">{formatDate(item.timestamp)}</p>
+                                          </div>
+                                          {currentUser?.id === profile.id && (
+                                            <DropdownMenu>
+                                              <DropdownMenuTrigger asChild>
+                                                <Button variant="ghost" size="sm">
+                                                  <MoreVertical className="h-4 w-4" />
+                                                </Button>
+                                              </DropdownMenuTrigger>
+                                              <DropdownMenuContent align="end">
+                                                <DropdownMenuItem onClick={() => handleEditPost(item.content)}>
+                                                  <Edit className="mr-2 h-4 w-4" />
+                                                  Düzenle
+                                                </DropdownMenuItem>
+                                                <DropdownMenuItem onClick={() => handleDeletePost(item.content.id)}>
+                                                  <Trash2 className="mr-2 h-4 w-4" />
+                                                  Sil
+                                                </DropdownMenuItem>
+                                              </DropdownMenuContent>
+                                            </DropdownMenu>
+                                          )}
+                                        </div>
+                                        {editingPostId === item.content.id ? (
+                                          <div className="mt-4">
+                                            <Input
+                                              value={editTitle}
+                                              onChange={(e) => setEditTitle(e.target.value)}
+                                              placeholder="Başlık"
+                                              className="mb-2"
+                                            />
+                                            <Textarea
+                                              value={editContent}
+                                              onChange={(e) => setEditContent(e.target.value)}
+                                              placeholder="İçerik"
+                                              className="mb-2"
+                                            />
+                                            <div className="flex justify-end space-x-2">
+                                              <Button variant="outline" onClick={handleCancelEdit}>
+                                                İptal
+                                              </Button>
+                                              <Button onClick={() => handleUpdatePost(item.content.id)}>
+                                                Kaydet
+                                              </Button>
+                                            </div>
+                                          </div>
+                                        ) : (
+                                          <>
+                                            <h3 className="mt-2 text-lg font-semibold text-gray-900 dark:text-gray-100">{item.content.title}</h3>
+                                            <p className="mt-2 text-gray-600 dark:text-gray-300">{item.content.content}</p>
+                                          </>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </CardContent>
+                                </Card>
+                              )}
+                              {item.type === 'quote' && (
+                                <QuoteCard
+                                  quote={item.content}
+                                  onDelete={handleDelete}
+                                  onEdit={handleQuoteEdit}
+                                  onLike={handleLike}
+                                  onSave={handleSave}
+                                  onShare={() => handleShare(item.content.id)}
+                                />
+                              )}
+                              {item.type === 'review' && (
+                                <ReviewCard
+                                  review={item.content}
+                                  onDelete={handleDelete}
+                                  onEdit={handleReviewEdit}
+                                  onLike={handleLike}
+                                  onSave={handleSave}
+                                  onShare={() => handleShare(item.content.id)}
+                                />
+                              )}
+                            </motion.div>
+                          ))
+                        )}
                       </div>
                     </TabsContent>
 
