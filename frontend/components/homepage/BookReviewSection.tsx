@@ -1,9 +1,7 @@
 "use client"
 import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
-import Image from "next/image"
 import Link from "next/link"
-import { Star } from "lucide-react"
 import { reviewService, Review } from "@/services/reviewService"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 
@@ -31,46 +29,70 @@ function BookReviewCard({ review }: BookReviewCardProps) {
           before:absolute before:inset-0 
           before:bg-gradient-to-br before:from-violet-500/0 before:to-purple-500/0 
           before:group-hover:from-violet-500/5 before:group-hover:to-purple-500/5 
-          before:transition-colors before:duration-500"
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
+          before:transition-colors before:duration-500
+          after:absolute after:inset-0 
+          after:bg-gradient-to-tr after:from-transparent after:via-violet-500/0 after:to-purple-500/0
+          after:group-hover:via-violet-500/5 after:group-hover:to-purple-500/10
+          after:transition-colors after:duration-700
+          border border-transparent hover:border-violet-200/30
+          dark:hover:border-violet-500/20"
+        initial={{ opacity: 0, y: 20, scale: 0.95 }}
+        whileInView={{ opacity: 1, y: 0, scale: 1 }}
         viewport={{ once: true }}
-        transition={{ duration: 0.5 }}
+        transition={{ duration: 0.7, ease: "easeOut" }}
       >
         <div className="flex flex-col items-center text-center flex-1 relative z-10">
           {/* Reviewer Profile Picture */}
-          <div className="shrink-0 mb-4 transform group-hover:scale-105 transition-transform duration-500 ease-out">
-            <Avatar className="w-20 h-20 border-2 border-violet-100/50 group-hover:border-violet-300/50 transition-colors duration-500">
+          <motion.div 
+            className="shrink-0 mb-4 transform group-hover:scale-105 transition-transform duration-500 ease-out"
+            whileHover={{ rotate: [0, -5, 5, -5, 0] }}
+            transition={{ duration: 0.5 }}
+          >
+            <Avatar className="w-20 h-20 border-2 border-violet-100/50 group-hover:border-violet-300/50 
+              transition-colors duration-500 ring-2 ring-offset-2 ring-transparent
+              group-hover:ring-violet-400/30 group-hover:ring-offset-violet-50">
               <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${review.username}`} alt={review.username} />
               <AvatarFallback className="text-2xl bg-violet-50 text-violet-500">{review.username[0].toUpperCase()}</AvatarFallback>
             </Avatar>
-          </div>
+          </motion.div>
 
           {/* Reviewer Name */}
-          <h4 className="text-lg font-medium mb-4 text-gray-800 dark:text-gray-200 
-            group-hover:text-violet-700 dark:group-hover:text-violet-400 
-            tracking-normal group-hover:tracking-wide transition-all duration-500">
+          <motion.h4 
+            className="text-lg font-medium mb-4 text-gray-800 dark:text-gray-200 
+              group-hover:text-violet-700 dark:group-hover:text-violet-400 
+              tracking-normal group-hover:tracking-wide transition-all duration-500"
+            whileHover={{ scale: 1.05 }}
+            transition={{ type: "spring", stiffness: 400, damping: 10 }}
+          >
             {review.username}
-          </h4>
+          </motion.h4>
 
           {/* Book Info */}
           <div className="w-full mb-6">
-            <h3 className="text-xl font-semibold mb-1 bg-clip-text text-transparent 
-              bg-gradient-to-br from-violet-800 to-purple-900 dark:from-violet-400 dark:to-purple-500
-              group-hover:from-violet-700 group-hover:to-purple-800 dark:group-hover:from-violet-300 dark:group-hover:to-purple-400
-              line-clamp-1 transition-all duration-500">
+            <motion.h3 
+              className="text-xl font-semibold mb-1 bg-clip-text text-transparent 
+                bg-gradient-to-br from-violet-800 to-purple-900 dark:from-violet-400 dark:to-purple-500
+                group-hover:from-violet-700 group-hover:to-purple-800 dark:group-hover:from-violet-300 dark:group-hover:to-purple-400
+                line-clamp-1 transition-all duration-500"
+              whileHover={{ scale: 1.02 }}
+              transition={{ type: "spring", stiffness: 400, damping: 10 }}
+            >
               {review.bookTitle}
-            </h3>
+            </motion.h3>
             <p className="text-gray-600 dark:text-gray-400 text-sm mb-2 
               group-hover:text-violet-600 dark:group-hover:text-violet-300 transition-colors duration-500">
               {review.bookAuthor}
             </p>
 
             {/* Star Rating */}
-            <div className="flex items-center justify-center mb-4 transform group-hover:scale-105 transition-transform duration-500">
+            <motion.div 
+              className="flex items-center justify-center mb-4 transform group-hover:scale-105 transition-transform duration-500"
+              whileHover={{ y: -2 }}
+              transition={{ type: "spring", stiffness: 400, damping: 10 }}
+            >
               <div className="flex items-center">
                 {[...Array(totalStars)].map((_, i) => (
-                  <svg
+                  <motion.svg
                     key={i}
                     className={`${sizeClass} mr-1 transition-all duration-500
                       ${i < fullStars 
@@ -79,51 +101,68 @@ function BookReviewCard({ review }: BookReviewCardProps) {
                     viewBox="0 0 24 24"
                     stroke="currentColor"
                     strokeWidth="2"
+                    whileHover={{ scale: 1.2, rotate: 360 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 10 }}
                   >
                     <path d="M12 17.27L18.18 21 16.54 13.97 22 9.24 14.81 8.63 12 2 9.19 8.63 2 9.24 7.45 13.97 5.82 21z" />
-                  </svg>
+                  </motion.svg>
                 ))}
               </div>
               <span className="ml-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 
                 group-hover:text-violet-700 dark:group-hover:text-violet-300 transition-colors duration-500">
                 {review.rating.toFixed(1)}
               </span>
-            </div>
+            </motion.div>
           </div>
 
           {/* Review Text Container */}
           <div className="relative w-full">
-            <p className="text-gray-600 dark:text-gray-300 leading-relaxed text-sm 
+            <p className="text-gray-800 dark:text-gray-100 leading-relaxed text-sm 
               line-clamp-2 group-hover:line-clamp-3
-              opacity-90 group-hover:opacity-100
-              transition-all duration-500">
+              opacity-100
+              transition-all duration-500
+              font-medium">
               {review.content}
             </p>
             
             {/* Gradient Overlay */}
             <div className="absolute bottom-0 left-0 right-0 h-12 
-              bg-gradient-to-t from-white via-white/50 to-transparent
-              group-hover:from-purple-50/90 group-hover:via-purple-50/50
-              dark:from-gray-800 dark:via-gray-800/50
-              dark:group-hover:from-gray-800/90 dark:group-hover:via-purple-900/20
+              bg-gradient-to-t from-white via-white/80 to-transparent
+              group-hover:from-purple-50/90 group-hover:via-purple-50/80
+              dark:from-gray-900 dark:via-gray-900/80
+              dark:group-hover:from-gray-900/90 dark:group-hover:via-purple-900/30
               transition-colors duration-500" />
           </div>
 
           {/* Read More Button */}
           <div className="absolute bottom-2 left-0 right-0 flex justify-center 
-            opacity-0 group-hover:opacity-100 
-            translate-y-4 group-hover:translate-y-0
-            transition-all duration-500 delay-100">
-            <span className="inline-flex items-center px-4 py-2 text-sm font-medium
-              text-violet-600 dark:text-violet-400
-              hover:text-violet-700 dark:hover:text-violet-300
-              transition-colors duration-300">
+            opacity-100
+            translate-y-0
+            transition-all duration-500">
+            <motion.span 
+              className="inline-flex items-center px-4 py-2 text-sm font-medium
+                text-violet-600 dark:text-violet-400
+                transition-colors duration-300
+                animate-[bounce_2s_ease-in-out_infinite]
+                bg-white/50 dark:bg-white/5 rounded-full
+                shadow-sm hover:shadow-md
+                backdrop-blur-sm"
+              whileHover={{ scale: 1.05 }}
+              transition={{ type: "spring", stiffness: 400, damping: 10 }}
+            >
               Devamını Oku
-              <svg className="w-4 h-4 ml-1.5 transition-transform duration-300 transform group-hover:translate-x-1" 
-                viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M5 12h14M12 5l7 7-7 7" />
-              </svg>
-            </span>
+              <motion.svg 
+                className="w-4 h-4 ml-1.5 transition-transform duration-300 transform group-hover:translate-x-1" 
+                fill="none" 
+                viewBox="0 0 24 24" 
+                stroke="currentColor"
+                strokeWidth="2"
+                whileHover={{ x: 3 }}
+                transition={{ type: "spring", stiffness: 400, damping: 10 }}
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+              </motion.svg>
+            </motion.span>
           </div>
         </div>
       </motion.div>
