@@ -8,7 +8,7 @@ import { usePathname } from "next/navigation";
 import {BookOpen, CheckCircle, Clock, Star, Library as LibraryIcon, Compass, Users, Heart, Moon, Sun, Check, Bookmark, UserPlus, ChevronLeft, ChevronRight} from "lucide-react";
 import { ScratchToReveal } from "@/components/ui/scratch-to-reveal";
 import { Header } from "@/components/homepage/Header";
-import KitapKaziKazan from "./KitapKaziKazan"
+import KitapKaziKazan from "../../../components/KitapKaziKazan"
 
 interface Book {
   id: number;
@@ -755,8 +755,7 @@ const Library = ({ activeTab = 'all' }: LibraryProps): JSX.Element => {
                                 />
                               </button>
                               <Card 
-                                className="relative h-[240px] bg-white border-none shadow-xl hover:shadow-2xl transition-all duration-300 rounded-lg overflow-hidden cursor-pointer"
-                                onClick={() => handleBookClick(book)}
+                                className="relative h-[240px] bg-white border-none shadow-xl hover:shadow-2xl transition-all duration-300 rounded-lg overflow-hidden"
                               >
                                 <img
                                   src={book.coverImage}
@@ -764,6 +763,16 @@ const Library = ({ activeTab = 'all' }: LibraryProps): JSX.Element => {
                                   className="w-full h-full object-cover"
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedBook(book);
+                                    setShowLendModal(true);
+                                  }}
+                                  className="absolute bottom-2 left-1/2 transform -translate-x-1/2 px-4 py-2 bg-primary/80 hover:bg-primary text-white rounded-full text-sm font-medium opacity-0 group-hover:opacity-100 transition-all duration-300"
+                                >
+                                  Ödünç Ver
+                                </button>
                               </Card>
                               <div className="mt-3 text-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                                 <p className="font-semibold text-white text-sm mb-1 truncate">{book.title}</p>
