@@ -20,6 +20,7 @@
     <include file="/db/changelog/changes/okuyorum-63.xml"/>
     <include file="/db/changelog/changes/okuyorum-65.xml"/>
     <include file="/db/changelog/changes/add-is-favorite-column.xml"/>
+    <include file="/db/changelog/changes/update-posts-counts.xml"/>
 
     <!-- Veri değişikliklerini buraya include edeceğiz -->
     <include file="db/changelog/data/data-master.xml"/>

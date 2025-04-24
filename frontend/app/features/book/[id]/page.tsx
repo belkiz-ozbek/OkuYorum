@@ -527,7 +527,9 @@ export default function BookPage({ params }: PageProps) {
                                         className="relative group"
                                     >
                                         <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 via-pink-500 to-purple-600 rounded-xl blur opacity-0 group-hover:opacity-25 transition duration-1000 group-hover:duration-300"></div>
-                                        <Button className="relative flex items-center gap-3 px-6 py-3 bg-white dark:bg-gray-900 hover:bg-purple-50 dark:hover:bg-gray-800 border border-purple-100 dark:border-purple-800/30 rounded-lg shadow-xl shadow-purple-500/10 hover:shadow-purple-500/20 transition-all duration-300">
+                                        <Button 
+                                            onClick={() => handleStatusChange("WILL_READ")}
+                                            className="relative flex items-center gap-3 px-6 py-3 bg-white dark:bg-gray-900 hover:bg-purple-50 dark:hover:bg-gray-800 border border-purple-100 dark:border-purple-800/30 rounded-lg shadow-xl shadow-purple-500/10 hover:shadow-purple-500/20 transition-all duration-300">
                                             <div className="relative">
                                                 <Bookmark className="w-5 h-5 text-purple-500 dark:text-purple-400 group-hover:text-purple-600 dark:group-hover:text-purple-300 transition-colors duration-300" />
                                                 <div className="absolute inset-0 animate-pulse opacity-30 text-purple-500 group-hover:opacity-50">

@@ -56,6 +56,7 @@ import { QuoteCard } from "@/components/quotes/QuoteCard"
 import { ReviewCard } from "@/components/reviews/ReviewCard"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Textarea } from "@/components/ui/textarea"
+import PostCard from "@/components/PostCard"
 
 // Add this type definition before the ProfilePage component
 type CombinedContentItem = {
@@ -143,7 +144,6 @@ export default function ProfilePage() {
   const [editingPostId, setEditingPostId] = useState<number | null>(null);
   const [editTitle, setEditTitle] = useState("");
   const [editContent, setEditContent] = useState("");
-  const [menuOpenId, setMenuOpenId] = useState<number | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [isLoadingReviews, setIsLoadingReviews] = useState(false);
@@ -154,8 +154,6 @@ export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
   const [editSection, setEditSection] = useState<string | null>(null);
   const [showEditMenu, setShowEditMenu] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [isScrolled, setIsScrolled] = useState(false);
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -320,14 +318,6 @@ export default function ProfilePage() {
       setTheme("dark")
       document.documentElement.setAttribute("data-theme", "dark")
     }
-
-    const handleScroll = () => {
-      const scrollPosition = window.scrollY
-      setIsScrolled(scrollPosition > 50)
-    }
-
-    window.addEventListener("scroll", handleScroll)
-    return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
   // Toggle theme
@@ -716,10 +706,13 @@ export default function ProfilePage() {
   }, [posts, quotes, reviews, combineAndSortContent]);
 
   // Post düzenleme fonksiyonları
-  const handleEditPost = (post: Post) => {
-    setEditingPostId(post.id);
-    setEditTitle(post.title || "");
-    setEditContent(post.content || "");
+  const handleEditPost = async (postId: number) => {
+    const post = posts.find(p => p.id === postId);
+    if (post) {
+      setEditingPostId(post.id);
+      setEditTitle(post.title);
+      setEditContent(post.content);
+    }
   };
 
   const handleCancelEdit = () => {
@@ -754,6 +747,53 @@ export default function ProfilePage() {
     } catch (error: unknown) {
       console.error('Silme hatası:', error);
       toast({ title: "Hata", description: "Silme sırasında hata oluştu.", variant: "destructive" });
+    }
+  };
+
+  const handleLikePost = async (postId: number) => {
+    try {
+      await postService.toggleLike(postId);
+      await fetchPosts(); // Refresh posts after like
+    } catch (error) {
+      console.error('Error liking post:', error);
+      toast({
+        title: "Hata",
+        description: "İleti beğenilirken bir hata oluştu.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleSavePost = async (postId: number) => {
+    try {
+      await postService.toggleSave(postId);
+      await fetchPosts(); // Refresh posts after save
+    } catch (error) {
+      console.error('Error saving post:', error);
+      toast({
+        title: "Hata",
+        description: "İleti kaydedilirken bir hata oluştu.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleSharePost = async (postId: number) => {
+    try {
+      const shareUrl = await postService.sharePost(postId);
+      // Copy to clipboard
+      await navigator.clipboard.writeText(shareUrl);
+      toast({
+        title: "Başarılı",
+        description: "İleti bağlantısı panoya kopyalandı.",
+      });
+    } catch (error) {
+      console.error('Error sharing post:', error);
+      toast({
+        title: "Hata",
+        description: "İleti paylaşılırken bir hata oluştu.",
+        variant: "destructive"
+      });
     }
   };
 
@@ -1293,7 +1333,7 @@ export default function ProfilePage() {
                                                 </Button>
                                               </DropdownMenuTrigger>
                                               <DropdownMenuContent align="end">
-                                                <DropdownMenuItem onClick={() => handleEditPost(item.content)}>
+                                                <DropdownMenuItem onClick={() => handleEditPost(item.content.id)}>
                                                   <Edit className="mr-2 h-4 w-4" />
                                                   Düzenle
                                                 </DropdownMenuItem>
@@ -1467,74 +1507,35 @@ export default function ProfilePage() {
                           </Card>
                         )}
                         {posts.map((post) => (
-                          <Card key={post.id} className="relative shadow-md hover:shadow-lg transition-shadow rounded-xl border border-gray-100">
-                            <CardContent className="p-6">
-                              <div className="space-y-4">
-                                <div className="flex items-center justify-between gap-2">
-                                  <h3 className="text-lg font-medium">{post.title}</h3>
-                                  <div className="flex items-center gap-2">
-                                    <span className="text-sm text-gray-500">{formatDate(post.createdAt)}</span>
-                                    {currentUser && currentUser.id === profile.id && (
-                                      <div className="relative">
-                                        <button
-                                          className="p-1 rounded-full hover:bg-gray-100 transition"
-                                          onClick={() => setMenuOpenId(menuOpenId === post.id ? null : post.id)}
-                                          aria-label="İşlemler"
-                                        >
-                                          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <circle cx="4" cy="10" r="1.5" fill="#888" />
-                                            <circle cx="10" cy="10" r="1.5" fill="#888" />
-                                            <circle cx="16" cy="10" r="1.5" fill="#888" />
-                                          </svg>
-                                        </button>
-                                        {menuOpenId === post.id && (
-                                          <div className="absolute right-0 mt-2 w-32 bg-white rounded-lg shadow-lg border z-20 animate-fadeIn">
-                                            <button
-                                              className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
-                                              onClick={() => {
-                                                setMenuOpenId(null);
-                                                handleEditPost(post);
-                                              }}
-                                            >Düzenle</button>
-                                            <button
-                                              className="block w-full text-left px-4 py-2 hover:bg-red-50 text-sm text-red-600"
-                                              onClick={() => {
-                                                setMenuOpenId(null);
-                                                setDeleteConfirmId(post.id);
-                                              }}
-                                            >Sil</button>
-                                          </div>
-                                        )}
-                                      </div>
-                                    )}
-                                  </div>
-                                </div>
-                                {editingPostId === post.id ? (
-                                  <div className="space-y-2">
-                                    <Input
-                                      value={editTitle}
-                                      onChange={e => setEditTitle(e.target.value)}
-                                      maxLength={100}
-                                      className="mb-2"
-                                      placeholder="Başlık"
-                                    />
-                                    <Input
-                                      value={editContent}
-                                      onChange={e => setEditContent(e.target.value)}
-                                      maxLength={500}
-                                      placeholder="İleti içeriği"
-                                    />
-                                    <div className="flex gap-2 mt-2">
-                                      <Button size="sm" onClick={() => handleUpdatePost(post.id)} className="bg-purple-600 hover:bg-purple-700 text-white">Kaydet</Button>
-                                      <Button size="sm" variant="outline" onClick={handleCancelEdit}>İptal</Button>
-                                    </div>
-                                  </div>
-                                ) : (
-                                  <p className="text-gray-700 whitespace-pre-line">{post.content}</p>
-                                )}
-                              </div>
-                            </CardContent>
-                          </Card>
+                          <PostCard
+                            key={post.id}
+                            type={post.type || 'post'}
+                            user={{
+                              id: post.userId,
+                              name: post.username,
+                              avatar: post.profileImage || ''
+                            }}
+                            content={{
+                              text: post.content,
+                              book: post.book ? {
+                                title: post.book.title,
+                                author: post.book.author,
+                                cover: post.book.cover
+                              } : undefined
+                            }}
+                            engagement={{
+                              likes: post.likesCount,
+                              comments: post.commentsCount,
+                              isLiked: post.isLiked,
+                              isSaved: post.isSaved
+                            }}
+                            createdAt={post.createdAt}
+                            onLike={handleLikePost}
+                            onSave={handleSavePost}
+                            onShare={handleSharePost}
+                            onDelete={handleDeletePost}
+                            onEdit={handleEditPost}
+                          />
                         ))}
                         {posts.length === 0 && (
                           <div className="text-center py-8">

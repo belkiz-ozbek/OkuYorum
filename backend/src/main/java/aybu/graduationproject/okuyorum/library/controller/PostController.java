@@ -28,13 +28,20 @@ public class PostController {
     }
 
     @GetMapping
-    public ResponseEntity<List<PostResponse>> getAllPosts() {
-        return ResponseEntity.ok(postService.getAllPosts());
+    public ResponseEntity<List<PostResponse>> getAllPosts(
+            @AuthenticationPrincipal UserDetails userDetails) {
+        Long currentUserId = userDetails != null ? 
+            userService.getUserIdByUsername(userDetails.getUsername()) : null;
+        return ResponseEntity.ok(postService.getAllPosts(currentUserId));
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<PostResponse>> getUserPosts(@PathVariable Long userId) {
-        return ResponseEntity.ok(postService.getUserPosts(userId));
+    public ResponseEntity<List<PostResponse>> getUserPosts(
+            @PathVariable Long userId,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        Long currentUserId = userDetails != null ? 
+            userService.getUserIdByUsername(userDetails.getUsername()) : null;
+        return ResponseEntity.ok(postService.getUserPosts(userId, currentUserId));
     }
 
     @PutMapping("/{postId}")
@@ -53,5 +60,30 @@ public class PostController {
         Long userId = userService.getUserIdByUsername(userDetails.getUsername());
         postService.deletePost(postId, userId);
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/{postId}/like")
+    public ResponseEntity<PostResponse> toggleLike(
+            @PathVariable Long postId,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        Long userId = userService.getUserIdByUsername(userDetails.getUsername());
+        return ResponseEntity.ok(postService.toggleLike(postId, userId));
+    }
+
+    @PostMapping("/{postId}/save")
+    public ResponseEntity<PostResponse> toggleSave(
+            @PathVariable Long postId,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        Long userId = userService.getUserIdByUsername(userDetails.getUsername());
+        return ResponseEntity.ok(postService.toggleSave(postId, userId));
+    }
+
+    @PostMapping("/{postId}/share")
+    public ResponseEntity<String> sharePost(
+            @PathVariable Long postId,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        Long userId = userService.getUserIdByUsername(userDetails.getUsername());
+        String shareUrl = postService.sharePost(postId, userId);
+        return ResponseEntity.ok(shareUrl);
     }
 } 
