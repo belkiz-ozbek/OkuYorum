@@ -69,25 +69,6 @@ type CombinedContentItem = {
   timestamp: string;
 };
 
-type Post = {
-  id: number;
-  userId: number;
-  username: string;
-  title: string;
-  content: string;
-  createdAt: string;
-  book?: {
-    id: number;
-    title: string;
-    author: string;
-    cover: string;
-  };
-  likes: number;
-  comments: number;
-  isLiked: boolean;
-  isSaved: boolean;
-};
-
 const initialProfile: UserProfile = {
   id: 0,
   nameSurname: "Yükleniyor...",
@@ -156,7 +137,6 @@ export default function ProfilePage() {
   const router = useRouter();
   const { toast } = useToast();
 
-  const [editingPostId, setEditingPostId] = useState<number | null>(null);
   const [editTitle, setEditTitle] = useState("");
   const [editContent, setEditContent] = useState("");
   const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
@@ -725,7 +705,6 @@ export default function ProfilePage() {
   const handleEditPost = async (postId: number) => {
     const post = posts.find(p => p.id === postId);
     if (post) {
-      setEditingPostId(post.id);
       setEditTitle(post.title);
       setEditContent(post.content);
     }
@@ -733,7 +712,6 @@ export default function ProfilePage() {
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleCancelEdit = () => {
-    setEditingPostId(null);
     setEditTitle("");
     setEditContent("");
   };
@@ -746,9 +724,6 @@ export default function ProfilePage() {
         return;
       }
       await postService.updatePost(postId, editTitle, editContent);
-      setEditingPostId(null);
-      setEditTitle("");
-      setEditContent("");
       await fetchPosts();
       toast({ title: "Başarılı", description: "Gönderi güncellendi." });
     } catch (error: unknown) {
@@ -796,9 +771,9 @@ export default function ProfilePage() {
     }
   };
 
-  const handleSharePost = async () => {
+  const handleSharePost = async (postId: number) => {
     try {
-      const shareUrl = await postService.sharePost(editingPostId!);
+      const shareUrl = await postService.sharePost(postId);
       await navigator.clipboard.writeText(shareUrl);
       toast({
         title: "Başarılı",
@@ -860,7 +835,7 @@ export default function ProfilePage() {
 );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-rose-50 to-pink-100">
+    <div className="min-h-screen bg-background">
       <main className="container mx-auto px-4 py-8">
         {deleteConfirmModal}
         {/* Profile Header */}

@@ -3,8 +3,7 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react'
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { useInView } from 'react-intersection-observer'
-import { ContentService } from '@/services/ContentService'
-import type { ContentFilters } from '@/services/ContentService'
+import { ContentService, ContentFilters } from '@/services/ContentService'
 
 import DiscoverHeader from '@/components/discover/DiscoverHeader'
 import DiscoverFilters from '@/components/discover/DiscoverFilters'
@@ -17,12 +16,20 @@ export default function DiscoverPage() {
   const [showSearch, setShowSearch] = useState(false)
   const [showFilter, setShowFilter] = useState(false)
 
-  const { ref: inViewRef, inView } = useInView({ threshold: 0.5 })
+  const { inView } = useInView({ threshold: 0.5 })
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status } =
     useInfiniteQuery({
       queryKey: ['discover', filters],
-      queryFn: ({ pageParam = 1 }) => ContentService.getDiscoverContent(pageParam, filters),
-      getNextPageParam: last => last.nextPage,
+      queryFn: async (context) => {
+        const pageParam = context.pageParam as number
+        const items = await ContentService.getContent(filters)
+        return {
+          items,
+          nextPage: items.length > 0 ? pageParam + 1 : undefined
+        }
+      },
+      initialPageParam: 1,
+      getNextPageParam: (lastPage) => lastPage.nextPage,
     })
 
   const observer = useRef<IntersectionObserver | null>(null)
@@ -65,11 +72,11 @@ export default function DiscoverPage() {
         />
         <DiscoverContentGrid
           data={data}
-          status={status}
+          status={status as 'loading' | 'error' | 'success'}
           lastRef={lastContentRef}
         />
       </div>
-        <DialogsWrapper
+      <DialogsWrapper
         createOpen={showCreate}
         onCreateChange={setShowCreate}
         searchOpen={showSearch}
