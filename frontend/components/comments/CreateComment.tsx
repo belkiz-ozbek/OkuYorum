@@ -5,19 +5,21 @@ import { useToast } from '@/components/ui/use-toast';
 import { commentService } from '@/services/commentService';
 import { Send, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 interface CreateCommentProps {
     quoteId?: number;
     reviewId?: number;
+    postId?: number;
     parentCommentId?: number;
     onCommentCreated: () => void;
 }
 
-export function CreateComment({ quoteId, reviewId, parentCommentId, onCommentCreated }: CreateCommentProps) {
+export function CreateComment({ quoteId, reviewId, postId, parentCommentId, onCommentCreated }: CreateCommentProps) {
     const [content, setContent] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const { toast } = useToast();
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const hasContent = content.trim().length > 0;
 
     const handleSubmit = async () => {
@@ -38,12 +40,14 @@ export function CreateComment({ quoteId, reviewId, parentCommentId, onCommentCre
                     content: content.trim(),
                     quoteId,
                     reviewId,
+                    postId,
                 });
             } else {
                 await commentService.createComment({
                     content: content.trim(),
                     quoteId,
                     reviewId,
+                    postId,
                 });
             }
 

@@ -4,6 +4,7 @@ export interface Comment {
     id: number;
     quoteId?: number;
     reviewId?: number;
+    postId?: number;
     userId: number;
     username: string;
     content: string;
@@ -19,6 +20,7 @@ export interface Comment {
 export interface CreateCommentRequest {
     quoteId?: number;
     reviewId?: number;
+    postId?: number;
     content: string;
     parentCommentId?: number;
 }
@@ -26,6 +28,7 @@ export interface CreateCommentRequest {
 export interface ReplyCommentRequest {
     quoteId?: number;
     reviewId?: number;
+    postId?: number;
     content: string;
 }
 
@@ -37,6 +40,11 @@ export const commentService = {
 
     getReviewComments: async (reviewId: number): Promise<Comment[]> => {
         const response = await api.get(`/api/comments/review/${reviewId}`);
+        return response.data;
+    },
+
+    getPostComments: async (postId: number): Promise<Comment[]> => {
+        const response = await api.get(`/api/comments/post/${postId}`);
         return response.data;
     },
 

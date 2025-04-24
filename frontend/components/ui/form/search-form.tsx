@@ -6,12 +6,30 @@ import { Button } from "@/components/ui/form/button"
 import { Search } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { Avatar, AvatarImage } from "@/components/ui/avatar"
 
 type QuickSearchResult = {
     id: number;
     title: string;
     author: string;
     imageUrl?: string;
+    type: 'book' | 'user';
+    username?: string;
+    nameSurname?: string;
+}
+
+interface BookSearchResult {
+    id: number;
+    title: string;
+    author: string;
+    imageUrl?: string;
+}
+
+interface UserSearchResult {
+    id: number;
+    username: string;
+    nameSurname: string;
+    profileImage?: string;
 }
 
 interface SearchFormProps {
@@ -41,19 +59,51 @@ export function SearchForm({ isScrolled = false }: SearchFormProps) {
             if (searchQuery.length > 0) {
                 try {
                     const token = localStorage.getItem('token')
-                    const response = await fetch(
-                        `http://localhost:8080/api/books/quick-search?query=${encodeURIComponent(searchQuery)}`,
-                        {
-                            headers: {
-                                'Authorization': `Bearer ${token}`
+                    const [booksResponse, usersResponse] = await Promise.all([
+                        fetch(
+                            `http://localhost:8080/api/books/quick-search?query=${encodeURIComponent(searchQuery)}`,
+                            {
+                                headers: {
+                                    'Authorization': `Bearer ${token}`
+                                }
                             }
-                        }
-                    )
-                    if (response.ok) {
-                        const data = await response.json()
-                        setQuickResults(data)
-                        setShowResults(true)
-                    }
+                        ),
+                        fetch(
+                            `http://localhost:8080/api/users/quick-search?query=${encodeURIComponent(searchQuery)}`,
+                            {
+                                headers: {
+                                    'Authorization': `Bearer ${token}`
+                                }
+                            }
+                        )
+                    ]);
+
+                    const booksData = booksResponse.ok ? await booksResponse.json() : [];
+                    const usersData = usersResponse.ok ? await usersResponse.json() : [];
+
+                    const formattedBooks = booksData.map((book: BookSearchResult) => ({
+                        id: book.id,
+                        title: book.title,
+                        author: book.author,
+                        imageUrl: book.imageUrl,
+                        type: 'book' as const
+                    }));
+
+                    const formattedUsers = usersData.map((user: UserSearchResult) => {
+                        console.log('User data:', user);
+                        return {
+                            id: user.id,
+                            title: user.username,
+                            author: user.nameSurname,
+                            imageUrl: user.profileImage || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`,
+                            type: 'user' as const,
+                            username: user.username,
+                            nameSurname: user.nameSurname
+                        };
+                    });
+
+                    setQuickResults([...formattedBooks, ...formattedUsers]);
+                    setShowResults(true);
                 } catch (error) {
                     console.error('Quick search error:', error)
                 }
@@ -81,7 +131,7 @@ export function SearchForm({ isScrolled = false }: SearchFormProps) {
                 <div className="relative">
                     <Input
                         type="search"
-                        placeholder="Kitap ara..."
+                        placeholder="Kitap veya kullanıcı ara..."
                         className={`transition-all duration-300 pl-10 pr-4 py-2 rounded-full bg-background text-foreground placeholder:text-muted-foreground ${
                             isScrolled ? 'w-72 text-xs' : 'w-96 text-sm'
                         }`}
@@ -112,22 +162,42 @@ export function SearchForm({ isScrolled = false }: SearchFormProps) {
                         {quickResults.map((result) => (
                             <Link
                                 key={result.id}
-                                href={`/features/book/${result.id}`}
+                                href={result.type === 'book' ? `/features/book/${result.id}` : `/features/profile/${result.id}`}
                                 className="flex items-center gap-3 p-2 hover:bg-muted rounded-md transition-colors"
                                 onClick={() => setShowResults(false)}
                             >
                                 {result.imageUrl && (
-                                    <div className={`relative flex-shrink-0 transition-all duration-300 ${
-                                        isScrolled ? 'w-10 h-14' : 'w-12 h-16'
-                                    }`}>
-                                        <Image
-                                            src={result.imageUrl}
-                                            alt={result.title}
-                                            fill
-                                            sizes={isScrolled ? "40px" : "48px"}
-                                            className="object-cover rounded"
-                                        />
-                                    </div>
+                                    result.type === 'user' ? (
+                                        <div className="relative group">
+                                            {/* Soft background glow */}
+                                            <div className="absolute -inset-1 bg-gradient-to-r from-purple-200/40 to-pink-200/40 dark:from-purple-900/20 dark:to-pink-900/20 rounded-full blur-sm" />
+                                            
+                                            {/* Glass effect container */}
+                                            <div className="relative p-[1px] rounded-full bg-gradient-to-r from-purple-500 to-pink-500">
+                                                <div className="relative rounded-full p-0.5 bg-white dark:bg-gray-900 backdrop-blur-sm">
+                                                    <Avatar className={`${isScrolled ? 'h-10 w-10' : 'h-12 w-12'} rounded-full overflow-hidden ring-2 ring-white/80 dark:ring-gray-800/80`}>
+                                                        <AvatarImage 
+                                                            src={result.imageUrl} 
+                                                            alt={result.title}
+                                                            className="object-cover hover:scale-105 transition-transform duration-300"
+                                                        />
+                                                    </Avatar>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className={`relative flex-shrink-0 transition-all duration-300 ${
+                                            isScrolled ? 'w-10 h-14' : 'w-12 h-16'
+                                        }`}>
+                                            <Image
+                                                src={result.imageUrl}
+                                                alt={result.title}
+                                                fill
+                                                sizes={isScrolled ? "40px" : "48px"}
+                                                className="object-cover hover:scale-105 transition-transform duration-300"
+                                            />
+                                        </div>
+                                    )
                                 )}
                                 <div className="flex-1 min-w-0">
                                     <p className={`font-medium text-foreground truncate transition-all duration-300 ${

@@ -11,6 +11,16 @@ export interface Post {
   type?: 'post' | 'review';
   createdAt: string;
   updatedAt: string;
+  likesCount: number;
+  commentsCount: number;
+  isLiked: boolean;
+  isSaved: boolean;
+  book?: {
+    id: number;
+    title: string;
+    author: string;
+    cover: string;
+  };
 }
 
 export interface PostRequest {
@@ -41,5 +51,20 @@ export const postService = {
 
   deletePost: async (postId: number): Promise<void> => {
     await api.delete(`/api/posts/${postId}`);
+  },
+
+  toggleLike: async (postId: number): Promise<Post> => {
+    const response = await api.post(`/api/posts/${postId}/like`);
+    return response.data;
+  },
+
+  toggleSave: async (postId: number): Promise<Post> => {
+    const response = await api.post(`/api/posts/${postId}/save`);
+    return response.data;
+  },
+
+  sharePost: async (postId: number): Promise<string> => {
+    const response = await api.post(`/api/posts/${postId}/share`);
+    return response.data;
   }
 }; 

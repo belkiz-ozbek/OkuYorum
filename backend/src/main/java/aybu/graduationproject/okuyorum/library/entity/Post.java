@@ -8,6 +8,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "posts")
@@ -40,9 +42,37 @@ public class Post {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Column(name = "likes_count", nullable = false)
+    @Builder.Default
+    private Integer likesCount = 0;
+
+    @Column(name = "comments_count", nullable = false)
+    @Builder.Default
+    private Integer commentsCount = 0;
+
+    @ManyToMany
+    @JoinTable(
+        name = "post_likes",
+        joinColumns = @JoinColumn(name = "post_id"),
+        inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    @Builder.Default
+    private Set<User> likedBy = new HashSet<>();
+
+    @ManyToMany
+    @JoinTable(
+        name = "post_saves",
+        joinColumns = @JoinColumn(name = "post_id"),
+        inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    @Builder.Default
+    private Set<User> savedBy = new HashSet<>();
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
+        likesCount = 0;
+        commentsCount = 0;
     }
 
     @PreUpdate

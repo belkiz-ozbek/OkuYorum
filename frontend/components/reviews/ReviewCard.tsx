@@ -57,6 +57,12 @@ export function ReviewCard({ review, onDelete, onEdit, onLike, onSave, onShare }
     const [isLoadingComments, setIsLoadingComments] = useState(false);
     const [isLikeProcessing, setIsLikeProcessing] = useState(false);
 
+    const cardVariants = {
+        initial: { opacity: 0, y: 20 },
+        animate: { opacity: 1, y: 0 },
+        exit: { opacity: 0, y: -20 }
+    };
+
     const iconVariants = {
         initial: { scale: 1 },
         hover: { scale: 1.1, transition: { duration: 0.2 } },
@@ -159,226 +165,246 @@ export function ReviewCard({ review, onDelete, onEdit, onLike, onSave, onShare }
     };
 
     return (
-        <Card className="w-full overflow-hidden border border-purple-100 dark:border-purple-900/30 hover:border-purple-200 dark:hover:border-purple-800/50">
-            <div className="p-4 border-b border-purple-50 dark:border-purple-900/20">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center">
-                        <Link href={`/profile/${review.userId}`} className="flex items-center gap-2 group">
-                            <Avatar className="h-8 w-8">
-                                <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${review.username}`} alt={review.username} />
-                                <AvatarFallback>{review.username[0].toUpperCase()}</AvatarFallback>
-                            </Avatar>
-                            <div className="flex items-center">
-                                <span className="text-sm font-medium text-gray-800 dark:text-gray-200 group-hover:text-purple-700 dark:group-hover:text-purple-400 transition-colors duration-200">
-                                    {review.username}
-                                </span>
-                                <span className="mx-2 text-gray-400 dark:text-gray-500">•</span>
-                                <p className="text-xs text-gray-500 dark:text-gray-400">
-                                    {new Date(review.createdAt).toLocaleString('tr-TR', {
-                                        year: 'numeric',
-                                        month: 'numeric',
-                                        day: 'numeric',
-                                        hour: '2-digit',
-                                        minute: '2-digit'
-                                    })}
-                                </p>
-                            </div>
-                        </Link>
-                    </div>
-                    {isOwner && (
-                        <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
-                            <DropdownMenuTrigger asChild>
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-7 w-7 text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-50/50 dark:hover:bg-purple-900/10 rounded-full transition-all duration-200"
-                                >
-                                    <MoreVertical className="h-4 w-4" />
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                                <DropdownMenuItem 
-                                    className="text-gray-600 dark:text-gray-300"
-                                    onClick={() => {
-                                        setShowEditDialog(true);
-                                        setDropdownOpen(false);
-                                    }}
-                                >
-                                    <Edit className="mr-2 h-4 w-4" />
-                                    Düzenle
-                                </DropdownMenuItem>
-                                <DropdownMenuItem 
-                                    className="text-red-600 dark:text-red-400"
-                                    onClick={() => {
-                                        setShowDeleteDialog(true);
-                                        setDropdownOpen(false);
-                                    }}
-                                >
-                                    <Trash2 className="mr-2 h-4 w-4" />
-                                    Sil
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                    )}
-                </div>
-            </div>
-            <CardContent className="p-4 pt-5 pb-6">
-                {/* Book Info */}
-                <Link 
-                    href={`/features/book/${review.bookId}`} 
-                    className="flex items-start mb-4 group cursor-pointer"
-                >
-                    {review.bookCoverImage && (
-                        <div className="relative h-24 w-16 rounded-md overflow-hidden shadow-md mr-4 flex-shrink-0 transition-all duration-300 group-hover:shadow-lg transform group-hover:scale-105">
-                            <img
-                                src={review.bookCoverImage || "/placeholder.svg"}
-                                alt={review.bookTitle}
-                                className="object-cover w-full h-full"
-                            />
-                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300"></div>
-                        </div>
-                    )}
-                    <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-1 group-hover:text-purple-700 dark:group-hover:text-purple-400 transition-colors duration-200">
-                            {review.bookTitle}
-                        </h3>
-                        <p className="text-gray-600 dark:text-gray-400 text-sm mb-2">{review.bookAuthor}</p>
+        <motion.div
+            variants={cardVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            transition={{ duration: 0.3 }}
+        >
+            <Card className="w-full overflow-hidden bg-white dark:bg-gray-900/50 backdrop-blur-sm border border-gray-200/50 dark:border-gray-800/50 hover:border-purple-200 dark:hover:border-purple-800/50 shadow-sm hover:shadow-md transition-all duration-300">
+                <div className="p-4 border-b border-gray-100 dark:border-gray-800/50">
+                    <div className="flex items-center justify-between">
                         <div className="flex items-center">
-                            <div className="flex">{renderStars(review.rating)}</div>
-                            <span className="ml-2 text-sm text-gray-600 dark:text-gray-400">{review.rating}</span>
+                            <Link href={`/profile/${review.userId}`} className="flex items-center gap-2 group">
+                                <motion.div
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                >
+                                    <Avatar className="h-10 w-10 ring-2 ring-purple-100 dark:ring-purple-900/30">
+                                        <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${review.username}`} alt={review.username} />
+                                        <AvatarFallback>{review.username[0].toUpperCase()}</AvatarFallback>
+                                    </Avatar>
+                                </motion.div>
+                                <div className="flex flex-col">
+                                    <span className="text-sm font-medium text-gray-800 dark:text-gray-200 group-hover:text-purple-700 dark:group-hover:text-purple-400 transition-colors duration-200">
+                                        {review.username}
+                                    </span>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                                        {new Date(review.createdAt).toLocaleString('tr-TR', {
+                                            year: 'numeric',
+                                            month: 'numeric',
+                                            day: 'numeric',
+                                            hour: '2-digit',
+                                            minute: '2-digit'
+                                        })}
+                                    </p>
+                                </div>
+                            </Link>
+                        </div>
+                        {isOwner && (
+                            <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
+                                <DropdownMenuTrigger asChild>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-8 w-8 text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-50/50 dark:hover:bg-purple-900/10 rounded-full transition-all duration-200"
+                                    >
+                                        <MoreVertical className="h-4 w-4" />
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm">
+                                    <DropdownMenuItem 
+                                        className="text-gray-600 dark:text-gray-300 hover:bg-purple-50 dark:hover:bg-purple-900/20"
+                                        onClick={() => {
+                                            setShowEditDialog(true);
+                                            setDropdownOpen(false);
+                                        }}
+                                    >
+                                        <Edit className="mr-2 h-4 w-4" />
+                                        Düzenle
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem 
+                                        className="text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+                                        onClick={() => {
+                                            setShowDeleteDialog(true);
+                                            setDropdownOpen(false);
+                                        }}
+                                    >
+                                        <Trash2 className="mr-2 h-4 w-4" />
+                                        Sil
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        )}
+                    </div>
+                </div>
+                <CardContent className="p-4 pt-5 pb-6">
+                    {/* Book Info */}
+                    <Link 
+                        href={`/features/book/${review.bookId}`} 
+                        className="flex items-start mb-4 group cursor-pointer"
+                    >
+                        {review.bookCoverImage && (
+                            <motion.div 
+                                className="relative h-28 w-20 rounded-lg overflow-hidden shadow-md mr-4 flex-shrink-0 transition-all duration-300 group-hover:shadow-lg"
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                            >
+                                <img
+                                    src={review.bookCoverImage || "/placeholder.svg"}
+                                    alt={review.bookTitle}
+                                    className="object-cover w-full h-full"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                            </motion.div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                            <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-1 group-hover:text-purple-700 dark:group-hover:text-purple-400 transition-colors duration-200">
+                                {review.bookTitle}
+                            </h3>
+                            <p className="text-gray-600 dark:text-gray-400 text-sm mb-2">{review.bookAuthor}</p>
+                            <div className="flex items-center">
+                                <div className="flex space-x-1">{renderStars(review.rating)}</div>
+                                <span className="ml-2 text-sm text-gray-600 dark:text-gray-400">{review.rating}</span>
+                            </div>
+                        </div>
+                    </Link>
+
+                    {/* Review Content */}
+                    <div className="prose prose-sm dark:prose-invert max-w-none">
+                        <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+                            {review.content}
+                        </p>
+                    </div>
+                </CardContent>
+
+                <CardFooter className="p-4 border-t border-gray-100 dark:border-gray-800/50">
+                    <div className="flex items-center justify-between w-full">
+                        <div className="flex items-center space-x-4">
+                            <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <motion.button
+                                            variants={iconVariants}
+                                            whileHover="hover"
+                                            whileTap="tap"
+                                            onClick={handleLike}
+                                            className={cn(
+                                                "flex items-center space-x-1 text-sm transition-colors duration-200",
+                                                review.isLiked
+                                                    ? "text-purple-600 dark:text-purple-400"
+                                                    : "text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400"
+                                            )}
+                                        >
+                                            <Heart
+                                                className={cn(
+                                                    "h-5 w-5",
+                                                    review.isLiked && "fill-current"
+                                                )}
+                                            />
+                                            <span>{review.likesCount}</span>
+                                        </motion.button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <p>{review.isLiked ? "Beğeniyi Kaldır" : "Beğen"}</p>
+                                    </TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
+
+                            <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <motion.button
+                                            variants={iconVariants}
+                                            whileHover="hover"
+                                            whileTap="tap"
+                                            onClick={handleCommentClick}
+                                            className="flex items-center space-x-1 text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 text-sm transition-colors duration-200"
+                                        >
+                                            <MessageCircle className="h-5 w-5" />
+                                            <span>{review.commentsCount}</span>
+                                        </motion.button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <p>Yorum Yap</p>
+                                    </TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
+                        </div>
+
+                        <div className="flex items-center space-x-2">
+                            <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <motion.button
+                                            variants={iconVariants}
+                                            whileHover="hover"
+                                            whileTap="tap"
+                                            onClick={onShare}
+                                            className="text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors duration-200"
+                                        >
+                                            <Share2 className="h-5 w-5" />
+                                        </motion.button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <p>Paylaş</p>
+                                    </TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
+
+                            <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <motion.button
+                                            variants={iconVariants}
+                                            whileHover="hover"
+                                            whileTap="tap"
+                                            onClick={() => onSave && onSave(review.id)}
+                                            className="text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors duration-200"
+                                        >
+                                            <Bookmark className="h-5 w-5" />
+                                        </motion.button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <p>Kaydet</p>
+                                    </TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
                         </div>
                     </div>
-                </Link>
+                </CardFooter>
 
-                {/* Review Content */}
-                <div className="text-gray-800 dark:text-gray-200 text-base leading-relaxed">
-                    {review.content}
-                </div>
-            </CardContent>
-            <CardFooter className="px-4 py-3 border-t border-purple-50 dark:border-purple-900/20 flex items-center justify-between bg-purple-50/30 dark:bg-purple-900/10">
-                <div className="flex items-center space-x-6">
-                    <TooltipProvider>
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <motion.button
-                                    variants={iconVariants}
-                                    whileHover="hover"
-                                    whileTap="tap"
-                                    className={cn(
-                                        "flex items-center gap-1.5 px-2 py-1 rounded-full transition-all duration-200",
-                                        review.isLiked
-                                            ? "text-red-500 bg-red-50 dark:bg-red-900/20"
-                                            : "text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50/50 dark:hover:bg-red-900/10",
-                                    )}
-                                    onClick={handleLike}
-                                    disabled={isLikeProcessing}
-                                >
-                                    <Heart className="h-5 w-5" fill={review.isLiked ? "currentColor" : "none"} />
-                                    <span className="text-sm font-medium">{review.likesCount}</span>
-                                </motion.button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                                <p>{review.isLiked ? "Beğenildi" : "Beğen"}</p>
-                            </TooltipContent>
-                        </Tooltip>
-                    </TooltipProvider>
-
-                    <TooltipProvider>
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <motion.button
-                                    variants={iconVariants}
-                                    whileHover="hover"
-                                    whileTap="tap"
-                                    className={cn(
-                                        "flex items-center gap-1.5 px-2 py-1 rounded-full transition-all duration-200",
-                                        showComments
-                                            ? "text-purple-600 bg-purple-50 dark:bg-purple-900/20"
-                                            : "text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-50/70 dark:hover:bg-purple-900/20"
-                                    )}
-                                    onClick={handleCommentClick}
-                                >
-                                    <MessageCircle className="h-5 w-5" />
-                                    {comments.length > 0 && (
-                                        <span className="text-sm font-medium">{comments.length}</span>
-                                    )}
-                                </motion.button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                                <p>{showComments ? "Yorumları Gizle" : comments.length > 0 ? `${comments.length} yorum` : "Yorum Yap"}</p>
-                            </TooltipContent>
-                        </Tooltip>
-                    </TooltipProvider>
-                </div>
-
-                <div className="flex items-center space-x-3">
-                    <TooltipProvider>
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <motion.button
-                                    variants={iconVariants}
-                                    whileHover="hover"
-                                    whileTap="tap"
-                                    className="flex items-center justify-center h-8 w-8 rounded-full text-gray-500 dark:text-gray-400 hover:text-green-500 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 transition-all duration-200"
-                                    onClick={() => onShare && onShare()}
-                                >
-                                    <Share2 className="h-5 w-5" />
-                                </motion.button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                                <p>Paylaş</p>
-                            </TooltipContent>
-                        </Tooltip>
-                    </TooltipProvider>
-
-                    <TooltipProvider>
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <motion.button
-                                    variants={iconVariants}
-                                    whileHover="hover"
-                                    whileTap="tap"
-                                    className={cn(
-                                        "flex items-center justify-center h-8 w-8 rounded-full transition-all duration-200",
-                                        review.isSaved
-                                            ? "text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/30"
-                                            : "text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20",
-                                    )}
-                                    onClick={() => onSave && onSave(review.id)}
-                                >
-                                    <Bookmark className="h-5 w-5" fill={review.isSaved ? "currentColor" : "none"} />
-                                </motion.button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                                <p>{review.isSaved ? "Kaydedildi" : "Kaydet"}</p>
-                            </TooltipContent>
-                        </Tooltip>
-                    </TooltipProvider>
-                </div>
-            </CardFooter>
-
-            {showComments && (
-                <div className="border-t border-purple-50 dark:border-purple-900/20 p-4 bg-purple-50/20 dark:bg-purple-900/5">
-                    {isLoadingComments ? (
-                        <div className="flex justify-center py-4">
-                            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-600"></div>
-                        </div>
-                    ) : (
-                        <div className="space-y-4">
-                            <CreateComment
-                                reviewId={review.id}
-                                onCommentCreated={fetchComments}
-                            />
-                            <AnimatePresence mode="wait">
+                {/* Comments Section */}
+                <AnimatePresence>
+                    {showComments && (
+                        <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: "auto", opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.3 }}
+                            className="border-t border-gray-100 dark:border-gray-800/50"
+                        >
+                            <div className="p-4">
+                                <CreateComment
+                                    reviewId={review.id}
+                                    onCommentCreated={() => {
+                                        fetchComments();
+                                        if (onReviewsChange) {
+                                            onReviewsChange();
+                                        }
+                                    }}
+                                />
                                 <CommentList
                                     comments={comments}
-                                    onCommentCreated={fetchComments}
+                                    isLoading={isLoadingComments}
+                                    onCommentsChange={fetchComments}
                                 />
-                            </AnimatePresence>
-                        </div>
+                            </div>
+                        </motion.div>
                     )}
-                </div>
-            )}
+                </AnimatePresence>
+            </Card>
 
             <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
                 <AlertDialogContent>
@@ -449,6 +475,6 @@ export function ReviewCard({ review, onDelete, onEdit, onLike, onSave, onShare }
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
-        </Card>
+        </motion.div>
     );
 } 

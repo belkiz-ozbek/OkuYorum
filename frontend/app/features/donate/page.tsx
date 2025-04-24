@@ -227,7 +227,9 @@ export default function DonatePage() {
   const [recipientName, setRecipientName] = useLocalStorage('draft_recipientName', '')
   const [address, setAddress] = useLocalStorage('draft_address', '')
   const [showConfirmModal, setShowConfirmModal] = useState(false)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isScrolled, setIsScrolled] = useState(false)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [theme, setTheme] = useState<'light' | 'dark'>('light')
   const [pendingDonation, setPendingDonation] = useState<DonationData>({
     bookTitle: '',
@@ -260,12 +262,6 @@ export default function DonatePage() {
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
-
-  const toggleTheme = () => {
-    const newTheme = theme === 'light' ? 'dark' : 'light'
-    setTheme(newTheme)
-    document.documentElement.setAttribute('data-theme', newTheme)
-  }
 
   const nextStep = () => {
     clearErrors()
@@ -1071,7 +1067,7 @@ export default function DonatePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-rose-50 to-pink-100">
+    <div className="min-h-screen bg-background">
       <main className="container mx-auto px-4 py-8">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-purple-600 to-pink-600 text-transparent bg-clip-text">

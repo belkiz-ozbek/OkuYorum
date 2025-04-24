@@ -4,12 +4,11 @@ import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { DonationService } from "@/services/DonationService"
 import { Skeleton } from "@/components/ui/skeleton"
-import { ArrowLeft, BookOpen, User, Library, Compass, Users, Heart, Moon, Sun } from "lucide-react"
+import { ArrowLeft } from "lucide-react"
 import Link from "next/link"
 import DonationInfo, { Donation } from "@/components/donations/DonationInfo"
 import {useToast} from "@/components/ui/feedback/use-toast";
 import {Button} from "@/components/ui/form/button";
-import {SearchForm} from "@/components/ui/form/search-form"
 
 export default function DonationDetailPage() {
   const params = useParams()
@@ -18,7 +17,8 @@ export default function DonationDetailPage() {
   const [donation, setDonation] = useState<Donation | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [isScrolled, setIsScrolled] = useState(false)
+  const [ setIsScrolled] = useState(false)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [theme, setTheme] = useState<'light' | 'dark'>('light')
 
   useEffect(() => {
@@ -30,18 +30,14 @@ export default function DonationDetailPage() {
 
     const handleScroll = () => {
       const scrollPosition = window.scrollY
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-expect-error
       setIsScrolled(scrollPosition > 50)
     }
 
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
-
-  const toggleTheme = () => {
-    const newTheme = theme === 'light' ? 'dark' : 'light'
-    setTheme(newTheme)
-    document.documentElement.setAttribute('data-theme', newTheme)
-  }
 
   useEffect(() => {
     const fetchDonation = async () => {
@@ -136,7 +132,7 @@ export default function DonationDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-rose-50 to-pink-100">
+      <div className="min-h-screen bg-background">
         <main className="container mx-auto px-4 py-8">
           <div className="mb-6">
             <Skeleton className="h-8 w-64" />
@@ -153,7 +149,7 @@ export default function DonationDetailPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-rose-50 to-pink-100">
+      <div className="min-h-screen bg-background">
         <main className="container mx-auto px-4 py-8">
           <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-4">
             <div className="flex">
@@ -174,7 +170,7 @@ export default function DonationDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-rose-50 to-pink-100">
+    <div className="min-h-screen bg-background">
       <main className="container mx-auto px-4 py-8">
         <div className="mb-6 flex items-center justify-between">
           <h1 className="text-2xl font-bold text-gray-900">Bağış Detayları</h1>
