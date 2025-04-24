@@ -279,99 +279,99 @@ export function ReviewCard({ review, onDelete, onEdit, onLike, onSave, onShare }
                     </div>
                 </CardContent>
 
-                <CardFooter className="p-4 border-t border-gray-100 dark:border-gray-800/50">
-                    <div className="flex items-center justify-between w-full">
-                        <div className="flex items-center space-x-4">
-                            <TooltipProvider>
-                                <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <motion.button
-                                            variants={iconVariants}
-                                            whileHover="hover"
-                                            whileTap="tap"
-                                            onClick={handleLike}
-                                            className={cn(
-                                                "flex items-center space-x-1 text-sm transition-colors duration-200",
-                                                review.isLiked
-                                                    ? "text-purple-600 dark:text-purple-400"
-                                                    : "text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400"
-                                            )}
-                                        >
-                                            <Heart
-                                                className={cn(
-                                                    "h-5 w-5",
-                                                    review.isLiked && "fill-current"
-                                                )}
-                                            />
-                                            <span>{review.likesCount}</span>
-                                        </motion.button>
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                        <p>{review.isLiked ? "Beğeniyi Kaldır" : "Beğen"}</p>
-                                    </TooltipContent>
-                                </Tooltip>
-                            </TooltipProvider>
+                <CardFooter className="px-4 py-3 border-t border-purple-50 dark:border-purple-900/20 flex items-center justify-between bg-purple-50/30 dark:bg-purple-900/10">
+                    <div className="flex items-center space-x-6">
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <motion.button
+                                        variants={iconVariants}
+                                        whileHover="hover"
+                                        whileTap="tap"
+                                        className={cn(
+                                            "flex items-center gap-1.5 px-2 py-1 rounded-full transition-all duration-200",
+                                            review.isLiked
+                                                ? "text-red-500 bg-red-50 dark:bg-red-900/20"
+                                                : "text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50/50 dark:hover:bg-red-900/10"
+                                        )}
+                                        onClick={handleLike}
+                                    >
+                                        <Heart className="h-5 w-5" fill={review.isLiked ? "currentColor" : "none"} />
+                                        <span className="text-sm font-medium">{review.likesCount}</span>
+                                    </motion.button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    <p>{review.isLiked ? "Beğenildi" : "Beğen"}</p>
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
 
-                            <TooltipProvider>
-                                <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <motion.button
-                                            variants={iconVariants}
-                                            whileHover="hover"
-                                            whileTap="tap"
-                                            onClick={handleCommentClick}
-                                            className="flex items-center space-x-1 text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 text-sm transition-colors duration-200"
-                                        >
-                                            <MessageCircle className="h-5 w-5" />
-                                            <span>{review.commentsCount}</span>
-                                        </motion.button>
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                        <p>Yorum Yap</p>
-                                    </TooltipContent>
-                                </Tooltip>
-                            </TooltipProvider>
-                        </div>
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <motion.button
+                                        variants={iconVariants}
+                                        whileHover="hover"
+                                        whileTap="tap"
+                                        className={cn(
+                                            "flex items-center gap-1.5 px-2 py-1 rounded-full transition-all duration-200",
+                                            showComments
+                                                ? "text-purple-600 bg-purple-50 dark:bg-purple-900/20"
+                                                : "text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-50/70 dark:hover:bg-purple-900/20"
+                                        )}
+                                        onClick={handleCommentClick}
+                                    >
+                                        <MessageCircle className="h-5 w-5" />
+                                        {comments.length > 0 && (
+                                            <span className="text-sm font-medium">{comments.length}</span>
+                                        )}
+                                    </motion.button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    <p>{showComments ? "Yorumları Gizle" : comments.length > 0 ? `${comments.length} yorum` : "Yorum Yap"}</p>
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+                    </div>
 
-                        <div className="flex items-center space-x-2">
-                            <TooltipProvider>
-                                <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <motion.button
-                                            variants={iconVariants}
-                                            whileHover="hover"
-                                            whileTap="tap"
-                                            onClick={onShare}
-                                            className="text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors duration-200"
-                                        >
-                                            <Share2 className="h-5 w-5" />
-                                        </motion.button>
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                        <p>Paylaş</p>
-                                    </TooltipContent>
-                                </Tooltip>
-                            </TooltipProvider>
+                    <div className="flex items-center space-x-6">
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <motion.button
+                                        variants={iconVariants}
+                                        whileHover="hover"
+                                        whileTap="tap"
+                                        onClick={onShare}
+                                        className="text-gray-500 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50/70 dark:hover:bg-green-900/20 transition-colors duration-200"
+                                    >
+                                        <Share2 className="h-5 w-5" />
+                                    </motion.button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    <p>Paylaş</p>
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
 
-                            <TooltipProvider>
-                                <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <motion.button
-                                            variants={iconVariants}
-                                            whileHover="hover"
-                                            whileTap="tap"
-                                            onClick={() => onSave && onSave(review.id)}
-                                            className="text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors duration-200"
-                                        >
-                                            <Bookmark className="h-5 w-5" />
-                                        </motion.button>
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                        <p>Kaydet</p>
-                                    </TooltipContent>
-                                </Tooltip>
-                            </TooltipProvider>
-                        </div>
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <motion.button
+                                        variants={iconVariants}
+                                        whileHover="hover"
+                                        whileTap="tap"
+                                        onClick={() => onSave && onSave(review.id)}
+                                        className="text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors duration-200"
+                                    >
+                                        <Bookmark className="h-5 w-5" />
+                                    </motion.button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    <p>Kaydet</p>
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
                     </div>
                 </CardFooter>
 
