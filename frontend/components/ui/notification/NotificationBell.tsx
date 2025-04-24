@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useRouter } from 'next/navigation';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 
 export function NotificationBell() {
     const router = useRouter();
@@ -66,6 +67,8 @@ export function NotificationBell() {
                 redirectUrl = `/features${notification.link}`;
             } else if (notification.link.startsWith('/profile/')) {
                 redirectUrl = `/features${notification.link}`;
+            } else if (notification.link.startsWith('/posts/')) {
+                redirectUrl = `/features${notification.link}`;
             }
 
             router.push(redirectUrl);
@@ -96,12 +99,15 @@ export function NotificationBell() {
             case 'LIKE':
             case 'REVIEW_LIKE':
             case 'COMMENT_LIKE':
+            case 'POST_LIKE':
                 return <Heart className="h-4 w-4 text-red-500" />;
             case 'COMMENT':
+            case 'POST_COMMENT':
                 return <MessageSquare className="h-4 w-4 text-blue-500" />;
             case 'COMMENT_REPLY':
             case 'QUOTE_COMMENT_REPLY':
             case 'REVIEW_COMMENT_REPLY':
+            case 'POST_COMMENT_REPLY':
                 return <Reply className="h-4 w-4 text-blue-500" />;
             case 'QUOTE_COMMENT':
             case 'REVIEW_COMMENT':
@@ -147,51 +153,51 @@ export function NotificationBell() {
                 </div>
                 <ScrollArea className="h-[32rem]">
                     {notifications.length > 0 ? (
-                        notifications.map((notification) => (
-                            <DropdownMenuItem
-                                key={notification.id}
-                                className={cn(
-                                    'flex items-start gap-3 p-4 cursor-pointer',
-                                    !notification.read && 'bg-purple-50/50 dark:bg-purple-900/20'
+                        notifications.map((notification, index) => (
+                            <div key={notification.id}>
+                                {index > 0 && (
+                                    <div className="h-[1px] bg-purple-100/50 dark:bg-purple-800/50 mx-4" />
                                 )}
-                                onClick={() => handleNotificationClick(notification)}
-                            >
-                                <div className="flex-shrink-0">
-                                    {notification.actorAvatar ? (
-                                        <img
-                                            src={notification.actorAvatar}
-                                            alt={notification.actorUsername}
-                                            className="h-8 w-8 rounded-full"
-                                        />
-                                    ) : (
-                                        <div className="h-8 w-8 rounded-full bg-purple-100 dark:bg-purple-900 flex items-center justify-center">
-                                            <span className="text-sm font-medium text-purple-600 dark:text-purple-300">
-                                                {notification.actorUsername[0].toUpperCase()}
-                                            </span>
-                                        </div>
+                                <DropdownMenuItem
+                                    className={cn(
+                                        'flex items-start gap-3 p-4 cursor-pointer',
+                                        !notification.read && 'bg-purple-50/50 dark:bg-purple-900/20'
                                     )}
-                                </div>
-                                <div className="flex-1 space-y-1">
-                                    <div className="flex items-center justify-between gap-2">
-                                        <p className="text-sm text-gray-700 dark:text-gray-300">
-                                            <button
-                                                onClick={(e) => handleActorClick(e, notification.actorId)}
-                                                className="font-semibold hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
-                                            >
-                                                {notification.actorUsername}
-                                            </button>{' '}
-                                            {notification.message}
-                                        </p>
-                                        {getNotificationIcon(notification.type)}
+                                    onClick={() => handleNotificationClick(notification)}
+                                >
+                                    <div className="flex-shrink-0">
+                                        <Avatar className="h-8 w-8">
+                                            <AvatarImage 
+                                                src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${notification.actorUsername}`}
+                                                alt={notification.actorUsername}
+                                            />
+                                            <AvatarFallback>
+                                                {notification.actorUsername[0].toUpperCase()}
+                                            </AvatarFallback>
+                                        </Avatar>
                                     </div>
-                                    <div className="flex items-center justify-end text-xs text-gray-500 dark:text-gray-400">
-                                        {new Date(notification.createdAt).toLocaleDateString('tr-TR', {
-                                            hour: '2-digit',
-                                            minute: '2-digit'
-                                        })}
+                                    <div className="flex-1 space-y-1">
+                                        <div className="flex items-center justify-between gap-2">
+                                            <p className="text-sm text-gray-700 dark:text-gray-300">
+                                                <button
+                                                    onClick={(e) => handleActorClick(e, notification.actorId)}
+                                                    className="font-semibold hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
+                                                >
+                                                    {notification.actorUsername}
+                                                </button>{' '}
+                                                {notification.message}
+                                            </p>
+                                            {getNotificationIcon(notification.type)}
+                                        </div>
+                                        <div className="flex items-center justify-end text-xs text-gray-500 dark:text-gray-400">
+                                            {new Date(notification.createdAt).toLocaleDateString('tr-TR', {
+                                                hour: '2-digit',
+                                                minute: '2-digit'
+                                            })}
+                                        </div>
                                     </div>
-                                </div>
-                            </DropdownMenuItem>
+                                </DropdownMenuItem>
+                            </div>
                         ))
                     ) : (
                         <div className="py-8 text-center text-sm text-gray-500 dark:text-gray-400">
