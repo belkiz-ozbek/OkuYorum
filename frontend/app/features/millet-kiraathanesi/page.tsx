@@ -254,7 +254,7 @@ function DiscussionCard({ title, author, participants, comments, lastActive }: {
         </span>
       </div>
       <a 
-        href="#" 
+        href="/features/popular-discussions" 
         className="mt-4 inline-flex items-center justify-center gap-2 w-fit py-2 px-6 bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white rounded-full transition-all duration-500 ease-in-out transform hover:scale-[1.02] hover:shadow-lg hover:shadow-purple-500/20 group motion-safe:animate-pulse-slow"
       >
         <span className="transition-transform duration-500 group-hover:translate-x-0.5">Tartışmaya Katıl</span>
