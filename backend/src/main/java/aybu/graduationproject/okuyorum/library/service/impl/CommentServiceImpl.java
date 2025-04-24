@@ -4,10 +4,12 @@ import aybu.graduationproject.okuyorum.library.dto.CommentDTO;
 import aybu.graduationproject.okuyorum.library.dto.CreateCommentRequest;
 import aybu.graduationproject.okuyorum.library.entity.Comment;
 import aybu.graduationproject.okuyorum.library.entity.CommentLike;
+import aybu.graduationproject.okuyorum.library.entity.Post;
 import aybu.graduationproject.okuyorum.library.entity.Quote;
 import aybu.graduationproject.okuyorum.library.entity.Review;
 import aybu.graduationproject.okuyorum.library.repository.CommentLikeRepository;
 import aybu.graduationproject.okuyorum.library.repository.CommentRepository;
+import aybu.graduationproject.okuyorum.library.repository.PostRepository;
 import aybu.graduationproject.okuyorum.library.repository.QuoteRepository;
 import aybu.graduationproject.okuyorum.library.repository.ReviewRepository;
 import aybu.graduationproject.okuyorum.library.service.CommentService;
@@ -31,6 +33,7 @@ public class CommentServiceImpl implements CommentService {
     private final UserRepository userRepository;
     private final QuoteRepository quoteRepository;
     private final ReviewRepository reviewRepository;
+    private final PostRepository postRepository;
     private final NotificationService notificationService;
 
     @Autowired
@@ -40,12 +43,14 @@ public class CommentServiceImpl implements CommentService {
             UserRepository userRepository,
             QuoteRepository quoteRepository,
             ReviewRepository reviewRepository,
+            PostRepository postRepository,
             NotificationService notificationService) {
         this.commentRepository = commentRepository;
         this.commentLikeRepository = commentLikeRepository;
         this.userRepository = userRepository;
         this.quoteRepository = quoteRepository;
         this.reviewRepository = reviewRepository;
+        this.postRepository = postRepository;
         this.notificationService = notificationService;
     }
 
@@ -87,8 +92,26 @@ public class CommentServiceImpl implements CommentService {
                     String.format("/features/reviews/%d", review.getId())
                 );
             }
+        } else if (request.getPostId() != null) {
+            Post post = postRepository.findById(request.getPostId())
+                    .orElseThrow(() -> new EntityNotFoundException("Post not found"));
+            comment.setPost(post);
+
+            if (!post.getUser().getId().equals(userId)) {
+                notificationService.createNotification(
+                    post.getUser().getId(),
+                    userId,
+                    "POST_COMMENT",
+                    String.format("%s iletinize yorum yaptı", user.getUsername()),
+                    String.format("/features/posts/%d", post.getId())
+                );
+            }
+
+            // Increment post's comment count
+            post.setCommentsCount(post.getCommentsCount() + 1);
+            postRepository.save(post);
         } else {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Either quoteId or reviewId must be provided");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Either quoteId, reviewId, or postId must be provided");
         }
 
         Comment savedComment = commentRepository.save(comment);

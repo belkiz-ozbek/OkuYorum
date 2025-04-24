@@ -175,32 +175,25 @@ export function ReviewCard({ review, onDelete, onEdit, onLike, onSave, onShare }
             <Card className="w-full overflow-hidden bg-white dark:bg-gray-900/50 backdrop-blur-sm border border-gray-200/50 dark:border-gray-800/50 hover:border-purple-200 dark:hover:border-purple-800/50 shadow-sm hover:shadow-md transition-all duration-300">
                 <div className="p-4 border-b border-gray-100 dark:border-gray-800/50">
                     <div className="flex items-center justify-between">
-                        <div className="flex items-center">
-                            <Link href={`/profile/${review.userId}`} className="flex items-center gap-2 group">
-                                <motion.div
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
-                                >
-                                    <Avatar className="h-10 w-10 ring-2 ring-purple-100 dark:ring-purple-900/30">
-                                        <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${review.username}`} alt={review.username} />
-                                        <AvatarFallback>{review.username[0].toUpperCase()}</AvatarFallback>
-                                    </Avatar>
-                                </motion.div>
-                                <div className="flex flex-col">
-                                    <span className="text-sm font-medium text-gray-800 dark:text-gray-200 group-hover:text-purple-700 dark:group-hover:text-purple-400 transition-colors duration-200">
-                                        {review.username}
-                                    </span>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                                        {new Date(review.createdAt).toLocaleString('tr-TR', {
-                                            year: 'numeric',
-                                            month: 'numeric',
-                                            day: 'numeric',
-                                            hour: '2-digit',
-                                            minute: '2-digit'
-                                        })}
-                                    </p>
-                                </div>
-                            </Link>
+                        <div className="flex items-center gap-2">
+                            <Avatar className="h-8 w-8">
+                                <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${review.username}`} alt={review.username} />
+                                <AvatarFallback>{review.username[0].toUpperCase()}</AvatarFallback>
+                            </Avatar>
+                            <div>
+                                <Link href={`/features/profile/${review.userId}`} className="font-medium hover:text-purple-600 dark:hover:text-purple-400">
+                                    {review.username}
+                                </Link>
+                                <p className="text-xs text-gray-500 dark:text-gray-400">
+                                    {new Date(review.createdAt).toLocaleString('tr-TR', {
+                                        year: 'numeric',
+                                        month: 'numeric',
+                                        day: 'numeric',
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                    })}
+                                </p>
+                            </div>
                         </div>
                         {isOwner && (
                             <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
@@ -208,14 +201,14 @@ export function ReviewCard({ review, onDelete, onEdit, onLike, onSave, onShare }
                                     <Button
                                         variant="ghost"
                                         size="icon"
-                                        className="h-8 w-8 text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-50/50 dark:hover:bg-purple-900/10 rounded-full transition-all duration-200"
+                                        className="h-7 w-7 text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-50/50 dark:hover:bg-purple-900/10 rounded-full transition-all duration-200"
                                     >
                                         <MoreVertical className="h-4 w-4" />
                                     </Button>
                                 </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm">
+                                <DropdownMenuContent align="end">
                                     <DropdownMenuItem 
-                                        className="text-gray-600 dark:text-gray-300 hover:bg-purple-50 dark:hover:bg-purple-900/20"
+                                        className="text-gray-600 dark:text-gray-300"
                                         onClick={() => {
                                             setShowEditDialog(true);
                                             setDropdownOpen(false);
@@ -225,7 +218,7 @@ export function ReviewCard({ review, onDelete, onEdit, onLike, onSave, onShare }
                                         Düzenle
                                     </DropdownMenuItem>
                                     <DropdownMenuItem 
-                                        className="text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+                                        className="text-red-600 dark:text-red-400"
                                         onClick={() => {
                                             setShowDeleteDialog(true);
                                             setDropdownOpen(false);

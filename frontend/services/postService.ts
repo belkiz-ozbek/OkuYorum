@@ -2,13 +2,15 @@ import { api } from './api';
 
 export interface Post {
   id: number;
-  title: string;
+  title?: string;
   content: string;
   userId: number;
   username: string;
   nameSurname: string;
   profileImage: string | null;
-  type?: 'post' | 'review';
+  type?: 'post' | 'review' | 'quote';
+  rating?: number;
+  pageNumber?: string;
   createdAt: string;
   updatedAt: string;
   likesCount: number;
@@ -24,7 +26,6 @@ export interface Post {
 }
 
 export interface PostRequest {
-  title: string;
   content: string;
 }
 

@@ -2,19 +2,14 @@ import { api } from '@/lib/api';
 
 export interface Comment {
     id: number;
-    quoteId?: number;
-    reviewId?: number;
-    postId?: number;
     userId: number;
     username: string;
     content: string;
-    parentCommentId?: number;
-    replies?: Comment[];
-    likesCount: number;
-    isLiked: boolean;
-    replyCount: number;
     createdAt: string;
     updatedAt: string;
+    likesCount: number;
+    isLiked: boolean;
+    replies?: Comment[];
 }
 
 export interface CreateCommentRequest {

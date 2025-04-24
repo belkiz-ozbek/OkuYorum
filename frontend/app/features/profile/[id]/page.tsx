@@ -105,9 +105,7 @@ const usePosts = (
 ) => {
   const fetchPosts = useCallback(async () => {
     try {
-       
       if (!params.id) return;
-       
       const postsData = await postService.getUserPosts(params.id.toString());
       setPosts(postsData);
     } catch (err: unknown) {
@@ -126,7 +124,6 @@ const usePosts = (
         variant: "destructive"
       });
     }
-     
   }, [params.id, toast, setPosts, router]);
 
   return { fetchPosts };
@@ -137,8 +134,6 @@ export default function ProfilePage() {
   const router = useRouter();
   const { toast } = useToast();
 
-  const [editTitle, setEditTitle] = useState("");
-  const [editContent, setEditContent] = useState("");
   const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [isLoadingReviews, setIsLoadingReviews] = useState(false);
@@ -175,7 +170,7 @@ export default function ProfilePage() {
     return null;
   }
 
-  const userId = params.id.toString();
+  const id: string = params.id.toString();
 
   // PROFİL İLETİLERİNİ HER ZAMAN YÜKLE
   // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -190,8 +185,8 @@ export default function ProfilePage() {
         const response = await UserService.getCurrentUser();
         setCurrentUser(response.data);
         // Kullanıcı giriş yapmışsa ve profil sayfası başka bir kullanıcıya aitse takip durumunu kontrol et
-        if (response.data && userId !== response.data.id.toString()) {
-          const isFollowingStatus = await followService.isFollowing(userId);
+        if (response.data && id !== response.data.id.toString()) {
+          const isFollowingStatus = await followService.isFollowing(id);
           setIsFollowing(isFollowingStatus);
         }
       } catch (error) {
@@ -201,25 +196,25 @@ export default function ProfilePage() {
     };
 
     loadUserInfo();
-  }, [userId]);
+  }, [id]);
 
   const fetchProfileData = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      console.log('Fetching profile data for user:', userId);
-      const profileData = await profileService.getUserProfile(userId);
+      console.log('Fetching profile data for user:', id);
+      const profileData = await profileService.getUserProfile(id);
       console.log('Profile data received:', profileData);
       
       // Takip durumunu kontrol et
-      if (currentUser && userId !== currentUser.id.toString()) {
+      if (currentUser && id !== currentUser.id.toString()) {
         console.log('Fetching additional data for other user profile');
         const [isFollowingStatus, achievementsData, readingActivityData, booksData] = await Promise.all([
-          followService.isFollowing(userId),
-          profileService.getUserAchievements(userId),
-          profileService.getUserReadingActivity(userId),
-          bookService.getBooks(userId)
+          followService.isFollowing(id),
+          profileService.getUserAchievements(id),
+          profileService.getUserReadingActivity(id),
+          bookService.getBooks(id)
         ]);
         
         console.log('Additional data received:', {
@@ -237,9 +232,9 @@ export default function ProfilePage() {
       } else {
         console.log('Fetching data for current user profile');
         const [achievementsData, readingActivityData, booksData] = await Promise.all([
-          profileService.getUserAchievements(userId),
-          profileService.getUserReadingActivity(userId),
-          bookService.getBooks(userId)
+          profileService.getUserAchievements(id),
+          profileService.getUserReadingActivity(id),
+          bookService.getBooks(id)
         ]);
         
         console.log('Current user data received:', {
@@ -702,33 +697,21 @@ export default function ProfilePage() {
   }, [posts, quotes, reviews, combineAndSortContent]);
 
   // Post düzenleme fonksiyonları
-  const handleEditPost = async (postId: number) => {
-    const post = posts.find(p => p.id === postId);
-    if (post) {
-      setEditTitle(post.title);
-      setEditContent(post.content);
-    }
-  };
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const handleCancelEdit = () => {
-    setEditTitle("");
-    setEditContent("");
-  };
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const handleUpdatePost = async (postId: number) => {
+  const handleEditPost = async (postId: number, title: string, content: string) => {
     try {
-      if (!editTitle.trim() || !editContent.trim()) {
-        toast({ title: "Hata", description: "Başlık ve içerik boş olamaz.", variant: "destructive" });
-        return;
-      }
-      await postService.updatePost(postId, editTitle, editContent);
+      await postService.updatePost(postId, title, content);
       await fetchPosts();
-      toast({ title: "Başarılı", description: "Gönderi güncellendi." });
-    } catch (error: unknown) {
-      console.error('Güncelleme hatası:', error);
-      toast({ title: "Hata", description: "Güncelleme sırasında hata oluştu.", variant: "destructive" });
+      toast({
+        title: "Başarılı",
+        description: "İleti başarıyla güncellendi.",
+      });
+    } catch (error) {
+      console.error('İleti güncellenirken hata:', error);
+      toast({
+        title: "Hata",
+        description: "İleti güncellenirken bir hata oluştu.",
+        variant: "destructive"
+      });
     }
   };
 
@@ -746,7 +729,7 @@ export default function ProfilePage() {
   const handleLikePost = async (postId: number) => {
     try {
       await postService.toggleLike(postId);
-      await fetchPosts(); // Refresh posts after like
+      await fetchPosts();
     } catch (error) {
       console.error('Error liking post:', error);
       toast({
@@ -760,7 +743,7 @@ export default function ProfilePage() {
   const handleSavePost = async (postId: number) => {
     try {
       await postService.toggleSave(postId);
-      await fetchPosts(); // Refresh posts after save
+      await fetchPosts();
     } catch (error) {
       console.error('Error saving post:', error);
       toast({
@@ -893,7 +876,7 @@ export default function ProfilePage() {
 
               {/* Follow/Edit Button */}
               <div className="mb-4">
-                {currentUser && currentUser.id !== profile.id && (
+                {currentUser && currentUser.id.toString() !== profile.id.toString() && (
                   <Button
                     variant="outline"
                     size="lg"
@@ -929,7 +912,7 @@ export default function ProfilePage() {
                   </Button>
                 )}
 
-                {currentUser?.id === profile.id && (
+                {currentUser?.id.toString() === profile.id.toString() && (
                   <Button
                     onClick={() => setShowEditMenu(!showEditMenu)}
                     variant="outline"
@@ -949,7 +932,7 @@ export default function ProfilePage() {
           </div>
 
           {/* Edit Menu */}
-          {showEditMenu && currentUser?.id === profile.id && (
+          {showEditMenu && currentUser?.id.toString() === profile.id.toString() && (
             <motion.div
               initial={{ opacity: 0, y: 10, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -1306,11 +1289,10 @@ export default function ProfilePage() {
                             >
                               {item.type === 'post' && (
                                 <PostCard
-                                  key={item.content.id}
-                                  type="post"
+                                  key={index}
                                   post={item.content}
                                   onDelete={() => handleDeletePost(item.content.id)}
-                                  onEdit={() => handleEditPost(item.content.id)}
+                                  onEdit={handleEditPost}
                                   onLike={() => handleLikePost(item.content.id)}
                                   onSave={() => handleSavePost(item.content.id)}
                                   onShare={() => handleSharePost(item.content.id)}
@@ -1373,13 +1355,13 @@ export default function ProfilePage() {
                         ) : (
                           <EmptyState
                             icon={BookOpen}
-                            title={currentUser?.id === profile.id ? 
+                            title={currentUser?.id.toString() === profile.id.toString() ? 
                               "Henüz hiç alıntı paylaşmadınız" : 
                               `${profile.nameSurname} henüz hiç alıntı paylaşmamış`}
-                            description={currentUser?.id === profile.id ?
+                            description={currentUser?.id.toString() === profile.id.toString() ?
                               "Yukarıdaki arama çubuğundan kitap aratıp, kitap detay sayfasından alıntı ekleyebilirsiniz." :
                               "Kullanıcı kitaplardan alıntı paylaştığında burada görüntülenecek."}
-                            ctaText={currentUser?.id === profile.id ? "Kitap Ara" : undefined}
+                            ctaText={currentUser?.id.toString() === profile.id.toString() ? "Kitap Ara" : undefined}
                           />
                         )}
                       </div>
@@ -1401,13 +1383,13 @@ export default function ProfilePage() {
                         ) : (
                           <EmptyState
                             icon={BookText}
-                            title={currentUser?.id === profile.id ? 
+                            title={currentUser?.id.toString() === profile.id.toString() ? 
                               "Henüz hiç inceleme paylaşmadınız" : 
                               `${profile.nameSurname} henüz hiç inceleme paylaşmamış`}
-                            description={currentUser?.id === profile.id ?
+                            description={currentUser?.id.toString() === profile.id.toString() ?
                               "Yukarıdaki arama çubuğundan kitap aratıp, kitap detay sayfasından inceleme ekleyebilirsiniz." :
                               "Kullanıcı kitap incelemeleri paylaştığında burada görüntülenecek."}
-                            ctaText={currentUser?.id === profile.id ? "Kitap Ara" : undefined}
+                            ctaText={currentUser?.id.toString() === profile.id.toString() ? "Kitap Ara" : undefined}
                             ctaAction={() => router.push('/features/discover')}
                           />
                         )}
@@ -1447,10 +1429,9 @@ export default function ProfilePage() {
                           posts.map((post) => (
                             <PostCard
                               key={post.id}
-                              type="post"
                               post={post}
                               onDelete={() => handleDeletePost(post.id)}
-                              onEdit={() => handleEditPost(post.id)}
+                              onEdit={handleEditPost}
                               onLike={() => handleLikePost(post.id)}
                               onSave={() => handleSavePost(post.id)}
                               onShare={() => handleSharePost(post.id)}

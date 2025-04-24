@@ -159,55 +159,59 @@ export function SearchForm({ isScrolled = false }: SearchFormProps) {
                     isScrolled ? 'w-72' : 'w-96'
                 }`}>
                     <div className="grid grid-cols-1 gap-2 p-2">
-                        {quickResults.map((result) => (
-                            <Link
-                                key={result.id}
-                                href={result.type === 'book' ? `/features/book/${result.id}` : `/features/profile/${result.id}`}
-                                className="flex items-center gap-3 p-2 hover:bg-muted rounded-md transition-colors"
-                                onClick={() => setShowResults(false)}
-                            >
-                                {result.imageUrl && (
-                                    result.type === 'user' ? (
-                                        <div className="relative group">
-                                            {/* Soft background glow */}
-                                            <div className="absolute -inset-1 bg-gradient-to-r from-purple-200/40 to-pink-200/40 dark:from-purple-900/20 dark:to-pink-900/20 rounded-full blur-sm" />
-                                            
-                                            {/* Glass effect container */}
-                                            <div className="relative p-[1px] rounded-full bg-gradient-to-r from-purple-500 to-pink-500">
-                                                <div className="relative rounded-full p-0.5 bg-white dark:bg-gray-900 backdrop-blur-sm">
-                                                    <Avatar className={`${isScrolled ? 'h-10 w-10' : 'h-12 w-12'} rounded-full overflow-hidden ring-2 ring-white/80 dark:ring-gray-800/80`}>
-                                                        <AvatarImage 
-                                                            src={result.imageUrl} 
-                                                            alt={result.title}
-                                                            className="object-cover hover:scale-105 transition-transform duration-300"
-                                                        />
-                                                    </Avatar>
+                        {quickResults.map((result, index) => (
+                            <div key={result.id}>
+                                {index > 0 && (
+                                    <div className="h-[1px] bg-purple-100/50 dark:bg-purple-800/50 my-2" />
+                                )}
+                                <Link
+                                    href={result.type === 'book' ? `/features/book/${result.id}` : `/features/profile/${result.id}`}
+                                    className="flex items-center gap-3 p-2 hover:bg-muted rounded-md transition-colors"
+                                    onClick={() => setShowResults(false)}
+                                >
+                                    {result.imageUrl && (
+                                        result.type === 'user' ? (
+                                            <div className="relative group">
+                                                {/* Soft background glow */}
+                                                <div className="absolute -inset-1 bg-gradient-to-r from-purple-200/40 to-pink-200/40 dark:from-purple-900/20 dark:to-pink-900/20 rounded-full blur-sm" />
+                                                
+                                                {/* Glass effect container */}
+                                                <div className="relative p-[1px] rounded-full bg-gradient-to-r from-purple-500 to-pink-500">
+                                                    <div className="relative rounded-full p-0.5 bg-white dark:bg-gray-900 backdrop-blur-sm">
+                                                        <Avatar className={`${isScrolled ? 'h-10 w-10' : 'h-12 w-12'} rounded-full overflow-hidden ring-2 ring-white/80 dark:ring-gray-800/80`}>
+                                                            <AvatarImage 
+                                                                src={result.imageUrl} 
+                                                                alt={result.title}
+                                                                className="object-cover hover:scale-105 transition-transform duration-300"
+                                                            />
+                                                        </Avatar>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    ) : (
-                                        <div className={`relative flex-shrink-0 transition-all duration-300 ${
-                                            isScrolled ? 'w-10 h-14' : 'w-12 h-16'
-                                        }`}>
-                                            <Image
-                                                src={result.imageUrl}
-                                                alt={result.title}
-                                                fill
-                                                sizes={isScrolled ? "40px" : "48px"}
-                                                className="object-cover hover:scale-105 transition-transform duration-300"
-                                            />
-                                        </div>
-                                    )
-                                )}
-                                <div className="flex-1 min-w-0">
-                                    <p className={`font-medium text-foreground truncate transition-all duration-300 ${
-                                        isScrolled ? 'text-xs' : 'text-sm'
-                                    }`}>{result.title}</p>
-                                    <p className={`text-muted-foreground truncate transition-all duration-300 ${
-                                        isScrolled ? 'text-[10px]' : 'text-xs'
-                                    }`}>{result.author}</p>
-                                </div>
-                            </Link>
+                                        ) : (
+                                            <div className={`relative flex-shrink-0 transition-all duration-300 ${
+                                                isScrolled ? 'w-10 h-14' : 'w-12 h-16'
+                                            }`}>
+                                                <Image
+                                                    src={result.imageUrl}
+                                                    alt={result.title}
+                                                    fill
+                                                    sizes={isScrolled ? "40px" : "48px"}
+                                                    className="object-cover hover:scale-105 transition-transform duration-300"
+                                                />
+                                            </div>
+                                        )
+                                    )}
+                                    <div className="flex-1 min-w-0">
+                                        <p className={`font-medium text-foreground truncate transition-all duration-300 ${
+                                            isScrolled ? 'text-xs' : 'text-sm'
+                                        }`}>{result.title}</p>
+                                        <p className={`text-muted-foreground truncate transition-all duration-300 ${
+                                            isScrolled ? 'text-[10px]' : 'text-xs'
+                                        }`}>{result.author}</p>
+                                    </div>
+                                </Link>
+                            </div>
                         ))}
                     </div>
                 </div>

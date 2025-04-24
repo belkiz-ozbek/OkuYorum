@@ -9,7 +9,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import Link from 'next/link';
 import { Card, CardContent, CardFooter } from '@/components/ui/Card';
 import { useAuth } from '@/contexts/AuthContext';
-import { Comment, commentService } from '@/services/commentService';
+import { commentService } from '@/services/commentService';
 import { CommentList } from '@/components/comments/CommentList';
 import { CreateComment } from '@/components/comments/CreateComment';
 import {
@@ -22,66 +22,38 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { toast } from "@/components/ui/use-toast";
+import { Post } from '@/services/postService';
+import type { Comment } from '@/services/commentService';
 
 interface PostCardProps {
-    type: 'review' | 'quote' | 'post';
-    post: {
-        id: number;
-        userId: number;
-        username: string;
-        content: string;
-        rating?: number;
-        pageNumber?: string;
-        book?: {
-            id: number;
-            title: string;
-            author: string;
-            cover: string;
-        };
-        likesCount: number;
-        commentsCount: number;
-        isLiked: boolean;
-        isSaved: boolean;
-        createdAt: string;
-        title?: string;
-    };
+    post: Post;
     onDelete?: (id: number) => void;
-    onEdit?: (id: number, content: string, pageNumber?: string) => void;
+    onEdit?: (id: number, title: string, content: string) => Promise<void>;
     onLike?: (id: number) => Promise<void>;
     onSave?: (id: number) => Promise<void>;
-    onShare?: () => Promise<void>;
+    onShare?: (id: number) => Promise<void>;
 }
 
 const PostCard: FC<PostCardProps> = ({ 
-    type,
     post,
     onDelete,
+    onEdit,
     onLike,
     onSave,
     onShare
 }) => {
-    if (!post) {
-        return null;
-    }
-
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     const { user } = useAuth();
-    const isOwner = user?.id === post.userId;
-    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const isOwner = user?.id === post?.userId;
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const [ setShowEditDialog] = useState(false);
-    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const [showEditDialog, setShowEditDialog] = useState(false);
+    const [editContent, setEditContent] = useState(post?.content || '');
+    const [editTitle, setEditTitle] = useState(post?.title || '');
     const [dropdownOpen, setDropdownOpen] = useState(false);
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const [isLiked, setIsLiked] = useState(post.isLiked);
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const [likesCount, setLikesCount] = useState(post.likesCount);
-    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const [isLiked, setIsLiked] = useState(post?.isLiked || false);
+    const [likesCount, setLikesCount] = useState(post?.likesCount || 0);
     const [showComments, setShowComments] = useState(false);
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     const [comments, setComments] = useState<Comment[]>([]);
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     const [isLoadingComments, setIsLoadingComments] = useState(false);
 
     const iconVariants = {
@@ -90,44 +62,36 @@ const PostCard: FC<PostCardProps> = ({
         tap: { scale: 0.9, transition: { duration: 0.1 } },
     };
 
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     useEffect(() => {
-        setIsLiked(post.isLiked);
-        setLikesCount(post.likesCount);
+        if (post) {
+            setIsLiked(post.isLiked || false);
+            setLikesCount(post.likesCount || 0);
+        }
     }, [post]);
 
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     useEffect(() => {
         const fetchInitialComments = async () => {
+            if (!post) return;
             try {
                 const data = await commentService.getPostComments(post.id);
-                setComments(data);
+                setComments(data || []);
             } catch (error) {
                 console.error('Yorumlar yüklenirken hata:', error);
             }
         };
 
         fetchInitialComments();
-    }, [post.id]);
+    }, [post]);
 
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     useEffect(() => {
-        if (showComments) {
+        if (showComments && post) {
             fetchComments();
         }
-    }, [showComments]);
+    }, [showComments, post]);
 
-    const fetchComments = async () => {
-        try {
-            setIsLoadingComments(true);
-            const data = await commentService.getPostComments(post.id);
-            setComments(data);
-        } catch (error) {
-            console.error('Yorumlar yüklenirken hata:', error);
-        } finally {
-            setIsLoadingComments(false);
-        }
-    };
+    if (!post) {
+        return null;
+    }
 
     const handleCommentClick = () => {
         setShowComments(!showComments);
@@ -149,7 +113,7 @@ const PostCard: FC<PostCardProps> = ({
 
         try {
             setIsLiked(!isLiked);
-            setLikesCount(prev => isLiked ? prev - 1 : prev + 1);
+            setLikesCount((prev: number) => isLiked ? prev - 1 : prev + 1);
 
             if (onLike) {
                 await onLike(post.id);
@@ -160,31 +124,71 @@ const PostCard: FC<PostCardProps> = ({
             setLikesCount(previousLikesCount);
         }
     };
+
+    const handleSaveEdit = async () => {
+        if (!editContent.trim()) {
+            toast({
+                title: "Hata",
+                description: "İçerik boş olamaz.",
+                variant: "destructive"
+            });
+            return;
+        }
+
+        try {
+            if (onEdit) {
+                await onEdit(post.id, editTitle, editContent);
+                setShowEditDialog(false);
+                toast({
+                    title: "Başarılı",
+                    description: "İleti başarıyla güncellendi.",
+                });
+            }
+        } catch (error) {
+            console.error('İleti güncellenirken hata:', error);
+            toast({
+                title: "Hata",
+                description: "İleti güncellenirken bir hata oluştu.",
+                variant: "destructive"
+            });
+        }
+    };
+
+    const fetchComments = async () => {
+        try {
+            setIsLoadingComments(true);
+            const data = await commentService.getPostComments(post.id);
+            setComments(data || []);
+        } catch (error) {
+            console.error('Yorumlar yüklenirken hata:', error);
+        } finally {
+            setIsLoadingComments(false);
+        }
+    };
+
     return (
         <Card className="w-full overflow-hidden border border-purple-100 dark:border-purple-900/30 hover:border-purple-200 dark:hover:border-purple-800/50">
             <div className="p-4 border-b border-purple-50 dark:border-purple-900/20">
                 <div className="flex items-center justify-between">
-                    <div className="flex items-center">
-                        <Link href={`/profile/${post.userId}`} className="flex items-center gap-2 group">
-                            <Avatar className="h-8 w-8">
-                                <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${post.username}`} alt={post.username} />
-                                <AvatarFallback>{post.username[0].toUpperCase()}</AvatarFallback>
-                            </Avatar>
-                            <div className="flex flex-col">
-                                <span className="text-sm font-medium text-gray-800 dark:text-gray-200 group-hover:text-purple-700 dark:group-hover:text-purple-400 transition-colors duration-200">
-                                    {post.username}
-                                </span>
-                                <p className="text-xs text-gray-500 dark:text-gray-400">
-                                    {new Date(post.createdAt).toLocaleString('tr-TR', {
-                                        year: 'numeric',
-                                        month: 'numeric',
-                                        day: 'numeric',
-                                        hour: '2-digit',
-                                        minute: '2-digit'
-                                    })}
-                                </p>
-                            </div>
-                        </Link>
+                    <div className="flex items-center gap-2">
+                        <Avatar className="h-8 w-8">
+                            <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${post.username}`} alt={post.username} />
+                            <AvatarFallback>{post.username[0].toUpperCase()}</AvatarFallback>
+                        </Avatar>
+                        <div>
+                            <Link href={`/features/profile/${post.userId}`} className="font-medium hover:text-purple-600 dark:hover:text-purple-400">
+                                {post.username}
+                            </Link>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                                {new Date(post.createdAt).toLocaleString('tr-TR', {
+                                    year: 'numeric',
+                                    month: 'numeric',
+                                    day: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                })}
+                            </p>
+                        </div>
                     </div>
                     {isOwner && (
                         <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
@@ -201,8 +205,6 @@ const PostCard: FC<PostCardProps> = ({
                                 <DropdownMenuItem 
                                     className="text-gray-600 dark:text-gray-300"
                                     onClick={() => {
-                                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                                        // @ts-expect-error
                                         setShowEditDialog(true);
                                         setDropdownOpen(false);
                                     }}
@@ -251,7 +253,7 @@ const PostCard: FC<PostCardProps> = ({
                                 {post.book.title}
                             </h3>
                             <p className="text-gray-600 dark:text-gray-400 text-sm mb-2">{post.book.author}</p>
-                            {type === 'review' && post.rating && (
+                            {post.rating && (
                                 <div className="flex items-center gap-1">
                                     {[...Array(5)].map((_, i) => (
                                         <svg
@@ -276,11 +278,11 @@ const PostCard: FC<PostCardProps> = ({
                 {/* Content Text */}
                 <div className={cn(
                     "p-4 rounded-lg relative mb-4",
-                    type === 'quote' 
+                    post.type === 'quote' 
                         ? "bg-purple-50 dark:bg-purple-900/20 border-l-4 border-purple-300 dark:border-purple-700"
                         : "bg-gray-50 dark:bg-gray-800"
                 )}>
-                    {type === 'quote' && (
+                    {post.type === 'quote' && (
                         <>
                             <div className="absolute top-2 left-2 text-4xl text-purple-200 dark:text-purple-800 font-serif leading-none">&#34;</div>
                             <div className="absolute bottom-2 right-4 text-4xl text-purple-200 dark:text-purple-800 font-serif leading-none">&#34;</div>
@@ -288,7 +290,7 @@ const PostCard: FC<PostCardProps> = ({
                     )}
                     <p className={cn(
                         "relative z-10 leading-relaxed",
-                        type === 'quote' 
+                        post.type === 'quote' 
                             ? "text-lg italic font-serif pl-6"
                             : "text-base"
                     )}>
@@ -367,7 +369,7 @@ const PostCard: FC<PostCardProps> = ({
                                     whileHover="hover"
                                     whileTap="tap"
                                     className="flex items-center justify-center h-8 w-8 rounded-full text-gray-500 dark:text-gray-400 hover:text-green-500 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 transition-all duration-200"
-                                    onClick={() => onShare && onShare()}
+                                    onClick={() => onShare && onShare(post.id)}
                                 >
                                     <Share2 className="h-5 w-5" />
                                 </motion.button>
@@ -429,6 +431,48 @@ const PostCard: FC<PostCardProps> = ({
                         <AlertDialogCancel>İptal</AlertDialogCancel>
                         <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">
                             Sil
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
+            {/* Edit Dialog */}
+            <AlertDialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>İletiyi Düzenle</AlertDialogTitle>
+                    </AlertDialogHeader>
+                    <div className="space-y-4 py-4">
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Başlık</label>
+                            <input
+                                type="text"
+                                value={editTitle}
+                                onChange={(e) => setEditTitle(e.target.value)}
+                                className="w-full p-3 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                placeholder="Başlık girin..."
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">İçerik</label>
+                            <textarea
+                                value={editContent}
+                                onChange={(e) => setEditContent(e.target.value)}
+                                className="w-full min-h-[100px] p-3 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                placeholder="İletinizi buraya yazın..."
+                            />
+                        </div>
+                    </div>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel onClick={() => {
+                            setEditContent(post.content);
+                            setEditTitle(post.title || '');
+                        }}>İptal</AlertDialogCancel>
+                        <AlertDialogAction 
+                            onClick={handleSaveEdit}
+                            className="bg-purple-600 hover:bg-purple-700"
+                        >
+                            Kaydet
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>

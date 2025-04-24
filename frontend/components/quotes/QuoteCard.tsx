@@ -134,27 +134,25 @@ export function QuoteCard({ quote, onDelete, onEdit, onLike, onSave, onShare }: 
         <Card className="w-full overflow-hidden border border-purple-100 dark:border-purple-900/30 hover:border-purple-200 dark:hover:border-purple-800/50">
             <div className="p-4 border-b border-purple-50 dark:border-purple-900/20">
                 <div className="flex items-center justify-between">
-                    <div className="flex items-center">
-                        <Link href={`/profile/${quote.userId}`} className="flex items-center gap-2 group">
-                            <Avatar className="h-8 w-8">
-                                <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${quote.username}`} alt={quote.username} />
-                                <AvatarFallback>{quote.username[0].toUpperCase()}</AvatarFallback>
-                            </Avatar>
-                            <div className="flex flex-col">
-                                <span className="text-sm font-medium text-gray-800 dark:text-gray-200 group-hover:text-purple-700 dark:group-hover:text-purple-400 transition-colors duration-200">
-                                    {quote.username}
-                                </span>
-                                <p className="text-xs text-gray-500 dark:text-gray-400">
-                                    {new Date(quote.createdAt || '').toLocaleString('tr-TR', {
-                                        year: 'numeric',
-                                        month: 'numeric',
-                                        day: 'numeric',
-                                        hour: '2-digit',
-                                        minute: '2-digit'
-                                    })}
-                                </p>
-                            </div>
-                        </Link>
+                    <div className="flex items-center gap-2">
+                        <Avatar className="h-8 w-8">
+                            <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${quote.username}`} alt={quote.username} />
+                            <AvatarFallback>{quote.username[0].toUpperCase()}</AvatarFallback>
+                        </Avatar>
+                        <div>
+                            <Link href={`/features/profile/${quote.userId}`} className="font-medium hover:text-purple-600 dark:hover:text-purple-400">
+                                {quote.username}
+                            </Link>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                                {(quote.createdAt ? new Date(quote.createdAt) : new Date()).toLocaleString('tr-TR', {
+                                    year: 'numeric',
+                                    month: 'numeric',
+                                    day: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                })}
+                            </p>
+                        </div>
                     </div>
                     {isOwner && (
                         <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
