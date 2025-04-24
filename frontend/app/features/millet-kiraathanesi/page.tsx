@@ -4,6 +4,17 @@ import Image from 'next/image';
 import { Card } from '@/components/ui/Card';
 import { useState, useEffect } from 'react';
 import { UserService } from "@/services/UserService";
+import { MilletKiraathaneleri } from '@/components/homepage/MilletKıraathaneleri';
+
+import Link from 'next/link'
+
+interface DiscussionCardProps {
+  title: string
+  author: string
+  participants: number
+  comments: number
+  lastActive: string
+}
 
 export default function MilletKiraathanesi() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -65,7 +76,6 @@ export default function MilletKiraathanesi() {
             Kitaplarla dolu keyifli sohbetlerin, bilgi paylaşımının ve kültürel etkinliklerin merkezi
           </p>
           <a 
-            href="#events" 
             className="group relative inline-flex items-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-md hover:bg-white/20 border border-white/30 text-white rounded-xl transition-all duration-500 hover:gap-4 hover:pr-10 overflow-hidden shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_25px_rgba(255,255,255,0.2)]"
           >
             <span className="relative z-10 font-medium">Etkinlikleri Keşfet</span>
@@ -92,85 +102,14 @@ export default function MilletKiraathanesi() {
         <div className="container mx-auto px-4">
           {/* Kıraathaneler Bölümü */}
           <div className="mb-24">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-center text-gray-900 dark:text-gray-50">Millet Kıraathaneleri</h2>
-            <p className="text-gray-600 dark:text-gray-400 text-center mb-12 max-w-2xl mx-auto">
-              Size en yakın kıraathaneyi bulun ve etkinliklere katılın
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-              {[
-                {
-                  name: "Beyoğlu Millet Kıraathanesi",
-                  location: "Beyoğlu",
-                  currentOccupancy: 45,
-                  maxCapacity: 100,
-                  image: "https://images.unsplash.com/photo-1559925393-8be0ec4767c8?q=80&w=2071&auto=format&fit=crop&ixlib=rb-4.0.3",
-                },
-                {
-                  name: "Kadıköy Millet Kıraathanesi",
-                  location: "Kadıköy",
-                  currentOccupancy: 32,
-                  maxCapacity: 80,
-                  image: "https://images.unsplash.com/photo-1610632380989-680fe40816c6?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3",
-                },
-                {
-                  name: "Üsküdar Millet Kıraathanesi",
-                  location: "Üsküdar",
-                  currentOccupancy: 28,
-                  maxCapacity: 60,
-                  image: "https://images.unsplash.com/photo-1519682577862-22b62b24e493?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3",
-                },
-                {
-                  name: "Beşiktaş Millet Kıraathanesi",
-                  location: "Beşiktaş",
-                  currentOccupancy: 38,
-                  maxCapacity: 70,
-                  image: "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3",
-                },
-                {
-                  name: "Fatih Millet Kıraathanesi",
-                  location: "Fatih",
-                  currentOccupancy: 25,
-                  maxCapacity: 50,
-                  image: "https://images.unsplash.com/photo-1507842217343-583bb7270b66?q=80&w=2053&auto=format&fit=crop&ixlib=rb-4.0.3",
-                },
-              ].map((kiraathane, index) => (
-                <Card key={index} className="relative shadow-md h-full flex flex-col hover:shadow-xl hover:scale-[1.02] transition-all duration-300">
-                  <div className="p-0">
-                    <div className="relative">
-                      <img
-                        src={kiraathane.image || "/placeholder.svg"}
-                        alt={`${kiraathane.name} görüntüsü`}
-                        className="w-full h-48 object-cover rounded-t-lg transition-transform duration-300 hover:scale-105"
-                      />
-                    </div>
-                  </div>
-                  <div className="flex-grow p-4 flex flex-col">
-                    <h3 className="text-xl font-semibold hover:text-primary transition-colors">{kiraathane.name}</h3>
-                    <p className="mt-2 text-gray-600 dark:text-gray-400 flex items-center">
-                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
-                      {kiraathane.location}
-                    </p>
-                    <p className="mt-2 text-gray-600 dark:text-gray-400 flex items-center">
-                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                      </svg>
-                      {kiraathane.currentOccupancy}/{kiraathane.maxCapacity}
-                    </p>
-                    <button className="mt-auto py-2 px-4 bg-primary hover:bg-primary/90 text-white rounded-lg transition-all duration-300 hover:scale-[1.02]">
-                      Katıl
-                    </button>
-                  </div>
-                </Card>
-              ))}
-            </div>
+            <MilletKiraathaneleri />
           </div>
 
           {/* Etkinlikler Bölümü */}
           <div>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-center text-gray-900 dark:text-gray-50">Yaklaşan Etkinlikler</h2>
+            <h2 className="text-3xl font-bold bg-clip-text text-transparent text-center bg-gradient-to-br from-purple-700 to-purple-900 dark:from-purple-400 dark:to-purple-600 mb-4">
+              Yaklaşan Etkinlikler
+            </h2>
             <p className="text-gray-600 dark:text-gray-400 text-center mb-12 max-w-2xl mx-auto">
               Kültür ve sanat dolu etkinliklerimize katılarak bilgi ve deneyimlerinizi paylaşın
             </p>
@@ -203,7 +142,9 @@ export default function MilletKiraathanesi() {
       {/* Popüler Tartışmalar */}
       <section className="py-20 bg-gradient-to-b from-gray-50 to-white dark:from-black dark:to-gray-950">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-center text-gray-900 dark:text-gray-50">Popüler Tartışmalar</h2>
+          <h2 className="text-3xl font-bold bg-clip-text text-transparent text-center bg-gradient-to-br from-purple-700 to-purple-900 dark:from-purple-400 dark:to-purple-600 mb-4">
+            Popüler Tartışmalar
+          </h2>
           <p className="text-gray-600 dark:text-gray-400 text-center mb-12 max-w-2xl mx-auto">
             Devam eden tartışmalara katılın ve fikirlerinizi paylaşın
           </p>
@@ -277,7 +218,7 @@ function EventCard({ title, date, time, description, category, location, current
         </div>
       </div>
       <a 
-        href="#" 
+        href="/features/popular-discussions"
         className="inline-block text-center py-3 px-9 bg-primary hover:bg-primary/90 text-white rounded-lg transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg hover:shadow-primary/20"
       >
         Katıl
@@ -286,42 +227,55 @@ function EventCard({ title, date, time, description, category, location, current
   );
 }
 
-function DiscussionCard({ title, author, participants, comments, lastActive }: {
-  title: string;
-  author: string;
-  participants: number;
-  comments: number;
-  lastActive: string;
-}) {
+
+export function DiscussionCard({
+  title,
+  author,
+  participants,
+  comments,
+  lastActive,
+}: DiscussionCardProps) {
   return (
     <Card className="p-6 bg-white dark:bg-gray-900/50 hover:shadow-xl dark:hover:shadow-primary/5 transition-all duration-300">
       <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-gray-100 hover:text-primary transition-colors">
         {title}
       </h3>
       <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">{author}</p>
-      <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
+      <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400 mb-4">
         <div className="flex items-center gap-4">
           <span className="flex items-center">
+            {/* Katılımcı ikonu */}
             <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+              />
             </svg>
             {participants}
           </span>
           <span className="flex items-center">
+            {/* Yorum ikonu */}
             <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+              />
             </svg>
             {comments}
           </span>
         </div>
         <span>{lastActive}</span>
       </div>
-      <a 
-        href="#" 
-        className="mt-4 inline-block text-center py-2 px-2 bg-primary hover:bg-primary/90 text-white rounded-lg transition-all duration-300"
+      <Link
+        href="/features/popular-discussions"
+        className="inline-block mt-4 py-2 px-4 bg-primary hover:bg-primary/90 text-white rounded-lg transition-all duration-300"
       >
         Tartışmaya Katıl
-      </a>
+      </Link>
     </Card>
-  );
+  )
 }
