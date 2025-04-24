@@ -3,10 +3,12 @@
 import { useState, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card"
-import { Calendar, Users, Book, AtomIcon, Palette, History, Heart, Baby, ChevronLeft, ChevronRight } from "lucide-react"
+import { Calendar, Users, Book, AtomIcon, Palette, History, Heart, Baby, ChevronLeft, ChevronRight, Plus } from "lucide-react"
 import { Header } from "@/components/homepage/Header"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import Link from "next/link"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 // Örnek veri
 const readingGroups = [
@@ -24,6 +26,13 @@ const readingGroups = [
     ],
     meetingDay: "Her Cumartesi",
     memberCount: 12,
+    members: [
+      { name: "Ahmet Y.", avatar: null },
+      { name: "Zeynep K.", avatar: null },
+      { name: "Murat Ö.", avatar: null },
+      { name: "Ayşe T.", avatar: null },
+      { name: "Deniz A.", avatar: null },
+    ]
   },
   {
     id: 2,
@@ -39,6 +48,11 @@ const readingGroups = [
     ],
     meetingDay: "Her Çarşamba",
     memberCount: 8,
+    members: [
+      { name: "Berk Y.", avatar: null },
+      { name: "Elif K.", avatar: null },
+      { name: "Canan Ö.", avatar: null },
+    ]
   },
   {
     id: 3,
@@ -197,12 +211,19 @@ export default function BookGroups() {
   const scrollContainerRef = useRef<HTMLDivElement>(null)
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen relative">
       <Header />
 
       <div className="container mx-auto px-4 py-12 mt-16">
+        <div className="flex items-center justify-between mb-8">
+          <h2 className="text-2xl font-bold">Popüler Kategoriler</h2>
+          <Button className="bg-purple-600 hover:bg-purple-700 text-white flex items-center gap-2">
+            <Plus className="h-4 w-4" />
+            <span>Yeni Grup Oluştur</span>
+          </Button>
+        </div>
+        
         <div className="mb-8">
-          <h2 className="text-2xl font-bold mb-6">Popüler Kategoriler</h2>
           <div className="relative">
             <div 
               ref={scrollContainerRef}
@@ -259,12 +280,55 @@ export default function BookGroups() {
                       <Calendar className="h-4 w-4 text-purple-500" />
                       <span className="text-xs text-gray-700 dark:text-gray-300">{group.meetingDay}</span>
                     </div>
+                    
+                    {/* Member Avatars */}
+                    <div className="mt-3">
+                      <p className="text-xs text-gray-500 mb-1">Katılımcılar:</p>
+                      <div className="flex -space-x-2">
+                        {group.members && group.members.slice(0, 4).map((member, idx) => (
+                          <TooltipProvider key={idx}>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Avatar className="h-6 w-6 border-2 border-white">
+                                  <AvatarImage 
+                                    src={member.avatar || `https://api.dicebear.com/7.x/micah/svg?seed=${member.name}`} 
+                                    alt={member.name} 
+                                  />
+                                  <AvatarFallback className="text-[10px]">
+                                    {member.name.split(' ').map(part => part[0]).join('')}
+                                  </AvatarFallback>
+                                </Avatar>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p className="text-xs">{member.name}</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        ))}
+                        
+                        {group.members && group.members.length > 4 && (
+                          <Avatar className="h-6 w-6 border-2 border-white bg-purple-100">
+                            <AvatarFallback className="text-[10px] text-purple-600">
+                              +{group.members.length - 4}
+                            </AvatarFallback>
+                          </Avatar>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
               </CardContent>
             </Card>
           ))}
         </div>
+      </div>
+      
+      {/* Fixed Floating CTA Button for Mobile */}
+      <div className="md:hidden fixed bottom-6 right-6 z-10">
+        <Button className="bg-purple-600 hover:bg-purple-700 text-white rounded-full w-14 h-14 shadow-lg flex items-center justify-center">
+          <Plus className="h-6 w-6" />
+          <span className="sr-only">Yeni Grup Oluştur</span>
+        </Button>
       </div>
     </div>
   )
