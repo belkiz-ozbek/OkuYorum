@@ -171,6 +171,7 @@ export function EventsCalendar({ className }: EventsCalendarProps) {
 
   // Handle showing event details
   const handleShowEventDetails = (event: EventDetails, e: React.MouseEvent) => {
+    console.log("Event clicked:", event); // Debugging line
     // Get position for the popup
     const rect = e.currentTarget.getBoundingClientRect()
     const x = rect.left + window.scrollX

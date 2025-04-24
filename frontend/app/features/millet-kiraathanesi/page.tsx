@@ -6,7 +6,6 @@ import { useState, useEffect } from 'react';
 import { UserService } from "@/services/UserService";
 import { MilletKiraathaneleri } from '@/components/homepage/MilletKıraathaneleri';
 import { EventsCalendar } from '@/components/ui/EventsCalendar';
-
 import Link from 'next/link'
 
 interface DiscussionCardProps {
@@ -208,54 +207,60 @@ function EventCard({ title, date, time, description, category, location, current
 }
 
 
-export function DiscussionCard({
-  title,
-  author,
-  participants,
-  comments,
-  lastActive,
-}: DiscussionCardProps) {
+function DiscussionCard({ title, author, participants, comments, lastActive }: {
+  title: string;
+  author: string;
+  participants: number;
+  comments: number;
+  lastActive: string;
+}) {
   return (
-    <Card className="p-6 bg-white dark:bg-gray-900/50 hover:shadow-xl dark:hover:shadow-primary/5 transition-all duration-300">
-      <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-gray-100 hover:text-primary transition-colors">
+    <Card className="p-6 bg-gradient-to-tr from-white via-purple-50 to-white dark:from-gray-900 dark:via-purple-900/20 dark:to-gray-900 rounded-2xl shadow-xl shadow-purple-100/30 dark:shadow-purple-900/20 hover:shadow-2xl hover:shadow-purple-200/40 dark:hover:shadow-purple-900/30 transition-all duration-300 hover:scale-[1.02]">
+      <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 hover:text-primary transition-colors mb-2">
         {title}
       </h3>
-      <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">{author}</p>
-      <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400 mb-4">
+      <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 flex items-center">
+        <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+        </svg>
+        {author}
+      </p>
+      <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
         <div className="flex items-center gap-4">
           <span className="flex items-center">
-            {/* Katılımcı ikonu */}
             <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-              />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
             </svg>
             {participants}
           </span>
           <span className="flex items-center">
-            {/* Yorum ikonu */}
             <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-              />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
             </svg>
             {comments}
           </span>
         </div>
-        <span>{lastActive}</span>
+        <span className="flex items-center">
+          <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          {lastActive}
+        </span>
       </div>
-      <Link
-        href="/features/popular-discussions"
-        className="inline-block mt-4 py-2 px-4 bg-primary hover:bg-primary/90 text-white rounded-lg transition-all duration-300"
+      <a 
+        href="#" 
+        className="mt-4 inline-flex items-center justify-center gap-2 w-fit py-2 px-6 bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white rounded-full transition-all duration-500 ease-in-out transform hover:scale-[1.02] hover:shadow-lg hover:shadow-purple-500/20 group motion-safe:animate-pulse-slow"
       >
-        Tartışmaya Katıl
-      </Link>
+        <span className="transition-transform duration-500 group-hover:translate-x-0.5">Tartışmaya Katıl</span>
+        <svg 
+          className="w-4 h-4 transition-all duration-500 ease-in-out group-hover:translate-x-1 group-hover:scale-110" 
+          fill="none" 
+          viewBox="0 0 24 24" 
+          stroke="currentColor"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+        </svg>
+      </a>
     </Card>
-  )
+  );
 }
