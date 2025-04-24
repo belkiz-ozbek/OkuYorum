@@ -171,7 +171,6 @@ export function EventsCalendar({ className }: EventsCalendarProps) {
 
   // Handle showing event details
   const handleShowEventDetails = (event: EventDetails, e: React.MouseEvent) => {
-    console.log("Event clicked:", event); // Debugging line
     // Get position for the popup
     const rect = e.currentTarget.getBoundingClientRect()
     const x = rect.left + window.scrollX
@@ -254,30 +253,30 @@ export function EventsCalendar({ className }: EventsCalendarProps) {
       {/* Event Details Popup */}
       {selectedEvent && (
         <div
-          className="absolute z-10 bg-white rounded-lg shadow-lg p-4 w-64 border border-gray-200"
+          className="absolute z-10 bg-white rounded-lg shadow-lg p-3 w-52 border border-gray-200 text-xs"
           style={{
             top: `${selectedEvent.position.y + 40}px`,
             left: `${selectedEvent.position.x}px`,
           }}
         >
-          <div className="font-bold text-lg mb-2">{selectedEvent.event.name}</div>
+          <div className="font-bold text-sm mb-1">{selectedEvent.event.name}</div>
 
-          <div className="flex items-start gap-2 mb-2">
-            <MapPin className="h-4 w-4 text-gray-500 mt-0.5 shrink-0" />
-            <span className="text-sm text-gray-700">
+          <div className="flex items-start gap-1.5 mb-1">
+            <MapPin className="h-3 w-3 text-gray-500 mt-0.5 shrink-0" />
+            <span className="text-xs text-gray-700">
               {selectedEvent.event.location}
               {selectedEvent.event.isOnline && " (Online)"}
             </span>
           </div>
 
-          <div className="flex items-start gap-2 mb-2">
-            <Clock className="h-4 w-4 text-gray-500 mt-0.5 shrink-0" />
-            <span className="text-sm text-gray-700">{selectedEvent.event.time}</span>
+          <div className="flex items-start gap-1.5 mb-1">
+            <Clock className="h-3 w-3 text-gray-500 mt-0.5 shrink-0" />
+            <span className="text-xs text-gray-700">{selectedEvent.event.time}</span>
           </div>
 
-          <div className="flex items-start gap-2 mb-2">
-            <Calendar className="h-4 w-4 text-gray-500 mt-0.5 shrink-0" />
-            <span className="text-sm text-gray-700">{selectedEvent.event.description}</span>
+          <div className="flex items-start gap-1.5">
+            <Calendar className="h-3 w-3 text-gray-500 mt-0.5 shrink-0" />
+            <span className="text-xs text-gray-700 line-clamp-2">{selectedEvent.event.description}</span>
           </div>
         </div>
       )}

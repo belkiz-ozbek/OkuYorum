@@ -77,6 +77,12 @@ export default function MilletKiraathanesi() {
           </p>
           <a 
             className="group relative inline-flex items-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-md hover:bg-white/20 border border-white/30 text-white rounded-xl transition-all duration-500 hover:gap-4 hover:pr-10 overflow-hidden shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_25px_rgba(255,255,255,0.2)]"
+            onClick={() => {
+              const element = document.getElementById('upcoming-events');
+              if (element) {
+                element.scrollIntoView({ behavior: 'smooth' });
+              }
+            }}
           >
             <span className="relative z-10 font-medium">Etkinlikleri Keşfet</span>
             <svg 
@@ -106,7 +112,7 @@ export default function MilletKiraathanesi() {
           </div>
 
           {/* Events Calendar Section */}
-          <div>
+          <div id="upcoming-events">
             <h2 className="text-3xl font-bold bg-clip-text text-transparent text-center bg-gradient-to-br from-purple-700 to-purple-900 dark:from-purple-400 dark:to-purple-600 mb-4">
               Yaklaşan Etkinlikler
             </h2>
