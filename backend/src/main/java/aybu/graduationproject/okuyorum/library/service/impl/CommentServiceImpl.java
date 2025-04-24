@@ -214,6 +214,15 @@ public class CommentServiceImpl implements CommentService {
         return convertToDTO(savedReply, userId);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<CommentDTO> getPostComments(Long postId) {
+        List<Comment> comments = commentRepository.findByPostIdAndParentCommentIsNullAndDeletedFalseOrderByCreatedAtDesc(postId);
+        return comments.stream()
+                .map(comment -> convertToDTO(comment, null))
+                .collect(Collectors.toList());
+    }
+
     private CommentDTO convertToDTO(Comment comment, Long currentUserId) {
         CommentDTO dto = new CommentDTO();
         dto.setId(comment.getId());

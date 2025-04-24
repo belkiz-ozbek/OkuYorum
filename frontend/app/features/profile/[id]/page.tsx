@@ -23,8 +23,6 @@ import {
   UserCheck,
   Quote as QuoteIcon,
   BookText,
-  MoreVertical,
-  Trash2
 } from "lucide-react"
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/form/button"
@@ -54,8 +52,6 @@ import { ReviewList } from '@/components/reviews/ReviewList'
 import { Avatar, AvatarImage } from "@/components/ui/avatar"
 import { QuoteCard } from "@/components/quotes/QuoteCard"
 import { ReviewCard } from "@/components/reviews/ReviewCard"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Textarea } from "@/components/ui/textarea"
 import PostCard from "@/components/PostCard"
 
 // Add this type definition before the ProfilePage component
@@ -71,6 +67,25 @@ type CombinedContentItem = {
   type: 'review';
   content: Review;
   timestamp: string;
+};
+
+type Post = {
+  id: number;
+  userId: number;
+  username: string;
+  title: string;
+  content: string;
+  createdAt: string;
+  book?: {
+    id: number;
+    title: string;
+    author: string;
+    cover: string;
+  };
+  likes: number;
+  comments: number;
+  isLiked: boolean;
+  isSaved: boolean;
 };
 
 const initialProfile: UserProfile = {
@@ -562,6 +577,7 @@ export default function ProfilePage() {
   }, [profile?.id, fetchUserReviews]);
 
   // Date formatting helper function
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const formatDate = (dateString: string | undefined) => {
     if (!dateString) return '';
     return new Date(dateString).toLocaleDateString('tr-TR');
@@ -715,12 +731,14 @@ export default function ProfilePage() {
     }
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleCancelEdit = () => {
     setEditingPostId(null);
     setEditTitle("");
     setEditContent("");
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleUpdatePost = async (postId: number) => {
     try {
       if (!editTitle.trim() || !editContent.trim()) {
@@ -778,10 +796,9 @@ export default function ProfilePage() {
     }
   };
 
-  const handleSharePost = async (postId: number) => {
+  const handleSharePost = async () => {
     try {
-      const shareUrl = await postService.sharePost(postId);
-      // Copy to clipboard
+      const shareUrl = await postService.sharePost(editingPostId!);
       await navigator.clipboard.writeText(shareUrl);
       toast({
         title: "Başarılı",
@@ -1313,71 +1330,16 @@ export default function ProfilePage() {
                               className="transform transition-all duration-300 hover:scale-[1.02]"
                             >
                               {item.type === 'post' && (
-                                <Card className="overflow-hidden bg-white dark:bg-gray-800/50 backdrop-blur-lg border border-purple-100/20 dark:border-purple-900/20 shadow-sm hover:shadow-md transition-shadow duration-300">
-                                  <CardContent className="p-6">
-                                    <div className="flex items-start space-x-4">
-                                      <Avatar className="h-10 w-10 border-2 border-purple-200 dark:border-purple-800">
-                                        <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${profile.username}`} alt={profile.username} />
-                                      </Avatar>
-                                      <div className="flex-1 min-w-0">
-                                        <div className="flex items-center justify-between">
-                                          <div>
-                                            <p className="font-medium text-gray-900 dark:text-gray-100">{profile.username}</p>
-                                            <p className="text-sm text-gray-500 dark:text-gray-400">{formatDate(item.timestamp)}</p>
-                                          </div>
-                                          {currentUser?.id === profile.id && (
-                                            <DropdownMenu>
-                                              <DropdownMenuTrigger asChild>
-                                                <Button variant="ghost" size="sm">
-                                                  <MoreVertical className="h-4 w-4" />
-                                                </Button>
-                                              </DropdownMenuTrigger>
-                                              <DropdownMenuContent align="end">
-                                                <DropdownMenuItem onClick={() => handleEditPost(item.content.id)}>
-                                                  <Edit className="mr-2 h-4 w-4" />
-                                                  Düzenle
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem onClick={() => handleDeletePost(item.content.id)}>
-                                                  <Trash2 className="mr-2 h-4 w-4" />
-                                                  Sil
-                                                </DropdownMenuItem>
-                                              </DropdownMenuContent>
-                                            </DropdownMenu>
-                                          )}
-                                        </div>
-                                        {editingPostId === item.content.id ? (
-                                          <div className="mt-4">
-                                            <Input
-                                              value={editTitle}
-                                              onChange={(e) => setEditTitle(e.target.value)}
-                                              placeholder="Başlık"
-                                              className="mb-2"
-                                            />
-                                            <Textarea
-                                              value={editContent}
-                                              onChange={(e) => setEditContent(e.target.value)}
-                                              placeholder="İçerik"
-                                              className="mb-2"
-                                            />
-                                            <div className="flex justify-end space-x-2">
-                                              <Button variant="outline" onClick={handleCancelEdit}>
-                                                İptal
-                                              </Button>
-                                              <Button onClick={() => handleUpdatePost(item.content.id)}>
-                                                Kaydet
-                                              </Button>
-                                            </div>
-                                          </div>
-                                        ) : (
-                                          <>
-                                            <h3 className="mt-2 text-lg font-semibold text-gray-900 dark:text-gray-100">{item.content.title}</h3>
-                                            <p className="mt-2 text-gray-600 dark:text-gray-300">{item.content.content}</p>
-                                          </>
-                                        )}
-                                      </div>
-                                    </div>
-                                  </CardContent>
-                                </Card>
+                                <PostCard
+                                  key={item.content.id}
+                                  type="post"
+                                  post={item.content}
+                                  onDelete={() => handleDeletePost(item.content.id)}
+                                  onEdit={() => handleEditPost(item.content.id)}
+                                  onLike={() => handleLikePost(item.content.id)}
+                                  onSave={() => handleSavePost(item.content.id)}
+                                  onShare={() => handleSharePost(item.content.id)}
+                                />
                               )}
                               {item.type === 'quote' && (
                                 <QuoteCard
@@ -1506,38 +1468,20 @@ export default function ProfilePage() {
                             </CardContent>
                           </Card>
                         )}
-                        {posts.map((post) => (
-                          <PostCard
-                            key={post.id}
-                            type={post.type || 'post'}
-                            user={{
-                              id: post.userId,
-                              name: post.username,
-                              avatar: post.profileImage || ''
-                            }}
-                            content={{
-                              text: post.content,
-                              book: post.book ? {
-                                title: post.book.title,
-                                author: post.book.author,
-                                cover: post.book.cover
-                              } : undefined
-                            }}
-                            engagement={{
-                              likes: post.likesCount,
-                              comments: post.commentsCount,
-                              isLiked: post.isLiked,
-                              isSaved: post.isSaved
-                            }}
-                            createdAt={post.createdAt}
-                            onLike={handleLikePost}
-                            onSave={handleSavePost}
-                            onShare={handleSharePost}
-                            onDelete={handleDeletePost}
-                            onEdit={handleEditPost}
-                          />
-                        ))}
-                        {posts.length === 0 && (
+                        {posts.length > 0 ? (
+                          posts.map((post) => (
+                            <PostCard
+                              key={post.id}
+                              type="post"
+                              post={post}
+                              onDelete={() => handleDeletePost(post.id)}
+                              onEdit={() => handleEditPost(post.id)}
+                              onLike={() => handleLikePost(post.id)}
+                              onSave={() => handleSavePost(post.id)}
+                              onShare={() => handleSharePost(post.id)}
+                            />
+                          ))
+                        ) : (
                           <div className="text-center py-8">
                             <MessageSquare className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                             <p className="text-gray-500">Henüz ileti paylaşılmamış.</p>

@@ -28,6 +28,10 @@ public class Comment {
     @JoinColumn(name = "quote_id")
     private Quote quote;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "post_id")
+    private Post post;
+
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
@@ -80,6 +84,14 @@ public class Comment {
 
     public void setQuote(Quote quote) {
         this.quote = quote;
+    }
+
+    public Post getPost() {
+        return post;
+    }
+
+    public void setPost(Post post) {
+        this.post = post;
     }
 
     public String getContent() {

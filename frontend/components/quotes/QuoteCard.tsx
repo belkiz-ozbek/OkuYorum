@@ -140,11 +140,10 @@ export function QuoteCard({ quote, onDelete, onEdit, onLike, onSave, onShare }: 
                                 <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${quote.username}`} alt={quote.username} />
                                 <AvatarFallback>{quote.username[0].toUpperCase()}</AvatarFallback>
                             </Avatar>
-                            <div className="flex items-center">
+                            <div className="flex flex-col">
                                 <span className="text-sm font-medium text-gray-800 dark:text-gray-200 group-hover:text-purple-700 dark:group-hover:text-purple-400 transition-colors duration-200">
                                     {quote.username}
                                 </span>
-                                <span className="mx-2 text-gray-400 dark:text-gray-500">•</span>
                                 <p className="text-xs text-gray-500 dark:text-gray-400">
                                     {new Date(quote.createdAt || '').toLocaleString('tr-TR', {
                                         year: 'numeric',
@@ -237,7 +236,7 @@ export function QuoteCard({ quote, onDelete, onEdit, onLike, onSave, onShare }: 
                 )}
             </CardContent>
             <CardFooter className="px-4 py-3 border-t border-purple-50 dark:border-purple-900/20 flex items-center justify-between bg-purple-50/30 dark:bg-purple-900/10">
-                <div className="flex items-center space-x-6">
+                <div className="flex items-center space-x-4">
                     <TooltipProvider>
                         <Tooltip>
                             <TooltipTrigger asChild>

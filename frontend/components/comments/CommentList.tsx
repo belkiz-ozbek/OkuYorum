@@ -2,13 +2,15 @@ import { Comment as CommentType, commentService } from '@/services/commentServic
 import { CommentCard } from './CommentCard';
 import { AnimatePresence } from 'framer-motion';
 import { useToast } from '@/components/ui/use-toast';
+import { Loader2 } from 'lucide-react';
 
 interface CommentListProps {
     comments: CommentType[];
     onCommentCreated: () => void;
+    isLoading?: boolean;
 }
 
-export function CommentList({ comments, onCommentCreated }: CommentListProps) {
+export function CommentList({ comments, onCommentCreated, isLoading = false }: CommentListProps) {
     const { toast } = useToast();
 
     const handleDelete = async (commentId: number) => {
@@ -67,6 +69,7 @@ export function CommentList({ comments, onCommentCreated }: CommentListProps) {
                 content,
                 quoteId: comments[0]?.quoteId,
                 reviewId: comments[0]?.reviewId,
+                postId: comments[0]?.postId,
             });
             onCommentCreated();
             toast({
@@ -82,6 +85,14 @@ export function CommentList({ comments, onCommentCreated }: CommentListProps) {
             });
         }
     };
+
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin text-purple-500" />
+            </div>
+        );
+    }
 
     return (
         <AnimatePresence mode="wait">

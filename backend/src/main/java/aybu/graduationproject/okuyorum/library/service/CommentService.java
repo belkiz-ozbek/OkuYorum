@@ -13,4 +13,5 @@ public interface CommentService {
     List<CommentDTO> getQuoteComments(Long quoteId);
     List<CommentDTO> getReviewComments(Long reviewId);
     CommentDTO replyToComment(Long commentId, CreateCommentRequest request, Long userId);
+    List<CommentDTO> getPostComments(Long postId);
 } 
