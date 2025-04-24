@@ -6,7 +6,6 @@ import { useState, useEffect } from 'react';
 import { UserService } from "@/services/UserService";
 import { MilletKiraathaneleri } from '@/components/homepage/MilletKıraathaneleri';
 import { EventsCalendar } from '@/components/ui/EventsCalendar';
-import Link from 'next/link'
 
 interface DiscussionCardProps {
   title: string
