@@ -4,10 +4,14 @@ import Image from 'next/image';
 import { Card } from '@/components/ui/Card';
 import { useState, useEffect } from 'react';
 import { UserService } from "@/services/UserService";
+import { motion } from "framer-motion";
 
 export default function MilletKiraathanesi() {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isScrolled, setIsScrolled] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [currentUser, setCurrentUser] = useState<{ id: number; username: string } | null>(null);
 
   useEffect(() => {
@@ -35,12 +39,6 @@ export default function MilletKiraathanesi() {
 
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  const toggleTheme = () => {
-    const newTheme = theme === 'light' ? 'dark' : 'light';
-    setTheme(newTheme);
-    document.documentElement.setAttribute('data-theme', newTheme);
-  };
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -92,10 +90,24 @@ export default function MilletKiraathanesi() {
         <div className="container mx-auto px-4">
           {/* Kıraathaneler Bölümü */}
           <div className="mb-24">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-center text-gray-900 dark:text-gray-50">Millet Kıraathaneleri</h2>
-            <p className="text-gray-600 dark:text-gray-400 text-center mb-12 max-w-2xl mx-auto">
+            <motion.h2 
+              className="text-3xl md:text-4xl font-bold mb-4 text-center text-gray-900 dark:text-gray-50"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+            >
+              Millet Kıraathaneleri
+            </motion.h2>
+            <motion.p 
+              className="text-gray-600 dark:text-gray-400 text-center mb-12 max-w-2xl mx-auto"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
               Size en yakın kıraathaneyi bulun ve etkinliklere katılın
-            </p>
+            </motion.p>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
               {[
                 {
@@ -134,67 +146,128 @@ export default function MilletKiraathanesi() {
                   image: "https://images.unsplash.com/photo-1507842217343-583bb7270b66?q=80&w=2053&auto=format&fit=crop&ixlib=rb-4.0.3",
                 },
               ].map((kiraathane, index) => (
-                <Card key={index} className="relative shadow-md h-full flex flex-col hover:shadow-xl hover:scale-[1.02] transition-all duration-300">
-                  <div className="p-0">
-                    <div className="relative">
-                      <img
-                        src={kiraathane.image || "/placeholder.svg"}
-                        alt={`${kiraathane.name} görüntüsü`}
-                        className="w-full h-48 object-cover rounded-t-lg transition-transform duration-300 hover:scale-105"
-                      />
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 50 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ 
+                    duration: 0.5,
+                    delay: index * 0.1,
+                    type: "spring",
+                    stiffness: 100,
+                    damping: 10
+                  }}
+                >
+                  <Card className="relative shadow-md h-full flex flex-col hover:shadow-xl hover:scale-[1.02] transition-all duration-300">
+                    <div className="p-0">
+                      <div className="relative">
+                        <img
+                          src={kiraathane.image || "/placeholder.svg"}
+                          alt={`${kiraathane.name} görüntüsü`}
+                          className="w-full h-48 object-cover rounded-t-lg transition-transform duration-300 hover:scale-105"
+                        />
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex-grow p-4 flex flex-col">
-                    <h3 className="text-xl font-semibold hover:text-primary transition-colors">{kiraathane.name}</h3>
-                    <p className="mt-2 text-gray-600 dark:text-gray-400 flex items-center">
-                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
-                      {kiraathane.location}
-                    </p>
-                    <p className="mt-2 text-gray-600 dark:text-gray-400 flex items-center">
-                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                      </svg>
-                      {kiraathane.currentOccupancy}/{kiraathane.maxCapacity}
-                    </p>
-                    <button className="mt-auto py-2 px-4 bg-primary hover:bg-primary/90 text-white rounded-lg transition-all duration-300 hover:scale-[1.02]">
-                      Katıl
-                    </button>
-                  </div>
-                </Card>
+                    <div className="flex-grow p-4 flex flex-col">
+                      <h3 className="text-xl font-semibold hover:text-primary transition-colors">{kiraathane.name}</h3>
+                      <p className="mt-2 text-gray-600 dark:text-gray-400 flex items-center">
+                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        {kiraathane.location}
+                      </p>
+                      <p className="mt-2 text-gray-600 dark:text-gray-400 flex items-center">
+                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                        {kiraathane.currentOccupancy}/{kiraathane.maxCapacity}
+                      </p>
+                      <button className="mt-auto inline-flex items-center justify-center gap-1.5 w-fit mx-auto py-1.5 px-4 text-sm bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white rounded-full transition-all duration-500 ease-in-out transform hover:scale-[1.02] hover:shadow-lg hover:shadow-purple-500/20 group motion-safe:animate-pulse-slow">
+                        <span className="transition-transform duration-500 group-hover:translate-x-0.5">Katıl</span>
+                        <svg 
+                          className="w-3.5 h-3.5 transition-all duration-500 ease-in-out group-hover:translate-x-1 group-hover:scale-110" 
+                          fill="none" 
+                          viewBox="0 0 24 24" 
+                          stroke="currentColor"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                        </svg>
+                      </button>
+                    </div>
+                  </Card>
+                </motion.div>
               ))}
             </div>
           </div>
 
           {/* Etkinlikler Bölümü */}
           <div>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-center text-gray-900 dark:text-gray-50">Yaklaşan Etkinlikler</h2>
-            <p className="text-gray-600 dark:text-gray-400 text-center mb-12 max-w-2xl mx-auto">
+            <motion.h2 
+              className="text-3xl md:text-4xl font-bold mb-4 text-center text-gray-900 dark:text-gray-50"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+            >
+              Yaklaşan Etkinlikler
+            </motion.h2>
+            <motion.p 
+              className="text-gray-600 dark:text-gray-400 text-center mb-12 max-w-2xl mx-auto"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
               Kültür ve sanat dolu etkinliklerimize katılarak bilgi ve deneyimlerinizi paylaşın
-            </p>
+            </motion.p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <EventCard
-                title="Dijital çağda okuma alışkanlıkları"
-                date="20 Nisan 2024"
-                time="15:00"
-                description="Dijital dönüşümün okuma alışkanlıklarımıza etkisi üzerine interaktif bir tartışma"
-                category="Genel Tartışma"
-                location="Sincan Millet Kıraathanesi"
-                currentParticipants={45}
-                maxParticipants={124}
-              />
-              <EventCard
-                title="Kitap Tartışma Grubu"
-                date="15 Nisan 2024"
-                time="14:00"
-                description="'Veba Geceleri' kitabını tartışıyoruz"
-                category="Kitap"
-                location="Mamak Millet Kıraathanesi"
-                currentParticipants={18}
-                maxParticipants={25}
-              />
+              <motion.div
+                initial={{ opacity: 0, y: 50 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ 
+                  duration: 0.5,
+                  type: "spring",
+                  stiffness: 100,
+                  damping: 10
+                }}
+              >
+                <EventCard
+                  title="Dijital çağda okuma alışkanlıkları"
+                  date="20 Nisan 2024"
+                  time="15:00"
+                  description="Dijital dönüşümün okuma alışkanlıklarımıza etkisi üzerine interaktif bir tartışma"
+                  category="Genel Tartışma"
+                  location="Sincan Millet Kıraathanesi"
+                  currentParticipants={45}
+                  maxParticipants={124}
+                />
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0, y: 50 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ 
+                  duration: 0.5,
+                  delay: 0.2,
+                  type: "spring",
+                  stiffness: 100,
+                  damping: 10
+                }}
+              >
+                <EventCard
+                  title="Kitap Tartışma Grubu"
+                  date="15 Nisan 2024"
+                  time="14:00"
+                  description="'Veba Geceleri' kitabını tartışıyoruz"
+                  category="Kitap"
+                  location="Mamak Millet Kıraathanesi"
+                  currentParticipants={18}
+                  maxParticipants={25}
+                />
+              </motion.div>
             </div>
           </div>
         </div>
@@ -203,32 +276,84 @@ export default function MilletKiraathanesi() {
       {/* Popüler Tartışmalar */}
       <section className="py-20 bg-gradient-to-b from-gray-50 to-white dark:from-black dark:to-gray-950">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-center text-gray-900 dark:text-gray-50">Popüler Tartışmalar</h2>
-          <p className="text-gray-600 dark:text-gray-400 text-center mb-12 max-w-2xl mx-auto">
+          <motion.h2 
+            className="text-3xl md:text-4xl font-bold mb-4 text-center text-gray-900 dark:text-gray-50"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+          >
+            Popüler Tartışmalar
+          </motion.h2>
+          <motion.p 
+            className="text-gray-600 dark:text-gray-400 text-center mb-12 max-w-2xl mx-auto"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
             Devam eden tartışmalara katılın ve fikirlerinizi paylaşın
-          </p>
+          </motion.p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <DiscussionCard
-              title="Yüzyıllık Yalnızlık üzerine düşünceler"
-              author="Gabriel Garcia Marquez"
-              participants={32}
-              comments={78}
-              lastActive="2 saat önce"
-            />
-            <DiscussionCard
-              title="Dijital çağda okuma alışkanlıkları"
-              author="Genel Tartışma"
-              participants={45}
-              comments={124}
-              lastActive="5 saat önce"
-            />
-            <DiscussionCard
-              title="Türk Edebiyatında modernizm"
-              author="Akademik Tartışma"
-              participants={28}
-              comments={92}
-              lastActive="1 gün önce"
-            />
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ 
+                duration: 0.5,
+                type: "spring",
+                stiffness: 100,
+                damping: 10
+              }}
+            >
+              <DiscussionCard
+                title="Yüzyıllık Yalnızlık üzerine düşünceler"
+                author="Gabriel Garcia Marquez"
+                participants={32}
+                comments={78}
+                lastActive="2 saat önce"
+              />
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ 
+                duration: 0.5,
+                delay: 0.2,
+                type: "spring",
+                stiffness: 100,
+                damping: 10
+              }}
+            >
+              <DiscussionCard
+                title="Dijital çağda okuma alışkanlıkları"
+                author="Genel Tartışma"
+                participants={45}
+                comments={124}
+                lastActive="5 saat önce"
+              />
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ 
+                duration: 0.5,
+                delay: 0.4,
+                type: "spring",
+                stiffness: 100,
+                damping: 10
+              }}
+            >
+              <DiscussionCard
+                title="Türk Edebiyatında modernizm"
+                author="Akademik Tartışma"
+                participants={28}
+                comments={92}
+                lastActive="1 gün önce"
+              />
+            </motion.div>
           </div>
         </div>
       </section>
@@ -247,15 +372,20 @@ function EventCard({ title, date, time, description, category, location, current
   maxParticipants: number;
 }) {
   return (
-    <Card className="group p-6 bg-white dark:bg-gray-900/50 hover:shadow-xl dark:hover:shadow-primary/5 transition-all duration-300 border-t-4 border-t-primary/80">
-      <div className="flex justify-between items-start mb-4">
+    <Card className="group h-[240px] p-4 bg-gradient-to-tr from-white via-purple-50 to-white dark:from-gray-900 dark:via-purple-900/20 dark:to-gray-900 rounded-2xl shadow-xl shadow-purple-100/30 dark:shadow-purple-900/20 hover:shadow-2xl hover:shadow-purple-200/40 dark:hover:shadow-purple-900/30 transition-all duration-300 hover:scale-[1.02] border-t-4 border-t-primary/80 flex flex-col">
+      <div className="flex justify-between items-start">
         <div>
-          <div className="text-sm text-primary/80 dark:text-primary/70 font-medium mb-2">{category}</div>
-          <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 group-hover:text-primary transition-colors">{title}</h3>
+          <div className="inline-flex items-center gap-1 px-2 py-1 bg-primary/10 dark:bg-primary/20 rounded-lg text-sm text-primary/80 dark:text-primary/70 font-medium mb-1">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+            </svg>
+            {category}
+          </div>
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 group-hover:text-primary transition-colors line-clamp-2">{title}</h3>
         </div>
-        <div className="text-right">
+        <div className="text-right shrink-0 ml-4 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-lg p-2 border border-gray-200/50 dark:border-gray-700/50">
           <div className="text-sm text-gray-600 dark:text-gray-400 flex items-center justify-end">
-            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
             <p>{date}</p>
@@ -263,24 +393,35 @@ function EventCard({ title, date, time, description, category, location, current
           <p className="text-sm text-gray-600 dark:text-gray-400">{time}</p>
         </div>
       </div>
-      <p className="text-gray-700 dark:text-gray-300 mb-4">{description}</p>
-      <div className="flex items-center justify-between mb-4">
+      <p className="text-gray-700 dark:text-gray-300 mt-2 mb-2 line-clamp-2">{description}</p>
+      <div className="flex items-center justify-between mt-auto">
         <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4 mr-1 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>
-          {location}
+          <span className="truncate">{location}</span>
         </div>
-        <div className="text-sm text-gray-600 dark:text-gray-400">
-          {currentParticipants}/{maxParticipants} katılımcı
+        <div className="text-sm text-gray-600 dark:text-gray-400 shrink-0 ml-2 flex items-center">
+          <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+          </svg>
+          {currentParticipants}/{maxParticipants}
         </div>
       </div>
       <a 
         href="#" 
-        className="inline-block text-center py-3 px-9 bg-primary hover:bg-primary/90 text-white rounded-lg transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg hover:shadow-primary/20"
+        className="mt-3 inline-flex items-center justify-center gap-2 w-fit py-2 px-6 bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white rounded-full transition-all duration-500 ease-in-out transform hover:scale-[1.02] hover:shadow-lg hover:shadow-purple-500/20 group motion-safe:animate-pulse-slow"
       >
-        Katıl
+        <span className="transition-transform duration-500 group-hover:translate-x-0.5">Katıl</span>
+        <svg 
+          className="w-4 h-4 transition-all duration-500 ease-in-out group-hover:translate-x-1 group-hover:scale-110" 
+          fill="none" 
+          viewBox="0 0 24 24" 
+          stroke="currentColor"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+        </svg>
       </a>
     </Card>
   );
@@ -294,11 +435,16 @@ function DiscussionCard({ title, author, participants, comments, lastActive }: {
   lastActive: string;
 }) {
   return (
-    <Card className="p-6 bg-white dark:bg-gray-900/50 hover:shadow-xl dark:hover:shadow-primary/5 transition-all duration-300">
-      <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-gray-100 hover:text-primary transition-colors">
+    <Card className="p-6 bg-gradient-to-tr from-white via-purple-50 to-white dark:from-gray-900 dark:via-purple-900/20 dark:to-gray-900 rounded-2xl shadow-xl shadow-purple-100/30 dark:shadow-purple-900/20 hover:shadow-2xl hover:shadow-purple-200/40 dark:hover:shadow-purple-900/30 transition-all duration-300 hover:scale-[1.02]">
+      <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 hover:text-primary transition-colors mb-2">
         {title}
       </h3>
-      <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">{author}</p>
+      <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 flex items-center">
+        <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+        </svg>
+        {author}
+      </p>
       <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
         <div className="flex items-center gap-4">
           <span className="flex items-center">
@@ -314,13 +460,26 @@ function DiscussionCard({ title, author, participants, comments, lastActive }: {
             {comments}
           </span>
         </div>
-        <span>{lastActive}</span>
+        <span className="flex items-center">
+          <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          {lastActive}
+        </span>
       </div>
       <a 
         href="#" 
-        className="mt-4 inline-block text-center py-2 px-2 bg-primary hover:bg-primary/90 text-white rounded-lg transition-all duration-300"
+        className="mt-4 inline-flex items-center justify-center gap-2 w-fit py-2 px-6 bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white rounded-full transition-all duration-500 ease-in-out transform hover:scale-[1.02] hover:shadow-lg hover:shadow-purple-500/20 group motion-safe:animate-pulse-slow"
       >
-        Tartışmaya Katıl
+        <span className="transition-transform duration-500 group-hover:translate-x-0.5">Tartışmaya Katıl</span>
+        <svg 
+          className="w-4 h-4 transition-all duration-500 ease-in-out group-hover:translate-x-1 group-hover:scale-110" 
+          fill="none" 
+          viewBox="0 0 24 24" 
+          stroke="currentColor"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+        </svg>
       </a>
     </Card>
   );
