@@ -2,6 +2,7 @@
 import { motion } from "framer-motion"
 import { Users, BookOpen, MessageSquare, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/form/button"
+import Link from "next/link"
 
 export function ReadingGroups() {
   return (
@@ -72,9 +73,11 @@ export function ReadingGroups() {
               </div>
 
               <div className="mt-6 pt-6 border-t border-gray-100 dark:border-gray-800">
-                <Button className="w-full bg-gradient-to-r from-primary to-[#4A00E0] hover:from-[#4A00E0] hover:to-primary text-white rounded-full px-8 py-6 text-lg shadow-lg hover:shadow-xl transition-all duration-300">
-                  Gruba Katıl
-                </Button>
+                <Link href="/reading-groups">
+                  <Button className="w-full bg-gradient-to-r from-primary to-[#4A00E0] hover:from-[#4A00E0] hover:to-primary text-white rounded-full px-8 py-6 text-lg shadow-lg hover:shadow-xl transition-all duration-300">
+                    Gruba Katıl
+                  </Button>
+                </Link>
               </div>
             </div>
           </motion.div>
