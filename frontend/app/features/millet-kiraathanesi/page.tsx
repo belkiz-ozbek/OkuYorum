@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/Card';
 import { useState, useEffect } from 'react';
 import { UserService } from "@/services/UserService";
 import { MilletKiraathaneleri } from '@/components/homepage/MilletKıraathaneleri';
+import { EventsCalendar } from '@/components/ui/EventsCalendar';
 
 import Link from 'next/link'
 
@@ -105,7 +106,7 @@ export default function MilletKiraathanesi() {
             <MilletKiraathaneleri />
           </div>
 
-          {/* Etkinlikler Bölümü */}
+          {/* Events Calendar Section */}
           <div>
             <h2 className="text-3xl font-bold bg-clip-text text-transparent text-center bg-gradient-to-br from-purple-700 to-purple-900 dark:from-purple-400 dark:to-purple-600 mb-4">
               Yaklaşan Etkinlikler
@@ -113,28 +114,7 @@ export default function MilletKiraathanesi() {
             <p className="text-gray-600 dark:text-gray-400 text-center mb-12 max-w-2xl mx-auto">
               Kültür ve sanat dolu etkinliklerimize katılarak bilgi ve deneyimlerinizi paylaşın
             </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <EventCard
-                title="Dijital çağda okuma alışkanlıkları"
-                date="20 Nisan 2024"
-                time="15:00"
-                description="Dijital dönüşümün okuma alışkanlıklarımıza etkisi üzerine interaktif bir tartışma"
-                category="Genel Tartışma"
-                location="Sincan Millet Kıraathanesi"
-                currentParticipants={45}
-                maxParticipants={124}
-              />
-              <EventCard
-                title="Kitap Tartışma Grubu"
-                date="15 Nisan 2024"
-                time="14:00"
-                description="'Veba Geceleri' kitabını tartışıyoruz"
-                category="Kitap"
-                location="Mamak Millet Kıraathanesi"
-                currentParticipants={18}
-                maxParticipants={25}
-              />
-            </div>
+            <EventsCalendar className="mb-8" />
           </div>
         </div>
       </section>
