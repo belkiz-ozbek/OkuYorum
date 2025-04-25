@@ -54,6 +54,7 @@ import { Avatar, AvatarImage } from "@/components/ui/avatar"
 import { QuoteCard } from "@/components/quotes/QuoteCard"
 import { ReviewCard } from "@/components/reviews/ReviewCard"
 import PostCard from "@/components/PostCard"
+import { AxiosError } from "axios"
 
 // Add this type definition before the ProfilePage component
 type CombinedContentItem = {
@@ -70,6 +71,9 @@ type CombinedContentItem = {
   timestamp: string;
 };
 
+const initialAchievements: Achievement[] = []
+const initialReadingActivity: ReadingActivity[] = []
+
 const initialProfile: UserProfile = {
   id: 0,
   nameSurname: "",
@@ -80,16 +84,15 @@ const initialProfile: UserProfile = {
   readerScore: 0,
   booksRead: 0,
   yearlyGoal: 0,
+  readingHours: 0,
   profileImage: null,
   headerImage: null,
   followers: 0,
   following: 0,
   createdAt: "",
-  updatedAt: ""
+  updatedAt: "",
+  isFollowing: false
 };
-
-const initialAchievements: Achievement[] = []
-const initialReadingActivity: ReadingActivity[] = []
 
 const usePosts = (
   params: ReturnType<typeof useParams>,
@@ -156,7 +159,6 @@ export default function ProfilePage() {
   const [newPost, setNewPost] = useState("");
   const [isEditingYearlyGoal, setIsEditingYearlyGoal] = useState(false);
   const [yearlyGoal, setYearlyGoal] = useState<number>(0);
-  const [readingHours, setReadingHours] = useState(0);
 
   const { fetchPosts } = usePosts(params, toast, setPosts, router);
 
@@ -772,17 +774,18 @@ export default function ProfilePage() {
           description: "Yıllık hedef güncellendi.",
         });
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error('Yıllık hedef güncellenirken hata:', error);
       let errorMessage = "Yıllık hedef güncellenirken bir hata oluştu.";
       
-      if (error.response) {
-        if (error.response.status === 403) {
+      if (error instanceof AxiosError && error.response) {
+        const { status, data } = error.response;
+        if (status === 403) {
           errorMessage = "Bu işlem için yetkiniz yok.";
-        } else if (error.response.status === 400) {
+        } else if (status === 400) {
           errorMessage = "Geçersiz hedef değeri.";
-        } else if (error.response.data?.message) {
-          errorMessage = error.response.data.message;
+        } else if (data?.message) {
+          errorMessage = data.message;
         }
       }
       
@@ -1781,7 +1784,7 @@ export default function ProfilePage() {
 
                     {/* Activity bars */}
                     <div className="h-64 flex items-end justify-between relative">
-                      {/* eslint-disable-next-line @typescript-eslint/no-unused-vars */}
+                      { }
                       {readingActivity.map((item) => (
                           <div key={item.id} className="flex flex-col items-center group">
                             <div
