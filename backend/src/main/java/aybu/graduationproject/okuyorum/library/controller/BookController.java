@@ -13,6 +13,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import java.util.List;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+
 
 @RestController
 @RequestMapping("/api/books")
@@ -77,13 +82,10 @@ public class BookController {
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<BookDto> updateBookStatus(
             @PathVariable Long bookId,
-            @RequestBody StatusUpdateRequest status) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
-        Long userId = userService.getUserIdByUsername(username);
-        
-        Book.ReadingStatus readingStatus = Book.ReadingStatus.valueOf(status.getStatus());
-        return ResponseEntity.ok(bookService.updateBookStatus(bookId, userId, readingStatus));
+            @RequestParam Book.ReadingStatus status,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        Long userId = Long.parseLong(userDetails.getUsername());
+        return ResponseEntity.ok(bookService.updateBookStatus(bookId, status, userId));
     }
 
     @PutMapping("/{bookId}/favorite")

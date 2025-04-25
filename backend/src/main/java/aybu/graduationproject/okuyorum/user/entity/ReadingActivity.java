@@ -2,6 +2,7 @@ package aybu.graduationproject.okuyorum.user.entity;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "reading_activities")
@@ -17,6 +18,12 @@ public class ReadingActivity {
     private String month;
     private Integer books;
 
+    @Column(name = "last_read_date")
+    private LocalDate lastReadDate;
+
+    @Column(name = "consecutive_days")
+    private Integer consecutiveDays;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
@@ -27,6 +34,12 @@ public class ReadingActivity {
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
+        if (lastReadDate == null) {
+            lastReadDate = LocalDate.now();
+        }
+        if (consecutiveDays == null) {
+            consecutiveDays = 1;
+        }
     }
 
     @PreUpdate
@@ -64,6 +77,22 @@ public class ReadingActivity {
 
     public void setBooks(Integer books) {
         this.books = books;
+    }
+
+    public LocalDate getLastReadDate() {
+        return lastReadDate;
+    }
+
+    public void setLastReadDate(LocalDate lastReadDate) {
+        this.lastReadDate = lastReadDate;
+    }
+
+    public Integer getConsecutiveDays() {
+        return consecutiveDays;
+    }
+
+    public void setConsecutiveDays(Integer consecutiveDays) {
+        this.consecutiveDays = consecutiveDays;
     }
 
     public LocalDateTime getCreatedAt() {

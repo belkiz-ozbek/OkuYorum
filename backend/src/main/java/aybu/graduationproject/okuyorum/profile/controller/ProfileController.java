@@ -1,6 +1,6 @@
 package aybu.graduationproject.okuyorum.profile.controller;
 
-import aybu.graduationproject.okuyorum.user.entity.Achievement;
+import aybu.graduationproject.okuyorum.profile.entity.Achievement;
 import aybu.graduationproject.okuyorum.user.entity.ReadingActivity;
 import aybu.graduationproject.okuyorum.user.entity.User;
 import aybu.graduationproject.okuyorum.profile.service.ProfileService;

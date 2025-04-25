@@ -9,6 +9,7 @@ import aybu.graduationproject.okuyorum.library.repository.BookRepository;
 import aybu.graduationproject.okuyorum.library.repository.ReviewRepository;
 import aybu.graduationproject.okuyorum.library.repository.ReviewLikeRepository;
 import aybu.graduationproject.okuyorum.notification.service.NotificationService;
+import aybu.graduationproject.okuyorum.profile.service.AchievementService;
 import aybu.graduationproject.okuyorum.user.entity.User;
 import aybu.graduationproject.okuyorum.user.service.UserService;
 import jakarta.persistence.EntityNotFoundException;
@@ -30,6 +31,7 @@ public class ReviewService {
     private final ReviewLikeRepository reviewLikeRepository;
     private final NotificationService notificationService;
     private final EntityManager entityManager;
+    private final AchievementService achievementService;
 
     @Autowired
     public ReviewService(
@@ -38,13 +40,15 @@ public class ReviewService {
             UserService userService,
             ReviewLikeRepository reviewLikeRepository,
             NotificationService notificationService,
-            EntityManager entityManager) {
+            EntityManager entityManager,
+            AchievementService achievementService) {
         this.reviewRepository = reviewRepository;
         this.bookRepository = bookRepository;
         this.userService = userService;
         this.reviewLikeRepository = reviewLikeRepository;
         this.notificationService = notificationService;
         this.entityManager = entityManager;
+        this.achievementService = achievementService;
     }
 
     @Transactional
@@ -80,6 +84,11 @@ public class ReviewService {
         }
 
         Review savedReview = reviewRepository.save(review);
+        
+        // Update achievement progress
+        int reviewCount = reviewRepository.findByUserId(currentUser.getId()).size();
+        achievementService.updateSocialReaderProgress(currentUser.getId(), reviewCount);
+        
         return convertToDTO(savedReview);
     }
 

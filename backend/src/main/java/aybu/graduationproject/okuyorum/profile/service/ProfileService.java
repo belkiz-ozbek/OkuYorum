@@ -1,11 +1,11 @@
 package aybu.graduationproject.okuyorum.profile.service;
 
-import aybu.graduationproject.okuyorum.user.entity.Achievement;
 import aybu.graduationproject.okuyorum.user.entity.ReadingActivity;
 import aybu.graduationproject.okuyorum.user.entity.User;
-import aybu.graduationproject.okuyorum.user.repository.AchievementRepository;
 import aybu.graduationproject.okuyorum.user.repository.ReadingActivityRepository;
 import aybu.graduationproject.okuyorum.user.repository.UserRepository;
+import aybu.graduationproject.okuyorum.profile.entity.Achievement;
+import aybu.graduationproject.okuyorum.profile.repository.AchievementRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -124,13 +124,13 @@ public class ProfileService {
     @Transactional(readOnly = true)
     public List<Achievement> getUserAchievements(Long userId) {
         User user = getUserProfile(userId);
-        return achievementRepository.findByUserOrderByProgressDesc(user);
+        return achievementRepository.findByUserIdOrderByProgressDesc(userId);
     }
 
     @Transactional
     public Achievement updateAchievementProgress(Long userId, Long achievementId, Integer progress) {
         User user = getUserProfile(userId);
-        Achievement achievement = achievementRepository.findByIdAndUser(achievementId, user)
+        Achievement achievement = achievementRepository.findByIdAndUserId(achievementId, userId)
                 .orElseThrow(() -> new RuntimeException("Başarı bulunamadı"));
 
         achievement.setProgress(progress);

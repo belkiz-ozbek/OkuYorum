@@ -10,4 +10,5 @@
     <include file="db/changelog/data/book-data.xml"/>
     <include file="db/changelog/data/achievements-data.xml"/>
     <include file="db/changelog/data/user-books-data.xml"/>
+    <include file="db/changelog/data/user-achievements-data.xml"/>
 </databaseChangeLog>

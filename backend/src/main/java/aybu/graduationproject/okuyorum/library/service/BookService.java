@@ -9,6 +9,7 @@ import aybu.graduationproject.okuyorum.user.entity.User;
 import aybu.graduationproject.okuyorum.user.repository.UserRepository;
 import aybu.graduationproject.okuyorum.library.repository.ReviewRepository;
 import aybu.graduationproject.okuyorum.user.service.UserService;
+import aybu.graduationproject.okuyorum.profile.service.AchievementService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -31,19 +32,22 @@ public class BookService {
     private final GoogleBooksService googleBooksService;
     private final UserService userService;
     private final ReviewRepository reviewRepository;
+    private final AchievementService achievementService;
 
     public BookService(BookRepository bookRepository, 
                       UserRepository userRepository, 
                       UserBookRepository userBookRepository,
                       GoogleBooksService googleBooksService,
                       UserService userService,
-                      ReviewRepository reviewRepository) {
+                      ReviewRepository reviewRepository,
+                      AchievementService achievementService) {
         this.bookRepository = bookRepository;
         this.userRepository = userRepository;
         this.userBookRepository = userBookRepository;
         this.googleBooksService = googleBooksService;
         this.userService = userService;
         this.reviewRepository = reviewRepository;
+        this.achievementService = achievementService;
     }
 
     @Transactional
@@ -159,36 +163,27 @@ public class BookService {
     }
 
     @Transactional
-    public BookDto updateBookStatus(Long bookId, Long userId, Book.ReadingStatus status) {
-        Book book = bookRepository.findById(bookId)
-                .orElseThrow(() -> new EntityNotFoundException("Book not found"));
-        
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
-
+    public BookDto updateBookStatus(Long bookId, Book.ReadingStatus status, Long userId) {
         UserBook userBook = userBookRepository.findByUserIdAndBookId(userId, bookId)
                 .orElseGet(() -> {
                     UserBook newUserBook = new UserBook();
-                    newUserBook.setUser(user);
-                    newUserBook.setBook(book);
+                    newUserBook.setUser(userRepository.findById(userId)
+                            .orElseThrow(() -> new EntityNotFoundException("User not found")));
+                    newUserBook.setBook(bookRepository.findById(bookId)
+                            .orElseThrow(() -> new EntityNotFoundException("Book not found")));
                     return newUserBook;
                 });
-        
-        // Eğer durum "READ" olarak değiştirildiyse ve önceki durum "READ" değilse
-        if (status == Book.ReadingStatus.READ && userBook.getStatus() != Book.ReadingStatus.READ) {
-            user.setBooksRead(user.getBooksRead() + 1);
-            userRepository.save(user);
-        }
-        // Eğer durum "READ"den başka bir duruma değiştirildiyse ve önceki durum "READ" ise
-        else if (status != Book.ReadingStatus.READ && userBook.getStatus() == Book.ReadingStatus.READ) {
-            user.setBooksRead(Math.max(0, user.getBooksRead() - 1));
-            userRepository.save(user);
-        }
-        
+
         userBook.setStatus(status);
-        userBookRepository.save(userBook);
-        
-        return convertToDto(book, userBook);
+        userBook = userBookRepository.save(userBook);
+
+        // Update achievement progress when a book is marked as read
+        if (status == Book.ReadingStatus.READ) {
+            int readCount = userBookRepository.countByUserIdAndStatus(userId, Book.ReadingStatus.READ);
+            achievementService.updateBookWormProgress(userId, readCount);
+        }
+
+        return convertToDto(userBook.getBook(), userBook);
     }
 
     public List<BookDto> getUserBooks(Long userId) {

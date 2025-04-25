@@ -24,15 +24,67 @@ export interface UserProfile extends BaseUser {
   updatedAt: string;
 }
 
+// Achievement tipleri
+export enum AchievementType {
+  BOOK_WORM = "BOOK_WORM",
+  SOCIAL_READER = "SOCIAL_READER",
+  QUOTE_MASTER = "QUOTE_MASTER",
+  MARATHON_READER = "MARATHON_READER"
+}
+
+// Achievement detayları
+export interface AchievementDetails {
+  type: AchievementType;
+  title: string;
+  description: string;
+  target: number;
+  icon: string;
+}
+
+// Achievement
 export interface Achievement {
   id: number;
-  type: string;
+  type: AchievementType;
   title: string;
   description: string;
   progress: number;
+  target: number;
+  isEarned: boolean;
   createdAt: string;
   updatedAt: string;
 }
+
+// Achievement sabitleri
+export const ACHIEVEMENT_DETAILS: Record<AchievementType, AchievementDetails> = {
+  [AchievementType.BOOK_WORM]: {
+    type: AchievementType.BOOK_WORM,
+    title: "Kitap Kurdu",
+    description: "100 kitap tamamladığında kazanılır",
+    target: 100,
+    icon: "BookOpenCheck"
+  },
+  [AchievementType.SOCIAL_READER]: {
+    type: AchievementType.SOCIAL_READER,
+    title: "Sosyal Okur",
+    description: "50 yorum yapınca kazanılır",
+    target: 50,
+    icon: "MessageSquare"
+  },
+  [AchievementType.QUOTE_MASTER]: {
+    type: AchievementType.QUOTE_MASTER,
+    title: "Alıntı Ustası",
+    description: "200 alıntı paylaşınca kazanılır",
+    target: 200,
+    icon: "Quote"
+  },
+  [AchievementType.MARATHON_READER]: {
+    type: AchievementType.MARATHON_READER,
+    title: "Maraton Okuyucu",
+    description: "30 gün arka arkaya okuyarak kazanılır",
+    target: 30,
+    icon: "Zap"
+  }
+};
 
 export interface ReadingActivity {
   id: number;
@@ -213,7 +265,7 @@ export const profileService = {
       }
       
       console.log('Fetching user achievements with headers:', headers);
-      const response = await api.get(`/api/profile/${userId}/achievements`, {
+      const response = await api.get(`/api/achievements/user/${userId}`, {
         headers
       });
       

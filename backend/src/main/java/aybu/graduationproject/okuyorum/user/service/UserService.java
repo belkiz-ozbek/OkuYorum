@@ -3,22 +3,32 @@ package aybu.graduationproject.okuyorum.user.service;
 import aybu.graduationproject.okuyorum.user.entity.User;
 import aybu.graduationproject.okuyorum.user.repository.UserRepository;
 import aybu.graduationproject.okuyorum.user.enums.Role;
-import jakarta.persistence.EntityNotFoundException;
+import aybu.graduationproject.okuyorum.profile.service.AchievementService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
 public class UserService {
     private final UserRepository userRepository;
+    private final AchievementService achievementService;
 
     @Autowired
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, AchievementService achievementService) {
         this.userRepository = userRepository;
+        this.achievementService = achievementService;
+    }
+
+    @Transactional
+    public User createUser(User user) {
+        User savedUser = userRepository.save(user);
+        achievementService.initializeAchievements(savedUser.getId());
+        return savedUser;
     }
 
     public User getCurrentUser() {

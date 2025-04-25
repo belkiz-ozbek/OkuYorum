@@ -5,6 +5,7 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/feedback/toaster"
 import { AuthProvider } from "@/contexts/AuthContext";
 import { Providers } from "./providers"
+import { AchievementNotification } from '../components/achievements/AchievementNotification';
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -39,6 +40,7 @@ export default function RootLayout({
       >
         <AuthProvider>
           <Providers>
+            <AchievementNotification />
             {children}
           </Providers>
         </AuthProvider>

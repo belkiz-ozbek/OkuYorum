@@ -23,12 +23,13 @@ import {
   UserCheck,
   Quote as QuoteIcon,
   BookText,
+  Info,
+  Layout,
 } from "lucide-react"
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/form/button"
 import { Input } from "@/components/ui/form/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Progress } from "@/components/ui/progress"
 import { Card, CardContent } from "@/components/ui/layout/Card"
 import { Label } from "@/components/ui/form/label"
 import { profileService, UserProfile, Achievement, ReadingActivity } from "@/services/profileService"
@@ -89,14 +90,6 @@ const initialProfile: UserProfile = {
 const initialAchievements: Achievement[] = []
 const initialReadingActivity: ReadingActivity[] = []
 
-// Achievement icons mapping
-const achievementIcons = {
-  "BOOK_WORM": <BookOpenCheck className="h-6 w-6" />,
-  "SOCIAL_READER": <MessageSquare className="h-6 w-6" />,
-  "QUOTE_MASTER": <QuoteIcon className="h-6 w-6" />,
-  "MARATHON_READER": <Zap className="h-6 w-6" />
-}
-
 const usePosts = (
   params: ReturnType<typeof useParams>,
   toast: ReturnType<typeof useToast>["toast"],
@@ -144,7 +137,6 @@ export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
   const [editSection, setEditSection] = useState<string | null>(null);
   const [showEditMenu, setShowEditMenu] = useState(false);
-  const [theme, setTheme] = useState<"light" | "dark">("light");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [books, setBooks] = useState<Book[]>([]);
@@ -305,18 +297,9 @@ export default function ProfilePage() {
   useEffect(() => {
     // Sistem dark mode tercihini kontrol et
     if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-      setTheme("dark")
       document.documentElement.setAttribute("data-theme", "dark")
     }
   }, [])
-
-  // Toggle theme
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const toggleTheme = () => {
-    const newTheme = theme === "light" ? "dark" : "light"
-    setTheme(newTheme)
-    document.documentElement.setAttribute("data-theme", newTheme)
-  }
 
   const handleProfileUpdate = async (field: keyof UserProfile, value: string | number) => {
     try {
@@ -383,9 +366,6 @@ export default function ProfilePage() {
     return Math.max(...readingActivity.map((item) => item.books))
   }
 
-  const getAchievementIcon = (achievementType: string) => {
-    return achievementIcons[achievementType as keyof typeof achievementIcons] || <Award className="h-6 w-6" />
-  }
   const handleFollow = async () => {
     const targetUserId = params.id;
     if (!targetUserId || Array.isArray(targetUserId)) return;
@@ -550,13 +530,6 @@ export default function ProfilePage() {
       fetchUserReviews();
     }
   }, [profile?.id, fetchUserReviews]);
-
-  // Date formatting helper function
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const formatDate = (dateString: string | undefined) => {
-    if (!dateString) return '';
-    return new Date(dateString).toLocaleDateString('tr-TR');
-  };
 
   // Düzenleme ve silme fonksiyonları
   const handleDelete = async (id: number, type: 'post' | 'quote' | 'review') => {
@@ -866,16 +839,18 @@ export default function ProfilePage() {
                   </div>
                 </div>
 
-                {/* Profile Info and Follow Button */}
-                <div className="flex flex-col mb-4">
-                  <h2 className="text-2xl font-bold text-white mb-1">
-                    {profile.nameSurname}
-                  </h2>
-                  <div className="flex items-center text-white/80">
-                    <Calendar className="h-4 w-4 mr-1" />
-                    <span className="text-sm">
-                      Katılma: {new Date(profile.createdAt).toLocaleDateString()}
-                    </span>
+                {/* Profile Info and Achievements */}
+                <div className="flex flex-col gap-4">
+                  <div className="flex flex-col mb-4">
+                    <h2 className="text-2xl font-bold text-white mb-1">
+                      {profile.nameSurname}
+                    </h2>
+                    <div className="flex items-center text-white/80">
+                      <Calendar className="h-4 w-4 mr-1" />
+                      <span className="text-sm">
+                        Katılma: {new Date(profile.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1100,14 +1075,14 @@ export default function ProfilePage() {
               <Card className="overflow-hidden border-none bg-white/70 backdrop-blur-sm shadow-md">
                 <CardContent className="p-6">
                   <h3 className="text-lg font-semibold mb-6 flex items-center">
-                    <Award className="mr-2 h-5 w-5 text-purple-400" /> Okuma İstatistikleri
+                    <BarChart3 className="mr-2 h-5 w-5 text-purple-400" /> Okuma İstatistikleri
                   </h3>
 
                   <div className="grid grid-cols-3 gap-4">
-                    {/* Reader Score */}
+                    {/* Achievements */}
                     <div className="text-center p-4 rounded-lg bg-purple-50/50 hover:bg-purple-100/50 transition-colors duration-300">
-                      <div className="text-2xl font-bold text-purple-400 mb-1">{profile.readerScore}</div>
-                      <div className="text-sm text-gray-600">Okuyucu Puanı</div>
+                      <div className="text-2xl font-bold text-purple-400 mb-1">{achievements.length}</div>
+                      <div className="text-sm text-gray-600">Kazanılan Başarı</div>
                     </div>
 
                     {/* Yearly Goal */}
@@ -1120,6 +1095,210 @@ export default function ProfilePage() {
                     <div className="text-center p-4 rounded-lg bg-purple-50/50 hover:bg-purple-100/50 transition-colors duration-300">
                       <div className="text-2xl font-bold text-purple-400 mb-1">124</div>
                       <div className="text-sm text-gray-600">Okuma Saati</div>
+                    </div>
+                  </div>
+
+                  {/* Achievements Section */}
+                  <div className="mt-6 pt-4 border-t">
+                    <h3 className="text-lg font-semibold mb-3 flex items-center">
+                      <Award className="mr-2 h-4 w-4 text-purple-400" /> Kazanılan Başarılar
+                    </h3>
+                    <div className="grid grid-cols-2 gap-2">
+                      <motion.div
+                        className="group relative bg-white/90 backdrop-blur-sm rounded-lg p-2 shadow-sm hover:shadow-md transition-all duration-300"
+                        whileHover={{ y: -2 }}
+                      >
+                        <div className="flex items-center gap-1.5">
+                          <div className={`rounded-full p-1.5 inline-flex items-center justify-center ${
+                            achievements.some(a => a.type === "BOOK_WORM") 
+                              ? "bg-purple-100" 
+                              : "bg-gray-100"
+                          }`}>
+                            <BookOpenCheck className={`h-4 w-4 ${
+                              achievements.some(a => a.type === "BOOK_WORM") 
+                                ? "text-purple-400" 
+                                : "text-gray-400"
+                            }`} />
+                          </div>
+                          <div className="flex flex-col">
+                            <span className={`text-xs font-medium ${
+                              achievements.some(a => a.type === "BOOK_WORM") 
+                                ? "text-gray-800" 
+                                : "text-gray-400"
+                            }`}>Kitap Kurdu</span>
+                            <span className="text-[10px] text-gray-500">100 kitap</span>
+                          </div>
+                        </div>
+                        <div className="absolute -top-1 -right-1 bg-purple-100 rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="relative">
+                            <Info className="h-2.5 w-2.5 text-purple-400" />
+                            <div className="absolute bottom-full -right-2 mb-1 min-w-[200px] max-w-[300px] p-2 bg-white rounded-lg shadow-lg text-[10px] text-gray-600 hidden group-hover:block z-10">
+                              <div className="flex items-start gap-1.5">
+                                <div className="bg-purple-50 rounded-full p-1.5">
+                                  <BookOpenCheck className="h-3 w-3 text-purple-400" />
+                                </div>
+                                <div>
+                                  <p className="font-medium text-gray-800">Kitap Kurdu</p>
+                                  <p className="text-gray-500">100 kitap tamamladığında kazanılır</p>
+                                  <div className="mt-1.5 flex items-center gap-1">
+                                    <div className="h-1 w-full bg-gray-100 rounded-full overflow-hidden">
+                                      <div className="h-full bg-purple-400 rounded-full" style={{ width: `${(books.filter(b => b.status?.toUpperCase() === "READ").length / 100) * 100}%` }}></div>
+                                    </div>
+                                    <span className="text-[10px] text-gray-500">{books.filter(b => b.status?.toUpperCase() === "READ").length}/100</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+
+                      <motion.div
+                        className="group relative bg-white/90 backdrop-blur-sm rounded-lg p-2 shadow-sm hover:shadow-md transition-all duration-300"
+                        whileHover={{ y: -2 }}
+                      >
+                        <div className="flex items-center gap-1.5">
+                          <div className={`rounded-full p-1.5 inline-flex items-center justify-center ${
+                            achievements.some(a => a.type === "SOCIAL_READER") 
+                              ? "bg-purple-100" 
+                              : "bg-gray-100"
+                          }`}>
+                            <MessageSquare className={`h-4 w-4 ${
+                              achievements.some(a => a.type === "SOCIAL_READER") 
+                                ? "text-purple-400" 
+                                : "text-gray-400"
+                            }`} />
+                          </div>
+                          <div className="flex flex-col">
+                            <span className={`text-xs font-medium ${
+                              achievements.some(a => a.type === "SOCIAL_READER") 
+                                ? "text-gray-800" 
+                                : "text-gray-400"
+                            }`}>Sosyal Okur</span>
+                            <span className="text-[10px] text-gray-500">50 yorum</span>
+                          </div>
+                        </div>
+                        <div className="absolute -top-1 -right-1 bg-purple-100 rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="relative">
+                            <Info className="h-2.5 w-2.5 text-purple-400" />
+                            <div className="absolute bottom-full right-0 mb-1 w-56 p-2 bg-white rounded-lg shadow-lg text-[10px] text-gray-600 hidden group-hover:block">
+                              <div className="flex items-start gap-1.5">
+                                <div className="bg-purple-50 rounded-full p-1.5">
+                                  <MessageSquare className="h-3 w-3 text-purple-400" />
+                                </div>
+                                <div>
+                                  <p className="font-medium text-gray-800">Sosyal Okur</p>
+                                  <p className="text-gray-500">50 yorum yapınca kazanılır</p>
+                                  <div className="mt-1.5 flex items-center gap-1">
+                                    <div className="h-1 w-full bg-gray-100 rounded-full overflow-hidden">
+                                      <div className="h-full bg-purple-400 rounded-full" style={{ width: `${(reviews.length / 50) * 100}%` }}></div>
+                                    </div>
+                                    <span className="text-[10px] text-gray-500">{reviews.length}/50</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+
+                      <motion.div
+                        className="group relative bg-white/90 backdrop-blur-sm rounded-lg p-2 shadow-sm hover:shadow-md transition-all duration-300"
+                        whileHover={{ y: -2 }}
+                      >
+                        <div className="flex items-center gap-1.5">
+                          <div className={`rounded-full p-1.5 inline-flex items-center justify-center ${
+                            achievements.some(a => a.type === "QUOTE_MASTER") 
+                              ? "bg-purple-100" 
+                              : "bg-gray-100"
+                          }`}>
+                            <QuoteIcon className={`h-4 w-4 ${
+                              achievements.some(a => a.type === "QUOTE_MASTER") 
+                                ? "text-purple-400" 
+                                : "text-gray-400"
+                            }`} />
+                          </div>
+                          <div className="flex flex-col">
+                            <span className={`text-xs font-medium ${
+                              achievements.some(a => a.type === "QUOTE_MASTER") 
+                                ? "text-gray-800" 
+                                : "text-gray-400"
+                            }`}>Alıntı Ustası</span>
+                            <span className="text-[10px] text-gray-500">200 alıntı</span>
+                          </div>
+                        </div>
+                        <div className="absolute -top-1 -right-1 bg-purple-100 rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="relative">
+                            <Info className="h-2.5 w-2.5 text-purple-400" />
+                            <div className="absolute bottom-full -right-2 mb-1 min-w-[200px] max-w-[300px] p-2 bg-white rounded-lg shadow-lg text-[10px] text-gray-600 hidden group-hover:block z-10">
+                              <div className="flex items-start gap-1.5">
+                                <div className="bg-purple-50 rounded-full p-1.5">
+                                  <QuoteIcon className="h-3 w-3 text-purple-400" />
+                                </div>
+                                <div>
+                                  <p className="font-medium text-gray-800">Alıntı Ustası</p>
+                                  <p className="text-gray-500">200 alıntı paylaşınca kazanılır</p>
+                                  <div className="mt-1.5 flex items-center gap-1">
+                                    <div className="h-1 w-full bg-gray-100 rounded-full overflow-hidden">
+                                      <div className="h-full bg-purple-400 rounded-full" style={{ width: `${(quotes.length / 200) * 100}%` }}></div>
+                                    </div>
+                                    <span className="text-[10px] text-gray-500">{quotes.length}/200</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+
+                      <motion.div
+                        className="group relative bg-white/90 backdrop-blur-sm rounded-lg p-2 shadow-sm hover:shadow-md transition-all duration-300"
+                        whileHover={{ y: -2 }}
+                      >
+                        <div className="flex items-center gap-1.5">
+                          <div className={`rounded-full p-1.5 inline-flex items-center justify-center ${
+                            achievements.some(a => a.type === "MARATHON_READER") 
+                              ? "bg-purple-100" 
+                              : "bg-gray-100"
+                          }`}>
+                            <Zap className={`h-4 w-4 ${
+                              achievements.some(a => a.type === "MARATHON_READER") 
+                                ? "text-purple-400" 
+                                : "text-gray-400"
+                            }`} />
+                          </div>
+                          <div className="flex flex-col">
+                            <span className={`text-xs font-medium ${
+                              achievements.some(a => a.type === "MARATHON_READER") 
+                                ? "text-gray-800" 
+                                : "text-gray-400"
+                            }`}>Maraton Okuyucu</span>
+                            <span className="text-[10px] text-gray-500">30 gün</span>
+                          </div>
+                        </div>
+                        <div className="absolute -top-1 -right-1 bg-purple-100 rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="relative">
+                            <Info className="h-2.5 w-2.5 text-purple-400" />
+                            <div className="absolute bottom-full right-0 mb-1 w-56 p-2 bg-white rounded-lg shadow-lg text-[10px] text-gray-600 hidden group-hover:block">
+                              <div className="flex items-start gap-1.5">
+                                <div className="bg-purple-50 rounded-full p-1.5">
+                                  <Zap className="h-3 w-3 text-purple-400" />
+                                </div>
+                                <div>
+                                  <p className="font-medium text-gray-800">Maraton Okuyucu</p>
+                                  <p className="text-gray-500">1 ayda 5+ kitap bitirince kazanılır</p>
+                                  <div className="mt-1.5 flex items-center gap-1">
+                                    <div className="h-1 w-full bg-gray-100 rounded-full overflow-hidden">
+                                      <div className="h-full bg-purple-400 rounded-full" style={{ width: `${(readingActivity[0]?.books || 0) / 5 * 100}%` }}></div>
+                                    </div>
+                                    <span className="text-[10px] text-gray-500">{readingActivity[0]?.books || 0}/5</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
                     </div>
                   </div>
                 </CardContent>
@@ -1139,7 +1318,7 @@ export default function ProfilePage() {
                       <span>Kitaplar</span>
                     </TabsTrigger>
                     <TabsTrigger value="wall">
-                      <BarChart3 className="h-4 w-4" />
+                      <Layout className="h-4 w-4" />
                       <span>Duvar</span>
                     </TabsTrigger>
                     <TabsTrigger value="quotes">
@@ -1479,7 +1658,7 @@ export default function ProfilePage() {
                     {/* Activity bars */}
                     <div className="h-64 flex items-end justify-between relative">
                       {/* eslint-disable-next-line @typescript-eslint/no-unused-vars */}
-                      {readingActivity.map((item, index) => (
+                      {readingActivity.map((item) => (
                           <div key={item.id} className="flex flex-col items-center group">
                             <div
                                 className="w-8 bg-gradient-to-t from-purple-300 to-purple-100 hover:from-purple-400 hover:to-purple-200 transition-all rounded-t-md relative"
@@ -1517,44 +1696,6 @@ export default function ProfilePage() {
                       </div>
                       <div className="text-sm text-gray-500">En Yüksek Ay</div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-
-            {/* Achievements */}
-            <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-            >
-              <Card className="overflow-hidden border-none bg-white/70 backdrop-blur-sm shadow-md">
-                <CardContent className="p-6">
-                  <h3 className="text-lg font-semibold mb-4 flex items-center">
-                    <Award className="mr-2 h-5 w-5 text-purple-400" /> Başarılar
-                  </h3>
-
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {achievements.map((achievement) => (
-                        <motion.div
-                            key={achievement.id}
-                            className="bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-all duration-300"
-                            whileHover={{ y: -5 }}
-                        >
-                          <div className="bg-purple-50 rounded-full p-3 inline-flex items-center justify-center mb-3">
-                            <div className="text-purple-400">
-                              {getAchievementIcon(achievement.type)}
-                            </div>
-                          </div>
-                          <h4 className="font-semibold text-gray-800 mb-1">{achievement.title}</h4>
-                          <p className="text-xs text-gray-500 mb-2">{achievement.description}</p>
-                          <Progress
-                              value={achievement.progress}
-                              className={`h-2 bg-gray-100 ${achievement.progress === 100 ? "[&>div]:bg-green-400" : "[&>div]:bg-purple-300"}`}
-                          />
-                          <p className="mt-1 text-xs font-medium text-gray-600">%{achievement.progress}</p>
-                        </motion.div>
-                    ))}
                   </div>
                 </CardContent>
               </Card>

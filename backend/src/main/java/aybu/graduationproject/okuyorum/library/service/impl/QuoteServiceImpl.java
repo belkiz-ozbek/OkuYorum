@@ -7,6 +7,7 @@ import aybu.graduationproject.okuyorum.library.entity.Quote;
 import aybu.graduationproject.okuyorum.library.repository.BookRepository;
 import aybu.graduationproject.okuyorum.library.repository.QuoteRepository;
 import aybu.graduationproject.okuyorum.library.service.QuoteService;
+import aybu.graduationproject.okuyorum.profile.service.AchievementService;
 import aybu.graduationproject.okuyorum.user.entity.User;
 import aybu.graduationproject.okuyorum.user.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -23,12 +24,14 @@ public class QuoteServiceImpl implements QuoteService {
     private final BookRepository bookRepository;
     private final UserRepository userRepository;
     private final NotificationService notificationService;
+    private final AchievementService achievementService;
 
-    public QuoteServiceImpl(QuoteRepository quoteRepository, BookRepository bookRepository, UserRepository userRepository, NotificationService notificationService) {
+    public QuoteServiceImpl(QuoteRepository quoteRepository, BookRepository bookRepository, UserRepository userRepository, NotificationService notificationService, AchievementService achievementService) {
         this.quoteRepository = quoteRepository;
         this.bookRepository = bookRepository;
         this.userRepository = userRepository;
         this.notificationService = notificationService;
+        this.achievementService = achievementService;
     }
 
     @Override
@@ -47,6 +50,11 @@ public class QuoteServiceImpl implements QuoteService {
         quote.setUser(user);
 
         Quote savedQuote = quoteRepository.save(quote);
+        
+        // Update achievement progress
+        int quoteCount = quoteRepository.findByUserId(userId).size();
+        achievementService.updateQuoteMasterProgress(userId, quoteCount);
+        
         return convertToDTO(savedQuote, user);
     }
 
