@@ -3,10 +3,12 @@
 import { useState, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card"
-import { Calendar, Users, Book, AtomIcon, Palette, History, Baby, Plus } from "lucide-react"
+import { Calendar, Users, Book, AtomIcon, Palette, History, Baby, Plus, Search } from "lucide-react"
 import { Header } from "@/components/homepage/Header"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { CreateGroupModal } from "@/components/reading-groups/CreateGroupModal"
+import { Input } from "@/components/ui/input"
 
 // Örnek veri
 const readingGroups = [
@@ -173,40 +175,63 @@ const categories = [
   { id: "history", label: "Tarih", icon: <History className="w-6 h-6" /> },
 ]
 
-// Kategorilere göre grupları filtrele
-const getFilteredGroups = (category: string) => {
-  if (category === "all") return readingGroups
-  return readingGroups.filter(group => {
-    switch (category) {
-      case "scifi":
-        return group.name === "Bilim Kurgu Severler"
-      case "classic":
-        return group.name === "Klasik Edebiyat"
-      case "fantasy":
-        return group.name === "Fantastik Dünyalar"
-      case "turkish":
-        return group.name === "Türk Edebiyatı"
-      case "philosophy":
-        return group.name === "Felsefe Okumaları"
-      case "mystery":
-        return group.name === "Polisiye Romanlar"
-      case "biography":
-        return group.name === "Biyografi Okumaları"
-      case "poetry":
-        return group.name === "Şiir Kulübü"
-      case "children":
-        return group.name === "Çocuk Edebiyatı"
-      case "history":
-        return group.name.includes("Tarih") || group.currentBook.title.includes("Tarih")
-      default:
-        return true
-    }
-  })
-}
-
 export default function BookGroups() {
   const [activeCategory, setActiveCategory] = useState("all")
   const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+  const [groups, setGroups] = useState(readingGroups)
+  const [searchQuery, setSearchQuery] = useState("")
+
+  const handleGroupCreated = (newGroup: any) => {
+    setGroups(prevGroups => [newGroup, ...prevGroups])
+    setIsCreateModalOpen(false)
+  }
+
+  const getFilteredGroups = (category: string) => {
+    let filteredGroups = groups
+
+    // First filter by category
+    if (category !== "all") {
+      filteredGroups = filteredGroups.filter(group => {
+        switch (category) {
+          case "scifi":
+            return group.name === "Bilim Kurgu Severler"
+          case "classic":
+            return group.name === "Klasik Edebiyat"
+          case "fantasy":
+            return group.name === "Fantastik Dünyalar"
+          case "turkish":
+            return group.name === "Türk Edebiyatı"
+          case "philosophy":
+            return group.name === "Felsefe Okumaları"
+          case "mystery":
+            return group.name === "Polisiye Romanlar"
+          case "biography":
+            return group.name === "Biyografi Okumaları"
+          case "poetry":
+            return group.name === "Şiir Kulübü"
+          case "children":
+            return group.name === "Çocuk Edebiyatı"
+          case "history":
+            return group.name.includes("Tarih") || group.currentBook.title.includes("Tarih")
+          default:
+            return true
+        }
+      })
+    }
+
+    // Then filter by search query
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase()
+      filteredGroups = filteredGroups.filter(group => 
+        group.name.toLowerCase().includes(query) ||
+        group.currentBook.title.toLowerCase().includes(query) ||
+        group.currentBook.author.toLowerCase().includes(query)
+      )
+    }
+
+    return filteredGroups
+  }
 
   return (
     <div className="flex flex-col min-h-screen relative">
@@ -214,11 +239,26 @@ export default function BookGroups() {
 
       <div className="container mx-auto px-4 py-12 mt-16">
         <div className="flex items-center justify-between mb-8">
-          <h2 className="text-2xl font-bold">Popüler Kategoriler</h2>
-          <Button className="bg-purple-600 hover:bg-purple-700 text-white flex items-center gap-2">
-            <Plus className="h-4 w-4" />
-            <span>Yeni Grup Oluştur</span>
-          </Button>
+          <h2 className="text-2xl font-bold">Okuma Grupları</h2>
+          <div className="flex items-center gap-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <Input
+                type="text"
+                placeholder="Grup adı, kitap adı veya yazar ara..."
+                className="pl-10 w-[300px]"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+            <Button 
+              className="bg-purple-600 hover:bg-purple-700 text-white flex items-center gap-2 h-9 px-3 text-sm"
+              onClick={() => setIsCreateModalOpen(true)}
+            >
+              <Plus className="h-3.5 w-3.5" />
+              <span>Yeni Grup</span>
+            </Button>
+          </div>
         </div>
         
         <div className="mb-8">
@@ -323,11 +363,20 @@ export default function BookGroups() {
       
       {/* Fixed Floating CTA Button for Mobile */}
       <div className="md:hidden fixed bottom-6 right-6 z-10">
-        <Button className="bg-purple-600 hover:bg-purple-700 text-white rounded-full w-14 h-14 shadow-lg flex items-center justify-center">
+        <Button 
+          className="bg-purple-600 hover:bg-purple-700 text-white rounded-full w-14 h-14 shadow-lg flex items-center justify-center"
+          onClick={() => setIsCreateModalOpen(true)}
+        >
           <Plus className="h-6 w-6" />
           <span className="sr-only">Yeni Grup Oluştur</span>
         </Button>
       </div>
+
+      <CreateGroupModal 
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onGroupCreated={handleGroupCreated}
+      />
     </div>
   )
 }
