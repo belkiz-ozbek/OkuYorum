@@ -82,10 +82,11 @@ public class BookController {
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<BookDto> updateBookStatus(
             @PathVariable Long bookId,
-            @RequestParam Book.ReadingStatus status,
+            @RequestBody StatusUpdateRequest request,
             @AuthenticationPrincipal UserDetails userDetails) {
-        Long userId = Long.parseLong(userDetails.getUsername());
-        return ResponseEntity.ok(bookService.updateBookStatus(bookId, status, userId));
+        String username = userDetails.getUsername();
+        Long userId = userService.getUserIdByUsername(username);
+        return ResponseEntity.ok(bookService.updateBookStatus(bookId, Book.ReadingStatus.valueOf(request.getStatus()), userId));
     }
 
     @PutMapping("/{bookId}/favorite")
