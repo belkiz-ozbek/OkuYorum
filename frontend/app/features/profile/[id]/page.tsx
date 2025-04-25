@@ -72,20 +72,21 @@ type CombinedContentItem = {
 
 const initialProfile: UserProfile = {
   id: 0,
-  nameSurname: "Yükleniyor...",
-  username: "loading",
+  nameSurname: "",
+  username: "",
   email: "",
   bio: "",
   birthDate: "",
   readerScore: 0,
   booksRead: 0,
+  yearlyGoal: 0,
   profileImage: null,
   headerImage: null,
   followers: 0,
   following: 0,
-  createdAt: new Date().toISOString(),
-  updatedAt: new Date().toISOString()
-}
+  createdAt: "",
+  updatedAt: ""
+};
 
 const initialAchievements: Achievement[] = []
 const initialReadingActivity: ReadingActivity[] = []
@@ -153,6 +154,8 @@ export default function ProfilePage() {
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [newPostTitle, setNewPostTitle] = useState("");
   const [newPost, setNewPost] = useState("");
+  const [isEditingYearlyGoal, setIsEditingYearlyGoal] = useState(false);
+  const [yearlyGoal, setYearlyGoal] = useState<number>(0);
 
   const { fetchPosts } = usePosts(params, toast, setPosts, router);
 
@@ -751,6 +754,25 @@ export default function ProfilePage() {
     }
   };
 
+  const handleYearlyGoalUpdate = async (newGoal: number) => {
+    try {
+      const updatedProfile = await profileService.updateYearlyGoal(newGoal);
+      setProfile(updatedProfile);
+      setYearlyGoal(updatedProfile.yearlyGoal || 0);
+      setIsEditingYearlyGoal(false);
+      toast({
+        title: "Başarılı!",
+        description: "Yıllık hedef güncellendi.",
+      });
+    } catch (error) {
+      toast({
+        title: "Hata!",
+        description: "Yıllık hedef güncellenirken bir hata oluştu.",
+        variant: "destructive",
+      });
+    }
+  };
+
   // Profile stats section
   if (loading) {
     return (
@@ -1086,9 +1108,69 @@ export default function ProfilePage() {
                     </div>
 
                     {/* Yearly Goal */}
-                    <div className="text-center p-4 rounded-lg bg-purple-50/50 hover:bg-purple-100/50 transition-colors duration-300">
-                      <div className="text-2xl font-bold text-purple-400 mb-1">26/36</div>
-                      <div className="text-sm text-gray-600">Yıllık Hedef</div>
+                    <div 
+                      className="text-center p-4 rounded-lg bg-purple-50/50 hover:bg-purple-100/50 transition-colors duration-300 cursor-pointer relative group"
+                      onClick={() => currentUser?.id === profile.id && setIsEditingYearlyGoal(true)}
+                    >
+                      {isEditingYearlyGoal ? (
+                        <div className="absolute inset-0 bg-white rounded-lg shadow-lg p-4 z-10">
+                          <Input
+                            type="number"
+                            value={yearlyGoal}
+                            onChange={(e) => setYearlyGoal(parseInt(e.target.value))}
+                            className="mb-2"
+                            min={1}
+                            max={1000}
+                          />
+                          <div className="flex gap-2 justify-center">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setIsEditingYearlyGoal(false);
+                              }}
+                            >
+                              İptal
+                            </Button>
+                            <Button
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleYearlyGoalUpdate(yearlyGoal);
+                              }}
+                            >
+                              Kaydet
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="text-2xl font-bold text-purple-400 mb-1">
+                            {books.filter(book => book.status?.toUpperCase() === "READ").length}/{profile.yearlyGoal || 0}
+                          </div>
+                          <div className="text-sm text-gray-600">Yıllık Hedef</div>
+                          {currentUser?.id === profile.id && (
+                            <div className="absolute -top-1 -right-1 bg-purple-100 rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Edit className="h-3 w-3 text-purple-400" />
+                            </div>
+                          )}
+                          {/* Progress Bar */}
+                          <div className="mt-2">
+                            <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+                              <div
+                                className="h-full bg-purple-400 rounded-full transition-all duration-300"
+                                style={{
+                                  width: `${profile.yearlyGoal ? (books.filter(book => book.status?.toUpperCase() === "READ").length / profile.yearlyGoal) * 100 : 0}%`
+                                }}
+                              />
+                            </div>
+                            <div className="text-xs text-gray-500 mt-1">
+                              {profile.yearlyGoal ? Math.round((books.filter(book => book.status?.toUpperCase() === "READ").length / profile.yearlyGoal) * 100) : 0}%
+                            </div>
+                          </div>
+                        </>
+                      )}
                     </div>
 
                     {/* Reading Time */}

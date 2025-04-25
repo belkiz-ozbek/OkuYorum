@@ -3,7 +3,7 @@
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
-                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
 
     <!-- Add defaultSchemaName attribute -->
     <property name="defaultSchemaName" value="public"/>
@@ -22,8 +22,8 @@
     <include file="/db/changelog/changes/add-is-favorite-column.xml"/>
     <include file="/db/changelog/changes/update-posts-counts.xml"/>
     <include file="/db/changelog/changes/drop-achievements-table.xml"/>
-
+    <include file="/db/changelog/changes/add-yearly-goal.xml"/>
+    
     <!-- Veri değişikliklerini buraya include edeceğiz -->
     <include file="db/changelog/data/data-master.xml"/>
-
 </databaseChangeLog> 

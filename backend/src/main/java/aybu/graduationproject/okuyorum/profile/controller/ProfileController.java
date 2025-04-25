@@ -95,4 +95,11 @@ public class ProfileController {
     public ResponseEntity<List<ReadingActivity>> getUserReadingActivityById(@PathVariable Long userId) {
         return ResponseEntity.ok(profileService.getUserReadingActivity(userId));
     }
+
+    @PutMapping("/yearly-goal")
+    public ResponseEntity<User> updateYearlyGoal(@RequestParam Integer goal) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User user = (User) auth.getPrincipal();
+        return ResponseEntity.ok(profileService.updateYearlyGoal(user.getId(), goal));
+    }
 } 

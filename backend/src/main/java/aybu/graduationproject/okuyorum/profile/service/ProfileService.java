@@ -154,4 +154,11 @@ public class ProfileService {
         
         return readingActivityRepository.save(activity);
     }
+
+    @Transactional
+    public User updateYearlyGoal(Long userId, Integer goal) {
+        User user = getUserProfile(userId);
+        user.setYearlyGoal(goal);
+        return userRepository.save(user);
+    }
 } 

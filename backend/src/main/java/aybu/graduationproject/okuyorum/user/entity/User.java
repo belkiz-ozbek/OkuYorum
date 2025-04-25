@@ -84,6 +84,9 @@ public class User implements UserDetails {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Column(name = "yearly_goal")
+    private Integer yearlyGoal;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
@@ -267,6 +270,14 @@ public class User implements UserDetails {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public Integer getYearlyGoal() {
+        return yearlyGoal;
+    }
+
+    public void setYearlyGoal(Integer yearlyGoal) {
+        this.yearlyGoal = yearlyGoal;
     }
 
     // UserDetails implementation

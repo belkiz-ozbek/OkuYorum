@@ -19,6 +19,7 @@ export interface UserProfile extends BaseUser {
   birthDate: string;
   readerScore: number;
   booksRead: number;
+  yearlyGoal: number;
   headerImage: string | null;
   createdAt: string;
   updatedAt: string;
@@ -319,6 +320,16 @@ export const profileService = {
         throw new Error(`Okuma aktivitesi yüklenirken bir hata oluştu: ${error.response?.data?.message || error.message}`);
       }
       throw new Error('Okuma aktivitesi yüklenirken beklenmeyen bir hata oluştu');
+    }
+  },
+
+  // Yıllık hedefi güncelle
+  updateYearlyGoal: async (goal: number): Promise<UserProfile> => {
+    try {
+      const response = await api.put(`/api/profile/yearly-goal?goal=${goal}`);
+      return response.data;
+    } catch (error) {
+      throw handleError(error);
     }
   },
 }; 
