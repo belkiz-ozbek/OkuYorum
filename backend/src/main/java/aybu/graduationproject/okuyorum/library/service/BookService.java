@@ -69,7 +69,7 @@ public class BookService {
         UserBook userBook = new UserBook();
         userBook.setUser(savedBook.getUser());
         userBook.setBook(savedBook);
-        userBook.setStatus(Book.ReadingStatus.WILL_READ); // Default status
+        userBook.setStatus(UserBook.ReadingStatus.WILL_READ); // Default status
         userBookRepository.save(userBook);
         
         return convertToDto(savedBook, userBook);
@@ -163,7 +163,7 @@ public class BookService {
     }
 
     @Transactional
-    public BookDto updateBookStatus(Long bookId, Book.ReadingStatus status, Long userId) {
+    public BookDto updateBookStatus(Long bookId, UserBook.ReadingStatus status, Long userId) {
         UserBook userBook = userBookRepository.findByUserIdAndBookId(userId, bookId)
                 .orElseGet(() -> {
                     UserBook newUserBook = new UserBook();
@@ -178,8 +178,8 @@ public class BookService {
         userBook = userBookRepository.save(userBook);
 
         // Update achievement progress when a book is marked as read
-        if (status == Book.ReadingStatus.READ) {
-            int readCount = userBookRepository.countByUserIdAndStatus(userId, Book.ReadingStatus.READ);
+        if (status == UserBook.ReadingStatus.READ) {
+            int readCount = userBookRepository.countByUserIdAndStatus(userId, UserBook.ReadingStatus.READ);
             achievementService.updateBookWormProgress(userId, readCount);
         }
 
@@ -193,7 +193,7 @@ public class BookService {
                 .collect(Collectors.toList());
     }
 
-    public List<BookDto> getUserBooksByStatus(Long userId, Book.ReadingStatus status) {
+    public List<BookDto> getUserBooksByStatus(Long userId, UserBook.ReadingStatus status) {
         List<UserBook> userBooks = userBookRepository.findByUserIdAndStatus(userId, status);
         return userBooks.stream()
                 .map(userBook -> convertToDto(userBook.getBook(), userBook))
@@ -254,7 +254,7 @@ public class BookService {
         }
 
         // Calculate total readers (users who have read the book)
-        int readCount = userBookRepository.findByBookIdAndStatus(book.getId(), Book.ReadingStatus.READ).size();
+        int readCount = userBookRepository.findByBookIdAndStatus(book.getId(), UserBook.ReadingStatus.READ).size();
         dto.setReadCount(readCount);
         
         // Calculate average rating and review count

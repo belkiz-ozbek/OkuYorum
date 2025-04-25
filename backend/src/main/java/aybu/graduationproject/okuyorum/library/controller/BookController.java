@@ -1,7 +1,7 @@
 package aybu.graduationproject.okuyorum.library.controller;
 
 import aybu.graduationproject.okuyorum.library.dto.BookDto;
-import aybu.graduationproject.okuyorum.library.entity.Book;
+import aybu.graduationproject.okuyorum.library.entity.UserBook;
 import aybu.graduationproject.okuyorum.library.service.BookService;
 import aybu.graduationproject.okuyorum.user.service.UserService;
 import org.springframework.http.ResponseEntity;
@@ -86,7 +86,7 @@ public class BookController {
             @AuthenticationPrincipal UserDetails userDetails) {
         String username = userDetails.getUsername();
         Long userId = userService.getUserIdByUsername(username);
-        return ResponseEntity.ok(bookService.updateBookStatus(bookId, Book.ReadingStatus.valueOf(request.getStatus()), userId));
+        return ResponseEntity.ok(bookService.updateBookStatus(bookId, UserBook.ReadingStatus.valueOf(request.getStatus()), userId));
     }
 
     @PutMapping("/{bookId}/favorite")

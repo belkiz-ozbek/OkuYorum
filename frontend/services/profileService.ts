@@ -23,6 +23,7 @@ export interface UserProfile extends BaseUser {
   headerImage: string | null;
   createdAt: string;
   updatedAt: string;
+  readingHours: number;
 }
 
 // Achievement tipleri

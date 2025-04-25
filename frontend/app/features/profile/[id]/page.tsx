@@ -156,6 +156,7 @@ export default function ProfilePage() {
   const [newPost, setNewPost] = useState("");
   const [isEditingYearlyGoal, setIsEditingYearlyGoal] = useState(false);
   const [yearlyGoal, setYearlyGoal] = useState<number>(0);
+  const [readingHours, setReadingHours] = useState(0);
 
   const { fetchPosts } = usePosts(params, toast, setPosts, router);
 
@@ -756,18 +757,38 @@ export default function ProfilePage() {
 
   const handleYearlyGoalUpdate = async (newGoal: number) => {
     try {
-      const updatedProfile = await profileService.updateYearlyGoal(newGoal);
-      setProfile(updatedProfile);
-      setYearlyGoal(updatedProfile.yearlyGoal || 0);
-      setIsEditingYearlyGoal(false);
-      toast({
-        title: "Başarılı!",
-        description: "Yıllık hedef güncellendi.",
+      const response = await api.put(`/api/users/${profile.id}/yearly-goal`, {
+        yearlyGoal: newGoal
       });
-    } catch (error) {
+      
+      if (response.data) {
+        setProfile(prev => ({
+          ...prev,
+          yearlyGoal: newGoal
+        }));
+        setIsEditingYearlyGoal(false);
+        toast({
+          title: "Başarılı!",
+          description: "Yıllık hedef güncellendi.",
+        });
+      }
+    } catch (error: any) {
+      console.error('Yıllık hedef güncellenirken hata:', error);
+      let errorMessage = "Yıllık hedef güncellenirken bir hata oluştu.";
+      
+      if (error.response) {
+        if (error.response.status === 403) {
+          errorMessage = "Bu işlem için yetkiniz yok.";
+        } else if (error.response.status === 400) {
+          errorMessage = "Geçersiz hedef değeri.";
+        } else if (error.response.data?.message) {
+          errorMessage = error.response.data.message;
+        }
+      }
+      
       toast({
         title: "Hata!",
-        description: "Yıllık hedef güncellenirken bir hata oluştu.",
+        description: errorMessage,
         variant: "destructive",
       });
     }
@@ -1094,33 +1115,37 @@ export default function ProfilePage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.1 }}
             >
-              <Card className="overflow-hidden border-none bg-white/70 backdrop-blur-sm shadow-md">
+              <Card className="overflow-hidden border-none bg-gradient-to-br from-white/80 to-white/50 backdrop-blur-sm shadow-sm hover:shadow-md transition-all duration-300">
                 <CardContent className="p-6">
-                  <h3 className="text-lg font-semibold mb-6 flex items-center">
+                  <h3 className="text-lg font-semibold mb-6 flex items-center text-gray-700">
                     <BarChart3 className="mr-2 h-5 w-5 text-purple-400" /> Okuma İstatistikleri
                   </h3>
 
                   <div className="grid grid-cols-3 gap-4">
                     {/* Achievements */}
-                    <div className="text-center p-4 rounded-lg bg-purple-50/50 hover:bg-purple-100/50 transition-colors duration-300">
-                      <div className="text-2xl font-bold text-purple-400 mb-1">{achievements.length}</div>
-                      <div className="text-sm text-gray-600">Kazanılan Başarı</div>
+                    <div className="text-center p-4 rounded-xl bg-gradient-to-br from-purple-50/50 to-purple-100/30 hover:from-purple-100/50 hover:to-purple-200/30 transition-all duration-300 group">
+                      <div className="text-2xl font-bold text-purple-500 mb-1 group-hover:scale-105 transition-transform duration-300">{achievements.length}</div>
+                      <div className="text-sm text-gray-600 font-medium">Kazanılan Başarı</div>
                     </div>
 
                     {/* Yearly Goal */}
                     <div 
-                      className="text-center p-4 rounded-lg bg-purple-50/50 hover:bg-purple-100/50 transition-colors duration-300 cursor-pointer relative group"
+                      className="text-center p-4 rounded-xl bg-gradient-to-br from-blue-50/50 to-blue-100/30 hover:from-blue-100/50 hover:to-blue-200/30 transition-all duration-300 group cursor-pointer relative"
                       onClick={() => currentUser?.id === profile.id && setIsEditingYearlyGoal(true)}
                     >
                       {isEditingYearlyGoal ? (
-                        <div className="absolute inset-0 bg-white rounded-lg shadow-lg p-4 z-10">
+                        <div className="absolute inset-0 bg-white rounded-xl p-4 flex flex-col gap-2">
                           <Input
                             type="number"
-                            value={yearlyGoal}
-                            onChange={(e) => setYearlyGoal(parseInt(e.target.value))}
-                            className="mb-2"
+                            value={yearlyGoal || ''}
+                            onChange={(e) => {
+                              const value = parseInt(e.target.value);
+                              setYearlyGoal(isNaN(value) ? 0 : value);
+                            }}
+                            className="text-center text-lg font-semibold"
                             min={1}
                             max={1000}
+                            autoFocus
                           />
                           <div className="flex gap-2 justify-center">
                             <Button
@@ -1146,20 +1171,20 @@ export default function ProfilePage() {
                         </div>
                       ) : (
                         <>
-                          <div className="text-2xl font-bold text-purple-400 mb-1">
+                          <div className="text-2xl font-bold text-blue-500 mb-1 group-hover:scale-105 transition-transform duration-300">
                             {books.filter(book => book.status?.toUpperCase() === "READ").length}/{profile.yearlyGoal || 0}
                           </div>
-                          <div className="text-sm text-gray-600">Yıllık Hedef</div>
+                          <div className="text-sm text-gray-600 font-medium">Yıllık Hedef</div>
                           {currentUser?.id === profile.id && (
-                            <div className="absolute -top-1 -right-1 bg-purple-100 rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <Edit className="h-3 w-3 text-purple-400" />
+                            <div className="absolute -top-1 -right-1 bg-blue-100 rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Edit className="h-3 w-3 text-blue-400" />
                             </div>
                           )}
                           {/* Progress Bar */}
                           <div className="mt-2">
-                            <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+                            <div className="h-1.5 w-full bg-blue-100 rounded-full overflow-hidden">
                               <div
-                                className="h-full bg-purple-400 rounded-full transition-all duration-300"
+                                className="h-full bg-gradient-to-r from-blue-400 to-blue-500 rounded-full transition-all duration-500"
                                 style={{
                                   width: `${profile.yearlyGoal ? (books.filter(book => book.status?.toUpperCase() === "READ").length / profile.yearlyGoal) * 100 : 0}%`
                                 }}
@@ -1173,16 +1198,33 @@ export default function ProfilePage() {
                       )}
                     </div>
 
-                    {/* Reading Time */}
-                    <div className="text-center p-4 rounded-lg bg-purple-50/50 hover:bg-purple-100/50 transition-colors duration-300">
-                      <div className="text-2xl font-bold text-purple-400 mb-1">124</div>
-                      <div className="text-sm text-gray-600">Okuma Saati</div>
+                    {/* Reading Hours */}
+                    <div className="text-center p-4 rounded-xl bg-gradient-to-br from-green-50/50 to-green-100/30 hover:from-green-100/50 hover:to-green-200/30 transition-all duration-300 group relative">
+                      <div className="text-2xl font-bold text-green-500 mb-1 group-hover:scale-105 transition-transform duration-300">
+                        {profile.readingHours || 0}
+                      </div>
+                      <div className="text-sm text-gray-600 font-medium">Okuma Saati</div>
+                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full flex items-center justify-center">
+                        <div className="relative">
+                          <div className="absolute right-0 bottom-full mb-2 w-48 p-2 bg-white rounded-md shadow-md text-xs text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50">
+                            <div className="flex items-start gap-1">
+                              <div className="bg-green-50 rounded-full p-1">
+                                <BookOpen className="h-3 w-3 text-green-400" />
+                              </div>
+                              <div>
+                                <p className="font-medium text-gray-800">Toplam Okuma Saati</p>
+                                <p className="text-gray-500">Okuduğunuz kitapların sayfa sayılarına göre hesaplanmıştır.</p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
 
                   {/* Achievements Section */}
                   <div className="mt-6 pt-4 border-t">
-                    <h3 className="text-lg font-semibold mb-3 flex items-center">
+                    <h3 className="text-lg font-semibold mb-3 flex items-center text-gray-700">
                       <Award className="mr-2 h-4 w-4 text-purple-400" /> Kazanılan Başarılar
                     </h3>
                     <div className="grid grid-cols-2 gap-2">

@@ -75,4 +75,13 @@ public class UserService {
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
+
+    @Transactional
+    public void updateYearlyGoal(Long userId, Integer yearlyGoal) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı."));
+        
+        user.setYearlyGoal(yearlyGoal);
+        userRepository.save(user);
+    }
 }

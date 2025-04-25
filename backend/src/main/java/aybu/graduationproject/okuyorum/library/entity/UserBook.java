@@ -26,7 +26,7 @@ public class UserBook {
 
     @Column(name = "status", nullable = true)
     @Enumerated(EnumType.STRING)
-    private Book.ReadingStatus status;
+    private ReadingStatus status;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -37,6 +37,13 @@ public class UserBook {
     private LocalDateTime updatedAt;
 
     private boolean isFavorite = false;
+
+    public enum ReadingStatus {
+        READING,
+        READ,
+        WILL_READ,
+        DROPPED
+    }
 
     // Getters and Setters
     public Long getId() {
@@ -63,11 +70,11 @@ public class UserBook {
         this.book = book;
     }
 
-    public Book.ReadingStatus getStatus() {
+    public ReadingStatus getStatus() {
         return status;
     }
 
-    public void setStatus(Book.ReadingStatus status) {
+    public void setStatus(ReadingStatus status) {
         this.status = status;
     }
 
@@ -77,5 +84,13 @@ public class UserBook {
 
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
+    }
+
+    public boolean isFavorite() {
+        return isFavorite;
+    }
+
+    public void setFavorite(boolean favorite) {
+        isFavorite = favorite;
     }
 } 

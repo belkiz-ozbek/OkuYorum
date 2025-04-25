@@ -3,9 +3,14 @@ package aybu.graduationproject.okuyorum.user.controller;
 import aybu.graduationproject.okuyorum.user.dto.UserDto;
 import aybu.graduationproject.okuyorum.user.entity.User;
 import aybu.graduationproject.okuyorum.user.service.UserService;
+import aybu.graduationproject.okuyorum.user.service.ReadingStatsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.HashMap;
 import java.util.List;
@@ -17,10 +22,12 @@ import java.util.Map;
 public class UserController {
 
     private final UserService userService;
+    private final ReadingStatsService readingStatsService;
 
     @Autowired
-    public UserController(UserService userService) {
+    public UserController(UserService userService, ReadingStatsService readingStatsService) {
         this.userService = userService;
+        this.readingStatsService = readingStatsService;
     }
 
     @GetMapping
@@ -63,6 +70,10 @@ public class UserController {
     @GetMapping("/{id}")
     public ResponseEntity<UserDto> getUserById(@PathVariable Long id) {
         User user = userService.getUserById(id);
+        
+        // Okuma saatlerini güncelle
+        readingStatsService.updateReadingHours(id);
+        
         UserDto userDto = new UserDto();
         userDto.setId(user.getId());
         userDto.setUsername(user.getUsername());
@@ -76,6 +87,8 @@ public class UserController {
         userDto.setFollowing(user.getFollowing());
         userDto.setBooksRead(user.getBooksRead());
         userDto.setReaderScore(user.getReaderScore());
+        userDto.setYearlyGoal(user.getYearlyGoal());
+        userDto.setReadingHours(user.getReadingHours());
         userDto.setCreatedAt(user.getCreatedAt());
         userDto.setUpdatedAt(user.getUpdatedAt());
         return ResponseEntity.ok(userDto);
@@ -89,5 +102,38 @@ public class UserController {
     @GetMapping("/quick-search")
     public ResponseEntity<List<User>> quickSearchUsers(@RequestParam String query) {
         return ResponseEntity.ok(userService.quickSearchUsers(query));
+    }
+
+    @PutMapping("/{userId}/yearly-goal")
+    public ResponseEntity<?> updateYearlyGoal(
+            @PathVariable Long userId,
+            @RequestBody Map<String, Integer> request,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        try {
+            // Kullanıcının kendi profilini düzenleyip düzenlemediğini kontrol et
+            User currentUser = userService.getUserByUsername(userDetails.getUsername());
+            if (!currentUser.getId().equals(userId)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body(Map.of("message", "Bu işlem için yetkiniz yok."));
+            }
+
+            Integer yearlyGoal = request.get("yearlyGoal");
+            if (yearlyGoal == null || yearlyGoal < 1) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("message", "Geçersiz hedef değeri."));
+            }
+
+            userService.updateYearlyGoal(userId, yearlyGoal);
+            return ResponseEntity.ok(Map.of("message", "Yıllık hedef başarıyla güncellendi."));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("message", "Yıllık hedef güncellenirken bir hata oluştu."));
+        }
+    }
+
+    @GetMapping("/{userId}/calculate-reading-hours")
+    public ResponseEntity<String> calculateReadingHours(@PathVariable Long userId) {
+        readingStatsService.updateReadingHours(userId);
+        return ResponseEntity.ok("Reading hours calculation triggered for user: " + userId);
     }
 }

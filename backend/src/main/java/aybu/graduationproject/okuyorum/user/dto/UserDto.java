@@ -16,6 +16,8 @@ public class UserDto {
     private Integer following;
     private Integer booksRead;
     private Integer readerScore;
+    private Integer yearlyGoal;
+    private Integer readingHours;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -114,6 +116,22 @@ public class UserDto {
 
     public void setReaderScore(Integer readerScore) {
         this.readerScore = readerScore;
+    }
+
+    public Integer getYearlyGoal() {
+        return yearlyGoal;
+    }
+
+    public void setYearlyGoal(Integer yearlyGoal) {
+        this.yearlyGoal = yearlyGoal;
+    }
+
+    public Integer getReadingHours() {
+        return readingHours;
+    }
+
+    public void setReadingHours(Integer readingHours) {
+        this.readingHours = readingHours;
     }
 
     public LocalDateTime getCreatedAt() {

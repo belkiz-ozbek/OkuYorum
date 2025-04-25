@@ -4,6 +4,7 @@ import aybu.graduationproject.okuyorum.user.entity.User;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -11,6 +12,11 @@ import java.util.List;
 
 @Entity
 @Table(name = "books")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Book {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,7 +43,7 @@ public class Book {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    @Column(name = "google_books_id")
+    @Column(name = "google_books_id", unique = true)
     private String googleBooksId;
     
     @Column(name = "image_url", columnDefinition = "TEXT")
@@ -49,15 +55,19 @@ public class Book {
     @Column(name = "page_count")
     private Integer pageCount;
 
-    public enum ReadingStatus {
-        READING,
-        READ,
-        WILL_READ,
-        DROPPED
-    }
-
     @Column(name = "pathname", nullable = false)
     private String pathname;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 
     // Getters and Setters
     public Long getId() {
