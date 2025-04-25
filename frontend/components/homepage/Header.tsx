@@ -1,6 +1,6 @@
 "use client"
 import Link from "next/link"
-import { BookOpen, Library, Compass, Users, Heart, Moon, Sun, User, MessageSquare } from "lucide-react"
+import { BookOpen, Library, Compass, Users, Heart, Moon, Sun, User, MessageSquare, LogOut } from "lucide-react"
 import { NotificationBell } from "@/components/ui/notification/NotificationBell"
 import { SearchForm } from "@/components/ui/form/search-form"
 import { useEffect, useState } from "react"
@@ -13,22 +13,26 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { useAuth } from "@/contexts/AuthContext"
+import { useRouter } from "next/navigation"
 
 export function Header() {
-  const [isScrolled, setIsScrolled] = useState(false)
   const [theme, setTheme] = useState<"light" | "dark">("light")
   const [currentUser, setCurrentUser] = useState<{ id: number; username: string } | null>(null)
   const [unreadCount, setUnreadCount] = useState(0)
+  const { logout } = useAuth()
+  const router = useRouter()
 
   useEffect(() => {
     if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
       setTheme("dark")
       document.documentElement.setAttribute("data-theme", "dark")
-    }
-
-    const handleScroll = () => {
-      const scrollPosition = window.scrollY
-      setIsScrolled(scrollPosition > 50)
     }
 
     const loadUserInfo = async () => {
@@ -55,14 +59,12 @@ export function Header() {
       }
     };
 
-    window.addEventListener("scroll", handleScroll)
     loadUserInfo()
     loadUnreadCount()
 
     const interval = setInterval(loadUnreadCount, 30000);
 
     return () => {
-      window.removeEventListener("scroll", handleScroll)
       clearInterval(interval);
     }
   }, [])
@@ -168,25 +170,43 @@ export function Header() {
             {theme === "light" ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
           </button>
 
-          <Link 
-            className="flex items-center gap-2.5 text-muted-foreground hover:text-primary transition-colors duration-300" 
-            href={`/features/profile/${currentUser?.id}`}
-          >
-            {currentUser ? (
-              <div className="flex items-center gap-2.5">
+          {currentUser ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger className="flex items-center gap-2.5 text-muted-foreground hover:text-primary transition-colors duration-300">
                 <Avatar className="h-8 w-8 border border-purple-100 dark:border-purple-900/50 flex-shrink-0">
                   <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser.username}`} alt={currentUser.username} />
                   <AvatarFallback>{currentUser.username[0].toUpperCase()}</AvatarFallback>
                 </Avatar>
                 <span className="text-sm font-medium">{currentUser.username}</span>
-              </div>
-            ) : (
-              <>
-                <User className="h-5 w-5" />
-                <span className="text-sm">Profil</span>
-              </>
-            )}
-          </Link>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuItem asChild>
+                  <Link href={`/features/profile/${currentUser.id}`} className="flex items-center">
+                    <User className="mr-2 h-4 w-4" />
+                    <span>Profilim</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={() => {
+                    logout()
+                    router.push('/')
+                  }}
+                  className="text-red-600 focus:text-red-600"
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Çıkış Yap</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Link 
+              className="flex items-center gap-2.5 text-muted-foreground hover:text-primary transition-colors duration-300" 
+              href="/login"
+            >
+              <User className="h-5 w-5" />
+              <span className="text-sm">Giriş Yap</span>
+            </Link>
+          )}
         </div>
 
         {/* Mobile Nav */}
