@@ -6,6 +6,7 @@ import { ChevronRight, Menu } from "lucide-react"
 import { Button } from "@/components/ui/form/button"
 import { Header } from "@/components/homepage/Header"
 import { Footer } from "@/components/homepage/Footer"
+import { AnimatedIcons } from "@/components/homepage/AnimatedIcons"
 
 export default function AboutPage() {
   return (
@@ -15,7 +16,7 @@ export default function AboutPage() {
         {/* Left side - Dark section with image */}
         <div className="relative bg-background">
           <Image
-            src="/about-us-3.webp"
+            src="/b4.jpg"
             alt="Artistic installation"
             width={960}
             height={1080}
@@ -27,19 +28,17 @@ export default function AboutPage() {
         <div className="bg-background p-8 flex flex-col">
           <div className="py-4">{/* Navigation removed as requested */}</div>
 
-          <div className="flex-1 flex flex-col justify-center max-w-xl">
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-black tracking-tight mb-12 font-serif">
+          <div className="flex-1 flex flex-col justify-start max-w-xl mx-auto">
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-black tracking-tight mb-8 font-serif text-foreground/80 ml-12">
               Hakkımızda
             </h1>
 
-            <div className="grid gap-8 md:grid-cols-2">
-              <div>
-                <p className="text-lg leading-relaxed text-muted-foreground italic">
-                  OkuYorum, kitapların yalnızca raflarda değil, insanların hayatlarında dolaşmasını amaçlayan bir sosyal kitap paylaşım platformudur.
-                </p>
-              </div>
+            <p className="text-lg leading-relaxed text-muted-foreground italic text-center mb-12 max-w-2xl mx-auto">
+              OkuYorum, kitapların yalnızca raflarda değil, insanların hayatlarında dolaşmasını amaçlayan bir sosyal kitap paylaşım platformudur.
+            </p>
 
-              <div className="space-y-6">
+            
+              <div className="space-y-6 text-center max-w-2xl mx-auto">
                 <p className="text-base leading-relaxed text-muted-foreground">
                   Millet kıraathaneleri ve bireyler arasında kitap dolaşımını teşvik ederken, kullanıcılar arasında kültürel bağlar kurmayı hedefliyoruz. <span className="italic">Paylaştığınız her kitap bir başkasının dünyasını değiştirebilir.</span>
                 </p>
@@ -47,7 +46,6 @@ export default function AboutPage() {
                 <p className="text-base leading-relaxed text-muted-foreground">
                   OkuYorum, sadece bir kitap paylaşım ağı değil; aynı zamanda insanların bir araya gelip fikir alışverişi yaptığı, ortak ilgi alanları etrafında buluştuğu bir kültür platformudur. <span className="italic">Her kitap, yeni bir sohbetin kapısını aralar, her etkinlik yeni dostluklara zemin hazırlar.</span> Biz, kitapların yalnızca raflarda değil, insanlar arasında dolaşarak hikâyelere dönüşmesini istiyoruz.
                 </p>
-              </div>
             </div>
           </div>
         </div>
@@ -57,7 +55,7 @@ export default function AboutPage() {
         <section className="w-full py-12 md:py-24">
           <div className="container grid items-center gap-6 px-4 md:px-6 lg:grid-cols-2 lg:gap-12">
             <div className="space-y-4">
-              <h2 className="text-4xl font-black tracking-tight md:text-5xl font-serif">Hikayemiz</h2>
+              <h2 className="text-4xl font-black tracking-tight md:text-5xl font-serif text-foreground/80">Hikayemiz</h2>
               <p className="text-lg leading-relaxed text-muted-foreground italic">
                 OkuYorum, okumayı ve paylaşmayı seven bireyleri bir araya getirmek için doğdu.
               </p>
@@ -67,7 +65,7 @@ export default function AboutPage() {
             </div>
             <div className="aspect-video overflow-hidden rounded-lg">
               <Image
-                src="/placeholder.svg?height=720&width=1280"
+                src="/b7.jpg"
                 alt="Team working on home staging"
                 width={1280}
                 height={720}
@@ -80,7 +78,7 @@ export default function AboutPage() {
         <section className="w-full py-12 md:py-24 bg-background">
           <div className="container px-4 md:px-6">
             <div className="flex flex-col items-center justify-center space-y-4 text-center mb-12">
-              <h2 className="text-4xl font-black tracking-tight md:text-5xl font-serif">Ekibimiz</h2>
+              <h2 className="text-4xl font-black tracking-tight md:text-5xl font-serif text-foreground/80">Ekibimiz</h2>
               <p className="mx-auto max-w-[700px] text-lg leading-relaxed text-muted-foreground italic">
                 Bizi tanıyın!
               </p>
@@ -89,18 +87,19 @@ export default function AboutPage() {
               <TeamMember
                 name="Ayşenur Şirin"
                 role="Dev"
-                bio="With over 15 years of experience in interior design, Jane leads our creative vision."
+                image="/aysenur.png"
+              />
+               <TeamMember
+                name="Belkız Özbek"
+                role="Dev"                
+                image="/belkiz.png"
               />
               <TeamMember
                 name="Enfal Yetiş"
                 role="Dev"
-                bio="John specializes in contemporary design and has transformed hundreds of properties."
+                image="/enfal.png"
               />
-              <TeamMember
-                name="Belkız Özbek"
-                role="Dev"
-                bio="Sarah ensures every project runs smoothly from consultation to completion."
-              />
+             
             </div>
           </div>
         </section>
@@ -109,7 +108,7 @@ export default function AboutPage() {
           <div className="container px-4 md:px-6">
             <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 items-center">
               <div className="space-y-4">
-                <h2 className="text-4xl font-black tracking-tight md:text-5xl font-serif">Yaklaşımımız</h2>
+                <h2 className="text-4xl font-black tracking-tight md:text-5xl font-serif text-foreground/80">Yaklaşımımız</h2>
                 <p className="text-lg leading-relaxed text-muted-foreground italic">
                   Millet kıraathanelerini sadece bir okuma alanı değil, paylaşım ve etkileşim merkezi olarak görüyoruz.
                 </p>
@@ -135,14 +134,8 @@ export default function AboutPage() {
                   </li>
                 </ul>
               </div>
-              <div className="aspect-video overflow-hidden rounded-lg">
-                <Image
-                  src="/placeholder.svg?height=720&width=1280"
-                  alt="Staged living room"
-                  width={1280}
-                  height={720}
-                  className="object-cover w-full h-full"
-                />
+              <div className="flex items-center justify-center">
+                <AnimatedIcons />
               </div>
             </div>
           </div>
@@ -151,13 +144,15 @@ export default function AboutPage() {
         <section className="w-full py-12 md:py-24">
           <div className="container px-4 md:px-6">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
-              <h2 className="text-4xl font-black tracking-tight md:text-5xl font-serif">Hadi Birlikte Okuyalım!</h2>
+              <h2 className="text-4xl font-black tracking-tight md:text-5xl font-serif text-foreground/80">Hadi Birlikte Okuyalım!</h2>
               <p className="mx-auto max-w-[700px] text-lg leading-relaxed text-muted-foreground italic">
                 Kitabını kap, kıraathaneye gel! OkuYorum'la her kitap bir yolculuğa çıkar, her paylaşım bir iyiliğe dönüşür.
               </p>
-              <Button className="mt-4 bg-primary text-white hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all duration-300">
-                Hemen Başla
-              </Button>
+              <Link href="/">
+                <Button className="mt-4 bg-primary text-white hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all duration-300">
+                  Hemen Başla
+                </Button>
+              </Link>
             </div>
           </div>
         </section>
@@ -167,22 +162,25 @@ export default function AboutPage() {
   )
 }
 
-function TeamMember({ name, role, bio }: { name: string; role: string; bio: string }) {
+function TeamMember({ name, role, image }: { name: string; role: string; image: string }) {
   return (
     <div className="flex flex-col items-center space-y-4">
       <div className="h-40 w-40 overflow-hidden rounded-full">
         <Image
-          src="/placeholder.svg?height=720&width=1280"
+          src={image}
           alt={name}
           width={160}
           height={160}
           className="object-cover w-full h-full"
+          onError={(e) => {
+            console.error(`Error loading image for ${name}:`, image);
+            e.currentTarget.src = '/placeholder.svg?height=720&width=1280';
+          }}
         />
       </div>
       <div className="space-y-2 text-center">
-        <h3 className="text-2xl font-bold tracking-tight">{name}</h3>
+        <h3 className="text-2xl font-bold tracking-tight text-foreground/80">{name}</h3>
         <p className="text-base text-muted-foreground italic">{role}</p>
-        <p className="text-base text-muted-foreground">{bio}</p>
       </div>
     </div>
   )
