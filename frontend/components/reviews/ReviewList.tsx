@@ -9,7 +9,7 @@ interface ReviewListProps {
     onLike?: (id: number) => Promise<Review>;
 }
 
-export function ReviewList({ reviews: initialReviews, onReviewsChange, onLike }: ReviewListProps) {
+export function ReviewList({ reviews: initialReviews, onReviewsChange}: ReviewListProps) {
     const { toast } = useToast();
     const [reviews, setReviews] = useState<Review[]>(initialReviews);
 

@@ -131,7 +131,7 @@ export default function SearchPage() {
           {books.map((book) => (
             <Link 
               key={book.id} 
-              href={`/features/book/${book.id}`}
+              href={`/features/book/${String(book.id)}`}
               className="block bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow"
             >
               <div className="flex items-start gap-4">

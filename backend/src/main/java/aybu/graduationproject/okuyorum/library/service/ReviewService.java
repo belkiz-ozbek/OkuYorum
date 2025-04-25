@@ -112,8 +112,11 @@ public class ReviewService {
             throw new IllegalStateException("You can only delete your own reviews");
         }
 
-        // Soft delete the review instead of hard delete
+        // Soft delete the review
         review.setDeleted(true);
+        // Also clear relationships to prevent issues
+        review.getComments().clear();
+        review.getLikes().clear();
         reviewRepository.save(review);
     }
 
@@ -133,6 +136,7 @@ public class ReviewService {
     @Transactional(readOnly = true)
     public List<ReviewDTO> getReviewsByUser(Long userId) {
         return reviewRepository.findByUserId(userId).stream()
+                .filter(review -> !review.isDeleted()) // Only return non-deleted reviews
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }

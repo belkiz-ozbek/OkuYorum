@@ -559,21 +559,27 @@ export default function ProfilePage() {
   };
 
   // Düzenleme ve silme fonksiyonları
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: number, type: 'post' | 'quote' | 'review') => {
     try {
-      await postService.deletePost(id);
-      await fetchPosts();
-      toast({
-        title: "Başarılı",
-        description: "İçerik başarıyla silindi.",
-      });
+        if (type === 'post') {
+            await postService.deletePost(id);
+        } else if (type === 'quote') {
+            await quoteService.deleteQuote(id);
+        } else if (type === 'review') {
+            await reviewService.deleteReview(id);
+        }
+        await fetchPosts();
+        toast({
+            title: "Başarılı",
+            description: "İçerik başarıyla silindi.",
+        });
     } catch (error) {
-      console.error('Silme hatası:', error);
-      toast({
-        title: "Hata",
-        description: "Silme sırasında bir hata oluştu.",
-        variant: "destructive",
-      });
+        console.error('Silme hatası:', error);
+        toast({
+            title: "Hata",
+            description: "Silme sırasında bir hata oluştu.",
+            variant: "destructive",
+        });
     }
   };
 
@@ -1301,7 +1307,7 @@ export default function ProfilePage() {
                               {item.type === 'quote' && (
                                 <QuoteCard
                                   quote={item.content}
-                                  onDelete={handleDelete}
+                                  onDelete={() => handleDelete(item.content.id, 'quote')}
                                   onEdit={handleQuoteEdit}
                                   onLike={handleLike}
                                   onSave={handleSave}
@@ -1311,7 +1317,7 @@ export default function ProfilePage() {
                               {item.type === 'review' && (
                                 <ReviewCard
                                   review={item.content}
-                                  onDelete={handleDelete}
+                                  onDelete={() => handleDelete(item.content.id, 'review')}
                                   onEdit={handleReviewEdit}
                                   onLike={handleLike}
                                   onSave={handleSave}

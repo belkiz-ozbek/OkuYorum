@@ -66,6 +66,7 @@ public class QuoteServiceImpl implements QuoteService {
         User currentUser = currentUserId != null ? userRepository.findById(currentUserId)
                 .orElseThrow(() -> new RuntimeException("User not found")) : null;
         return quoteRepository.findByUserId(userId).stream()
+                .filter(quote -> !quote.isDeleted())
                 .map(quote -> convertToDTO(quote, currentUser))
                 .collect(Collectors.toList());
     }
@@ -75,6 +76,7 @@ public class QuoteServiceImpl implements QuoteService {
         User currentUser = userId != null ? userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found")) : null;
         return quoteRepository.findByBookId(bookId).stream()
+                .filter(quote -> !quote.isDeleted())
                 .map(quote -> convertToDTO(quote, currentUser))
                 .collect(Collectors.toList());
     }
@@ -84,6 +86,7 @@ public class QuoteServiceImpl implements QuoteService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         return quoteRepository.findByUserIdAndBookId(userId, bookId).stream()
+                .filter(quote -> !quote.isDeleted())
                 .map(quote -> convertToDTO(quote, user))
                 .collect(Collectors.toList());
     }
@@ -98,7 +101,11 @@ public class QuoteServiceImpl implements QuoteService {
             throw new RuntimeException("Unauthorized to delete this quote");
         }
         
-        quoteRepository.delete(quote);
+        quote.setDeleted(true);
+        quote.getComments().clear();
+        quote.getLikedBy().clear();
+        quote.getSavedBy().clear();
+        quoteRepository.save(quote);
     }
 
     @Override
@@ -145,6 +152,7 @@ public class QuoteServiceImpl implements QuoteService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         return quoteRepository.findByLikedByContaining(user).stream()
+                .filter(quote -> !quote.isDeleted())
                 .map(quote -> convertToDTO(quote, user))
                 .collect(Collectors.toList());
     }
@@ -154,6 +162,7 @@ public class QuoteServiceImpl implements QuoteService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         return quoteRepository.findBySavedByContaining(user).stream()
+                .filter(quote -> !quote.isDeleted())
                 .map(quote -> convertToDTO(quote, user))
                 .collect(Collectors.toList());
     }
