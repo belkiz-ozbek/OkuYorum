@@ -33,6 +33,7 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { toast } from "@/components/ui/use-toast";
 
 interface QuoteCardProps {
     quote: Quote;
@@ -51,22 +52,16 @@ export function QuoteCard({ quote, onDelete, onEdit, onLike, onSave, onShare }: 
     const [editContent, setEditContent] = useState(quote.content);
     const [editPageNumber, setEditPageNumber] = useState(quote.pageNumber?.toString() || '');
     const [dropdownOpen, setDropdownOpen] = useState(false);
-    const [isLiked, setIsLiked] = useState(quote.isLiked || false);
-    const [likesCount, setLikesCount] = useState(quote.likes || 0);
     const [showComments, setShowComments] = useState(false);
     const [comments, setComments] = useState<Comment[]>([]);
     const [isLoadingComments, setIsLoadingComments] = useState(false);
+    const [isLikeProcessing, setIsLikeProcessing] = useState(false);
 
     const iconVariants = {
         initial: { scale: 1 },
         hover: { scale: 1.1, transition: { duration: 0.2 } },
         tap: { scale: 0.9, transition: { duration: 0.1 } },
     };
-
-    useEffect(() => {
-        setIsLiked(quote.isLiked || false);
-        setLikesCount(quote.likes || 0);
-    }, [quote]);
 
     useEffect(() => {
         const fetchInitialComments = async () => {
@@ -113,20 +108,23 @@ export function QuoteCard({ quote, onDelete, onEdit, onLike, onSave, onShare }: 
     };
 
     const handleLike = async () => {
-        const previousLikeState = isLiked;
-        const previousLikesCount = likesCount;
-
+        if (isLikeProcessing) return;
+        
         try {
-            setIsLiked(!isLiked);
-            setLikesCount(prev => isLiked ? prev - 1 : prev + 1);
-
+            setIsLikeProcessing(true);
+            
             if (onLike) {
                 await onLike(quote.id);
             }
         } catch (error) {
             console.error('Beğeni işlemi başarısız:', error);
-            setIsLiked(previousLikeState);
-            setLikesCount(previousLikesCount);
+            toast({
+                title: 'Hata',
+                description: 'Beğeni işlemi sırasında bir hata oluştu.',
+                variant: 'destructive',
+            });
+        } finally {
+            setIsLikeProcessing(false);
         }
     };
 
@@ -244,18 +242,19 @@ export function QuoteCard({ quote, onDelete, onEdit, onLike, onSave, onShare }: 
                                     whileTap="tap"
                                     className={cn(
                                         "flex items-center gap-1.5 px-2 py-1 rounded-full transition-all duration-200",
-                                        isLiked
+                                        quote.isLiked
                                             ? "text-red-500 bg-red-50 dark:bg-red-900/20"
                                             : "text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50/50 dark:hover:bg-red-900/10",
                                     )}
                                     onClick={handleLike}
+                                    disabled={isLikeProcessing}
                                 >
-                                    <Heart className="h-5 w-5" fill={isLiked ? "currentColor" : "none"} />
-                                    <span className="text-sm font-medium">{likesCount}</span>
+                                    <Heart className="h-5 w-5" fill={quote.isLiked ? "currentColor" : "none"} />
+                                    <span className="text-sm font-medium">{quote.likes}</span>
                                 </motion.button>
                             </TooltipTrigger>
                             <TooltipContent>
-                                <p>{isLiked ? "Beğenildi" : "Beğen"}</p>
+                                <p>{quote.isLiked ? "Beğenildi" : "Beğen"}</p>
                             </TooltipContent>
                         </Tooltip>
                     </TooltipProvider>

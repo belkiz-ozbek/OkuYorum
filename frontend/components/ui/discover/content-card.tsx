@@ -10,6 +10,7 @@ import { Card } from "@/components/ui/layout/Card"
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
 import {DropdownMenu,DropdownMenuContent,DropdownMenuItem,DropdownMenuSeparator,DropdownMenuTrigger,} from "@/components/ui/dropdown-menu"
 import { useState } from "react"
+import { toast } from "@/components/ui/use-toast"
 
 // Content types
 export type ContentType = "quote" | "review"
@@ -49,18 +50,28 @@ interface ContentCardProps {
   isSaved?: boolean
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const ContentCard = ({ item, index = 0, onLike, onSave, onFollow, onShare }: ContentCardProps) => {
-  const [isLiked, setIsLiked] = useState(item.isLiked);
-  const [likesCount, setLikesCount] = useState(item.likes);
+ 
+export const ContentCard = ({ item, index = 0, onLike, onSave, onFollow }: ContentCardProps) => {
+  const [isLikeProcessing, setIsLikeProcessing] = useState(false);
+  const [likesCount] = useState(item.likes);
 
-  const handleLike = async (id: string) => {
+  const handleLike = async () => {
+    if (isLikeProcessing) return;
+    
     try {
-      await onLike(id);
-      setIsLiked(!isLiked);
-      setLikesCount(prev => isLiked ? prev - 1 : prev + 1);
+      setIsLikeProcessing(true);
+      if (onLike) {
+        await onLike(item.id);
+      }
     } catch (error) {
       console.error('Beğeni işlemi başarısız:', error);
+      toast({
+        title: 'Hata',
+        description: 'Beğeni işlemi sırasında bir hata oluştu.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLikeProcessing(false);
     }
   };
 
@@ -252,7 +263,7 @@ export const ContentCard = ({ item, index = 0, onLike, onSave, onFollow, onShare
           >
             {item.type === "quote" && (
               <div className="absolute top-2 left-2 text-4xl text-purple-200 dark:text-purple-800 font-serif leading-none">
-                "
+                &#34;
               </div>
             )}
             <p
@@ -265,7 +276,7 @@ export const ContentCard = ({ item, index = 0, onLike, onSave, onFollow, onShare
             </p>
             {item.type === "quote" && (
               <div className="absolute bottom-2 right-4 text-4xl text-purple-200 dark:text-purple-800 font-serif leading-none">
-                "
+                &#34;
               </div>
             )}
           </div>
@@ -283,18 +294,19 @@ export const ContentCard = ({ item, index = 0, onLike, onSave, onFollow, onShare
                     whileTap="tap"
                     className={cn(
                       "flex items-center gap-1.5 px-2 py-1 rounded-full transition-all duration-200",
-                      isLiked
+                      item.isLiked
                         ? "text-red-500 bg-red-50 dark:bg-red-900/20"
-                        : "text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50/50 dark:hover:bg-red-900/10",
+                        : "text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50/50 dark:hover:bg-red-900/10"
                     )}
-                    onClick={() => handleLike(item.id)}
+                    onClick={handleLike}
+                    disabled={isLikeProcessing}
                   >
-                    <Heart className="h-5 w-5" fill={isLiked ? "currentColor" : "none"} />
+                    <Heart className="h-5 w-5" fill={item.isLiked ? "currentColor" : "none"} />
                     <span className="text-sm font-medium">{likesCount}</span>
                   </motion.button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>{isLiked ? "Beğenildi" : "Beğen"}</p>
+                  <p>{item.isLiked ? 'Beğenildi' : 'Beğen'}</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -357,7 +369,7 @@ export const ContentCard = ({ item, index = 0, onLike, onSave, onFollow, onShare
                   </motion.button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>{item.isSaved ? "Kaydedildi" : "Kaydet"}</p>
+                  <p>{item.isSaved ? 'Kaydedildi' : 'Kaydet'}</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>

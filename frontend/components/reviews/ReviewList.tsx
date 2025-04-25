@@ -9,7 +9,7 @@ interface ReviewListProps {
     onLike?: (id: number) => Promise<Review>;
 }
 
-export function ReviewList({ reviews: initialReviews, onReviewsChange}: ReviewListProps) {
+export function ReviewList({ reviews: initialReviews, onReviewsChange, onLike}: ReviewListProps) {
     const { toast } = useToast();
     const [reviews, setReviews] = useState<Review[]>(initialReviews);
 
@@ -62,7 +62,14 @@ export function ReviewList({ reviews: initialReviews, onReviewsChange}: ReviewLi
 
     const handleLike = async (id: number) => {
         try {
-            const updatedReview = await reviewService.likeReview(id);
+            let updatedReview;
+            if (onLike) {
+                // Parent'tan gelen onLike fonksiyonunu kullan
+                updatedReview = await onLike(id);
+            } else {
+                // Varsayılan olarak reviewService'i kullan
+                updatedReview = await reviewService.likeReview(id);
+            }
             
             // State'i güncelleyelim
             setReviews(prevReviews => 
@@ -139,6 +146,7 @@ export function ReviewList({ reviews: initialReviews, onReviewsChange}: ReviewLi
                         onLike={handleLike}
                         onSave={handleSave}
                         onShare={() => handleShare(review.id)}
+                        onReviewsChange={onReviewsChange}
                     />
                 </div>
             ))}

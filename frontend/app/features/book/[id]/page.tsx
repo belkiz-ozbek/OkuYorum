@@ -306,6 +306,28 @@ export default function BookPage({ params }: PageProps) {
         }
     };
 
+    const handleQuoteLike = async (quoteId: number) => {
+        try {
+            const updatedQuote = await quoteService.likeQuote(quoteId);
+            setQuotes(prevQuotes => 
+                prevQuotes.map(quote => 
+                    quote.id === quoteId 
+                        ? { ...quote, isLiked: updatedQuote.isLiked, likes: updatedQuote.likes } 
+                        : quote
+                )
+            );
+            return updatedQuote;
+        } catch (error) {
+            console.error('Alıntı beğenme hatası:', error);
+            toast({
+                title: "Hata",
+                description: "Alıntı beğenilirken bir hata oluştu.",
+                variant: "destructive",
+            });
+            throw error;
+        }
+    };
+
     if (loading) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-pink-50 via-rose-50 to-pink-100">
@@ -740,7 +762,7 @@ export default function BookPage({ params }: PageProps) {
                                                                 quote={quote}
                                                                 onDelete={handleQuoteCreated}
                                                                 onEdit={handleQuoteCreated}
-                                                                onLike={handleQuoteCreated}
+                                                                onLike={handleQuoteLike}
                                                                 onSave={handleQuoteCreated}
                                                                 onShare={async () => {
                                                                     try {

@@ -42,20 +42,34 @@ interface ReviewCardProps {
     onLike?: (id: number) => Promise<Review>;
     onSave?: (id: number) => void;
     onShare?: () => void;
+    onReviewsChange?: () => void;
 }
 
-export function ReviewCard({ review, onDelete, onEdit, onLike, onSave, onShare }: ReviewCardProps) {
+export function ReviewCard({ 
+    review: initialReview, 
+    onDelete, 
+    onEdit, 
+    onLike, 
+    onSave, 
+    onShare,
+    onReviewsChange 
+}: ReviewCardProps) {
     const { user } = useAuth();
-    const isOwner = user?.id === review.userId;
+    const isOwner = user?.id === initialReview.userId;
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [showEditDialog, setShowEditDialog] = useState(false);
-    const [editContent, setEditContent] = useState(review.content);
-    const [editRating, setEditRating] = useState(review.rating);
+    const [editContent, setEditContent] = useState(initialReview.content);
+    const [editRating, setEditRating] = useState(initialReview.rating);
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [showComments, setShowComments] = useState(false);
     const [comments, setComments] = useState<Comment[]>([]);
     const [isLoadingComments, setIsLoadingComments] = useState(false);
     const [isLikeProcessing, setIsLikeProcessing] = useState(false);
+    const [review, setReview] = useState(initialReview);
+
+    useEffect(() => {
+        setReview(initialReview);
+    }, [initialReview]);
 
     const cardVariants = {
         initial: { opacity: 0, y: 20 },
@@ -117,29 +131,26 @@ export function ReviewCard({ review, onDelete, onEdit, onLike, onSave, onShare }
     const handleLike = async () => {
         if (isLikeProcessing) return;
         
-        // Mevcut durumu saklayalım
-        const currentLikeStatus = review.isLiked;
-        const currentLikesCount = review.likesCount;
-        
         try {
             setIsLikeProcessing(true);
             
             // Optimistic update
-            review.isLiked = !currentLikeStatus;
-            review.likesCount = currentLikeStatus ? currentLikesCount - 1 : currentLikesCount + 1;
+            setReview(prevReview => ({
+                ...prevReview,
+                isLiked: !prevReview.isLiked,
+                likesCount: prevReview.isLiked ? prevReview.likesCount - 1 : prevReview.likesCount + 1
+            }));
             
             if (onLike) {
                 // API çağrısı
                 const updatedReview = await onLike(review.id);
                 
                 // API yanıtıyla güncelleme
-                review.isLiked = updatedReview.isLiked;
-                review.likesCount = updatedReview.likesCount;
+                setReview(updatedReview);
             }
         } catch (error) {
             // Hata durumunda eski haline döndür
-            review.isLiked = currentLikeStatus;
-            review.likesCount = currentLikesCount;
+            setReview(initialReview);
             
             console.error('Beğeni işlemi başarısız:', error);
             toast({
@@ -391,7 +402,12 @@ export function ReviewCard({ review, onDelete, onEdit, onLike, onSave, onShare }
                                 <CommentList
                                     comments={comments}
                                     isLoading={isLoadingComments}
-                                    onCommentsChange={fetchComments}
+                                    onCommentCreated={() => {
+                                        fetchComments();
+                                        if (onReviewsChange) {
+                                            onReviewsChange();
+                                        }
+                                    }}
                                 />
                             </div>
                         </motion.div>
