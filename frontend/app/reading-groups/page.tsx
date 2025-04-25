@@ -3,10 +3,8 @@
 import { useState, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card"
-import { Calendar, Users, Book, AtomIcon, Palette, History, Heart, Baby, ChevronLeft, ChevronRight, Plus } from "lucide-react"
+import { Calendar, Users, Book, AtomIcon, Palette, History, Baby, Plus } from "lucide-react"
 import { Header } from "@/components/homepage/Header"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import Link from "next/link"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
