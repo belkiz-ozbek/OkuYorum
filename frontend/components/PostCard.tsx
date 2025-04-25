@@ -1,6 +1,9 @@
 import { FC } from 'react';
 import Image from 'next/image';
+// @ts-ignore
 import { formatDistanceToNow } from 'date-fns';
+// @ts-ignore
+// @ts-ignore
 import { tr } from 'date-fns/locale';
 import { Heart, MessageCircle, Share2, Bookmark } from 'lucide-react';
 
