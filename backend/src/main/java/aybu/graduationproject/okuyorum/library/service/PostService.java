@@ -153,15 +153,6 @@ public class PostService {
             response.setIsSaved(post.getSavedBy().contains(currentUser));
         }
 
-        if (post.getBook() != null) {
-            response.setBook(BookResponse.builder()
-                    .id(post.getBook().getId())
-                    .title(post.getBook().getTitle())
-                    .author(post.getBook().getAuthor())
-                    .cover(post.getBook().getImageUrl())
-                    .build());
-        }
-
         return response;
     }
 } 

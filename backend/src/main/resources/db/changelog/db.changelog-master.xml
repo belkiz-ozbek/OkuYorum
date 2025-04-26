@@ -24,6 +24,7 @@
     <include file="/db/changelog/changes/drop-achievements-table.xml"/>
     <include file="/db/changelog/changes/add-yearly-goal.xml"/>
     <include file="/db/changelog/changes/remove-status-from-books.xml"/>
+    <include file="/db/changelog/changes/remove-book-id-from-posts.xml"/>
     
     <!-- Veri değişikliklerini buraya include edeceğiz -->
     <include file="db/changelog/data/data-master.xml"/>

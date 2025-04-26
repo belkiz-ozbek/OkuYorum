@@ -17,5 +17,4 @@ public class PostResponse {
     private Integer commentsCount;
     private Boolean isLiked;
     private Boolean isSaved;
-    private BookResponse book;
 } 
