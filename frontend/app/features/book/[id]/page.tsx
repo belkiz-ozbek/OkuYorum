@@ -97,7 +97,7 @@ export default function BookPage({ params }: PageProps) {
     useEffect(() => {
         const fetchReviews = async () => {
             try {
-                const response = await api.get(`/api/reviews/book/${resolvedParams.id}`);
+                const response = await api.get(`/api/reviews/book/${resolvedParams.id}/active`);
                 setReviews(response.data);
             } catch (err) {
                 console.error('İncelemeler yüklenirken hata:', err);
@@ -200,7 +200,7 @@ export default function BookPage({ params }: PageProps) {
 
     const handleReviewCreated = async () => {
         try {
-            const response = await api.get(`/api/reviews/book/${resolvedParams.id}`);
+            const response = await api.get(`/api/reviews/book/${resolvedParams.id}/active`);
             setReviews(response.data);
             toast({
                 title: 'Başarılı',
