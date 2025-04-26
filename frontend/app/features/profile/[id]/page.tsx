@@ -44,7 +44,8 @@ import { api } from '@/services/api'
 import StatusBadge from "@/components/ui/book/StatusBadge"
 import { quoteService } from "@/services/quoteService"
 import { Quote } from "@/types/quote"
-import { postService, Post } from "@/services/postService"
+import { postService } from "@/services/postService"
+import { Post } from "@/types/post"
 import { QuoteList } from "@/components/quotes/QuoteList"
 import { AuthProvider } from "@/contexts/AuthContext"
 import { EmptyState } from '@/components/ui/empty-state/EmptyState'
@@ -564,18 +565,21 @@ export default function ProfilePage() {
 
   const handleQuoteEdit = async (id: number, content: string, pageNumber?: string) => {
     try {
-      await quoteService.updateQuote(id, { content, pageNumber: pageNumber ? parseInt(pageNumber) : undefined });
-      await fetchPosts();
+      const updatedQuote = await quoteService.updateQuote(id, {
+        content,
+        page: pageNumber ? parseInt(pageNumber) : undefined
+      });
+      setQuotes(quotes.map(quote => quote.id === id.toString() ? updatedQuote : quote));
       toast({
         title: "Başarılı",
         description: "Alıntı başarıyla güncellendi.",
       });
     } catch (error) {
-      console.error('Güncelleme hatası:', error);
+      console.error('Alıntı güncellenirken hata:', error);
       toast({
         title: "Hata",
-        description: "Güncelleme sırasında bir hata oluştu.",
-        variant: "destructive",
+        description: "Alıntı güncellenirken bir hata oluştu.",
+        variant: "destructive"
       });
     }
   };
@@ -598,9 +602,9 @@ export default function ProfilePage() {
     }
   };
 
-  const handleLike = async (id: number): Promise<Review> => {
+  const handleLike = async (id: number | string): Promise<Review> => {
     try {
-      const updatedReview = await reviewService.likeReview(id);
+      const updatedReview = await reviewService.likeReview(typeof id === 'string' ? parseInt(id) : id);
       await fetchPosts();
       return updatedReview;
     } catch (error) {
@@ -614,9 +618,9 @@ export default function ProfilePage() {
     }
   };
 
-  const handleSave = async (id: number) => {
+  const handleSave = async (id: number | string) => {
     try {
-      await reviewService.saveReview(id);
+      await reviewService.saveReview(typeof id === 'string' ? parseInt(id) : id);
       toast({
         title: "Başarılı",
         description: "İçerik kaydedildi.",
@@ -713,13 +717,13 @@ export default function ProfilePage() {
 
   const handleLikePost = async (postId: number) => {
     try {
-      await postService.toggleLike(postId);
-      await fetchPosts();
+      const updatedPost = await postService.toggleLike(postId);
+      setPosts(posts.map(post => post.id === postId ? updatedPost : post));
     } catch (error) {
-      console.error('Error liking post:', error);
+      console.error('Beğeni işlemi sırasında hata:', error);
       toast({
         title: "Hata",
-        description: "İleti beğenilirken bir hata oluştu.",
+        description: "Beğeni işlemi sırasında bir hata oluştu.",
         variant: "destructive"
       });
     }
@@ -727,13 +731,13 @@ export default function ProfilePage() {
 
   const handleSavePost = async (postId: number) => {
     try {
-      await postService.toggleSave(postId);
-      await fetchPosts();
+      const updatedPost = await postService.toggleSave(postId);
+      setPosts(posts.map(post => post.id === postId ? updatedPost : post));
     } catch (error) {
-      console.error('Error saving post:', error);
+      console.error('Kaydetme işlemi sırasında hata:', error);
       toast({
         title: "Hata",
-        description: "İleti kaydedilirken bir hata oluştu.",
+        description: "Kaydetme işlemi sırasında bir hata oluştu.",
         variant: "destructive"
       });
     }
@@ -1613,11 +1617,11 @@ export default function ProfilePage() {
                               {item.type === 'quote' && (
                                 <QuoteCard
                                   quote={item.content}
-                                  onDelete={() => handleDelete(item.content.id, 'quote')}
+                                  onDelete={() => handleDelete(parseInt(item.content.id), 'quote')}
                                   onEdit={handleQuoteEdit}
                                   onLike={handleLike}
                                   onSave={handleSave}
-                                  onShare={() => handleShare(item.content.id)}
+                                  onShare={() => handleShare(parseInt(item.content.id))}
                                 />
                               )}
                               {item.type === 'review' && (

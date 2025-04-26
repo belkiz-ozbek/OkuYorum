@@ -8,6 +8,8 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @Repository
 public interface ReviewRepository extends JpaRepository<Review, Long> {
@@ -23,4 +25,6 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 
     @Query("SELECT r FROM Review r LEFT JOIN FETCH r.likes WHERE r.id = :reviewId")
     Optional<Review> findByIdWithLikes(@Param("reviewId") Long reviewId);
+
+    Page<Review> findByIsDeletedFalse(Pageable pageable);
 } 

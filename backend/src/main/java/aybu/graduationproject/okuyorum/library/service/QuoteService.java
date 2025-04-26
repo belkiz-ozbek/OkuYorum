@@ -2,6 +2,8 @@ package aybu.graduationproject.okuyorum.library.service;
 
 import aybu.graduationproject.okuyorum.library.dto.CreateQuoteRequest;
 import aybu.graduationproject.okuyorum.library.dto.QuoteDTO;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -18,4 +20,5 @@ public interface QuoteService {
     List<QuoteDTO> getSavedQuotes(Long userId);
     QuoteDTO updateQuote(Long id, CreateQuoteRequest request, Long userId);
     String shareQuote(Long id, Long userId);
+    Page<QuoteDTO> getAllQuotes(Long userId, Pageable pageable);
 } 

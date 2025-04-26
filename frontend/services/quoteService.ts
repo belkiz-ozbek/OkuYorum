@@ -1,58 +1,68 @@
 import { api } from './api';
-import { Quote, CreateQuoteRequest } from '@/types/quote';
+import { Quote } from '@/types/quote';
 
 export const quoteService = {
-    getQuotes: async (): Promise<Quote[]> => {
-        const response = await api.get('/api/quotes');
+    async getLikedQuotes(): Promise<Quote[]> {
+        const response = await api.get('/api/quotes/liked');
         return response.data;
     },
 
-    getQuotesByUser: async (userId: string): Promise<Quote[]> => {
+    async getSavedQuotes(): Promise<Quote[]> {
+        const response = await api.get('/api/quotes/saved');
+        return response.data;
+    },
+
+    async getQuotesByUser(userId: string): Promise<Quote[]> {
         const response = await api.get(`/api/quotes/user/${userId}`);
         return response.data;
     },
 
-    createQuote: async (request: CreateQuoteRequest): Promise<Quote> => {
-        const response = await api.post('/api/quotes', request);
-        return response.data;
-    },
-
-    updateQuote: async (quoteId: number, data: { content: string; pageNumber?: number }): Promise<Quote> => {
-        const response = await api.patch(`/api/quotes/${quoteId}`, data);
-        return response.data;
-    },
-
-    getQuote: async (id: number): Promise<Quote> => {
-        const response = await api.get(`/api/quotes/${id}`);
-        return response.data;
-    },
-
-    getBookQuotes: async (bookId: number): Promise<Quote[]> => {
+    async getQuotesByBook(bookId: number): Promise<Quote[]> {
         const response = await api.get(`/api/quotes/book/${bookId}`);
         return response.data;
     },
 
-    deleteQuote: async (quoteId: number): Promise<void> => {
-        await api.delete(`/api/quotes/${quoteId}`);
+    // Alias for getQuotesByBook to maintain compatibility
+    async getBookQuotes(bookId: number): Promise<Quote[]> {
+        return this.getQuotesByBook(bookId);
     },
 
-    likeQuote: async (quoteId: number): Promise<Quote> => {
-        const response = await api.post(`/api/quotes/${quoteId}/like`);
+    async getQuoteById(id: number): Promise<Quote> {
+        const response = await api.get(`/api/quotes/${id}`);
         return response.data;
     },
 
-    saveQuote: async (quoteId: number): Promise<Quote> => {
-        const response = await api.post(`/api/quotes/${quoteId}/save`);
+    async createQuote(quote: Omit<Quote, 'id'>): Promise<Quote> {
+        const response = await api.post('/api/quotes', quote);
         return response.data;
     },
 
-    shareQuote: async (quoteId: number): Promise<{ url: string }> => {
-        const response = await api.post(`/api/quotes/${quoteId}/share`);
+    async updateQuote(id: number, quote: Partial<Quote>): Promise<Quote> {
+        const response = await api.put(`/api/quotes/${id}`, quote);
         return response.data;
     },
 
-    getLikedQuotes: async (): Promise<Quote[]> => {
-        const response = await api.get('/api/quotes/liked');
-        return response.data;
+    async deleteQuote(id: number): Promise<void> {
+        await api.delete(`/api/quotes/${id}`);
+    },
+
+    async likeQuote(id: number): Promise<void> {
+        await api.post(`/api/quotes/${id}/like`);
+    },
+
+    async unlikeQuote(id: number): Promise<void> {
+        await api.delete(`/api/quotes/${id}/like`);
+    },
+
+    async saveQuote(id: number): Promise<void> {
+        await api.post(`/api/quotes/${id}/save`);
+    },
+
+    async unsaveQuote(id: number): Promise<void> {
+        await api.delete(`/api/quotes/${id}/save`);
+    },
+
+    async shareQuote(id: number): Promise<void> {
+        await api.post(`/api/quotes/${id}/share`);
     }
 }; 

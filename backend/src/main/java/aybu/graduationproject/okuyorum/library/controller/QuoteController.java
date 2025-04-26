@@ -5,6 +5,10 @@ import aybu.graduationproject.okuyorum.library.dto.QuoteDTO;
 import aybu.graduationproject.okuyorum.library.service.QuoteService;
 import aybu.graduationproject.okuyorum.user.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -121,5 +125,17 @@ public class QuoteController {
         Long userId = userService.getUserIdByUsername(userDetails.getUsername());
         String shareUrl = quoteService.shareQuote(id, userId);
         return ResponseEntity.ok(shareUrl);
+    }
+
+    @GetMapping
+    public ResponseEntity<Page<QuoteDTO>> getAllQuotes(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "createdAt") String sort,
+            @RequestParam(defaultValue = "desc") String direction) {
+        Long userId = userDetails != null ? userService.getUserIdByUsername(userDetails.getUsername()) : null;
+        Pageable pageable = PageRequest.of(page, size, Sort.Direction.fromString(direction), sort);
+        return ResponseEntity.ok(quoteService.getAllQuotes(userId, pageable));
     }
 } 

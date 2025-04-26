@@ -10,6 +10,8 @@ import aybu.graduationproject.okuyorum.library.service.QuoteService;
 import aybu.graduationproject.okuyorum.profile.service.AchievementService;
 import aybu.graduationproject.okuyorum.user.entity.User;
 import aybu.graduationproject.okuyorum.user.repository.UserRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -202,6 +204,14 @@ public class QuoteServiceImpl implements QuoteService {
         // Şimdilik sadece frontend'e paylaşım URL'i döndürüyoruz
         // İleride sosyal medya entegrasyonu eklenebilir
         return String.format("/quotes/%d", quote.getId());
+    }
+
+    @Override
+    public Page<QuoteDTO> getAllQuotes(Long userId, Pageable pageable) {
+        User currentUser = userId != null ? userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found")) : null;
+        Page<Quote> quotes = quoteRepository.findByIsDeletedFalse(pageable);
+        return quotes.map(quote -> convertToDTO(quote, currentUser));
     }
 
     private QuoteDTO convertToDTO(Quote quote, User currentUser) {

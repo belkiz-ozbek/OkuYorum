@@ -1,22 +1,20 @@
-import { User } from './user';
-import { Book } from './book';
-
 export interface Quote {
-    id: number;
+    id: string;
     content: string;
-    pageNumber?: number;
-    bookId: number;
-    bookTitle: string;
-    bookAuthor?: string;
-    bookCoverImage?: string;
-    userId: number;
-    username: string;
-    userAvatar?: string;
-    likes?: number;
+    userId: string;
+    bookId: string;
+    createdAt: string;
+    page?: number;
+    chapter?: string;
+    likes: number;
+    saves: number;
     isLiked?: boolean;
     isSaved?: boolean;
-    createdAt?: string;
-    updatedAt?: string;
+    username: string;
+    userAvatar?: string;
+    bookTitle?: string;
+    bookAuthor?: string;
+    bookCoverImage?: string;
 }
 
 export interface CreateQuoteRequest {

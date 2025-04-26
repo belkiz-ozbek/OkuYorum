@@ -5,6 +5,10 @@ import aybu.graduationproject.okuyorum.library.dto.ReviewDTO;
 import aybu.graduationproject.okuyorum.library.service.ReviewService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -79,5 +83,11 @@ public class ReviewController {
             @PathVariable Long userId,
             @PathVariable Long bookId) {
         return ResponseEntity.ok(reviewService.getReviewsByUserAndBook(userId, bookId));
+    }
+
+    @GetMapping
+    public ResponseEntity<Page<ReviewDTO>> getAllReviews(
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        return ResponseEntity.ok(reviewService.getAllReviews(pageable));
     }
 } 

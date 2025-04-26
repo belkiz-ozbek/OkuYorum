@@ -1,9 +1,10 @@
 "use client"
 
-import React, { useState, useRef, useCallback, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { useInView } from 'react-intersection-observer'
-import { ContentService, ContentFilters } from '@/services/ContentService'
+import { contentService, ContentFilters, PageResponse } from '@/services/ContentService'
+import { Content } from '@/types/content'
 
 import DiscoverHeader from '@/components/discover/DiscoverHeader'
 import DiscoverFilters from '@/components/discover/DiscoverFilters'
@@ -16,37 +17,34 @@ export default function DiscoverPage() {
   const [showSearch, setShowSearch] = useState(false)
   const [showFilter, setShowFilter] = useState(false)
 
-  const { inView } = useInView({ threshold: 0.5 })
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status } =
-    useInfiniteQuery({
-      queryKey: ['discover', filters],
-      queryFn: async (context) => {
-        const pageParam = context.pageParam as number
-        const items = await ContentService.getContent(filters)
-        return {
-          items,
-          nextPage: items.length > 0 ? pageParam + 1 : undefined
-        }
-      },
-      initialPageParam: 1,
-      getNextPageParam: (lastPage) => lastPage.nextPage,
-    })
+  const { ref, inView } = useInView()
 
-  const observer = useRef<IntersectionObserver | null>(null)
-  const lastContentRef = useCallback((node: HTMLDivElement | null) => {
-    if (!node) return
-    observer.current?.disconnect()
-    observer.current = new IntersectionObserver(entries => {
-      if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
-        fetchNextPage()
-      }
-    })
-    observer.current.observe(node)
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage])
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    status
+  } = useInfiniteQuery<PageResponse<Content>>({
+      queryKey: ['discover', filters],
+    queryFn: async ({ pageParam = 0 }) => {
+      return contentService.getContent({
+        ...filters,
+        page: pageParam,
+        size: 20
+      })
+      },
+    initialPageParam: 0,
+    getNextPageParam: (lastPage) => {
+      return lastPage.last ? undefined : lastPage.number + 1
+    },
+  })
 
   useEffect(() => {
-    if (inView) fetchNextPage()
-  }, [inView, fetchNextPage])
+    if (inView && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage()
+    }
+  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage])
 
   const handleFilterChange = (type: ContentFilters['type']) => {
     setFilters(prev => ({ ...prev, type }))
@@ -72,8 +70,8 @@ export default function DiscoverPage() {
         />
         <DiscoverContentGrid
           data={data}
-          status={status as 'loading' | 'error' | 'success'}
-          lastRef={lastContentRef}
+          status={status}
+          lastRef={ref}
         />
       </div>
       <DialogsWrapper

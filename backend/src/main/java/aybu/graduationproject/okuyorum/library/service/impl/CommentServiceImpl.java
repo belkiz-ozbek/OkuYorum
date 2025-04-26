@@ -265,10 +265,8 @@ public class CommentServiceImpl implements CommentService {
             dto.setParentCommentId(comment.getParentComment().getId());
         }
 
-        // Get non-deleted replies
-        List<Comment> activeReplies = comment.getReplies().stream()
-                .filter(reply -> !reply.isDeleted())
-                .collect(Collectors.toList());
+        // Get non-deleted replies using the repository
+        List<Comment> activeReplies = commentRepository.findByParentCommentIdAndDeletedFalse(comment.getId());
 
         // Set reply count
         dto.setReplyCount(activeReplies.size());
