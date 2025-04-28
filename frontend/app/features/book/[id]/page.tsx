@@ -22,6 +22,24 @@ type PageProps = {
     params: Promise<{ id: string }>
 }
 
+interface Quote {
+    id: number;
+    content: string;
+    pageNumber: number;
+    bookId: number;
+    bookTitle: string;
+    bookAuthor: string;
+    bookCoverImage: string;
+    userId: number;
+    username: string;
+    userAvatar: string;
+    likes: number;
+    isLiked: boolean;
+    isSaved: boolean;
+    createdAt: string;
+    updatedAt: string;
+}
+
 // Tarih formatlama yardımcı fonksiyonu
 export default function BookPage({ params }: PageProps) {
     const resolvedParams = use(params)
@@ -306,7 +324,7 @@ export default function BookPage({ params }: PageProps) {
         }
     };
 
-    const handleQuoteLike = async (quoteId: number) => {
+    const handleQuoteLike = async (quoteId: number): Promise<Quote> => {
         try {
             const updatedQuote = await quoteService.likeQuote(quoteId);
             setQuotes(prevQuotes => 
@@ -325,6 +343,22 @@ export default function BookPage({ params }: PageProps) {
                 variant: "destructive",
             });
             throw error;
+        }
+    };
+
+    const handleShareQuote = async (quoteId: number) => {
+        try {
+            const response = await quoteService.shareQuote(quoteId);
+            if (response.url) {
+                window.open(response.url, '_blank');
+            }
+        } catch (error) {
+            console.error('Alıntı paylaşma hatası:', error);
+            toast({
+                title: "Hata",
+                description: "Alıntı paylaşılırken bir hata oluştu.",
+                variant: "destructive",
+            });
         }
     };
 
@@ -760,27 +794,9 @@ export default function BookPage({ params }: PageProps) {
                                                             <QuoteCard
                                                                 key={quote.id}
                                                                 quote={quote}
-                                                                onDelete={handleQuoteCreated}
-                                                                onEdit={handleQuoteCreated}
                                                                 onLike={handleQuoteLike}
                                                                 onSave={handleQuoteCreated}
-                                                                onShare={async () => {
-                                                                    try {
-                                                                        const { url } = await quoteService.shareQuote(quote.id);
-                                                                        await navigator.clipboard.writeText(url);
-                                                                        toast({
-                                                                            title: 'Başarılı',
-                                                                            description: 'Alıntı bağlantısı panoya kopyalandı.',
-                                                                        });
-                                                                        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                                                                    } catch (error) {
-                                                                        toast({
-                                                                            title: 'Hata',
-                                                                            description: 'Alıntı paylaşılırken bir hata oluştu.',
-                                                                            variant: 'destructive',
-                                                                        });
-                                                                    }
-                                                                }}
+                                                                onShare={() => handleShareQuote(quote.id)}
                                                             />
                                                         ))}
                                                     </div>

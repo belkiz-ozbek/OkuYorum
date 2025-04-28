@@ -1,5 +1,5 @@
 import { api } from './api';
-import { Quote } from '@/types/quote';
+import { Quote, ShareQuoteResponse } from '@/types/quote';
 
 export const quoteService = {
     async getLikedQuotes(): Promise<Quote[]> {
@@ -46,23 +46,28 @@ export const quoteService = {
         await api.delete(`/api/quotes/${id}`);
     },
 
-    async likeQuote(id: number): Promise<void> {
-        await api.post(`/api/quotes/${id}/like`);
+    async likeQuote(id: number): Promise<Quote> {
+        const response = await api.post(`/api/quotes/${id}/like`);
+        return response.data;
     },
 
-    async unlikeQuote(id: number): Promise<void> {
-        await api.delete(`/api/quotes/${id}/like`);
+    async unlikeQuote(id: number): Promise<Quote> {
+        const response = await api.delete(`/api/quotes/${id}/like`);
+        return response.data;
     },
 
-    async saveQuote(id: number): Promise<void> {
-        await api.post(`/api/quotes/${id}/save`);
+    async saveQuote(id: number): Promise<Quote> {
+        const response = await api.post(`/api/quotes/${id}/save`);
+        return response.data;
     },
 
-    async unsaveQuote(id: number): Promise<void> {
-        await api.delete(`/api/quotes/${id}/save`);
+    async unsaveQuote(id: number): Promise<Quote> {
+        const response = await api.delete(`/api/quotes/${id}/save`);
+        return response.data;
     },
 
-    async shareQuote(id: number): Promise<void> {
-        await api.post(`/api/quotes/${id}/share`);
+    async shareQuote(id: number): Promise<ShareQuoteResponse> {
+        const response = await api.post(`/api/quotes/${id}/share`);
+        return response.data;
     }
 }; 

@@ -1,24 +1,27 @@
 export interface Quote {
-    id: string;
+    id: number;
     content: string;
-    userId: string;
-    bookId: string;
-    createdAt: string;
-    page?: number;
-    chapter?: string;
-    likes: number;
-    saves: number;
-    isLiked?: boolean;
-    isSaved?: boolean;
+    pageNumber: number;
+    bookId: number;
+    bookTitle: string;
+    bookAuthor: string;
+    bookCoverImage: string;
+    userId: number;
     username: string;
-    userAvatar?: string;
-    bookTitle?: string;
-    bookAuthor?: string;
-    bookCoverImage?: string;
+    userAvatar: string;
+    likes: number;
+    isLiked: boolean;
+    isSaved: boolean;
+    createdAt: string;
+    updatedAt: string;
 }
 
 export interface CreateQuoteRequest {
     content: string;
     pageNumber?: number;
     bookId: number;
+}
+
+export interface ShareQuoteResponse {
+    url: string;
 } 
