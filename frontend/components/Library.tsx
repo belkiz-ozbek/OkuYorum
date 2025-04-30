@@ -7,7 +7,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {BookOpen, CheckCircle, Clock, Star, Library as LibraryIcon, Compass, Users, Heart, Moon, Sun, Check, Bookmark, UserPlus, ChevronLeft, ChevronRight} from "lucide-react";
 import { ScratchToReveal } from "@/components/ui/scratch-to-reveal";
-import KitapKaziKazan from "./KitapKaziKazan"
 
 interface Book {
   id: number;
@@ -538,11 +537,6 @@ const Library = ({ activeTab = 'all' }: LibraryProps): JSX.Element => {
   return (
     <div className="flex min-h-screen flex-col">
       <div className="flex-1">
-        {/* Kitap Kazı Kazan Component - Moved to top */}
-        <div className="border-b border-border">
-          <KitapKaziKazan />
-        </div>
-
         {/* Sol taraftaki ince dikey tab bar */}
         <div className={`fixed left-0 top-16 bottom-0 transition-all duration-300 ${isSidebarOpen ? 'w-48' : 'w-12'} bg-background/60 backdrop-blur-lg border-r border-border`}>
           <div className="flex flex-col h-full py-8 space-y-6">
