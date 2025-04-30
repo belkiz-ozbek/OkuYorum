@@ -20,17 +20,22 @@ export function Footer() {
               </li>
               <li>
                 <Link href="/features/library" className="text-sm text-muted-foreground hover:text-primary">
-                  Kütüphanem
+                  Kitaplığım
                 </Link>
               </li>
               <li>
-                <Link href="/features/donate" className="text-sm text-muted-foreground hover:text-primary">
-                  Bağış Yap
+                <Link href="/features/discover" className="text-sm text-muted-foreground hover:text-primary">
+                  Keşfet
                 </Link>
               </li>
               <li>
                 <Link href="/features/millet-kiraathanesi" className="text-sm text-muted-foreground hover:text-primary">
                   Millet Kıraathaneleri
+                </Link>
+              </li>
+              <li>
+                <Link href="/features/donate" className="text-sm text-muted-foreground hover:text-primary">
+                  Bağış Yap
                 </Link>
               </li>
             </ul>
