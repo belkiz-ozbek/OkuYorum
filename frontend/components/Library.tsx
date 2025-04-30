@@ -616,7 +616,7 @@ const Library = ({ activeTab = 'all' }: LibraryProps): JSX.Element => {
             </Link>
 
             <Link
-              href="/features/library/lending"
+              href="/features/lending"
               className={`flex items-center gap-2 px-4 py-3 transition-all duration-300 border-l-4 ${
                 activeTab === 'lending'
                   ? 'bg-primary/10 border-primary text-primary'
