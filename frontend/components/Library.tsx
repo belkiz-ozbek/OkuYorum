@@ -565,23 +565,6 @@ const Library = ({ activeTab = 'all' }: LibraryProps): JSX.Element => {
             </Link>
 
             <Link
-              href="/features/library/favorites"
-              className={`flex items-center gap-2 px-4 py-3 transition-all duration-300 border-l-4 ${
-                activeTab === 'favorites'
-                  ? 'bg-primary/10 border-primary text-primary'
-                  : 'border-transparent text-muted-foreground hover:bg-primary/5 hover:border-primary/50'
-              }`}
-            >
-              <Star className="w-5 h-5 flex-shrink-0" />
-              <div className={`transition-all duration-300 ${isSidebarOpen ? 'opacity-100' : 'opacity-0 w-0'}`}>
-                <span className="font-medium text-sm">Favoriler</span>
-                <span className="ml-auto text-xs bg-primary/20 px-2 py-0.5 rounded-full">
-                  {getTabCount('favorite')}
-                </span>
-              </div>
-            </Link>
-
-            <Link
               href="/features/library/to-read"
               className={`flex items-center gap-2 px-4 py-3 transition-all duration-300 border-l-4 ${
                 activeTab === 'to-read'
@@ -670,29 +653,6 @@ const Library = ({ activeTab = 'all' }: LibraryProps): JSX.Element => {
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  setFavoriteBooks(prevFavorites => {
-                                    const newFavorites = new Set(prevFavorites);
-                                    if (newFavorites.has(book.id)) {
-                                      newFavorites.delete(book.id);
-                                    } else {
-                                      newFavorites.add(book.id);
-                                    }
-                                    console.log(`Toggled favorite for book ID: ${book.id}`);
-                                    return newFavorites;
-                                  });
-                                }}
-                                className="absolute top-2 right-2 z-10 p-1.5 bg-black/40 rounded-full text-white/70 hover:text-red-500 hover:bg-black/60 transition-all duration-200 opacity-0 group-hover:opacity-100"
-                                aria-label={favoriteBooks.has(book.id) ? "Favorilerden çıkar" : "Favorilere ekle"}
-                              >
-                                <Heart
-                                  className={`w-4 h-4 transition-colors duration-200 ${
-                                    favoriteBooks.has(book.id) ? 'fill-red-500 text-red-500' : ''
-                                  }`}
-                                />
-                              </button>
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
                                   setReadBooks(prevReadBooks => {
                                     const newReadBooks = new Set(prevReadBooks);
                                     if (newReadBooks.has(book.id)) {
@@ -709,7 +669,7 @@ const Library = ({ activeTab = 'all' }: LibraryProps): JSX.Element => {
                                     return newReadBooks;
                                   });
                                 }}
-                                className="absolute top-2 right-10 z-10 p-1.5 bg-black/40 rounded-full text-white/70 hover:text-green-500 hover:bg-black/60 transition-all duration-200 opacity-0 group-hover:opacity-100"
+                                className="absolute top-2 right-2 z-10 p-1.5 bg-black/40 rounded-full text-white/70 hover:text-green-500 hover:bg-black/60 transition-all duration-200 opacity-0 group-hover:opacity-100"
                                 aria-label={readBooks.has(book.id) ? "Okundu listesinden çıkar" : "Okundu listesine ekle"}
                               >
                                 <Check
@@ -737,7 +697,7 @@ const Library = ({ activeTab = 'all' }: LibraryProps): JSX.Element => {
                                     return newToReadBooks;
                                   });
                                 }}
-                                className="absolute top-2 right-18 z-10 p-1.5 bg-black/40 rounded-full text-white/70 hover:text-blue-500 hover:bg-black/60 transition-all duration-200 opacity-0 group-hover:opacity-100"
+                                className="absolute top-2 right-10 z-10 p-1.5 bg-black/40 rounded-full text-white/70 hover:text-blue-500 hover:bg-black/60 transition-all duration-200 opacity-0 group-hover:opacity-100"
                                 aria-label={toReadBooks.has(book.id) ? "Okunacaklar listesinden çıkar" : "Okunacaklar listesine ekle"}
                               >
                                 <Bookmark
