@@ -33,7 +33,7 @@ interface User {
 }
 
 interface LibraryProps {
-  activeTab?: 'all' | 'favorites' | 'to-read' | 'read' | 'borrowed';
+  activeTab?: 'all' | 'favorites' | 'to-read' | 'read' | 'borrowed' | 'lending';
 }
 
 const Library = ({ activeTab = 'all' }: LibraryProps): JSX.Element => {
@@ -612,6 +612,20 @@ const Library = ({ activeTab = 'all' }: LibraryProps): JSX.Element => {
                 <span className="ml-auto text-xs bg-primary/20 px-2 py-0.5 rounded-full">
                   {getTabCount('borrowed')}
                 </span>
+              </div>
+            </Link>
+
+            <Link
+              href="/features/library/lending"
+              className={`flex items-center gap-2 px-4 py-3 transition-all duration-300 border-l-4 ${
+                activeTab === 'lending'
+                  ? 'bg-primary/10 border-primary text-primary'
+                  : 'border-transparent text-muted-foreground hover:bg-primary/5 hover:border-primary/50'
+              }`}
+            >
+              <Users className="w-5 h-5 flex-shrink-0" />
+              <div className={`transition-all duration-300 ${isSidebarOpen ? 'opacity-100' : 'opacity-0 w-0'}`}>
+                <span className="font-medium text-sm">Ödünç Verme İşlemleri</span>
               </div>
             </Link>
           </div>
