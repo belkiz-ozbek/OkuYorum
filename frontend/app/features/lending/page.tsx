@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Card } from "@/components/ui/Card";
-import { BookOpen, UserPlus, Calendar, Clock, Eye, ArrowLeft, User, Trash2, Filter, SortAsc, SortDesc, Search, Star, Plus, Check, AlertTriangle } from "lucide-react";
+import { BookOpen, UserPlus, Calendar, Clock, Eye, ArrowLeft, User, Trash2, Filter, SortAsc, SortDesc, Search, Star, Plus, Check, AlertTriangle, ClipboardList, Heart } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface Book {
@@ -216,8 +216,54 @@ const LendingPage = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">Ödünç Verme İşlemleri</h1>
-      
+      {/* Hero Section */}
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-primary/10 to-primary/5 p-8 mb-12">
+        <div className="absolute inset-0 bg-[url('/pattern.png')] opacity-5"></div>
+        
+        <div className="relative z-10 max-w-3xl mx-auto text-center">
+          <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-clip-text bg-gradient-to-r from-primary to-primary/80">
+            Kitabınızın Yolculuğu
+          </h1>
+          <p className="text-xl text-muted-foreground mb-8">
+            Kitaplarınızı başka okurlara ulaştırın
+          </p>
+
+          {/* Steps */}
+          <div className="flex flex-col md:flex-row items-center justify-center gap-4 mb-8">
+            <div className="flex flex-col items-center group">
+              <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-2 shadow-lg hover:shadow-primary/20 transition-all duration-300 group-hover:bg-primary/20 group-hover:scale-110">
+                <BookOpen className="w-7 h-7 text-primary transition-transform duration-300 group-hover:scale-110" />
+              </div>
+              <p className="text-sm text-center group-hover:text-primary transition-colors duration-300">Ödünç vermek istediğiniz kitabınızı seçin</p>
+            </div>
+            
+            <div className="hidden md:block">
+              <div className="w-16 h-1 bg-gradient-to-r from-primary/20 to-primary/10 rounded-full"></div>
+              <div className="w-16 h-1 bg-gradient-to-r from-primary/10 to-primary/20 rounded-full mt-1"></div>
+            </div>
+            
+            <div className="flex flex-col items-center group">
+              <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-2 shadow-lg hover:shadow-primary/20 transition-all duration-300 group-hover:bg-primary/20 group-hover:scale-110">
+                <ClipboardList className="w-7 h-7 text-primary transition-transform duration-300 group-hover:scale-110" />
+              </div>
+              <p className="text-sm text-center group-hover:text-primary transition-colors duration-300">Kısa formu doldurun</p>
+            </div>
+            
+            <div className="hidden md:block">
+              <div className="w-16 h-1 bg-gradient-to-r from-primary/20 to-primary/10 rounded-full"></div>
+              <div className="w-16 h-1 bg-gradient-to-r from-primary/10 to-primary/20 rounded-full mt-1"></div>
+            </div>
+            
+            <div className="flex flex-col items-center group">
+              <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-2 shadow-lg hover:shadow-primary/20 transition-all duration-300 group-hover:bg-primary/20 group-hover:scale-110">
+                <Heart className="w-7 h-7 text-primary transition-transform duration-300 group-hover:scale-110" />
+              </div>
+              <p className="text-sm text-center group-hover:text-primary transition-colors duration-300">Kitabınız yeni sahibine ulaşsın</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Sol Taraf - Mevcut Ödünçler Listesi */}
         <section>
