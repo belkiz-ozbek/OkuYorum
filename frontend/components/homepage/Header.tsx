@@ -104,6 +104,11 @@ export function Header() {
               <span className="text-sm">Keşfet</span>
             </Link>
 
+            <Link className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300" href="/features/book-assistant">
+              <BookOpen className="h-5 w-5" />
+              <span className="text-sm">Kitap Asistanı</span>
+            </Link>
+
             <Link className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300" href="/features/millet-kiraathanesi">
               <Users className="h-5 w-5" />
               <span className="text-sm">Millet Kıraathaneleri</span>
