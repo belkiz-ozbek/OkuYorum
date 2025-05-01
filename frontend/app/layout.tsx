@@ -7,6 +7,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { Providers } from "./providers"
 import { AchievementNotification } from '../components/achievements/AchievementNotification';
 import { LoanProvider } from "./context/LoanContext";
+import { Toaster as HotToaster } from 'react-hot-toast';
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -48,6 +49,7 @@ export default function RootLayout({
           </LoanProvider>
         </AuthProvider>
         <Toaster />
+        <HotToaster position="top-center" />
       </body>
     </html>
   );

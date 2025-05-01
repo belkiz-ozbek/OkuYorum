@@ -1,9 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { BookOpen, ClipboardList, Heart, User, Calendar, Star } from "lucide-react";
 import { useLoans } from "@/app/context/LoanContext";
 import { useRouter } from "next/navigation";
+import ReactConfetti from 'react-confetti';
+import toast from 'react-hot-toast';
 
 const users = [
   { id: 1, name: "Enfal Yetiş" },
@@ -23,6 +25,23 @@ export default function LendBookPage() {
   const [notes, setNotes] = useState("");
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [windowSize, setWindowSize] = useState({
+    width: typeof window !== 'undefined' ? window.innerWidth : 0,
+    height: typeof window !== 'undefined' ? window.innerHeight : 0,
+  });
+
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowSize({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const handleSubmit = () => {
     if (!bookName || !selectedUser || !dueDate) {
@@ -45,11 +64,39 @@ export default function LendBookPage() {
     };
 
     addLoan(newLoan);
+    
+    // Show confetti and toast
+    setShowConfetti(true);
+    toast.success('Kitap başarıyla ödünç verildi! 🎉', {
+      duration: 4000,
+      position: 'top-center',
+      style: {
+        background: '#4CAF50',
+        color: '#fff',
+        padding: '16px',
+        borderRadius: '8px',
+        fontSize: '16px',
+      },
+    });
+
+    // Hide confetti after 5 seconds
+    setTimeout(() => {
+      setShowConfetti(false);
+    }, 3000);
+
     router.push('/features/current-loans');
   };
 
   return (
     <div className="min-h-screen bg-[#f6f4fb] py-10 px-2 flex flex-col items-center">
+      {showConfetti && (
+        <ReactConfetti
+          width={windowSize.width}
+          height={windowSize.height}
+          recycle={false}
+          numberOfPieces={500}
+        />
+      )}
       {/* Üst: Yolculuk Adımları */}
       <section className="w-full max-w-2xl bg-[#f3f0fa] rounded-2xl px-6 py-8 mb-10 text-center shadow-sm">
         <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-2">Kitabınızın Yolculuğu</h2>
