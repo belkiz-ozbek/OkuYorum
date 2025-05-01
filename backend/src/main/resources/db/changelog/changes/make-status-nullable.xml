@@ -4,7 +4,7 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                    https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
-    <changeSet id="20250501 10:30" author="belkiz.ozbek">
+    <changeSet id="20250501 10:16" author="belkiz.ozbek">
         <dropNotNullConstraint tableName="user_books" columnName="status" columnDataType="varchar(20)"/>
     </changeSet>
 
