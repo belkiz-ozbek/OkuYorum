@@ -174,6 +174,7 @@ public class BookService {
                     return newUserBook;
                 });
 
+        // Status null olabilir, direkt olarak set ediyoruz
         userBook.setStatus(status);
         userBook = userBookRepository.save(userBook);
 

@@ -16,6 +16,7 @@ export interface Book {
   status?: ReadingStatus;
   createdAt?: string;
   updatedAt?: string;
+  isFavorite?: boolean;
 }
 
 export interface Review {
@@ -104,6 +105,22 @@ class BookService {
 
   async deleteQuote(bookId: string, quoteId: string): Promise<void> {
     await api.delete(`/api/books/${bookId}/quotes/${quoteId}`);
+  }
+
+  async getFavoriteBooks(): Promise<Book[]> {
+    const response = await api.get('/api/books/favorites');
+    return response.data;
+  }
+
+  async toggleFavorite(bookId: string): Promise<Book> {
+    const response = await api.put(`/api/books/${bookId}/favorite`);
+    const updatedBook = response.data;
+    
+    // Emit event when favorite status is updated
+    bookEventEmitter.emit('favoriteUpdated', updatedBook);
+    bookEventEmitter.emit('profileNeedsUpdate');
+    
+    return updatedBook;
   }
 
   async updateBookStatus(id: string, status: ReadingStatus): Promise<Book> {

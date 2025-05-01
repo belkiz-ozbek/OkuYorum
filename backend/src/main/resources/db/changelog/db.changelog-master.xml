@@ -26,6 +26,7 @@
     <include file="/db/changelog/changes/remove-status-from-books.xml"/>
     <include file="/db/changelog/changes/remove-book-id-from-posts.xml"/>
     <include file="/db/changelog/changes/remove-likes-from-quotes.xml"/>
+    <include file="db/changelog/changes/make-status-nullable.xml"/>
     
     <!-- Veri değişikliklerini buraya include edeceğiz -->
     <include file="db/changelog/data/data-master.xml"/>

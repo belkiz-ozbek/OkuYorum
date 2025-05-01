@@ -39,7 +39,6 @@ import { UserService } from "@/services/UserService"
 import { followService } from "@/services/followService"
 import { bookService, Book } from "@/services/bookService"
 import { AddBookModal } from "@/components/ui/book/add-book-modal"
-import { bookEventEmitter } from '@/services/bookService'
 import { api } from '@/services/api'
 import StatusBadge from "@/components/ui/book/StatusBadge"
 import { quoteService } from "@/services/quoteService"
@@ -56,6 +55,7 @@ import { QuoteCard } from "@/components/quotes/QuoteCard"
 import { ReviewCard } from "@/components/reviews/ReviewCard"
 import PostCard from "@/components/PostCard"
 import { AxiosError } from "axios"
+import { on, off } from "@/lib/bookEventEmitter"
 
 // Add this type definition before the ProfilePage component
 type CombinedContentItem = {
@@ -199,58 +199,54 @@ export default function ProfilePage() {
 
   const fetchProfileData = async () => {
     try {
-      setLoading(true);
-      setError(null);
-
-      console.log('Fetching profile data for user:', id);
       const profileData = await profileService.getUserProfile(id);
-      console.log('Profile data received:', profileData);
       
-      // Takip durumunu kontrol et
-      if (currentUser && id !== currentUser.id.toString()) {
-        console.log('Fetching additional data for other user profile');
-        const [isFollowingStatus, achievementsData, readingActivityData, booksData] = await Promise.all([
-          followService.isFollowing(id),
-          profileService.getUserAchievements(id),
-          profileService.getUserReadingActivity(id),
-          bookService.getBooks(id)
-        ]);
-        
-        console.log('Additional data received:', {
-          isFollowingStatus,
-          achievementsData,
-          readingActivityData,
-          booksData
-        });
-        
-        setIsFollowing(isFollowingStatus);
-        setProfile(profileData);
-        setAchievements(achievementsData);
-        setReadingActivity(readingActivityData);
-        setBooks(booksData);
-      } else {
-        console.log('Fetching data for current user profile');
+      if (id !== currentUser?.id?.toString()) {
+        console.log('Fetching data for other user profile');
         const [achievementsData, readingActivityData, booksData] = await Promise.all([
           profileService.getUserAchievements(id),
           profileService.getUserReadingActivity(id),
           bookService.getBooks(id)
         ]);
         
+        setProfile(profileData);
+        setAchievements(achievementsData);
+        setReadingActivity(readingActivityData);
+        setBooks(booksData);
+      } else {
+        console.log('Fetching data for current user profile');
+        const [achievementsData, readingActivityData, booksData, favoriteBooksData] = await Promise.all([
+          profileService.getUserAchievements(id),
+          profileService.getUserReadingActivity(id),
+          bookService.getBooks(id),
+          bookService.getFavoriteBooks()
+        ]);
+        
         console.log('Current user data received:', {
           achievementsData,
           readingActivityData,
-          booksData
+          booksData,
+          favoriteBooksData
         });
         
         setProfile(profileData);
         setAchievements(achievementsData);
         setReadingActivity(readingActivityData);
-        setBooks(booksData);
+        
+        // Favori kitapları işaretle
+        const favoriteBookIds = new Set(favoriteBooksData.map(book => Number(book.id)));
+        const updatedBooks = booksData.map(book => ({
+          ...book,
+          id: Number(book.id),
+          isFavorite: favoriteBookIds.has(Number(book.id))
+        }));
+        
+        console.log('Updated books with favorite status:', updatedBooks);
+        setBooks(updatedBooks);
       }
     } catch (error) {
       console.error('Error loading profile data:', error);
       setError('Profil yüklenirken bir hata oluştu');
-      // Hata detaylarını da göster
       if (error instanceof Error) {
         console.error('Error details:', error.message);
       }
@@ -269,12 +265,22 @@ export default function ProfilePage() {
 
       try {
         setLoading(true);
-        const [profileResponse, booksData] = await Promise.all([
+        const [profileResponse, booksData, favoriteBooksData] = await Promise.all([
           api.get(`/api/users/${params.id}`),
-          bookService.getBooks(params.id.toString())
+          bookService.getBooks(params.id.toString()),
+          bookService.getFavoriteBooks()
         ]);
+        
+        // Favori kitapları işaretle
+        const favoriteBookIds = new Set(favoriteBooksData.map(book => Number(book.id)));
+        const updatedBooks = booksData.map(book => ({
+          ...book,
+          id: Number(book.id),
+          isFavorite: favoriteBookIds.has(Number(book.id))
+        }));
+        
         setProfile(profileResponse.data);
-        setBooks(booksData);
+        setBooks(updatedBooks);
         setLoading(false);
       } catch (error) {
         console.error("Error loading profile:", error);
@@ -285,18 +291,27 @@ export default function ProfilePage() {
 
     loadProfile();
 
-    // Listen for profile update events
-    const handleProfileUpdate = () => {
-      loadProfile();
+    // Favori durumu değişikliklerini dinle
+    const handleFavoriteUpdate = async ({ bookId, isFavorite }: { bookId: number; isFavorite: boolean }) => {
+      setBooks(prevBooks =>
+        prevBooks.map(book =>
+          book.id === bookId
+            ? { ...book, isFavorite }
+            : book
+        )
+      );
     };
 
-    // Listen for both profile updates and book status updates
-    bookEventEmitter.on('profileNeedsUpdate', handleProfileUpdate);
-    bookEventEmitter.on('bookStatusUpdated', handleProfileUpdate);
+    // Event listener'ları ekle
+    on('favoriteUpdated', handleFavoriteUpdate);
+    on('profileNeedsUpdate', loadProfile);
+    on('bookStatusUpdated', loadProfile);
 
     return () => {
-      bookEventEmitter.off('profileNeedsUpdate', handleProfileUpdate);
-      bookEventEmitter.off('bookStatusUpdated', handleProfileUpdate);
+      // Event listener'ları temizle
+      off('favoriteUpdated', handleFavoriteUpdate);
+      off('profileNeedsUpdate', loadProfile);
+      off('bookStatusUpdated', loadProfile);
     };
   }, [params.id]);
 
@@ -567,9 +582,9 @@ export default function ProfilePage() {
     try {
       const updatedQuote = await quoteService.updateQuote(id, {
         content,
-        page: pageNumber ? parseInt(pageNumber) : undefined
+        pageNumber: pageNumber ? parseInt(pageNumber) : undefined
       });
-      setQuotes(quotes.map(quote => quote.id === id.toString() ? updatedQuote : quote));
+      setQuotes(quotes.map(quote => quote.id === id ? updatedQuote : quote));
       toast({
         title: "Başarılı",
         description: "Alıntı başarıyla güncellendi.",
@@ -635,9 +650,9 @@ export default function ProfilePage() {
     }
   };
 
-  const handleShare = async (id: number) => {
+  const handleShare = async (id: number | string) => {
     try {
-      const shareUrl = await reviewService.shareReview(id);
+      const shareUrl = await reviewService.shareReview(typeof id === 'string' ? parseInt(id) : id);
       await navigator.clipboard.writeText(shareUrl);
       toast({
         title: "Başarılı",
@@ -1527,14 +1542,25 @@ export default function ProfilePage() {
                                 {books.filter(book => book.status?.toUpperCase() === "DROPPED").length}
                               </span>
                             </Button>
+                            <Button
+                              variant={selectedState === "FAVORITE" ? "default" : "outline"}
+                              size="sm"
+                              onClick={() => setSelectedState("FAVORITE")}
+                              className="text-sm flex items-center gap-2"
+                            >
+                              Favoriler
+                              <span className="bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full text-xs">
+                                {books.filter(book => book.isFavorite).length}
+                              </span>
+                            </Button>
                           </div>
 
                           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
                             {books
                               .filter(book => {
                                 if (!selectedState) return true;
-                                const bookStatus = book.status?.toUpperCase();
-                                return bookStatus === selectedState;
+                                if (selectedState === "FAVORITE") return book.isFavorite;
+                                return book.status?.toUpperCase() === selectedState;
                               })
                               .map((book) => (
                                 <motion.div
@@ -1566,16 +1592,22 @@ export default function ProfilePage() {
                               ))}
                           </div>
 
-                          {books.filter(book => !selectedState || book.status?.toUpperCase() === selectedState).length === 0 && (
+                          {books.filter(book => {
+                            if (!selectedState) return true;
+                            if (selectedState === "FAVORITE") return book.isFavorite;
+                            return book.status?.toUpperCase() === selectedState;
+                          }).length === 0 && (
                             <div className="text-center py-12">
                               <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-purple-50 flex items-center justify-center">
                                 <BookOpen className="h-8 w-8 text-purple-400" />
                               </div>
                               <p className="text-lg font-medium text-gray-900 mb-2">
-                                {selectedState ? `${selectedState === "WILL_READ" ? "Okunacak" : 
-                                  selectedState === "READING" ? "Okunuyor" : 
-                                  selectedState === "READ" ? "Okundu" : 
-                                  "Yarım Bırakıldı"} durumunda kitap bulunamadı` : "Henüz kitap eklenmemiş"}
+                                {selectedState === "FAVORITE" ? "Henüz favori kitap eklenmemiş" :
+                                 selectedState === "WILL_READ" ? "Okunacak durumunda kitap bulunamadı" : 
+                                 selectedState === "READING" ? "Okunuyor durumunda kitap bulunamadı" : 
+                                 selectedState === "READ" ? "Okundu durumunda kitap bulunamadı" : 
+                                 selectedState === "DROPPED" ? "Yarım Bırakıldı durumunda kitap bulunamadı" : 
+                                 "Henüz kitap eklenmemiş"}
                               </p>
                               <p className="text-sm text-gray-500">
                                 Kitap eklemek için arama çubuğunu kullanabilirsiniz
@@ -1617,11 +1649,11 @@ export default function ProfilePage() {
                               {item.type === 'quote' && (
                                 <QuoteCard
                                   quote={item.content}
-                                  onDelete={() => handleDelete(parseInt(item.content.id), 'quote')}
+                                  onDelete={() => handleDelete(Number(item.content.id), 'quote')}
                                   onEdit={handleQuoteEdit}
                                   onLike={handleLike}
                                   onSave={handleSave}
-                                  onShare={() => handleShare(parseInt(item.content.id))}
+                                  onShare={() => handleShare(Number(item.content.id))}
                                 />
                               )}
                               {item.type === 'review' && (
