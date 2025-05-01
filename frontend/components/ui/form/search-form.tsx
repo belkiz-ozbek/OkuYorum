@@ -160,7 +160,7 @@ export function SearchForm({ isScrolled = false }: SearchFormProps) {
                 }`}>
                     <div className="grid grid-cols-1 gap-2 p-2">
                         {quickResults.map((result, index) => (
-                            <div key={result.id}>
+                            <div key={`${result.type}-${result.id}`}>
                                 {index > 0 && (
                                     <div className="h-[1px] bg-purple-100/50 dark:bg-purple-800/50 my-2" />
                                 )}
