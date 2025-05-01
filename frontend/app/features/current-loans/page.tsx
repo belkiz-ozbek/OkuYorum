@@ -2,39 +2,11 @@
 
 import React from "react";
 import { BookOpen, User, Calendar, Star, Check, AlertTriangle, Eye, Filter, SortAsc, SortDesc } from "lucide-react";
-
-const loans = [
-  {
-    id: 1,
-    title: "Kürk Mantolu Madonna",
-    author: "Sabahattin Ali",
-    cover: "/books/kürk mantolu madonna.jpg",
-    borrower: "Enfal Yetiş",
-    lendDate: "2024-04-25",
-    dueDate: "2024-05-25",
-    status: "Ödünçte",
-    statusColor: "bg-blue-100 text-blue-700",
-    note: "Kitap iyi durumda, özenle kullanılıyor.",
-    rating: 5,
-    overdue: false
-  },
-  {
-    id: 2,
-    title: "Hayvan Çiftliği",
-    author: "George Orwell",
-    cover: "/books/hayvan çiftliği.jpg",
-    borrower: "Ayşenur Şirin",
-    lendDate: "2024-04-20",
-    dueDate: "2024-05-20",
-    status: "Gecikti",
-    statusColor: "bg-red-100 text-red-700",
-    note: "Kitap biraz yıpranmış durumda.",
-    rating: 3,
-    overdue: true
-  }
-];
+import { useLoans } from "@/app/context/LoanContext";
 
 const CurrentLoans = () => {
+  const { loans } = useLoans();
+
   return (
     <div className="min-h-screen bg-[#f6f4fb] py-10 px-2">
       <div className="max-w-3xl mx-auto">

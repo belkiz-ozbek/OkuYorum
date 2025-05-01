@@ -2,6 +2,8 @@
 
 import React, { useState } from "react";
 import { BookOpen, ClipboardList, Heart, User, Calendar, Star } from "lucide-react";
+import { useLoans } from "@/app/context/LoanContext";
+import { useRouter } from "next/navigation";
 
 const users = [
   { id: 1, name: "Enfal Yetiş" },
@@ -11,6 +13,8 @@ const users = [
 ];
 
 export default function LendBookPage() {
+  const router = useRouter();
+  const { addLoan } = useLoans();
   const [selectedUser, setSelectedUser] = useState("");
   const [showNewUser, setShowNewUser] = useState(false);
   const [newUserName, setNewUserName] = useState("");
@@ -19,6 +23,30 @@ export default function LendBookPage() {
   const [notes, setNotes] = useState("");
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
+
+  const handleSubmit = () => {
+    if (!bookName || !selectedUser || !dueDate) {
+      alert("Lütfen gerekli alanları doldurun!");
+      return;
+    }
+
+    const newLoan = {
+      title: bookName,
+      author: "Yazar Bilgisi", // Bu kısmı daha sonra geliştirebiliriz
+      cover: "/books/default.jpg", // Varsayılan kapak resmi
+      borrower: selectedUser,
+      lendDate: new Date().toISOString().split('T')[0], // Bugünün tarihi
+      dueDate: dueDate,
+      status: "Ödünçte",
+      statusColor: "bg-blue-100 text-blue-700",
+      note: notes,
+      rating: rating,
+      overdue: false
+    };
+
+    addLoan(newLoan);
+    router.push('/features/current-loans');
+  };
 
   return (
     <div className="min-h-screen bg-[#f6f4fb] py-10 px-2 flex flex-col items-center">
@@ -164,6 +192,7 @@ export default function LendBookPage() {
           {/* Buton */}
           <button
             type="button"
+            onClick={handleSubmit}
             className="w-full bg-[#a084e8] hover:bg-[#8a6fd1] text-white py-3 px-4 rounded-lg font-medium flex items-center justify-center gap-2 text-base shadow-md transition-all"
           >
             <BookOpen className="w-5 h-5" />
@@ -174,3 +203,4 @@ export default function LendBookPage() {
     </div>
   );
 }
+
