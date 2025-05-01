@@ -17,6 +17,7 @@ import { CreateReviewModal } from "@/components/reviews/CreateReviewModal"
 import { api } from '@/lib/api'
 import { AnimatePresence, motion } from 'framer-motion'
 import { reviewService } from "@/services/reviewService"
+import { emit } from "@/lib/bookEventEmitter"
 
 type PageProps = {
     params: Promise<{ id: string }>
@@ -83,9 +84,15 @@ export default function BookPage({ params }: PageProps) {
                     fullResponse: data
                 })
                 
+                // Favori durumunu localStorage'dan kontrol et
+                const savedFavorites = localStorage.getItem('favoriteBooks')
+                const favoriteBooks = savedFavorites ? JSON.parse(savedFavorites) : []
+                const isFavorite = favoriteBooks.includes(Number(data.id))
+                
                 setBook({
                     ...data,
-                    id: Number(data.id)
+                    id: Number(data.id),
+                    isFavorite: isFavorite
                 })
             } catch (err) {
                 console.error('Kitap detayı getirme hatası:', err)
@@ -101,7 +108,7 @@ export default function BookPage({ params }: PageProps) {
     useEffect(() => {
         const fetchQuotes = async () => {
             try {
-                if (!book) return;
+                if (!book?.id) return;
                 const bookQuotes = await quoteService.getBookQuotes(book.id);
                 setQuotes(bookQuotes);
             } catch (error) {
@@ -110,7 +117,7 @@ export default function BookPage({ params }: PageProps) {
         };
 
         fetchQuotes();
-    }, [book]);
+    }, [book?.id]);
 
     useEffect(() => {
         const fetchReviews = async () => {
@@ -156,7 +163,8 @@ export default function BookPage({ params }: PageProps) {
             })
 
             if (!response.ok) {
-                throw new Error('Okuma durumu güncellenemedi')
+                const errorData = await response.json().catch(() => null);
+                throw new Error(errorData?.message || 'Okuma durumu güncellenemedi')
             }
 
             // Backend'den gelen güncel kitap bilgisini al
@@ -254,9 +262,7 @@ export default function BookPage({ params }: PageProps) {
         }
     };
 
-    const handleFavoriteToggle = async () => {
-        if (!book) return;
-
+    const handleFavorite = async () => {
         try {
             setUpdatingFavorite(true);
             const token = localStorage.getItem('token');
@@ -269,54 +275,92 @@ export default function BookPage({ params }: PageProps) {
                 return;
             }
 
-            const response = await fetch(`http://localhost:8080/api/books/${book.id}/favorite`, {
-                method: 'PUT',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            if (!response.ok) {
+            if (!book) {
                 toast({
                     title: "Hata!",
-                    description: "Favori durumu güncellenemedi",
+                    description: "Kitap bilgisi bulunamadı",
                     variant: "destructive",
                 });
                 return;
             }
-            await response.json();
 
-            // Önce state'i güncelle
-            const newFavoriteState = !book.isFavorite;
+            const bookId = Number(resolvedParams.id);
+            if (isNaN(bookId)) {
+                throw new Error('Geçersiz kitap ID');
+            }
+
+            // Optimistic update - UI'ı hemen güncelle
+            const newFavoriteStatus = !book.isFavorite;
             setBook(prev => {
                 if (!prev) return null;
                 return {
                     ...prev,
-                    isFavorite: newFavoriteState
+                    isFavorite: newFavoriteStatus
                 };
             });
 
-            // Sonra toast mesajını göster
-            if (newFavoriteState) {
-                toast({
-                    title: "Favorilere eklendi!",
-                    description: "Kitap favorilerinize eklendi.",
-                    variant: "default",
-                });
-            } else {
-                toast({
-                    title: "Favorilerden çıkarıldı",
-                    description: "Kitap favorilerinizden çıkarıldı.",
-                    variant: "default",
-                });
+            // API çağrısı
+            const response = await api.put(`/api/books/${bookId}/favorite`, {
+                status: null,
+                isFavorite: newFavoriteStatus
+            });
+            
+            if (response.status !== 200) {
+                throw new Error('Favori durumu güncellenemedi');
             }
 
+            // API yanıtını doğrudan kullan
+            const isFavorite = response.data?.isFavorite ?? newFavoriteStatus;
+            
+            // Book state'ini güncelle
+            setBook(prev => {
+                if (!prev) return null;
+                return {
+                    ...prev,
+                    isFavorite: isFavorite
+                };
+            });
+
+            // Favori durumunu localStorage'a kaydet
+            const savedFavorites = localStorage.getItem('favoriteBooks')
+            let favoriteBooks = savedFavorites ? JSON.parse(savedFavorites) : []
+            
+            if (isFavorite) {
+                if (!favoriteBooks.includes(bookId)) {
+                    favoriteBooks.push(bookId)
+                }
+            } else {
+                favoriteBooks = favoriteBooks.filter((id: number) => id !== bookId)
+            }
+            
+            localStorage.setItem('favoriteBooks', JSON.stringify(favoriteBooks))
+
+            // Favori durumu değiştiğinde event tetikle
+            emit('favoriteUpdated', { bookId, isFavorite });
+
+            // Başarılı mesajı göster
+            toast({
+                title: isFavorite ? "Favorilere eklendi!" : "Favorilerden çıkarıldı",
+                description: isFavorite ? 
+                    "Kitap favorilerinize eklendi." : 
+                    "Kitap favorilerinizden çıkarıldı.",
+                variant: "default",
+            });
+
         } catch (err) {
+            // Hata durumunda optimistic update'i geri al
+            setBook(prev => {
+                if (!prev) return null;
+                return {
+                    ...prev,
+                    isFavorite: !prev.isFavorite
+                };
+            });
+
             console.error('Favori güncelleme hatası:', err);
             toast({
                 title: "Hata!",
-                description: "Favori durumu güncellenirken bir hata oluştu",
+                description: err instanceof Error ? err.message : "Favori durumu güncellenirken bir hata oluştu",
                 variant: "destructive",
             });
         } finally {
@@ -485,7 +529,7 @@ export default function BookPage({ params }: PageProps) {
                       cursor-pointer hover:border-purple-200 transition-colors duration-300
                       focus:outline-none focus:ring-2 focus:ring-purple-100"
                                         value={book.status || ''}
-                                        onChange={(e) => handleStatusChange(e.target.value === '' ? null : e.target.value as Book['status'])}
+                                        onChange={(e) => handleStatusChange(e.target.value ? e.target.value as Book['status'] : null)}
                                         disabled={updatingStatus}
                                     >
                                         <option value="">📚 Durum Yok</option>
@@ -528,7 +572,7 @@ export default function BookPage({ params }: PageProps) {
                                         <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 via-pink-500 to-purple-600 rounded-xl blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-300"></div>
                                         <Button 
                                             className="relative flex items-center gap-3 px-6 py-3 bg-white dark:bg-gray-900 hover:bg-purple-50 dark:hover:bg-gray-800 border border-purple-100 dark:border-purple-800/30 rounded-lg shadow-xl shadow-purple-500/10 hover:shadow-purple-500/20 transition-all duration-300"
-                                            onClick={handleFavoriteToggle}
+                                            onClick={handleFavorite}
                                             disabled={updatingFavorite}
                                         >
                                             <div className="relative">
@@ -552,7 +596,7 @@ export default function BookPage({ params }: PageProps) {
                                                 'text-red-500' : 
                                                 'bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent group-hover:from-purple-700 group-hover:to-pink-600'
                                             } transition-all duration-300`}>
-                                                {book.isFavorite ? 'Favorilerde' : 'Favorilere Ekle'}
+                                                {book.isFavorite ? 'Favorilerden Çıkar' : 'Favorilere Ekle'}
                                             </span>
                                             {book.isFavorite && (
                                                 <motion.div

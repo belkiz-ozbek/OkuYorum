@@ -86,7 +86,13 @@ public class BookController {
             @AuthenticationPrincipal UserDetails userDetails) {
         String username = userDetails.getUsername();
         Long userId = userService.getUserIdByUsername(username);
-        return ResponseEntity.ok(bookService.updateBookStatus(bookId, UserBook.ReadingStatus.valueOf(request.getStatus()), userId));
+        
+        UserBook.ReadingStatus status = null;
+        if (request.getStatus() != null) {
+            status = UserBook.ReadingStatus.valueOf(request.getStatus());
+        }
+        
+        return ResponseEntity.ok(bookService.updateBookStatus(bookId, status, userId));
     }
 
     @PutMapping("/{bookId}/favorite")
