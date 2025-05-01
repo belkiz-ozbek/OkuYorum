@@ -6,6 +6,8 @@ import { Toaster } from "@/components/ui/feedback/toaster"
 import { AuthProvider } from "@/contexts/AuthContext";
 import { Providers } from "./providers"
 import { AchievementNotification } from '../components/achievements/AchievementNotification';
+import { LoanProvider } from "./context/LoanContext";
+import { Toaster as HotToaster } from 'react-hot-toast';
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -39,12 +41,15 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} antialiased`}
       >
         <AuthProvider>
-          <Providers>
-            <AchievementNotification />
-            {children}
-          </Providers>
+          <LoanProvider>
+            <Providers>
+              <AchievementNotification />
+              {children}
+            </Providers>
+          </LoanProvider>
         </AuthProvider>
         <Toaster />
+        <HotToaster position="top-center" />
       </body>
     </html>
   );
