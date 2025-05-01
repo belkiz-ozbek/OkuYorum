@@ -60,14 +60,14 @@ public class BookService {
         }
 
         Book book = convertToEntity(bookDto);
-        book.setUser(userRepository.findById(bookDto.getUserId())
-                .orElseThrow(() -> new EntityNotFoundException("User not found")));
-        
         Book savedBook = bookRepository.save(book);
         
         // Create UserBook entry with initial status
+        User user = userRepository.findById(bookDto.getUserId())
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+        
         UserBook userBook = new UserBook();
-        userBook.setUser(savedBook.getUser());
+        userBook.setUser(user);
         userBook.setBook(savedBook);
         userBook.setStatus(UserBook.ReadingStatus.WILL_READ); // Default status
         userBookRepository.save(userBook);
@@ -142,8 +142,15 @@ public class BookService {
                     BookDto bookDto = googleBooksService.getBookById(googleId);
                     bookDto.setUserId(userId);
                     Book book = convertToEntity(bookDto);
-                    book.setUser(user);
-                    addedBooks.add(convertToDto(bookRepository.save(book)));
+                    Book savedBook = bookRepository.save(book);
+                    
+                    UserBook userBook = new UserBook();
+                    userBook.setUser(user);
+                    userBook.setBook(savedBook);
+                    userBook.setStatus(UserBook.ReadingStatus.WILL_READ);
+                    userBookRepository.save(userBook);
+                    
+                    addedBooks.add(convertToDto(savedBook, userBook));
                 } catch (Exception e) {
                     System.err.println("Error importing book with ID: " + googleId + " - " + e.getMessage());
                 }
@@ -240,14 +247,14 @@ public class BookService {
         dto.setTitle(book.getTitle());
         dto.setAuthor(book.getAuthor());
         dto.setSummary(book.getSummary());
-        dto.setUserId(book.getUser().getId());
         dto.setGoogleBooksId(book.getGoogleBooksId());
         dto.setImageUrl(book.getImageUrl());
         dto.setPublishedDate(book.getPublishedDate());
         dto.setPageCount(book.getPageCount());
         
-        // Get status from UserBook if available
+        // Get status and user info from UserBook if available
         if (userBook != null) {
+            dto.setUserId(userBook.getUser().getId());
             dto.setStatus(userBook.getStatus());
             dto.setFavorite(userBook.isFavorite());
         } else {

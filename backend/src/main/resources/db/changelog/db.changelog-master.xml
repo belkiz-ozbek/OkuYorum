@@ -28,6 +28,7 @@
     <include file="/db/changelog/changes/remove-likes-from-quotes.xml"/>
     <include file="db/changelog/changes/make-status-nullable.xml"/>
     <include file="db/changelog/changes/remove-pathname-from-books.xml"/>
+    <include file="db/changelog/changes/remove-user-id-from-books.xml"/>
     
     <!-- Veri değişikliklerini buraya include edeceğiz -->
     <include file="db/changelog/data/data-master.xml"/>

@@ -1,6 +1,5 @@
 package aybu.graduationproject.okuyorum.library.entity;
 
-import aybu.graduationproject.okuyorum.user.entity.User;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -30,10 +29,6 @@ public class Book {
 
     @Column(columnDefinition = "TEXT")
     private String summary;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -97,14 +92,6 @@ public class Book {
 
     public void setSummary(String summary) {
         this.summary = summary;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
     }
 
     public LocalDateTime getCreatedAt() {
