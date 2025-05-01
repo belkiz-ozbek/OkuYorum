@@ -55,9 +55,6 @@ public class Book {
     @Column(name = "page_count")
     private Integer pageCount;
 
-    @Column(name = "pathname", nullable = false)
-    private String pathname;
-
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
@@ -148,13 +145,5 @@ public class Book {
 
     public void setPageCount(Integer pageCount) {
         this.pageCount = pageCount;
-    }
-
-    public String getPathname() {
-        return pathname;
-    }
-
-    public void setPathname(String pathname) {
-        this.pathname = pathname;
     }
 }
