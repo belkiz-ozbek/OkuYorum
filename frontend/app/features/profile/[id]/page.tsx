@@ -1104,14 +1104,14 @@ export default function ProfilePage() {
                                 className="text-center cursor-pointer hover:text-purple-700 transition-colors"
                                 onClick={() => setShowFollowersModal(true)}
                             >
-                              <div className="text-xl font-bold text-purple-600">{profile.followers}</div>
+                              <div className="text-xl font-bold text-purple-600">{profile.followers || 0}</div>
                               <div className="text-sm text-gray-500">Takipçi</div>
                             </div>
                             <div
                                 className="text-center cursor-pointer hover:text-purple-700 transition-colors"
                                 onClick={() => setShowFollowingModal(true)}
                             >
-                              <div className="text-xl font-bold text-purple-600">{profile.following}</div>
+                              <div className="text-xl font-bold text-purple-600">{profile.following || 0}</div>
                               <div className="text-sm text-gray-500">Takip</div>
                             </div>
                             <div
