@@ -193,7 +193,7 @@ export default function AdminDonationsPage() {
                         </div>
 
                         <Button asChild className="bg-green-600 hover:bg-green-700">
-                            <Link href="/admin/features/donations/new">
+                            <Link href="/features/admin/donations/new">
                                 <Plus className="mr-2 h-4 w-4" key="plus-icon"/>
                                 Yeni Bağış Ekle
                             </Link>
@@ -263,7 +263,7 @@ export default function AdminDonationsPage() {
                                                     onClick={() => {
                                                         if (donation.id) {
                                                             console.log("Navigating to donation detail:", donation.id)
-                                                            router.push(`/admin/features/donations/${donation.id}`)
+                                                            router.push(`/features/admin/donations/${donation.id}`)
                                                         } else {
                                                             toast({
                                                                 title: "Hata",

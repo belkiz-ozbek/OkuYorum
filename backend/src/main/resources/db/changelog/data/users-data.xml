@@ -14,7 +14,9 @@
             <column name="password">$2a$10$umxp5DLJRsrVpFaeBBkcpuGto0LNy6EliUoUE16FZ332/0zoNLBUq</column>
             <column name="role">ADMIN</column>
             <column name="enabled">true</column>
-            <column name="email">foomail.okuyorum@gmail.com</column>
+            <column name="email">foomail1.okuyorum@gmail.com</column>
+            <column name="created_at">2025-05-02 15:24:00</column>
+            <column name="status">ACTIVE</column>
         </insert>
 
         <insert tableName="users">
@@ -24,7 +26,9 @@
             <column name="password">$2a$10$umxp5DLJRsrVpFaeBBkcpuGto0LNy6EliUoUE16FZ332/0zoNLBUq</column>
             <column name="role">ADMIN</column>
             <column name="enabled">true</column>
-            <column name="email">foomail.okuyorum@gmail.com</column>
+            <column name="email">foomail2.okuyorum@gmail.com</column>
+            <column name="created_at">2025-05-02 15:24:00</column>
+            <column name="status">ACTIVE</column>
         </insert>
 
         <insert tableName="users">
@@ -35,6 +39,8 @@
             <column name="role">ADMIN</column>
             <column name="enabled">true</column>
             <column name="email">ysmnyalciin@gmail.com</column>
+            <column name="created_at">2025-05-02 15:24:00</column>
+            <column name="status">ACTIVE</column>
         </insert>
 
         <insert tableName="users">
@@ -45,6 +51,8 @@
             <column name="role">ADMIN</column>
             <column name="enabled">true</column>
             <column name="email">ceng.belkiz@gmail.com</column>
+            <column name="created_at">2025-05-02 15:24:00</column>
+            <column name="status">ACTIVE</column>
         </insert>
 
     </changeSet>

@@ -17,7 +17,6 @@ export default function DonationDetailPage() {
   const [donation, setDonation] = useState<Donation | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [ setIsScrolled] = useState(false)
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [theme, setTheme] = useState<'light' | 'dark'>('light')
 
@@ -27,16 +26,6 @@ export default function DonationDetailPage() {
       setTheme('dark')
       document.documentElement.setAttribute('data-theme', 'dark')
     }
-
-    const handleScroll = () => {
-      const scrollPosition = window.scrollY
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
-      setIsScrolled(scrollPosition > 50)
-    }
-
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
   useEffect(() => {

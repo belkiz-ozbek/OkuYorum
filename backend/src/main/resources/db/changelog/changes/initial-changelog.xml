@@ -1,0 +1,651 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
+    <changeSet author="belkizozbek (generated)" id="1746292836812-1">
+        <createTable tableName="book_lendings">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="book_lendings_pkey"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="due_date" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="feedback" type="VARCHAR(255)"/>
+            <column name="lend_date" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rating" type="INTEGER"/>
+            <column name="return_date" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="status" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="book_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="borrower_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="belkizozbek (generated)" id="1746292836812-2">
+        <createTable tableName="donation_requests">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="donation_requests_pkey"/>
+            </column>
+            <column name="address" type="VARCHAR(255)"/>
+            <column name="author" type="VARCHAR(255)"/>
+            <column name="book_title" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="VARCHAR(1000)"/>
+            <column name="donation_delivery_method" type="VARCHAR(255)"/>
+            <column name="donation_estimated_delivery_date" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="donation_handler_name" type="VARCHAR(255)"/>
+            <column name="donation_status" type="SMALLINT"/>
+            <column name="donation_status_note" type="VARCHAR(255)"/>
+            <column name="donation_status_updated_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="donation_tracking_code" type="VARCHAR(255)"/>
+            <column name="genre" type="VARCHAR(255)"/>
+            <column name="institution_name" type="VARCHAR(255)"/>
+            <column name="latitude" type="FLOAT8"/>
+            <column name="longitude" type="FLOAT8"/>
+            <column name="quantity" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="requester_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="belkizozbek (generated)" id="1746292836812-3">
+        <createTable tableName="donation_tracking">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="donation_tracking_pkey"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by_name" type="VARCHAR(100)"/>
+            <column name="notes" type="VARCHAR(500)"/>
+            <column name="status" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="donation_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="belkizozbek (generated)" id="1746292836812-4">
+        <createTable tableName="donations">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="donations_pkey"/>
+            </column>
+            <column name="address" type="VARCHAR(255)"/>
+            <column name="author" type="VARCHAR(255)"/>
+            <column name="book_title" type="VARCHAR(255)"/>
+            <column name="condition" type="VARCHAR(255)"/>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="delivery_method" type="VARCHAR(255)"/>
+            <column name="description" type="VARCHAR(255)"/>
+            <column name="donation_type" type="VARCHAR(255)"/>
+            <column name="estimated_delivery_date" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="genre" type="VARCHAR(255)"/>
+            <column name="handler_name" type="VARCHAR(255)"/>
+            <column name="institution_name" type="VARCHAR(255)"/>
+            <column name="latitude" type="numeric(10, 6)"/>
+            <column name="longitude" type="numeric(10, 6)"/>
+            <column name="quantity" type="INTEGER"/>
+            <column name="recipient_name" type="VARCHAR(255)"/>
+            <column name="status" type="VARCHAR(255)"/>
+            <column name="status_note" type="VARCHAR(255)"/>
+            <column name="status_updated_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="tracking_code" type="VARCHAR(255)"/>
+            <column name="request_id" type="BIGINT"/>
+            <column name="user_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="belkizozbek (generated)" id="1746292836812-5">
+        <createTable tableName="profile_achievements">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="profile_achievements_pkey"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="earned" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="progress" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="belkizozbek (generated)" id="1746292836812-6">
+        <createTable tableName="user_books">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="user_books_pkey"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_favorite" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="VARCHAR(255)"/>
+            <column name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="book_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="belkizozbek (generated)" id="1746292836812-7">
+        <createTable tableName="users">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="users_pkey"/>
+            </column>
+            <column name="bio" type="VARCHAR(255)"/>
+            <column name="birth_date" type="date"/>
+            <column name="books_read" type="INTEGER"/>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="email" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="enabled" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="failed_login_attempts" type="INTEGER"/>
+            <column name="followers" type="INTEGER"/>
+            <column name="following" type="INTEGER"/>
+            <column name="header_image" type="VARCHAR(255)"/>
+            <column name="last_login_date" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="last_login_ip" type="VARCHAR(255)"/>
+            <column name="name_surname" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="password" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="profile_image" type="VARCHAR(255)"/>
+            <column name="reader_score" type="INTEGER"/>
+            <column name="reading_hours" type="INTEGER"/>
+            <column name="role" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="username" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="yearly_goal" type="INTEGER"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="belkizozbek (generated)" id="1746292836812-8">
+        <createTable tableName="review_likes">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="review_likes_pkey"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="review_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="belkizozbek (generated)" id="1746292836812-9">
+        <createTable tableName="books">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="books_pkey"/>
+            </column>
+            <column name="author" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="google_books_id" type="VARCHAR(255)"/>
+            <column name="image_url" type="TEXT"/>
+            <column name="page_count" type="INTEGER"/>
+            <column name="published_date" type="VARCHAR(255)"/>
+            <column name="summary" type="TEXT"/>
+            <column name="title" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="belkizozbek (generated)" id="1746292836812-10">
+        <createTable tableName="user_followings">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="user_followings_pkey"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="follower_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="following_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="belkizozbek (generated)" id="1746292836812-11">
+        <createTable tableName="comment_likes">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="comment_likes_pkey"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="comment_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="belkizozbek (generated)" id="1746292836812-12">
+        <addUniqueConstraint columnNames="request_id" constraintName="ukc0dnx8ych9r4ikqwrwu9fvjjf" tableName="donations"/>
+    </changeSet>
+    <changeSet author="belkizozbek (generated)" id="1746292836812-13">
+        <addUniqueConstraint columnNames="email" constraintName="uk6dotkott2kjsp8vw4d0m25fb7" tableName="users"/>
+    </changeSet>
+    <changeSet author="belkizozbek (generated)" id="1746292836812-14">
+        <addUniqueConstraint columnNames="username" constraintName="ukr43af9ap4edm43mmtq01oddj6" tableName="users"/>
+    </changeSet>
+    <changeSet author="belkizozbek (generated)" id="1746292836812-15">
+        <addUniqueConstraint columnNames="review_id, user_id" constraintName="ukb74o5l2fmrgqg556d9nyop0ns" tableName="review_likes"/>
+    </changeSet>
+    <changeSet author="belkizozbek (generated)" id="1746292836812-16">
+        <addUniqueConstraint columnNames="google_books_id" constraintName="ukewr3uksb6ikujo9ialg0akg2m" tableName="books"/>
+    </changeSet>
+    <changeSet author="belkizozbek (generated)" id="1746292836812-17">
+        <addUniqueConstraint columnNames="follower_id, following_id" constraintName="ukfkys8b0w1b1iyuhdfnu5sp0ki" tableName="user_followings"/>
+    </changeSet>
+    <changeSet author="belkizozbek (generated)" id="1746292836812-18">
+        <addUniqueConstraint columnNames="comment_id, user_id" constraintName="ukgu1pee3567af29uutdfy0fcjd" tableName="comment_likes"/>
+    </changeSet>
+    <changeSet author="belkizozbek (generated)" id="1746292836812-19">
+        <createTable tableName="book_feedbacks">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="book_feedbacks_pkey"/>
+            </column>
+            <column name="comment" type="VARCHAR(1000)"/>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rating" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="book_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="belkizozbek (generated)" id="1746292836812-20">
+        <createTable tableName="comments">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="comments_pkey"/>
+            </column>
+            <column name="content" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="deleted" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="parent_comment_id" type="BIGINT"/>
+            <column name="post_id" type="BIGINT"/>
+            <column name="quote_id" type="BIGINT"/>
+            <column name="review_id" type="BIGINT"/>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="belkizozbek (generated)" id="1746292836812-21">
+        <createTable tableName="messages">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="messages_pkey"/>
+            </column>
+            <column name="content" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_read" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="receiver_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sender_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="belkizozbek (generated)" id="1746292836812-22">
+        <createTable tableName="notification">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="notification_pkey"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="link" type="VARCHAR(255)"/>
+            <column name="message" type="VARCHAR(255)"/>
+            <column name="read" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type" type="VARCHAR(255)"/>
+            <column name="actor_id" type="BIGINT"/>
+            <column name="recipient_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="belkizozbek (generated)" id="1746292836812-23">
+        <createTable tableName="post_likes">
+            <column name="post_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="post_likes_pkey"/>
+            </column>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="post_likes_pkey"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="belkizozbek (generated)" id="1746292836812-24">
+        <createTable tableName="post_saves">
+            <column name="post_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="post_saves_pkey"/>
+            </column>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="post_saves_pkey"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="belkizozbek (generated)" id="1746292836812-25">
+        <createTable tableName="posts">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="posts_pkey"/>
+            </column>
+            <column name="comments_count" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="content" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="likes_count" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="title" type="VARCHAR(255)"/>
+            <column name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="belkizozbek (generated)" id="1746292836812-26">
+        <createTable tableName="quote_likes">
+            <column name="quote_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="quote_likes_pkey"/>
+            </column>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="quote_likes_pkey"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="belkizozbek (generated)" id="1746292836812-27">
+        <createTable tableName="quote_saves">
+            <column name="quote_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="quote_saves_pkey"/>
+            </column>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="quote_saves_pkey"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="belkizozbek (generated)" id="1746292836812-28">
+        <createTable tableName="quotes">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="quotes_pkey"/>
+            </column>
+            <column name="content" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_deleted" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="page_number" type="INTEGER"/>
+            <column name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="book_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="belkizozbek (generated)" id="1746292836812-29">
+        <createTable tableName="reading_activities">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="reading_activities_pkey"/>
+            </column>
+            <column name="books" type="INTEGER"/>
+            <column name="consecutive_days" type="INTEGER"/>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="last_read_date" type="date"/>
+            <column name="month" type="VARCHAR(255)"/>
+            <column name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="user_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="belkizozbek (generated)" id="1746292836812-30">
+        <createTable tableName="reviews">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="reviews_pkey"/>
+            </column>
+            <column name="content" type="TEXT"/>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_deleted" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rating" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="book_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="belkizozbek (generated)" id="1746292836812-31">
+        <createTable tableName="verification_tokens">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="verification_tokens_pkey"/>
+            </column>
+            <column name="expiry_date" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="token" type="VARCHAR(255)"/>
+            <column name="used" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_data" type="TEXT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="belkizozbek (generated)" id="1746292836812-32">
+        <addForeignKeyConstraint baseColumnNames="comment_id" baseTableName="comment_likes" constraintName="fk3wa5u7bs1p1o9hmavtgdgk1go" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="comments" validate="true"/>
+    </changeSet>
+    <changeSet author="belkizozbek (generated)" id="1746292836812-33">
+        <addForeignKeyConstraint baseColumnNames="sender_id" baseTableName="messages" constraintName="fk4ui4nnwntodh6wjvck53dbk9m" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="users" validate="true"/>
+    </changeSet>
+    <changeSet author="belkizozbek (generated)" id="1746292836812-34">
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="posts" constraintName="fk5lidm6cqbc7u4xhqpxm898qme" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="users" validate="true"/>
+    </changeSet>
+    <changeSet author="belkizozbek (generated)" id="1746292836812-35">
+        <addForeignKeyConstraint baseColumnNames="book_id" baseTableName="reviews" constraintName="fk6a9k6xvev80se5rreqvuqr7f9" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="books" validate="true"/>
+    </changeSet>
+    <changeSet author="belkizozbek (generated)" id="1746292836812-36">
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="comment_likes" constraintName="fk6h3lbneryl5pyb9ykaju7werx" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="users" validate="true"/>
+    </changeSet>
+    <changeSet author="belkizozbek (generated)" id="1746292836812-37">
+        <addForeignKeyConstraint baseColumnNames="book_id" baseTableName="book_lendings" constraintName="fk6khf609ipq4vl1c09owe62k46" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="books" validate="true"/>
+    </changeSet>
+    <changeSet author="belkizozbek (generated)" id="1746292836812-38">
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="post_saves" constraintName="fk71y66p9agprlbcf48w466ol3k" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="users" validate="true"/>
+    </changeSet>
+    <changeSet author="belkizozbek (generated)" id="1746292836812-39">
+        <addForeignKeyConstraint baseColumnNames="parent_comment_id" baseTableName="comments" constraintName="fk7h839m3lkvhbyv3bcdv7sm4fj" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="comments" validate="true"/>
+    </changeSet>
+    <changeSet author="belkizozbek (generated)" id="1746292836812-40">
+        <addForeignKeyConstraint baseColumnNames="borrower_id" baseTableName="book_lendings" constraintName="fk7jg727n9lm8flvfeiickeht78" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="users" validate="true"/>
+    </changeSet>
+    <changeSet author="belkizozbek (generated)" id="1746292836812-41">
+        <addForeignKeyConstraint baseColumnNames="requester_id" baseTableName="donation_requests" constraintName="fk8g589igeqwh24inh2x4rxse82" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="users" validate="true"/>
+    </changeSet>
+    <changeSet author="belkizozbek (generated)" id="1746292836812-42">
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="comments" constraintName="fk8omq0tc18jd43bu5tjh6jvraq" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="users" validate="true"/>
+    </changeSet>
+    <changeSet author="belkizozbek (generated)" id="1746292836812-43">
+        <addForeignKeyConstraint baseColumnNames="book_id" baseTableName="user_books" constraintName="fka26s0po2ld5t5mi5sww9ca98" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="books" validate="true"/>
+    </changeSet>
+    <changeSet author="belkizozbek (generated)" id="1746292836812-44">
+        <addForeignKeyConstraint baseColumnNames="post_id" baseTableName="post_likes" constraintName="fka5wxsgl4doibhbed9gm7ikie2" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="posts" validate="true"/>
+    </changeSet>
+    <changeSet author="belkizozbek (generated)" id="1746292836812-45">
+        <addForeignKeyConstraint baseColumnNames="quote_id" baseTableName="quote_likes" constraintName="fkaytwu2rco8yjqcc003h7lpbkm" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="quotes" validate="true"/>
+    </changeSet>
+    <changeSet author="belkizozbek (generated)" id="1746292836812-46">
+        <addForeignKeyConstraint baseColumnNames="request_id" baseTableName="donations" constraintName="fkb0bkykn1x9ty4j1nutjyupqts" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="donation_requests" validate="true"/>
+    </changeSet>
+    <changeSet author="belkizozbek (generated)" id="1746292836812-47">
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="quotes" constraintName="fkbwr7u11tqw8jekeijdbngy3ku" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="users" validate="true"/>
+    </changeSet>
+    <changeSet author="belkizozbek (generated)" id="1746292836812-48">
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="book_feedbacks" constraintName="fkby7lpb49f8peutnsqcei5xfgd" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="users" validate="true"/>
+    </changeSet>
+    <changeSet author="belkizozbek (generated)" id="1746292836812-49">
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="reviews" constraintName="fkcgy7qjc1r99dp117y9en6lxye" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="users" validate="true"/>
+    </changeSet>
+    <changeSet author="belkizozbek (generated)" id="1746292836812-50">
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="donations" constraintName="fkd2p196clbvqgbemy05ndspwu" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="users" validate="true"/>
+    </changeSet>
+    <changeSet author="belkizozbek (generated)" id="1746292836812-51">
+        <addForeignKeyConstraint baseColumnNames="review_id" baseTableName="comments" constraintName="fkdpo60i7auk5cudv7kkny8jrqb" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="reviews" validate="true"/>
+    </changeSet>
+    <changeSet author="belkizozbek (generated)" id="1746292836812-52">
+        <addForeignKeyConstraint baseColumnNames="book_id" baseTableName="book_feedbacks" constraintName="fkdrhfl7r8b1n10vb01wxh1bjil" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="books" validate="true"/>
+    </changeSet>
+    <changeSet author="belkizozbek (generated)" id="1746292836812-53">
+        <addForeignKeyConstraint baseColumnNames="donation_id" baseTableName="donation_tracking" constraintName="fkel3hq78wbesjnbitnh41bk5qe" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="donations" validate="true"/>
+    </changeSet>
+    <changeSet author="belkizozbek (generated)" id="1746292836812-54">
+        <addForeignKeyConstraint baseColumnNames="recipient_id" baseTableName="notification" constraintName="fkfcyn9rsga73dqnorl7owfyl4a" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="users" validate="true"/>
+    </changeSet>
+    <changeSet author="belkizozbek (generated)" id="1746292836812-55">
+        <addForeignKeyConstraint baseColumnNames="post_id" baseTableName="comments" constraintName="fkh4c7lvsc298whoyd4w9ta25cr" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="posts" validate="true"/>
+    </changeSet>
+    <changeSet author="belkizozbek (generated)" id="1746292836812-56">
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="reading_activities" constraintName="fkhfnbxcota79os78ym6avtvva1" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="users" validate="true"/>
+    </changeSet>
+    <changeSet author="belkizozbek (generated)" id="1746292836812-57">
+        <addForeignKeyConstraint baseColumnNames="post_id" baseTableName="post_saves" constraintName="fki58sh3npybd3lht2da1cewhre" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="posts" validate="true"/>
+    </changeSet>
+    <changeSet author="belkizozbek (generated)" id="1746292836812-58">
+        <addForeignKeyConstraint baseColumnNames="follower_id" baseTableName="user_followings" constraintName="fkjpetojen9fqf3shek5wn8aw3u" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="users" validate="true"/>
+    </changeSet>
+    <changeSet author="belkizozbek (generated)" id="1746292836812-59">
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="post_likes" constraintName="fkkgau5n0nlewg6o9lr4yibqgxj" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="users" validate="true"/>
+    </changeSet>
+    <changeSet author="belkizozbek (generated)" id="1746292836812-60">
+        <addForeignKeyConstraint baseColumnNames="book_id" baseTableName="quotes" constraintName="fklus9hhp6i4xchaju7r96r7e2p" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="books" validate="true"/>
+    </changeSet>
+    <changeSet author="belkizozbek (generated)" id="1746292836812-61">
+        <addForeignKeyConstraint baseColumnNames="review_id" baseTableName="review_likes" constraintName="fkm2uonfg8ky6jwtu6iugkilox8" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="reviews" validate="true"/>
+    </changeSet>
+    <changeSet author="belkizozbek (generated)" id="1746292836812-62">
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="quote_saves" constraintName="fkmuui2tj98l2n5u12w8n1oekh7" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="users" validate="true"/>
+    </changeSet>
+    <changeSet author="belkizozbek (generated)" id="1746292836812-63">
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="review_likes" constraintName="fknual15vv88tiqnwmi60tb2l8d" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="users" validate="true"/>
+    </changeSet>
+    <changeSet author="belkizozbek (generated)" id="1746292836812-64">
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="quote_likes" constraintName="fkoat39syer2qoxk47o9mk544b2" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="users" validate="true"/>
+    </changeSet>
+    <changeSet author="belkizozbek (generated)" id="1746292836812-65">
+        <addForeignKeyConstraint baseColumnNames="quote_id" baseTableName="comments" constraintName="fkpb86tbuk3pc05gf2qrct0p2jv" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="quotes" validate="true"/>
+    </changeSet>
+    <changeSet author="belkizozbek (generated)" id="1746292836812-66">
+        <addForeignKeyConstraint baseColumnNames="actor_id" baseTableName="notification" constraintName="fkqhkbe4e4w4pom5rn4qm6h3imb" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="users" validate="true"/>
+    </changeSet>
+    <changeSet author="belkizozbek (generated)" id="1746292836812-67">
+        <addForeignKeyConstraint baseColumnNames="quote_id" baseTableName="quote_saves" constraintName="fkse3ejoa7ctq354i56gb4ev33u" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="quotes" validate="true"/>
+    </changeSet>
+    <changeSet author="belkizozbek (generated)" id="1746292836812-68">
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="user_books" constraintName="fkseruwi8quqdx6svnurcamej55" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="users" validate="true"/>
+    </changeSet>
+    <changeSet author="belkizozbek (generated)" id="1746292836812-69">
+        <addForeignKeyConstraint baseColumnNames="following_id" baseTableName="user_followings" constraintName="fkspl0ww2du72ovyu0afrk8n6m5" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="users" validate="true"/>
+    </changeSet>
+    <changeSet author="belkizozbek (generated)" id="1746292836812-70">
+        <addForeignKeyConstraint baseColumnNames="receiver_id" baseTableName="messages" constraintName="fkt05r0b6n0iis8u7dfna4xdh73" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="users" validate="true"/>
+    </changeSet>
+</databaseChangeLog>

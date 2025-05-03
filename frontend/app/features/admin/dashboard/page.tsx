@@ -215,7 +215,7 @@ export default function AdminDashboardPage() {
                   console.log("Navigating to all donations")
                 }}
               >
-                <Link href="/features/admin/features/donations">
+                <Link href="/features/admin/donations">
                   <div className="flex items-center">
                     <BookOpen className="mr-2 h-5 w-5" />
                     <span>Tüm Bağışlar</span>
@@ -234,7 +234,7 @@ export default function AdminDashboardPage() {
                   console.log("Navigating to pending donations")
                 }}
               >
-                <Link href="/features/admin/features/donations?status=PENDING">
+                <Link href="/features/admin/donations?status=PENDING">
                   <div className="flex items-center">
                     <Package className="mr-2 h-5 w-5" />
                     <span>Bekleyen Bağışlar</span>
@@ -248,7 +248,7 @@ export default function AdminDashboardPage() {
                 variant="outline" 
                 className="w-full justify-between"
               >
-                <Link href="/features/admin/features/donations/new">
+                <Link href="/features/admin/donations/new">
                   <div className="flex items-center">
                     <BookMarked className="mr-2 h-5 w-5" />
                     <span>Yeni Bağış Ekle</span>

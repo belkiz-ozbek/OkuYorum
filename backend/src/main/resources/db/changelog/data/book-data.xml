@@ -4,20 +4,11 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                    https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
-    <changeSet id="20250215 10:30" author="belkiz.ozbek">
-        <addColumn tableName="books">
-            <column name="google_books_id" type="varchar(255)"/>
-            <column name="image_url" type="varchar(1000)"/>
-            <column name="published_date" type="varchar(255)"/>
-            <column name="page_count" type="integer"/>
-        </addColumn>
-    </changeSet>
     <changeSet id="add-books-data" author="belkiz.ozbek">
         <insert tableName="books">
             <column name="title" value="Aşk"/>
             <column name="author" value="Elif Şafak"/>
             <column name="summary" value="Tasavvuf felsefesi ve aşkın farklı yüzlerini anlatan derin bir roman."/>
-            <column name="user_id" value="1"/>
             <column name="created_at" value="2025-02-19 08:28:13.144461"/>
             <column name="updated_at" value="2025-02-19 08:28:13.144461"/>
             <column name="google_books_id" value="id13"/>
@@ -30,7 +21,6 @@
             <column name="title" value="1984"/>
             <column name="author" value="George Orwell"/>
             <column name="summary" value="Totaliter bir rejimin hüküm sürdüğü distopik bir gelecekte bireyin mücadelesi."/>
-            <column name="user_id" value="1"/>
             <column name="created_at" value="2025-02-19 08:28:13.144461"/>
             <column name="updated_at" value="2025-02-19 08:28:13.144461"/>
             <column name="google_books_id" value="id16"/>
@@ -43,7 +33,6 @@
             <column name="title" value="Dönüşüm"/>
             <column name="author" value="Franz Kafka"/>
             <column name="summary" value="Gregor Samsa'nın bir sabah böceğe dönüşmesiyle başlayan hikaye."/>
-            <column name="user_id" value="1"/>
             <column name="created_at" value="2025-02-19 08:28:13.144461"/>
             <column name="updated_at" value="2025-02-19 08:28:13.144461"/>
             <column name="google_books_id" value="id3"/>
@@ -56,7 +45,6 @@
             <column name="title" value="Nutuk"/>
             <column name="author" value="Mustafa Kemal Atatürk"/>
             <column name="summary" value="Atatürk'ün bağımsızlık mücadelesini ve Cumhuriyet'in kuruluş sürecini anlatan tarihi metin."/>
-            <column name="user_id" value="1"/>
             <column name="created_at" value="2025-02-19 08:28:13.144461"/>
             <column name="updated_at" value="2025-02-19 08:28:13.144461"/>
             <column name="google_books_id" value="id28"/>
@@ -69,7 +57,6 @@
             <column name="title" value="Olasılıksız"/>
             <column name="author" value="Adam Fawer"/>
             <column name="summary" value="Matematiksel olasılıkların insan hayatındaki etkilerini anlatan sürükleyici bir roman."/>
-            <column name="user_id" value="1"/>
             <column name="created_at" value="2025-02-19 08:28:13.144461"/>
             <column name="updated_at" value="2025-02-19 08:28:13.144461"/>
             <column name="google_books_id" value="id10"/>
@@ -82,7 +69,6 @@
             <column name="title" value="Başlangıç"/>
             <column name="author" value="Dan Brown"/>
             <column name="summary" value="Teknoloji, din ve bilim üzerine düşündüren bir gerilim romanı."/>
-            <column name="user_id" value="1"/>
             <column name="created_at" value="2025-02-19 08:28:13.144461"/>
             <column name="updated_at" value="2025-02-19 08:28:13.144461"/>
             <column name="google_books_id" value="id43"/>
@@ -95,7 +81,6 @@
             <column name="title" value="Bin Muhteşem Güneş"/>
             <column name="author" value="Khaled Hosseini"/>
             <column name="summary" value="Afganistan'da iki kadının kesişen hayatları ve dostlukları."/>
-            <column name="user_id" value="1"/>
             <column name="created_at" value="2025-02-19 08:28:13.144461"/>
             <column name="updated_at" value="2025-02-19 08:28:13.144461"/>
             <column name="google_books_id" value="id18"/>
@@ -108,7 +93,6 @@
             <column name="title" value="Zamanın Kısa Tarihi"/>
             <column name="author" value="Stephen Hawking"/>
             <column name="summary" value="Evrenin oluşumu ve fizik kuramlarını anlatan popüler bilim kitabı."/>
-            <column name="user_id" value="1"/>
             <column name="created_at" value="2025-02-19 08:28:13.144461"/>
             <column name="updated_at" value="2025-02-19 08:28:13.144461"/>
             <column name="google_books_id" value="id35"/>
@@ -121,7 +105,6 @@
             <column name="title" value="Harry Potter ve Felsefe Taşı"/>
             <column name="author" value="J.K. Rowling"/>
             <column name="summary" value="Genç büyücü Harry Potter'ın Hogwarts'ta geçirdiği ilk yıl."/>
-            <column name="user_id" value="1"/>
             <column name="created_at" value="2025-02-19 08:28:13.144461"/>
             <column name="updated_at" value="2025-02-19 08:28:13.144461"/>
             <column name="google_books_id" value="id31"/>
@@ -134,7 +117,6 @@
             <column name="title" value="Kırmızı ve Siyah"/>
             <column name="author" value="Stendhal"/>
             <column name="summary" value="Toplumun ikiyüzlülüğü ve bireyin hırsları üzerine klasikleşmiş bir eser."/>
-            <column name="user_id" value="1"/>
             <column name="created_at" value="2025-02-19 08:28:13.144461"/>
             <column name="updated_at" value="2025-02-19 08:28:13.144461"/>
             <column name="google_books_id" value="id40"/>
@@ -147,7 +129,6 @@
             <column name="title" value="Eşekli Kütüphaneci"/>
             <column name="author" value="Fakir Baykurt"/>
             <column name="summary" value="Anadolu'da bir köy kütüphanecisinin gerçek hikayesi."/>
-            <column name="user_id" value="1"/>
             <column name="created_at" value="2025-02-19 08:28:13.144461"/>
             <column name="updated_at" value="2025-02-19 08:28:13.144461"/>
             <column name="google_books_id" value="id50"/>
@@ -160,7 +141,6 @@
             <column name="title" value="Baba ve Piç"/>
             <column name="author" value="Elif Şafak"/>
             <column name="summary" value="Türk ve Ermeni kimlikleri arasında geçen tarihsel ve kişisel hesaplaşmalar."/>
-            <column name="user_id" value="1"/>
             <column name="created_at" value="2025-02-19 08:28:13.144461"/>
             <column name="updated_at" value="2025-02-19 08:28:13.144461"/>
             <column name="google_books_id" value="id24"/>
@@ -173,7 +153,6 @@
             <column name="title" value="İstanbul Hatırası"/>
             <column name="author" value="Ahmet Ümit"/>
             <column name="summary" value="İstanbul'un tarihiyle harmanlanmış sürükleyici bir polisiye roman."/>
-            <column name="user_id" value="1"/>
             <column name="created_at" value="2025-02-19 08:28:13.144461"/>
             <column name="updated_at" value="2025-02-19 08:28:13.144461"/>
             <column name="google_books_id" value="id29"/>
@@ -186,7 +165,6 @@
             <column name="title" value="Fareler ve İnsanlar"/>
             <column name="author" value="John Steinbeck"/>
             <column name="summary" value="Büyük Buhran döneminde iki gezgin çiftlik işçisinin dostluğu ve hayalleri."/>
-            <column name="user_id" value="1"/>
             <column name="created_at" value="2025-02-19 08:28:13.144461"/>
             <column name="updated_at" value="2025-02-19 08:28:13.144461"/>
             <column name="google_books_id" value="id11"/>
@@ -199,7 +177,6 @@
             <column name="title" value="Uçurtma Avcısı"/>
             <column name="author" value="Khaled Hosseini"/>
             <column name="summary" value="Afganistan'da geçen dostluk ve ihanet üzerine dokunaklı bir roman."/>
-            <column name="user_id" value="1"/>
             <column name="created_at" value="2025-02-19 08:28:13.144461"/>
             <column name="updated_at" value="2025-02-19 08:28:13.144461"/>
             <column name="google_books_id" value="id4"/>
@@ -212,7 +189,6 @@
             <column name="title" value="Dava"/>
             <column name="author" value="Franz Kafka"/>
             <column name="summary" value="Bürokratik bir sistem içinde kaybolan bireyin çaresizliği."/>
-            <column name="user_id" value="1"/>
             <column name="created_at" value="2025-02-19 08:28:13.144461"/>
             <column name="updated_at" value="2025-02-19 08:28:13.144461"/>
             <column name="google_books_id" value="id30"/>
@@ -225,7 +201,6 @@
             <column name="title" value="Kuyucaklı Yusuf"/>
             <column name="author" value="Sabahattin Ali"/>
             <column name="summary" value="Yusuf'un küçük bir kasabada yaşadığı aşk ve toplumsal çatışmalar."/>
-            <column name="user_id" value="1"/>
             <column name="created_at" value="2025-02-19 08:28:13.144461"/>
             <column name="updated_at" value="2025-02-19 08:28:13.144461"/>
             <column name="google_books_id" value="id14"/>
@@ -238,7 +213,6 @@
             <column name="title" value="Kürk Mantolu Madonna"/>
             <column name="author" value="Sabahattin Ali"/>
             <column name="summary" value="Raif Efendi'nin Maria Puder ile olan derin ve dokunaklı aşk hikayesi."/>
-            <column name="user_id" value="1"/>
             <column name="created_at" value="2025-02-19 08:28:13.144461"/>
             <column name="updated_at" value="2025-02-19 08:28:13.144461"/>
             <column name="google_books_id" value="id1"/>
@@ -251,7 +225,6 @@
             <column name="title" value="Sofie'nin Dünyası"/>
             <column name="author" value="Jostein Gaarder"/>
             <column name="summary" value="Felsefe tarihini roman biçiminde anlatan bir başyapıt."/>
-            <column name="user_id" value="1"/>
             <column name="created_at" value="2025-02-19 08:28:13.144461"/>
             <column name="updated_at" value="2025-02-19 08:28:13.144461"/>
             <column name="google_books_id" value="id34"/>
@@ -264,7 +237,6 @@
             <column name="title" value="Beyoğlu Rapsodisi"/>
             <column name="author" value="Ahmet Ümit"/>
             <column name="summary" value="İstanbul'un karanlık yüzünü anlatan etkileyici bir polisiye."/>
-            <column name="user_id" value="1"/>
             <column name="created_at" value="2025-02-19 08:28:13.144461"/>
             <column name="updated_at" value="2025-02-19 08:28:13.144461"/>
             <column name="google_books_id" value="id42"/>
@@ -277,7 +249,6 @@
             <column name="title" value="Beyaz Zambaklar Ülkesinde"/>
             <column name="author" value="Grigory Petrov"/>
             <column name="summary" value="Finlandiya'nın eğitim ve kalkınma sürecini anlatan ilham verici bir eser."/>
-            <column name="user_id" value="1"/>
             <column name="created_at" value="2025-02-19 08:28:13.144461"/>
             <column name="updated_at" value="2025-02-19 08:28:13.144461"/>
             <column name="google_books_id" value="id23"/>
@@ -290,7 +261,6 @@
             <column name="title" value="Tutunamayanlar"/>
             <column name="author" value="Oğuz Atay"/>
             <column name="summary" value="Türk edebiyatının en önemli modernist romanlarından biri."/>
-            <column name="user_id" value="1"/>
             <column name="created_at" value="2025-02-19 08:28:13.144461"/>
             <column name="updated_at" value="2025-02-19 08:28:13.144461"/>
             <column name="google_books_id" value="id38"/>
@@ -303,7 +273,6 @@
             <column name="title" value="Küçük Prens"/>
             <column name="author" value="Antoine de Saint-Exupéry"/>
             <column name="summary" value="Bir çocuğun gözünden büyüklerin dünyasına eleştirel bir bakış."/>
-            <column name="user_id" value="1"/>
             <column name="created_at" value="2025-02-19 08:28:13.144461"/>
             <column name="updated_at" value="2025-02-19 08:28:13.144461"/>
             <column name="google_books_id" value="id2"/>
@@ -316,7 +285,6 @@
             <column name="title" value="Şato"/>
             <column name="author" value="Franz Kafka"/>
             <column name="summary" value="Bürokrasiyle mücadele eden bir adamın sürreal hikayesi."/>
-            <column name="user_id" value="1"/>
             <column name="created_at" value="2025-02-19 08:28:13.144461"/>
             <column name="updated_at" value="2025-02-19 08:28:13.144461"/>
             <column name="google_books_id" value="id48"/>
@@ -329,7 +297,6 @@
             <column name="title" value="Yeraltından Notlar"/>
             <column name="author" value="Fyodor Dostoyevski"/>
             <column name="summary" value="İnsan ruhunun karanlık yönlerini irdeleyen derin felsefi bir roman."/>
-            <column name="user_id" value="1"/>
             <column name="created_at" value="2025-02-19 08:28:13.144461"/>
             <column name="updated_at" value="2025-02-19 08:28:13.144461"/>
             <column name="google_books_id" value="id25"/>
@@ -342,7 +309,6 @@
             <column name="title" value="Kırmızı Pazartesi"/>
             <column name="author" value="Gabriel García Márquez"/>
             <column name="summary" value="Bir cinayetin kaçınılmazlığı üzerine etkileyici bir anlatım."/>
-            <column name="user_id" value="1"/>
             <column name="created_at" value="2025-02-19 08:28:13.144461"/>
             <column name="updated_at" value="2025-02-19 08:28:13.144461"/>
             <column name="google_books_id" value="id33"/>
@@ -355,7 +321,6 @@
             <column name="title" value="Sefiller"/>
             <column name="author" value="Victor Hugo"/>
             <column name="summary" value="Jean Valjean'ın kefaret arayışı ve Fransız Devrimi'nin toplumsal yansımaları."/>
-            <column name="user_id" value="1"/>
             <column name="created_at" value="2025-02-19 08:28:13.144461"/>
             <column name="updated_at" value="2025-02-19 08:28:13.144461"/>
             <column name="google_books_id" value="id17"/>
@@ -368,7 +333,6 @@
             <column name="title" value="İnsan Ne İle Yaşar"/>
             <column name="author" value="Lev Tolstoy"/>
             <column name="summary" value="İnsanın varoluşunu ve manevi değerlerini sorgulayan derinlemesine öyküler."/>
-            <column name="user_id" value="1"/>
             <column name="created_at" value="2025-02-19 08:28:13.144461"/>
             <column name="updated_at" value="2025-02-19 08:28:13.144461"/>
             <column name="google_books_id" value="id19"/>
@@ -381,7 +345,6 @@
             <column name="title" value="Suç ve Ceza"/>
             <column name="author" value="Fyodor Dostoyevski"/>
             <column name="summary" value="Raskolnikov'un işlediği cinayet ve sonrasında yaşadığı içsel çatışmalar."/>
-            <column name="user_id" value="1"/>
             <column name="created_at" value="2025-02-19 08:28:13.144461"/>
             <column name="updated_at" value="2025-02-19 08:28:13.144461"/>
             <column name="google_books_id" value="id9"/>
@@ -394,7 +357,6 @@
             <column name="title" value="Hayvan Çiftliği"/>
             <column name="author" value="George Orwell"/>
             <column name="summary" value="Bir çiftlikteki hayvanların insanlara karşı başlattığı isyanın alegorisi."/>
-            <column name="user_id" value="1"/>
             <column name="created_at" value="2025-02-19 08:28:13.144461"/>
             <column name="updated_at" value="2025-02-19 08:28:13.144461"/>
             <column name="google_books_id" value="id8"/>
@@ -407,7 +369,6 @@
             <column name="title" value="Bir Ömür Nasıl Yaşanır?"/>
             <column name="author" value="İlber Ortaylı"/>
             <column name="summary" value="Hayatı daha anlamlı ve verimli yaşamak üzerine İlber Ortaylı'nın önerileri."/>
-            <column name="user_id" value="1"/>
             <column name="created_at" value="2025-02-19 08:28:13.144461"/>
             <column name="updated_at" value="2025-02-19 08:28:13.144461"/>
             <column name="google_books_id" value="id27"/>
@@ -420,7 +381,6 @@
             <column name="title" value="Bilinmeyen Bir Kadının Mektubu"/>
             <column name="author" value="Stefan Zweig"/>
             <column name="summary" value="Hayatı boyunca platonik bir aşk yaşayan bir kadının mektubu."/>
-            <column name="user_id" value="1"/>
             <column name="created_at" value="2025-02-19 08:28:13.144461"/>
             <column name="updated_at" value="2025-02-19 08:28:13.144461"/>
             <column name="google_books_id" value="id15"/>
@@ -433,7 +393,6 @@
             <column name="title" value="Satranç"/>
             <column name="author" value="Stefan Zweig"/>
             <column name="summary" value="Bir gemi yolculuğunda satranç üzerinden insan psikolojisinin derinlikleri."/>
-            <column name="user_id" value="1"/>
             <column name="created_at" value="2025-02-19 08:28:13.144461"/>
             <column name="updated_at" value="2025-02-19 08:28:13.144461"/>
             <column name="google_books_id" value="id6"/>
@@ -446,7 +405,6 @@
             <column name="title" value="Simyacı"/>
             <column name="author" value="Paulo Coelho"/>
             <column name="summary" value="Endülüslü çoban Santiago'nun hazinesini aramak için çıktığı yolculuk."/>
-            <column name="user_id" value="1"/>
             <column name="created_at" value="2025-02-19 08:28:13.144461"/>
             <column name="updated_at" value="2025-02-19 08:28:13.144461"/>
             <column name="google_books_id" value="id5"/>
@@ -459,7 +417,6 @@
             <column name="title" value="İlyada"/>
             <column name="author" value="Homeros"/>
             <column name="summary" value="Troya Savaşı'nı anlatan Antik Yunan destanı."/>
-            <column name="user_id" value="1"/>
             <column name="created_at" value="2025-02-19 08:28:13.144461"/>
             <column name="updated_at" value="2025-02-19 08:28:13.144461"/>
             <column name="google_books_id" value="id44"/>
@@ -472,7 +429,6 @@
             <column name="title" value="Serenad"/>
             <column name="author" value="Zülfü Livaneli"/>
             <column name="summary" value="Bir profesörün İstanbul'a gelişiyle açığa çıkan tarihi bir aşk hikayesi."/>
-            <column name="user_id" value="1"/>
             <column name="created_at" value="2025-02-19 08:28:13.144461"/>
             <column name="updated_at" value="2025-02-19 08:28:13.144461"/>
             <column name="google_books_id" value="id20"/>
@@ -485,7 +441,6 @@
             <column name="title" value="Puslu Kıtalar Atlası"/>
             <column name="author" value="İhsan Oktay Anar"/>
             <column name="summary" value="Alternatif bir Osmanlı dünyasında geçen fantastik bir hikaye."/>
-            <column name="user_id" value="1"/>
             <column name="created_at" value="2025-02-19 08:28:13.144461"/>
             <column name="updated_at" value="2025-02-19 08:28:13.144461"/>
             <column name="google_books_id" value="id36"/>
@@ -498,7 +453,6 @@
             <column name="title" value="Da Vinci Şifresi"/>
             <column name="author" value="Dan Brown"/>
             <column name="summary" value="Sanat tarihi ve şifrelerle dolu sürükleyici bir gerilim romanı."/>
-            <column name="user_id" value="1"/>
             <column name="created_at" value="2025-02-19 08:28:13.144461"/>
             <column name="updated_at" value="2025-02-19 08:28:13.144461"/>
             <column name="google_books_id" value="id41"/>
@@ -511,7 +465,6 @@
             <column name="title" value="Bir Bilim Adamının Romanı"/>
             <column name="author" value="Oğuz Atay"/>
             <column name="summary" value="Mustafa İnan'ın hayatı üzerinden bilimin ve insanın derinliği."/>
-            <column name="user_id" value="1"/>
             <column name="created_at" value="2025-02-19 08:28:13.144461"/>
             <column name="updated_at" value="2025-02-19 08:28:13.144461"/>
             <column name="google_books_id" value="id49"/>
@@ -524,7 +477,6 @@
             <column name="title" value="Bülbülü Öldürmek"/>
             <column name="author" value="Harper Lee"/>
             <column name="summary" value="Irkçılık ve adalet üzerine etkileyici bir Amerikan klasiği."/>
-            <column name="user_id" value="1"/>
             <column name="created_at" value="2025-02-19 08:28:13.144461"/>
             <column name="updated_at" value="2025-02-19 08:28:13.144461"/>
             <column name="google_books_id" value="id37"/>
@@ -537,7 +489,6 @@
             <column name="title" value="Şeker Portakalı"/>
             <column name="author" value="José Mauro de Vasconcelos"/>
             <column name="summary" value="Küçük Zezé'nin hayal dünyası ve yaşadığı zorluklar."/>
-            <column name="user_id" value="1"/>
             <column name="created_at" value="2025-02-19 08:28:13.144461"/>
             <column name="updated_at" value="2025-02-19 08:28:13.144461"/>
             <column name="google_books_id" value="id7"/>
@@ -550,7 +501,6 @@
             <column name="title" value="Yer Demir Gök Bakır"/>
             <column name="author" value="Yaşar Kemal"/>
             <column name="summary" value="Bir Anadolu köyünde geçen unutulmaz bir hikaye."/>
-            <column name="user_id" value="1"/>
             <column name="created_at" value="2025-02-19 08:28:13.144461"/>
             <column name="updated_at" value="2025-02-19 08:28:13.144461"/>
             <column name="google_books_id" value="id46"/>
@@ -563,7 +513,6 @@
             <column name="title" value="Od"/>
             <column name="author" value="İskender Pala"/>
             <column name="summary" value="Şeyh Galip'in aşkı ve tasavvuf yolculuğu."/>
-            <column name="user_id" value="1"/>
             <column name="created_at" value="2025-02-19 08:28:13.144461"/>
             <column name="updated_at" value="2025-02-19 08:28:13.144461"/>
             <column name="google_books_id" value="id45"/>
@@ -576,7 +525,6 @@
             <column name="title" value="Huzursuzluk"/>
             <column name="author" value="Zülfü Livaneli"/>
             <column name="summary" value="Suriye'den Türkiye'ye uzanan acı bir insan hikayesi."/>
-            <column name="user_id" value="1"/>
             <column name="created_at" value="2025-02-19 08:28:13.144461"/>
             <column name="updated_at" value="2025-02-19 08:28:13.144461"/>
             <column name="google_books_id" value="id32"/>
@@ -589,7 +537,6 @@
             <column name="title" value="Çalıkuşu"/>
             <column name="author" value="Reşat Nuri Güntekin"/>
             <column name="summary" value="Feride'nin Anadolu'da öğretmenlik yaparken yaşadığı zorluklar ve aşk hikayesi."/>
-            <column name="user_id" value="1"/>
             <column name="created_at" value="2025-02-19 08:28:13.144461"/>
             <column name="updated_at" value="2025-02-19 08:28:13.144461"/>
             <column name="google_books_id" value="id12"/>
@@ -602,7 +549,6 @@
             <column name="title" value="İçimizdeki Şeytan"/>
             <column name="author" value="Sabahattin Ali"/>
             <column name="summary" value="Ömer ve Macide'nin aşkı üzerinden bireyin içsel çatışmaları ve toplum baskısı."/>
-            <column name="user_id" value="1"/>
             <column name="created_at" value="2025-02-19 08:28:13.144461"/>
             <column name="updated_at" value="2025-02-19 08:28:13.144461"/>
             <column name="google_books_id" value="id21"/>
@@ -615,7 +561,6 @@
             <column name="title" value="Kafamda Bir Tuhaflık"/>
             <column name="author" value="Orhan Pamuk"/>
             <column name="summary" value="Boza satıcısı Mevlüt'ün İstanbul'daki yaşamı ve hayalleri."/>
-            <column name="user_id" value="1"/>
             <column name="created_at" value="2025-02-19 08:28:13.144461"/>
             <column name="updated_at" value="2025-02-19 08:28:13.144461"/>
             <column name="google_books_id" value="id26"/>
@@ -628,7 +573,6 @@
             <column name="title" value="Monte Cristo Kontu"/>
             <column name="author" value="Alexandre Dumas"/>
             <column name="summary" value="İhanet ve intikam üzerine efsanevi bir klasik."/>
-            <column name="user_id" value="1"/>
             <column name="created_at" value="2025-02-19 08:28:13.144461"/>
             <column name="updated_at" value="2025-02-19 08:28:13.144461"/>
             <column name="google_books_id" value="id47"/>
@@ -641,7 +585,6 @@
             <column name="title" value="Şah ve Sultan"/>
             <column name="author" value="İskender Pala"/>
             <column name="summary" value="Yavuz Sultan Selim ile Şah İsmail'in mücadelesini anlatan tarihi roman."/>
-            <column name="user_id" value="1"/>
             <column name="created_at" value="2025-02-19 08:28:13.144461"/>
             <column name="updated_at" value="2025-02-19 08:28:13.144461"/>
             <column name="google_books_id" value="id39"/>
