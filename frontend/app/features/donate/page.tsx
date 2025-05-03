@@ -14,7 +14,6 @@ import {
   ChevronsUpDown,
   Gift,
   Library,
-  Loader2,
   School,
   User,
   Users
@@ -387,9 +386,13 @@ export default function DonatePage() {
         throw new Error(data.error || 'Bağış kaydedilemedi')
       }
 
-      clearDraft()
       setShowConfirmModal(false)
       router.push('/features/donate/success')
+      
+      // Success sayfasına yönlendirdikten sonra draft verileri temizle
+      setTimeout(() => {
+        clearDraft()
+      }, 1000)
     } catch (error: unknown) {
       toast({
         title: "Hata",
@@ -755,19 +758,6 @@ export default function DonatePage() {
                   <div>
                     {renderInput("description", "Açıklama (Opsiyonel)", description, handleInputChange(setDescription))}
                   </div>
-
-                  <Button 
-                    type="submit" 
-                    className="w-full"
-                    disabled={isSubmitting}
-                  >
-                    {isSubmitting && (
-                      <>
-                        <span className="mr-2">Bağış Kaydediliyor</span>
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      </>
-                    )}
-                  </Button>
                 </form>
               </CardContent>
             </Card>

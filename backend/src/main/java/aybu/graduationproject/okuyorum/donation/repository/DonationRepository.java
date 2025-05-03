@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface DonationRepository extends JpaRepository<Donation, Long> {
@@ -36,4 +37,9 @@ public interface DonationRepository extends JpaRepository<Donation, Long> {
      * @return The count of donations created between the given dates
      */
     long countByCreatedAtBetween(LocalDateTime start, LocalDateTime end);
+
+    /**
+     * Find the latest donation by user
+     */
+    Optional<Donation> findFirstByUserOrderByCreatedAtDesc(User user);
 } 

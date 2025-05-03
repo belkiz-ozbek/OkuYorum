@@ -246,4 +246,15 @@ public class DonationService {
                 return now.plusWeeks(1); // Varsayılan olarak 1 hafta
         }
     }
+
+    /**
+     * Kullanıcının en son bağışını getirir
+     */
+    public DonationDto getLatestDonation() {
+        User currentUser = userService.getCurrentUser();
+        Donation latestDonation = donationRepository.findFirstByUserOrderByCreatedAtDesc(currentUser)
+            .orElseThrow(() -> new RuntimeException("Henüz bir bağışınız bulunmuyor"));
+        
+        return donationMapper.toDto(latestDonation);
+    }
 } 

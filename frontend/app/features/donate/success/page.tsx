@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import Image from 'next/image'
 import {Button} from "@/components/ui/form/button";
 import QRCode from 'qrcode';
+import { useRouter } from "next/navigation"
 
 type DonationData = {
   bookTitle: string;
@@ -65,85 +66,108 @@ export default function DonationSuccessPage() {
   const [copied, setCopied] = useState(false)
   const [certificatePreview, setCertificatePreview] = useState<string>("")
   const [certificateTheme, setCertificateTheme] = useState<"purple" | "blue" | "green">("purple")
-  const [isScrolled, setIsScrolled] = useState(false)
-  const [theme, setTheme] = useState<'light' | 'dark'>('light')
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const { toast } = useToast()
+  const router = useRouter()
   
-  useEffect(() => {
-    // Sistem dark mode tercihini kontrol et
-    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      setTheme('dark')
-      document.documentElement.setAttribute('data-theme', 'dark')
-    }
-
-    const handleScroll = () => {
-      const scrollPosition = window.scrollY
-      setIsScrolled(scrollPosition > 50)
-    }
-
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
-
-  const toggleTheme = () => {
-    const newTheme = theme === 'light' ? 'dark' : 'light'
-    setTheme(newTheme)
-    document.documentElement.setAttribute('data-theme', newTheme)
-  }
-
   // Kullanıcı bilgilerini ve bağış detaylarını al
   useEffect(() => {
-    try {
-      // Kullanıcı adını localStorage'dan al
-      const storedUserName = localStorage.getItem('userName') || ""
-      const cleanUserName = storedUserName.replace(/"/g, '')
-      console.log('Kullanıcı adı yüklendi:', cleanUserName)
-      setUserName(cleanUserName)
-      
-      // Bağış detaylarını localStorage'dan al
-      const details: DonationData = {
-        bookTitle: localStorage.getItem('draft_bookTitle') || "",
-        author: localStorage.getItem('draft_author') || "",
-        genre: localStorage.getItem('draft_genre') || "",
-        condition: localStorage.getItem('draft_condition') || "",
-        quantity: Number(localStorage.getItem('draft_quantity')) || 1,
-        donationType: localStorage.getItem('draft_donationType') || "",
-        institutionName: localStorage.getItem('draft_institutionName') || "",
-        recipientName: localStorage.getItem('draft_recipientName') || "",
-        address: localStorage.getItem('draft_address') || ""
-      }
-      
-      console.log('Bağış detayları yüklendi:', details)
-      
-      if (details.bookTitle) {
-        setDonationDetails(details)
-      } else {
-        console.warn('Bağış detayları eksik')
-        // Varsayılan değerler ile devam et
-        setDonationDetails({
-          bookTitle: "Örnek Kitap",
-          author: "Örnek Yazar",
-          genre: "fiction",
-          condition: "new",
-          quantity: 1,
-          donationType: "schools"
+    const fetchDonationDetails = async () => {
+      try {
+        // Kullanıcı adını localStorage'dan al
+        const storedUserName = localStorage.getItem('userName') || ""
+        const cleanUserName = storedUserName.replace(/"/g, '')
+        setUserName(cleanUserName)
+        
+        // Token kontrolü
+        const token = localStorage.getItem('token')
+        if (!token) {
+          console.warn("Token bulunamadı")
+          router.push('/features/auth/login?redirect=/features/donate')
+          return
+        }
+
+        // Önce API'den son bağışı almayı dene
+        try {
+          const response = await fetch('http://localhost:8080/api/donations/user/latest', {
+            headers: {
+              'Authorization': `Bearer ${token.replace(/"/g, '')}`,
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            },
+            credentials: 'include'
+          })
+
+          if (response.ok) {
+            const data = await response.json()
+            if (data) {
+              setDonationDetails({
+                bookTitle: data.bookTitle || "",
+                author: data.author || "",
+                genre: data.genre || "fiction",
+                condition: data.condition || "new",
+                quantity: data.quantity || 1,
+                donationType: data.donationType || "schools",
+                institutionName: data.institutionName || "",
+                recipientName: data.recipientName || "",
+                address: data.address || ""
+              })
+              return
+            }
+          }
+        } catch (error) {
+          console.warn('API çağrısı başarısız:', error)
+        }
+
+        // API'den veri alınamazsa localStorage'dan draft verileri kontrol et
+        const draftDetails = {
+          bookTitle: localStorage.getItem('draft_bookTitle'),
+          author: localStorage.getItem('draft_author'),
+          genre: localStorage.getItem('draft_genre'),
+          condition: localStorage.getItem('draft_condition'),
+          quantity: localStorage.getItem('draft_quantity'),
+          donationType: localStorage.getItem('draft_donationType'),
+          institutionName: localStorage.getItem('draft_institutionName'),
+          recipientName: localStorage.getItem('draft_recipientName'),
+          address: localStorage.getItem('draft_address')
+        }
+
+        // Eğer draft veriler varsa, onları kullan
+        if (draftDetails.bookTitle && draftDetails.author) {
+          setDonationDetails({
+            bookTitle: draftDetails.bookTitle,
+            author: draftDetails.author,
+            genre: draftDetails.genre || "fiction",
+            condition: draftDetails.condition || "new",
+            quantity: Number(draftDetails.quantity) || 1,
+            donationType: draftDetails.donationType || "schools",
+            institutionName: draftDetails.institutionName || "",
+            recipientName: draftDetails.recipientName || "",
+            address: draftDetails.address || ""
+          })
+          return
+        }
+
+        // Ne API'den ne de localStorage'dan veri alınabildiyse form sayfasına yönlendir
+        toast({
+          title: "Hata",
+          description: "Bağış detayları bulunamadı",
+          variant: "destructive"
         })
+        router.push('/features/donate')
+      } catch (error) {
+        console.error('Veri yükleme hatası:', error)
+        toast({
+          title: "Hata",
+          description: "Bağış detayları alınamadı. Lütfen tekrar deneyin.",
+          variant: "destructive"
+        })
+        router.push('/features/donate')
       }
-    } catch (error) {
-      console.error('Veri yükleme hatası:', error)
-      // Hata durumunda varsayılan değerler ile devam et
-      setUserName("Değerli Bağışçı")
-      setDonationDetails({
-        bookTitle: "Örnek Kitap",
-        author: "Örnek Yazar",
-        genre: "fiction",
-        condition: "new",
-        quantity: 1,
-        donationType: "schools"
-      })
     }
-  }, [])
+
+    fetchDonationDetails()
+  }, [router, toast])
 
   // İstatistikleri API'den al
   useEffect(() => {
@@ -575,7 +599,7 @@ export default function DonationSuccessPage() {
               {userName ? `Teşekkürler ${userName}!` : 'Bağışınız için Teşekkürler!'}
             </h1>
             <p className="text-gray-600 text-lg mb-6">
-              {donationDetails?.bookTitle ? `"${donationDetails.bookTitle}" kitabınız yeni sahibini bekliyor...` : 'Kitaplarınız yeni sahiplerini bekliyor...'}
+              {donationDetails?.bookTitle ? `${donationDetails.bookTitle} kitabınız yeni sahibini bekliyor...` : 'Kitaplarınız yeni sahiplerini bekliyor...'}
             </p>
             <div className="flex items-center justify-center space-x-2 text-sm text-gray-500">
               <Heart className="h-4 w-4 text-pink-500" />

@@ -165,4 +165,17 @@ public class DonationController {
                 }});
         }
     }
+
+    @GetMapping("/user/latest")
+    public ResponseEntity<?> getLatestDonation() {
+        try {
+            DonationDto donation = donationService.getLatestDonation();
+            return ResponseEntity.ok(donation);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                .body(new HashMap<String, String>() {{
+                    put("error", "Son bağış detayları alınırken bir hata oluştu: " + e.getMessage());
+                }});
+        }
+    }
 } 
