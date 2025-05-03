@@ -47,7 +47,6 @@ import { postService } from "@/services/postService"
 import { Post } from "@/types/post"
 import { QuoteList } from "@/components/quotes/QuoteList"
 import { AuthProvider } from "@/contexts/AuthContext"
-import { EmptyState } from '@/components/ui/empty-state/EmptyState'
 import { Review, reviewService } from '@/services/reviewService'
 import { ReviewList } from '@/components/reviews/ReviewList'
 import { Avatar, AvatarImage } from "@/components/ui/avatar"
@@ -930,7 +929,7 @@ export default function ProfilePage() {
                     className={`group relative z-10 min-w-[140px] ${
                       isFollowing 
                         ? 'bg-white hover:bg-red-50 border-gray-200 text-gray-700' 
-                        : 'bg-purple-400 hover:bg-purple-500 text-white border-transparent'
+                        : 'bg-purple-600 hover:bg-purple-700 text-white border-transparent shadow-md hover:shadow-lg'
                     } transition-all duration-200`}
                     onClick={isFollowing ? handleUnfollow : handleFollow}
                   >
@@ -1623,8 +1622,20 @@ export default function ProfilePage() {
                     <div className="h-[calc(100vh-300px)] overflow-y-auto">
                       <div className="space-y-6">
                         {combinedContent.length === 0 ? (
-                          <div className="text-center text-gray-500 py-8">
-                            Henüz hiç paylaşım yapılmamış.
+                          <div className="text-center py-12">
+                            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-purple-50 flex items-center justify-center">
+                              <Layout className="h-8 w-8 text-purple-400" />
+                            </div>
+                            <p className="text-lg font-medium text-gray-900 mb-2">
+                              {currentUser?.id.toString() === profile.id.toString() ? 
+                                "Henüz hiç paylaşım yapmadınız" : 
+                                `${profile.nameSurname} henüz hiç paylaşım yapmamış`}
+                            </p>
+                            <p className="text-sm text-gray-500">
+                              {currentUser?.id.toString() === profile.id.toString() ?
+                                "Kitaplardan alıntı paylaşabilir, inceleme yazabilir veya ileti paylaşabilirsiniz." :
+                                "Kullanıcı paylaşım yaptığında burada görüntülenecek."}
+                            </p>
                           </div>
                         ) : (
                           combinedContent.map((item, index) => (
@@ -1701,16 +1712,21 @@ export default function ProfilePage() {
                             }} />
                           </AuthProvider>
                         ) : (
-                          <EmptyState
-                            icon={BookOpen}
-                            title={currentUser?.id.toString() === profile.id.toString() ? 
-                              "Henüz hiç alıntı paylaşmadınız" : 
-                              `${profile.nameSurname} henüz hiç alıntı paylaşmamış`}
-                            description={currentUser?.id.toString() === profile.id.toString() ?
-                              "Yukarıdaki arama çubuğundan kitap aratıp, kitap detay sayfasından alıntı ekleyebilirsiniz." :
-                              "Kullanıcı kitaplardan alıntı paylaştığında burada görüntülenecek."}
-                            ctaText={currentUser?.id.toString() === profile.id.toString() ? "Kitap Ara" : undefined}
-                          />
+                          <div className="text-center py-12">
+                            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-purple-50 flex items-center justify-center">
+                              <QuoteIcon className="h-8 w-8 text-purple-400" />
+                            </div>
+                            <p className="text-lg font-medium text-gray-900 mb-2">
+                              {currentUser?.id.toString() === profile.id.toString() ? 
+                                "Henüz hiç alıntı paylaşmadınız" : 
+                                `${profile.nameSurname} henüz hiç alıntı paylaşmamış`}
+                            </p>
+                            <p className="text-sm text-gray-500">
+                              {currentUser?.id.toString() === profile.id.toString() ?
+                                "Yukarıdaki arama çubuğundan kitap aratıp, kitap detay sayfasından alıntı ekleyebilirsiniz." :
+                                "Kullanıcı kitaplardan alıntı paylaştığında burada görüntülenecek."}
+                            </p>
+                          </div>
                         )}
                       </div>
                     </div>
@@ -1729,17 +1745,21 @@ export default function ProfilePage() {
                             onReviewsChange={fetchUserReviews}
                           />
                         ) : (
-                          <EmptyState
-                            icon={BookText}
-                            title={currentUser?.id.toString() === profile.id.toString() ? 
-                              "Henüz hiç inceleme paylaşmadınız" : 
-                              `${profile.nameSurname} henüz hiç inceleme paylaşmamış`}
-                            description={currentUser?.id.toString() === profile.id.toString() ?
-                              "Yukarıdaki arama çubuğundan kitap aratıp, kitap detay sayfasından inceleme ekleyebilirsiniz." :
-                              "Kullanıcı kitap incelemeleri paylaştığında burada görüntülenecek."}
-                            ctaText={currentUser?.id.toString() === profile.id.toString() ? "Kitap Ara" : undefined}
-                            ctaAction={() => router.push('/features/discover')}
-                          />
+                          <div className="text-center py-12">
+                            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-purple-50 flex items-center justify-center">
+                              <BookText className="h-8 w-8 text-purple-400" />
+                            </div>
+                            <p className="text-lg font-medium text-gray-900 mb-2">
+                              {currentUser?.id.toString() === profile.id.toString() ? 
+                                "Henüz hiç inceleme paylaşmadınız" : 
+                                `${profile.nameSurname} henüz hiç inceleme paylaşmamış`}
+                            </p>
+                            <p className="text-sm text-gray-500">
+                              {currentUser?.id.toString() === profile.id.toString() ?
+                                "Yukarıdaki arama çubuğundan kitap aratıp, kitap detay sayfasından inceleme ekleyebilirsiniz." :
+                                "Kullanıcı kitap incelemeleri paylaştığında burada görüntülenecek."}
+                            </p>
+                          </div>
                         )}
                       </div>
                     </div>
