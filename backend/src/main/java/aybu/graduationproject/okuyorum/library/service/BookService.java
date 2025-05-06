@@ -251,6 +251,7 @@ public class BookService {
         dto.setImageUrl(book.getImageUrl());
         dto.setPublishedDate(book.getPublishedDate());
         dto.setPageCount(book.getPageCount());
+        dto.setGenre(book.getGenre());
         
         // Get status and user info from UserBook if available
         if (userBook != null) {

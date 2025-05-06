@@ -1,0 +1,303 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
+
+    <changeSet author="belkizozbek" id="update-book-genres-data">
+        <!-- Aşk -->
+        <update tableName="books">
+            <column name="genre" value="Roman"/>
+            <where>title = 'Aşk'</where>
+        </update>
+
+        <!-- 1984 -->
+        <update tableName="books">
+            <column name="genre" value="Distopya"/>
+            <where>title = '1984'</where>
+        </update>
+
+        <!-- Hayvan Çiftliği -->
+        <update tableName="books">
+            <column name="genre" value="Politik Alegori"/>
+            <where>title = 'Hayvan Çiftliği'</where>
+        </update>
+
+        <!-- Dönüşüm -->
+        <update tableName="books">
+            <column name="genre" value="Alegori"/>
+            <where>title = 'Dönüşüm'</where>
+        </update>
+
+        <!-- Nutuk -->
+        <update tableName="books">
+            <column name="genre" value="Tarih"/>
+            <where>title = 'Nutuk'</where>
+        </update>
+
+        <!-- Olasılıksız -->
+        <update tableName="books">
+            <column name="genre" value="Bilim Kurgu"/>
+            <where>title = 'Olasılıksız'</where>
+        </update>
+
+        <!-- Başlangıç -->
+        <update tableName="books">
+            <column name="genre" value="Gerilim"/>
+            <where>title = 'Başlangıç'</where>
+        </update>
+
+        <!-- Bin Muhteşem Güneş -->
+        <update tableName="books">
+            <column name="genre" value="Roman"/>
+            <where>title = 'Bin Muhteşem Güneş'</where>
+        </update>
+
+        <!-- Zamanın Kısa Tarihi -->
+        <update tableName="books">
+            <column name="genre" value="Popüler Bilim"/>
+            <where>title = 'Zamanın Kısa Tarihi'</where>
+        </update>
+
+        <!-- Harry Potter ve Felsefe Taşı -->
+        <update tableName="books">
+            <column name="genre" value="Fantastik"/>
+            <where>title = 'Harry Potter ve Felsefe Taşı'</where>
+        </update>
+
+        <!-- Kırmızı ve Siyah -->
+        <update tableName="books">
+            <column name="genre" value="Klasik"/>
+            <where>title = 'Kırmızı ve Siyah'</where>
+        </update>
+
+        <!-- Eşekli Kütüphaneci -->
+        <update tableName="books">
+            <column name="genre" value="Öykü"/>
+            <where>title = 'Eşekli Kütüphaneci'</where>
+        </update>
+
+        <!-- Baba ve Piç -->
+        <update tableName="books">
+            <column name="genre" value="Roman"/>
+            <where>title = 'Baba ve Piç'</where>
+        </update>
+
+        <!-- İstanbul Hatırası -->
+        <update tableName="books">
+            <column name="genre" value="Polisiye"/>
+            <where>title = 'İstanbul Hatırası'</where>
+        </update>
+
+        <!-- Fareler ve İnsanlar -->
+        <update tableName="books">
+            <column name="genre" value="Roman"/>
+            <where>title = 'Fareler ve İnsanlar'</where>
+        </update>
+
+        <!-- Uçurtma Avcısı -->
+        <update tableName="books">
+            <column name="genre" value="Roman"/>
+            <where>title = 'Uçurtma Avcısı'</where>
+        </update>
+
+        <!-- Dava -->
+        <update tableName="books">
+            <column name="genre" value="Alegori"/>
+            <where>title = 'Dava'</where>
+        </update>
+
+        <!-- Kuyucaklı Yusuf -->
+        <update tableName="books">
+            <column name="genre" value="Roman"/>
+            <where>title = 'Kuyucaklı Yusuf'</where>
+        </update>
+
+        <!-- Kürk Mantolu Madonna -->
+        <update tableName="books">
+            <column name="genre" value="Roman"/>
+            <where>title = 'Kürk Mantolu Madonna'</where>
+        </update>
+
+        <!-- Sofie'nin Dünyası -->
+        <update tableName="books">
+            <column name="genre" value="Felsefe"/>
+            <where>title = 'Sofie''nin Dünyası'</where>
+        </update>
+
+        <!-- Beyoğlu Rapsodisi -->
+        <update tableName="books">
+            <column name="genre" value="Polisiye"/>
+            <where>title = 'Beyoğlu Rapsodisi'</where>
+        </update>
+
+        <!-- Beyaz Zambaklar Ülkesinde -->
+        <update tableName="books">
+            <column name="genre" value="Eğitim"/>
+            <where>title = 'Beyaz Zambaklar Ülkesinde'</where>
+        </update>
+
+        <!-- Tutunamayanlar -->
+        <update tableName="books">
+            <column name="genre" value="Modern Roman"/>
+            <where>title = 'Tutunamayanlar'</where>
+        </update>
+
+        <!-- Küçük Prens -->
+        <update tableName="books">
+            <column name="genre" value="Alegori"/>
+            <where>title = 'Küçük Prens'</where>
+        </update>
+
+        <!-- Şato -->
+        <update tableName="books">
+            <column name="genre" value="Alegori"/>
+            <where>title = 'Şato'</where>
+        </update>
+
+        <!-- Yeraltından Notlar -->
+        <update tableName="books">
+            <column name="genre" value="Felsefi Roman"/>
+            <where>title = 'Yeraltından Notlar'</where>
+        </update>
+
+        <!-- Kırmızı Pazartesi -->
+        <update tableName="books">
+            <column name="genre" value="Roman"/>
+            <where>title = 'Kırmızı Pazartesi'</where>
+        </update>
+
+        <!-- Sefiller -->
+        <update tableName="books">
+            <column name="genre" value="Klasik"/>
+            <where>title = 'Sefiller'</where>
+        </update>
+
+        <!-- İnsan Ne İle Yaşar -->
+        <update tableName="books">
+            <column name="genre" value="Öykü"/>
+            <where>title = 'İnsan Ne İle Yaşar'</where>
+        </update>
+
+        <!-- Suç ve Ceza -->
+        <update tableName="books">
+            <column name="genre" value="Psikolojik Roman"/>
+            <where>title = 'Suç ve Ceza'</where>
+        </update>
+
+        <!-- Bir Ömür Nasıl Yaşanır? -->
+        <update tableName="books">
+            <column name="genre" value="Kişisel Gelişim"/>
+            <where>title = 'Bir Ömür Nasıl Yaşanır?'</where>
+        </update>
+
+        <!-- Bilinmeyen Bir Kadının Mektubu -->
+        <update tableName="books">
+            <column name="genre" value="Novella"/>
+            <where>title = 'Bilinmeyen Bir Kadının Mektubu'</where>
+        </update>
+
+        <!-- Satranç -->
+        <update tableName="books">
+            <column name="genre" value="Novella"/>
+            <where>title = 'Satranç'</where>
+        </update>
+
+        <!-- Simyacı -->
+        <update tableName="books">
+            <column name="genre" value="Felsefi Roman"/>
+            <where>title = 'Simyacı'</where>
+        </update>
+
+        <!-- İlyada -->
+        <update tableName="books">
+            <column name="genre" value="Epik"/>
+            <where>title = 'İlyada'</where>
+        </update>
+
+        <!-- Serenad -->
+        <update tableName="books">
+            <column name="genre" value="Tarihi Roman"/>
+            <where>title = 'Serenad'</where>
+        </update>
+
+        <!-- Puslu Kıtalar Atlası -->
+        <update tableName="books">
+            <column name="genre" value="Fantastik"/>
+            <where>title = 'Puslu Kıtalar Atlası'</where>
+        </update>
+
+        <!-- Da Vinci Şifresi -->
+        <update tableName="books">
+            <column name="genre" value="Gerilim"/>
+            <where>title = 'Da Vinci Şifresi'</where>
+        </update>
+
+        <!-- Bir Bilim Adamının Romanı -->
+        <update tableName="books">
+            <column name="genre" value="Biyografi"/>
+            <where>title = 'Bir Bilim Adamının Romanı'</where>
+        </update>
+
+        <!-- Bülbülü Öldürmek -->
+        <update tableName="books">
+            <column name="genre" value="Roman"/>
+            <where>title = 'Bülbülü Öldürmek'</where>
+        </update>
+
+        <!-- Şeker Portakalı -->
+        <update tableName="books">
+            <column name="genre" value="Roman"/>
+            <where>title = 'Şeker Portakalı'</where>
+        </update>
+
+        <!-- Yer Demir Gök Bakır -->
+        <update tableName="books">
+            <column name="genre" value="Roman"/>
+            <where>title = 'Yer Demir Gök Bakır'</where>
+        </update>
+
+        <!-- Od -->
+        <update tableName="books">
+            <column name="genre" value="Tarihi Roman"/>
+            <where>title = 'Od'</where>
+        </update>
+
+        <!-- Huzursuzluk -->
+        <update tableName="books">
+            <column name="genre" value="Roman"/>
+            <where>title = 'Huzursuzluk'</where>
+        </update>
+
+        <!-- Çalıkuşu -->
+        <update tableName="books">
+            <column name="genre" value="Roman"/>
+            <where>title = 'Çalıkuşu'</where>
+        </update>
+
+        <!-- İçimizdeki Şeytan -->
+        <update tableName="books">
+            <column name="genre" value="Psikolojik Roman"/>
+            <where>title = 'İçimizdeki Şeytan'</where>
+        </update>
+
+        <!-- Kafamda Bir Tuhaflık -->
+        <update tableName="books">
+            <column name="genre" value="Roman"/>
+            <where>title = 'Kafamda Bir Tuhaflık'</where>
+        </update>
+
+        <!-- Monte Cristo Kontu -->
+        <update tableName="books">
+            <column name="genre" value="Macera"/>
+            <where>title = 'Monte Cristo Kontu'</where>
+        </update>
+
+        <!-- Şah ve Sultan -->
+        <update tableName="books">
+            <column name="genre" value="Tarihi Roman"/>
+            <where>title = 'Şah ve Sultan'</where>
+        </update>
+    </changeSet>
+
+</databaseChangeLog> 

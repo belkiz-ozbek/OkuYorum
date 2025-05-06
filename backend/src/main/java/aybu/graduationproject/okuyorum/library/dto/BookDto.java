@@ -17,6 +17,7 @@ public class BookDto {
     private Double rating;
     private Integer reviewCount;
     private boolean isFavorite;
+    private String genre;
 
     // Getters and Setters
     public Long getId() {
@@ -129,5 +130,13 @@ public class BookDto {
 
     public void setFavorite(boolean favorite) {
         isFavorite = favorite;
+    }
+
+    public String getGenre() {
+        return genre;
+    }
+
+    public void setGenre(String genre) {
+        this.genre = genre;
     }
 } 

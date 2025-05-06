@@ -1,6 +1,6 @@
 "use client"
 
-import { BookOpen, Quote, Calendar, BookText, Heart, Share2, Bookmark, MessageCircle, Sparkles, Award } from 'lucide-react'
+import { BookOpen, Quote, Calendar, BookText, Heart, Share2, Bookmark, BookmarkCheck, MessageCircle, Sparkles, Award } from 'lucide-react'
 import Image from 'next/image'
 import { useEffect, useState } from 'react'
 import { use } from 'react'
@@ -82,6 +82,7 @@ export default function BookPage({ params }: PageProps) {
                     title: data.title,
                     status: data.status,
                     favorite: data.favorite,
+                    genre: data.genre,
                     fullResponse: data
                 })
                 
@@ -90,6 +91,9 @@ export default function BookPage({ params }: PageProps) {
                     ...data,
                     isFavorite: data.favorite
                 })
+
+                // Genre'yi kontrol et
+                console.log('Genre after setting book:', data.genre)
             } catch (err) {
                 console.error('Kitap detayı getirme hatası:', err)
                 setError(err instanceof Error ? err.message : 'Bir hata oluştu')
@@ -597,12 +601,22 @@ export default function BookPage({ params }: PageProps) {
                                             onClick={() => handleStatusChange("WILL_READ")}
                                             className="relative flex items-center gap-3 px-6 py-3 bg-white dark:bg-gray-900 hover:bg-purple-50 dark:hover:bg-gray-800 border border-purple-100 dark:border-purple-800/30 rounded-lg shadow-xl shadow-purple-500/10 hover:shadow-purple-500/20 transition-all duration-300">
                                             <div className="relative">
-                                                <Bookmark className="w-5 h-5 text-purple-500 dark:text-purple-400 group-hover:text-purple-600 dark:group-hover:text-purple-300 transition-colors duration-300" />
+                                                {book?.status === "WILL_READ" ? (
+                                                    <BookmarkCheck className="w-5 h-5 text-purple-500 dark:text-purple-400 group-hover:text-purple-600 dark:group-hover:text-purple-300 transition-colors duration-300" />
+                                                ) : (
+                                                    <Bookmark className="w-5 h-5 text-purple-500 dark:text-purple-400 group-hover:text-purple-600 dark:group-hover:text-purple-300 transition-colors duration-300" />
+                                                )}
                                                 <div className="absolute inset-0 animate-pulse opacity-30 text-purple-500 group-hover:opacity-50">
-                                                    <Bookmark className="w-5 h-5" />
+                                                    {book?.status === "WILL_READ" ? (
+                                                        <BookmarkCheck className="w-5 h-5" />
+                                                    ) : (
+                                                        <Bookmark className="w-5 h-5" />
+                                                    )}
                                                 </div>
                                             </div>
-                                            <span className="font-medium text-gray-700 dark:text-gray-300 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors duration-300">Okuma Listeme Ekle</span>
+                                            <span className="font-medium text-gray-700 dark:text-gray-300 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors duration-300">
+                                                {book?.status === "WILL_READ" ? "Okuma Listemde" : "Okuma Listeme Ekle"}
+                                            </span>
                                         </Button>
                                     </motion.div>
 
@@ -627,21 +641,15 @@ export default function BookPage({ params }: PageProps) {
 
                             {/* Etiketler */}
                             <div className="flex flex-wrap gap-2 mb-6">
-                                <span className="px-3 py-1 bg-amber-50 text-amber-600 rounded-full text-sm hover:bg-amber-100 transition-colors">
-                                    Fantastik
-                                </span>
-                                <span className="px-3 py-1 bg-indigo-50 text-indigo-600 rounded-full text-sm hover:bg-indigo-100 transition-colors">
-                                    Büyü ve Sihir
-                                </span>
-                                <span className="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-full text-sm hover:bg-emerald-100 transition-colors">
-                                    Macera
-                                </span>
-                                <span className="px-3 py-1 bg-purple-50 text-purple-600 rounded-full text-sm hover:bg-purple-100 transition-colors">
-                                    Hogwarts
-                                </span>
-                                <span className="px-3 py-1 bg-rose-50 text-rose-600 rounded-full text-sm hover:bg-rose-100 transition-colors">
-                                    Genç-Yetişkin
-                                </span>
+                                {book.genre ? (
+                                    <span className="px-4 py-2 bg-purple-100 text-purple-700 rounded-full text-sm font-medium hover:bg-purple-200 transition-colors">
+                                        {book.genre}
+                                    </span>
+                                ) : (
+                                    <span className="px-4 py-2 bg-gray-100 text-gray-600 rounded-full text-sm font-medium">
+                                        Tür belirtilmemiş
+                                    </span>
+                                )}
                             </div>
 
                             {/* Alıntı ve İnceleme Ekleme Butonları */}
