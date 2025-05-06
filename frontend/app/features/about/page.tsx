@@ -389,7 +389,7 @@ export default function AboutPage() {
               skills={["Backend Geliştirme", "Veri Tabanı Tasarımı", "Yapay Zeka"]}
               socialLinks={{
                 github: "https://github.com/enfalyetis",
-                linkedin: "https://linkedin.com/in/enfalyetis",
+                linkedin: "https://www.linkedin.com/in/enfal-yeti%C5%9F-152781233/",
                 twitter: "https://twitter.com/enfalyetis",
               }}
             />
@@ -413,7 +413,7 @@ export default function AboutPage() {
               skills={["Backend Geliştirme", "Veri Tabanı Yönetimi", "API Entegrasyonu"]}
               socialLinks={{
                 github: "https://github.com/belkizozbek",
-                linkedin: "https://linkedin.com/in/belkizozbek",
+                linkedin: "https://www.linkedin.com/in/belk%C4%B1z-%C3%B6zbek-69b626246/",
                 twitter: "https://twitter.com/belkizozbek",
               }}
             />
