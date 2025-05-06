@@ -388,7 +388,7 @@ export default function AboutPage() {
               bio="Bilgisayar Mühendisliği öğrencisi olan Enfal, OkuYorum'un teknik altyapısından sorumludur. Yazılım geliştirme ve veri tabanı yönetimi konularında uzmanlaşmıştır."
               skills={["Backend Geliştirme", "Veri Tabanı Tasarımı", "Yapay Zeka"]}
               socialLinks={{
-                github: "https://github.com/enfalyetis",
+                github: "https://github.com/EnfalYetis",
                 linkedin: "https://www.linkedin.com/in/enfal-yeti%C5%9F-152781233/",
                 twitter: "https://twitter.com/enfalyetis",
               }}
@@ -400,7 +400,7 @@ export default function AboutPage() {
               bio="Ayşenur, kullanıcı deneyimi ve arayüz tasarımı konusunda uzmanlaşmış bir Bilgisayar Mühendisliği öğrencisidir. OkuYorum'un kullanıcı dostu arayüzünün arkasındaki yaratıcıdır."
               skills={["UI/UX Tasarım", "Frontend Geliştirme", "Kullanıcı Araştırması"]}
               socialLinks={{
-                github: "https://github.com/aysenursirin",
+                github: "https://github.com/sirinn00",
                 linkedin: "https://linkedin.com/in/aysenursirin",
                 twitter: "https://twitter.com/aysenursirin",
               }}
@@ -412,7 +412,7 @@ export default function AboutPage() {
               bio="Belkız, proje yönetimi ve iş geliştirme konularında deneyimli bir Bilgisayar Mühendisliği öğrencisidir. OkuYorum'un backend geliştirme ve veri tabanı yönetiminden sorumludur."
               skills={["Backend Geliştirme", "Veri Tabanı Yönetimi", "API Entegrasyonu"]}
               socialLinks={{
-                github: "https://github.com/belkizozbek",
+                github: "https://github.com/belkiz-ozbek",
                 linkedin: "https://www.linkedin.com/in/belk%C4%B1z-%C3%B6zbek-69b626246/",
                 twitter: "https://twitter.com/belkizozbek",
               }}
