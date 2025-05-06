@@ -2,17 +2,18 @@
 import Link from "next/link"
 import { Header } from "@/components/homepage/Header"
 import { Footer } from "@/components/homepage/Footer"
+import { CallToAction } from "@/components/homepage/CallToAction"
 import { motion } from "framer-motion"
 import { ChevronRight, BookOpen, Heart, MessageSquare, Users, Target, Compass, Star, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 export default function AboutPage() {
   return (
-    <div className="flex min-h-screen flex-col bg-[#f8f6ff]">
+    <div className="flex min-h-screen flex-col bg-background">
       <Header />
 
       {/* Hero Section - Biz Kimiz? */}
-      <section className="relative overflow-hidden bg-white py-20 md:py-28">
+      <section className="relative overflow-hidden bg-background py-20 md:py-28">
         <div className="absolute inset-0 bg-[url('/subtle-pattern.png')] opacity-5 z-0"></div>
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-6xl mx-auto">
@@ -24,12 +25,12 @@ export default function AboutPage() {
                 className="order-2 lg:order-1"
               >
                 <div className="inline-flex items-center px-3 py-1 rounded-full bg-[#f0ebff] text-[#8a3ffc] text-sm font-medium mb-6">
-                  <span>2023'den beri kitapseverlerle</span>
+                  <span>2025'den beri kitapseverlerle</span>
                 </div>
                 <h1 className="text-4xl md:text-5xl font-bold mb-6 text-gray-900">Biz Kimiz?</h1>
                 <div className="space-y-4 text-gray-700">
                   <p className="text-lg leading-relaxed">
-                    <span className="font-semibold text-[#8a3ffc]">OkuYorum</span>, 2023 yılında Ankara Yıldırım Beyazıt
+                    <span className="font-semibold text-[#8a3ffc]">OkuYorum</span>, 2025 yılında Ankara Yıldırım Beyazıt
                     Üniversitesi Bilgisayar Mühendisliği öğrencileri tarafından kurulmuş, kitapseverleri ve toplulukları
                     bir araya getiren yenilikçi bir sosyal kitap paylaşım platformudur.
                   </p>
@@ -92,7 +93,7 @@ export default function AboutPage() {
       </section>
 
       {/* Mission Section */}
-      <section className="py-16 md:py-24 bg-white">
+      <section className="py-16 md:py-24 bg-background">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
             <motion.div
@@ -201,7 +202,7 @@ export default function AboutPage() {
       </section>
 
       {/* Vision Section */}
-      <section className="py-16 md:py-24 bg-[#f8f6ff]">
+      <section className="py-16 md:py-24 bg-background">
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -251,8 +252,8 @@ export default function AboutPage() {
                         Dijital Kütüphaneleri Demokratikleştirmek
                       </h3>
                       <p className="text-gray-600">
-                        Herkesin erişebileceği, kullanımı kolay ve kapsayıcı dijital kütüphane sistemleri oluşturarak
-                        bilgiye erişimi demokratikleştirmeyi hedefliyoruz.
+                      Herkesin erişebileceği, kullanımı kolay ve kapsayıcı dijital kütüphane altyapısı 
+                      sağlamayı hedefliyoruz.
                       </p>
                     </div>
                   </li>
@@ -292,7 +293,7 @@ export default function AboutPage() {
       </section>
 
       {/* Process Section */}
-      <section className="py-16 md:py-24 bg-white">
+      <section className="py-16 md:py-24 bg-background">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4 text-[#8a3ffc]">Platformumuz sizin için tasarlandı</h2>
@@ -333,80 +334,9 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Team Section */}
-      <section className="py-16 md:py-24 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-[#8a3ffc]">Ekibimiz</h2>
-            <p className="text-gray-500 max-w-3xl mx-auto">
-              OkuYorum, tutkulu ve yetenekli bir ekip tarafından geliştirilmiştir. Kitap sevgisi ve teknoloji tutkusuyla
-              bir araya gelen ekibimiz, kullanıcılarımıza en iyi deneyimi sunmak için çalışmaktadır.
-            </p>
-          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            <TeamMember
-              name="Enfal Yetiş"
-              role="Kurucu & Baş Geliştirici"
-              bio="Bilgisayar Mühendisliği öğrencisi olan Enfal, OkuYorum'un teknik altyapısından sorumludur. Yazılım geliştirme ve veri tabanı yönetimi konularında uzmanlaşmıştır."
-              skills={["Backend Geliştirme", "Veri Tabanı Tasarımı", "API Entegrasyonu"]}
-              socialLinks={{
-                github: "https://github.com/enfalyetis",
-                linkedin: "https://linkedin.com/in/enfalyetis",
-                twitter: "https://twitter.com/enfalyetis",
-              }}
-            />
-
-            <TeamMember
-              name="Ayşenur Şirin"
-              role="Kurucu & UI/UX Tasarımcı"
-              bio="Ayşenur, kullanıcı deneyimi ve arayüz tasarımı konusunda uzmanlaşmış bir Bilgisayar Mühendisliği öğrencisidir. OkuYorum'un kullanıcı dostu arayüzünün arkasındaki yaratıcı güçtür."
-              skills={["UI/UX Tasarım", "Frontend Geliştirme", "Kullanıcı Araştırması"]}
-              socialLinks={{
-                github: "https://github.com/aysenursirin",
-                linkedin: "https://linkedin.com/in/aysenursirin",
-                twitter: "https://twitter.com/aysenursirin",
-              }}
-            />
-
-            <TeamMember
-              name="Belkız Özbek"
-              role="Kurucu & Proje Yöneticisi"
-              bio="Belkız, proje yönetimi ve iş geliştirme konularında deneyimli bir Bilgisayar Mühendisliği öğrencisidir. OkuYorum'un stratejik planlaması ve topluluk ilişkilerinden sorumludur."
-              skills={["Proje Yönetimi", "İş Geliştirme", "Topluluk Yönetimi"]}
-              socialLinks={{
-                github: "https://github.com/belkizozbek",
-                linkedin: "https://linkedin.com/in/belkizozbek",
-                twitter: "https://twitter.com/belkizozbek",
-              }}
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* Technologies Section */}
-      <section className="py-16 md:py-24 bg-[#f8f6ff]">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-[#8a3ffc]">Kullandığımız Teknolojiler</h2>
-            <p className="text-gray-500 max-w-3xl mx-auto">
-              OkuYorum platformu, modern ve güvenilir teknolojiler kullanılarak geliştirilmiştir.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8">
-            <TechnologyCard name="Java" />
-            <TechnologyCard name="Spring Boot" />
-            <TechnologyCard name="Next.js" />
-            <TechnologyCard name="PostgreSQL" />
-            <TechnologyCard name="Docker" />
-            <TechnologyCard name="GitHub" />
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials Section */}
-      <section className="py-16 md:py-24 bg-white">
+            {/* Testimonials Section */}
+            <section className="py-16 md:py-24 bg-background">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold mb-4 text-[#8a3ffc]">Kullanıcı Yorumları</h2>
@@ -440,21 +370,80 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-16 md:py-24 bg-[#8a3ffc] text-white">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-6">Hemen Başlayın</h2>
-          <p className="text-xl mb-8 max-w-3xl mx-auto">
-            OkuYorum'a katılın, kitaplarınızı yönetin, incelemeler yazın ve topluma katkıda bulunun.
-          </p>
-          <Link href="/register">
-            <Button size="lg" className="bg-white hover:bg-gray-100 text-[#8a3ffc] px-8 py-6">
-              Üye Ol
-            </Button>
-          </Link>
+      {/* Team Section */}
+      <section className="py-16 md:py-24 bg-background">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-[#8a3ffc]">Ekibimiz</h2>
+            <p className="text-gray-500 max-w-3xl mx-auto">
+              OkuYorum, tutkulu ve yetenekli bir ekip tarafından geliştirilmiştir. Kitap sevgisi ve teknoloji tutkusuyla
+              bir araya gelen ekibimiz, kullanıcılarımıza en iyi deneyimi sunmak için çalışmaktadır.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            <TeamMember
+              name="Enfal Yetiş"
+              role="Kurucu & Backend Developer"
+              bio="Bilgisayar Mühendisliği öğrencisi olan Enfal, OkuYorum'un teknik altyapısından sorumludur. Yazılım geliştirme ve veri tabanı yönetimi konularında uzmanlaşmıştır."
+              skills={["Backend Geliştirme", "Veri Tabanı Tasarımı", "Yapay Zeka"]}
+              socialLinks={{
+                github: "https://github.com/enfalyetis",
+                linkedin: "https://linkedin.com/in/enfalyetis",
+                twitter: "https://twitter.com/enfalyetis",
+              }}
+            />
+
+            <TeamMember
+              name="Ayşenur Şirin"
+              role="Kurucu & Frontend Developer"
+              bio="Ayşenur, kullanıcı deneyimi ve arayüz tasarımı konusunda uzmanlaşmış bir Bilgisayar Mühendisliği öğrencisidir. OkuYorum'un kullanıcı dostu arayüzünün arkasındaki yaratıcıdır."
+              skills={["UI/UX Tasarım", "Frontend Geliştirme", "Kullanıcı Araştırması"]}
+              socialLinks={{
+                github: "https://github.com/aysenursirin",
+                linkedin: "https://linkedin.com/in/aysenursirin",
+                twitter: "https://twitter.com/aysenursirin",
+              }}
+            />
+
+            <TeamMember
+              name="Belkız Özbek"
+              role="Kurucu & Backend Developer"
+              bio="Belkız, proje yönetimi ve iş geliştirme konularında deneyimli bir Bilgisayar Mühendisliği öğrencisidir. OkuYorum'un backend geliştirme ve veri tabanı yönetiminden sorumludur."
+              skills={["Backend Geliştirme", "Veri Tabanı Yönetimi", "API Entegrasyonu"]}
+              socialLinks={{
+                github: "https://github.com/belkizozbek",
+                linkedin: "https://linkedin.com/in/belkizozbek",
+                twitter: "https://twitter.com/belkizozbek",
+              }}
+            />
+          </div>
         </div>
       </section>
 
+      {/* Technologies Section */}
+      <section className="py-16 md:py-24 bg-background">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-[#8a3ffc]">Kullandığımız Teknolojiler</h2>
+            <p className="text-gray-500 max-w-3xl mx-auto">
+              OkuYorum platformu, modern ve güvenilir teknolojiler kullanılarak geliştirilmiştir.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8">
+            <TechnologyCard name="Java" />
+            <TechnologyCard name="Spring Boot" />
+            <TechnologyCard name="Next.js" />
+            <TechnologyCard name="PostgreSQL" />
+            <TechnologyCard name="Docker" />
+            <TechnologyCard name="GitHub" />
+          </div>
+        </div>
+      </section>
+
+
+      <CallToAction/>
       <Footer />
     </div>
   )
