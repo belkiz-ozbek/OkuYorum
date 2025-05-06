@@ -249,7 +249,7 @@ export default function AboutPage() {
                     </div>
                     <div>
                       <h3 className="text-lg font-bold text-[#8a3ffc] mb-2">
-                        Dijital Kütüphaneleri Demokratikleştirmek
+                        Dijital Kütüphane Sistemi Kurmak
                       </h3>
                       <p className="text-gray-600">
                       Herkesin erişebileceği, kullanımı kolay ve kapsayıcı dijital kütüphane altyapısı 
