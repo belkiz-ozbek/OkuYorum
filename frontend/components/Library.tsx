@@ -1,12 +1,10 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Card } from "@/components/ui/Card";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import {BookOpen, CheckCircle, Clock, Star, Library as LibraryIcon, Compass, Users, Heart, Moon, Sun, Check, Bookmark, UserPlus, ChevronLeft, ChevronRight} from "lucide-react";
-import { ScratchToReveal } from "@/components/ui/scratch-to-reveal";
+import {BookOpen, CheckCircle, Star, Users, Check, Bookmark, ChevronLeft, ChevronRight} from "lucide-react";
 
 interface Book {
   id: number;
@@ -14,7 +12,7 @@ interface Book {
   author: string;
   isbn?: string;
   coverImage: string;
-  status: "available" | "borrowed" | "read" | "to-read" | "favorite";
+  status: "available" | "borrowed" | "read" | "to-read" | "favorite" | "lending";
   borrowedBy?: string;
   borrower?: {
     id: number;
@@ -36,27 +34,19 @@ interface LibraryProps {
   activeTab?: 'all' | 'favorites' | 'to-read' | 'read' | 'borrowed' | 'lending';
 }
 
-const Library = ({ activeTab = 'all' }: LibraryProps): JSX.Element => {
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const pathname = usePathname();
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
-  const [shelf, setShelf] = useState(0);
+const Library = ({ activeTab = 'all' }: LibraryProps): React.ReactElement => {
   const [isClient, setIsClient] = useState(false);
-  const [revealedBook, setRevealedBook] = useState<Book | null>(null);
   const [books, setBooks] = useState<Book[]>([]);
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [showLendModal, setShowLendModal] = useState(false);
   const [showBorrowerModal, setShowBorrowerModal] = useState(false);
-  const [borrowerName, setBorrowerName] = useState('');
   const [rating, setRating] = useState(0);
   const [feedback, setFeedback] = useState('');
-  const [favoriteBooks, setFavoriteBooks] = useState<Set<number>>(new Set());
   const [readBooks, setReadBooks] = useState<Set<number>>(new Set());
   const [toReadBooks, setToReadBooks] = useState<Set<number>>(new Set());
   const [borrowedBooks, setBorrowedBooks] = useState<Set<number>>(new Set());
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
-  const [users, setUsers] = useState<User[]>([
+  const [users] = useState<User[]>([
     { id: 1, username: 'yetisenfal', nameSurname: 'Enfal Yetiş' },
     { id: 2, username: 'sirinaysenur', nameSurname: 'Ayşenur Şirin' },
     { id: 3, username: 'yaseminyalcin', nameSurname: 'Yasemin Yalçın' },
@@ -64,6 +54,7 @@ const Library = ({ activeTab = 'all' }: LibraryProps): JSX.Element => {
   ]);
   const [selectedUser, setSelectedUser] = useState<string>('');
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [favoriteBooks, setFavoriteBooks] = useState<Set<number>>(new Set());
   
   // İstemci tarafında olduğumuzu kontrol et ve localStorage'dan verileri yükle
   useEffect(() => {
@@ -362,7 +353,6 @@ const Library = ({ activeTab = 'all' }: LibraryProps): JSX.Element => {
         }
       };
 
-      loadSetFromLocalStorage('favoriteBooks', setFavoriteBooks);
       loadSetFromLocalStorage('readBooks', setReadBooks);
       loadSetFromLocalStorage('toReadBooks', setToReadBooks);
       loadSetFromLocalStorage('borrowedBooks', setBorrowedBooks);
@@ -376,12 +366,24 @@ const Library = ({ activeTab = 'all' }: LibraryProps): JSX.Element => {
     }
   }, [books, isClient]);
 
-  // Diğer localStorage kaydetme işlemleri (favori, okunan vb.)
+  // localStorage ile ilgili useEffect'leri kaldır
   useEffect(() => {
     if (isClient) {
-      localStorage.setItem('favoriteBooks', JSON.stringify(Array.from(favoriteBooks)));
+      // Favori kitapları API'den al
+      const fetchFavoriteBooks = async () => {
+        try {
+          const response = await fetch('/api/books/favorites');
+          if (response.ok) {
+            const data = await response.json();
+            setFavoriteBooks(new Set(data.map((book: Book) => book.id)));
+          }
+        } catch (error) {
+          console.error('Favori kitaplar yüklenirken hata:', error);
+        }
+      };
+      fetchFavoriteBooks();
     }
-  }, [favoriteBooks, isClient]);
+  }, [isClient]);
 
   useEffect(() => {
     if (isClient) {
@@ -410,16 +412,6 @@ const Library = ({ activeTab = 'all' }: LibraryProps): JSX.Element => {
     return book.status === activeTab;
   }), [books, activeTab, favoriteBooks, readBooks, toReadBooks, borrowedBooks]);
 
-   
-  const renderStars = (rating: number = 0) => {
-    return Array(5).fill(0).map((_, index) => (
-      <Star
-        key={index}
-        className={`w-3 h-3 ${index < rating ? 'text-amber-400 fill-amber-400' : 'text-gray-300'}`}
-      />
-    ));
-  };
-
   const getTabCount = (status: 'favorite' | 'to-read' | 'read' | 'all' | 'borrowed') => {
     if (status === 'all') return books.length;
     if (status === 'favorite') return favoriteBooks.size;
@@ -432,35 +424,9 @@ const Library = ({ activeTab = 'all' }: LibraryProps): JSX.Element => {
   // Theme kontrolü
   useEffect(() => {
     if (isClient && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      setTheme('dark');
       document.documentElement.setAttribute('data-theme', 'dark');
     }
-
-    const handleScroll = () => {
-      const scrollPosition = window.scrollY;
-      setIsScrolled(scrollPosition > 50);
-    };
-
-    if (isClient) {
-      window.addEventListener('scroll', handleScroll);
-      return () => window.removeEventListener('scroll', handleScroll);
-    }
   }, [isClient]);
-
-  const toggleTheme = () => {
-    const newTheme = theme === 'light' ? 'dark' : 'light';
-    setTheme(newTheme);
-    document.documentElement.setAttribute('data-theme', newTheme);
-  };
-
-  const getRandomBook = useCallback(() => {
-    if (typeof window !== 'undefined') {
-      const availableBooks = books.filter(book => !revealedBook || book.id !== revealedBook.id);
-      const randomIndex = Math.floor(Math.random() * availableBooks.length);
-      return availableBooks[randomIndex];
-    }
-    return null;
-  }, [books, revealedBook]);
 
   const handleBookClick = (book: Book) => {
     setSelectedBook(book);

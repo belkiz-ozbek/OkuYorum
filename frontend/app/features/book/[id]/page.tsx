@@ -81,18 +81,14 @@ export default function BookPage({ params }: PageProps) {
                     id: data.id,
                     title: data.title,
                     status: data.status,
+                    favorite: data.favorite,
                     fullResponse: data
                 })
                 
-                // Favori durumunu localStorage'dan kontrol et
-                const savedFavorites = localStorage.getItem('favoriteBooks')
-                const favoriteBooks = savedFavorites ? JSON.parse(savedFavorites) : []
-                const isFavorite = favoriteBooks.includes(Number(data.id))
-                
+                // API yanıtındaki favorite alanını isFavorite olarak ayarla
                 setBook({
                     ...data,
-                    id: Number(data.id),
-                    isFavorite: isFavorite
+                    isFavorite: data.favorite
                 })
             } catch (err) {
                 console.error('Kitap detayı getirme hatası:', err)
@@ -289,74 +285,44 @@ export default function BookPage({ params }: PageProps) {
                 throw new Error('Geçersiz kitap ID');
             }
 
-            // Optimistic update - UI'ı hemen güncelle
-            const newFavoriteStatus = !book.isFavorite;
-            setBook(prev => {
-                if (!prev) return null;
-                return {
-                    ...prev,
-                    isFavorite: newFavoriteStatus
-                };
-            });
-
             // API çağrısı
-            const response = await api.put(`/api/books/${bookId}/favorite`, {
-                status: null,
-                isFavorite: newFavoriteStatus
+            const response = await fetch(`http://localhost:8080/api/books/${bookId}/favorite`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
             });
             
-            if (response.status !== 200) {
+            if (!response.ok) {
                 throw new Error('Favori durumu güncellenemedi');
             }
 
             // API yanıtını doğrudan kullan
-            const isFavorite = response.data?.isFavorite ?? newFavoriteStatus;
+            const updatedBook = await response.json();
             
             // Book state'ini güncelle
             setBook(prev => {
                 if (!prev) return null;
                 return {
                     ...prev,
-                    isFavorite: isFavorite
+                    isFavorite: updatedBook.favorite // API'den gelen alanı doğru şekilde kullan
                 };
             });
 
-            // Favori durumunu localStorage'a kaydet
-            const savedFavorites = localStorage.getItem('favoriteBooks')
-            let favoriteBooks = savedFavorites ? JSON.parse(savedFavorites) : []
-            
-            if (isFavorite) {
-                if (!favoriteBooks.includes(bookId)) {
-                    favoriteBooks.push(bookId)
-                }
-            } else {
-                favoriteBooks = favoriteBooks.filter((id: number) => id !== bookId)
-            }
-            
-            localStorage.setItem('favoriteBooks', JSON.stringify(favoriteBooks))
-
             // Favori durumu değiştiğinde event tetikle
-            emit('favoriteUpdated', { bookId, isFavorite });
+            emit('favoriteUpdated', { bookId, isFavorite: updatedBook.favorite });
 
             // Başarılı mesajı göster
             toast({
-                title: isFavorite ? "Favorilere eklendi!" : "Favorilerden çıkarıldı",
-                description: isFavorite ? 
+                title: updatedBook.favorite ? "Favorilere eklendi!" : "Favorilerden çıkarıldı",
+                description: updatedBook.favorite ? 
                     "Kitap favorilerinize eklendi." : 
                     "Kitap favorilerinizden çıkarıldı.",
                 variant: "default",
             });
 
         } catch (err) {
-            // Hata durumunda optimistic update'i geri al
-            setBook(prev => {
-                if (!prev) return null;
-                return {
-                    ...prev,
-                    isFavorite: !prev.isFavorite
-                };
-            });
-
             console.error('Favori güncelleme hatası:', err);
             toast({
                 title: "Hata!",
