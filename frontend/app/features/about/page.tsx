@@ -390,7 +390,7 @@ export default function AboutPage() {
               socialLinks={{
                 github: "https://github.com/EnfalYetis",
                 linkedin: "https://www.linkedin.com/in/enfal-yeti%C5%9F-152781233/",
-                twitter: "https://twitter.com/enfalyetis",
+                twitter: "https://x.com/lafneli",
               }}
             />
 
@@ -402,7 +402,7 @@ export default function AboutPage() {
               socialLinks={{
                 github: "https://github.com/sirinn00",
                 linkedin: "https://linkedin.com/in/aysenursirin",
-                twitter: "https://twitter.com/aysenursirin",
+                twitter: "https://x.com/aysiriin",
               }}
             />
 
