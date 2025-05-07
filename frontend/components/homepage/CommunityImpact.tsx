@@ -4,12 +4,12 @@ import { BookOpen, Heart, MessageSquare, Users } from "lucide-react"
 export function CommunityImpact() {
   return (
     <div className="max-w-6xl mx-auto px-4 py-16">
-      <h2 className="text-3xl md:text-4xl font-bold mb-6 text-center bg-clip-text text-transparent bg-gradient-to-br from-purple-600 to-purple-800 dark:from-purple-400 dark:to-purple-600">
+      <h2 className="text-3xl font-bold bg-clip-text text-transparent text-center bg-gradient-to-br from-purple-600 to-purple-800 mb-3 dark:from-purple-400 dark:to-purple-600">
         Toplum Üzerindeki Etkimiz
       </h2>
 
-      <p className="text-center text-lg text-purple-700 dark:text-purple-300 mb-12 max-w-3xl mx-auto">
-        Burada kitaplar dolaşır, fikirler çarpışır; kitabın dönmese bile bazen muhabbet döner.
+      <p className="text-center text-lg text-gray-600 dark:text-gray-400 mb-12 max-w-xl mx-auto">
+      Birlikte okuyor, tartışıyor ve bilgi paylaşımımızla toplumda kalıcı bir okuma alışkanlığı oluşturuyoruz.
       </p>
 
       <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
