@@ -294,6 +294,7 @@ export default function AboutPage() {
 
       {/* Process Section */}
       <section className="py-16 md:py-24 bg-background">
+      <div className="flex justify-center px-4 sm:px-6 md:px-8 lg:px-16">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4 text-[#8a3ffc]">Platformumuz sizin için tasarlandı</h2>
@@ -331,6 +332,7 @@ export default function AboutPage() {
               hasArrow={false}
             />
           </div>
+        </div>
         </div>
       </section>
 
@@ -423,7 +425,8 @@ export default function AboutPage() {
 
       {/* Technologies Section */}
       <section className="py-16 md:py-24 bg-background">
-        <div className="container mx-auto px-4">
+      <div className="flex justify-center px-4 sm:px-6 md:px-8 lg:px-16">
+      <div className="w-full max-w-6xl">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4 text-[#8a3ffc]">Kullandığımız Teknolojiler</h2>
             <p className="text-gray-500 max-w-3xl mx-auto">
@@ -431,19 +434,21 @@ export default function AboutPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-1">
             <TechnologyCard name="Java" />
             <TechnologyCard name="Spring Boot" />
             <TechnologyCard name="Next.js" />
+            <TechnologyCard name="React.js" />
             <TechnologyCard name="PostgreSQL" />
             <TechnologyCard name="Docker" />
             <TechnologyCard name="GitHub" />
           </div>
         </div>
+        </div>
       </section>
 
-
       <CallToAction/>
+  
       <Footer />
     </div>
   )
