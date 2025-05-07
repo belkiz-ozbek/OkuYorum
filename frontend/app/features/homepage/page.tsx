@@ -16,7 +16,9 @@ export default function HomePage() {
       <main className="max-w-7xl mx-auto px-6">
         <HeroSection />
         <FeatureHighlights />
+        <div className="mt-16">  
         <LiteraryMinds />
+        </div>
         <div className="py-16">
           <MilletKiraathaneleri />
         </div>
