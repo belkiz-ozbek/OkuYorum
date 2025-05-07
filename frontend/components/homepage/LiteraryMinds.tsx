@@ -30,9 +30,6 @@ export function LiteraryMinds() {
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
           >
-            <Badge className="mb-4 bg-purple-100 text-purple-800 hover:bg-purple-200 px-4 py-1.5 text-sm rounded-full">
-              Edebi Keşifler
-            </Badge>
             <h2 className="text-3xl font-bold bg-clip-text text-transparent text-center bg-gradient-to-br from-purple-600 to-purple-800 mb-3 dark:from-purple-400 dark:to-purple-600">
               Büyük Yazarların Dünyasına Adım Atın
             </h2>
