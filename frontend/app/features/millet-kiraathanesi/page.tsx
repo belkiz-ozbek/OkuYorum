@@ -105,10 +105,13 @@ export default function MilletKiraathanesi() {
       {/* Events Section */}
       <section className="py-20 bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-black">
         <div className="container mx-auto px-4">
+
           {/* Kıraathaneler Bölümü */}
-          <div className="mb-24">
-            <MilletKiraathaneleri />
-          </div>
+          <div className="mb-24 flex justify-center px-4 sm:px-6 md:px-8 lg:px-16">
+  <div className="w-full max-w-6xl">
+    <MilletKiraathaneleri />
+  </div>
+</div>
 
           {/* Events Calendar Section */}
           <div id="upcoming-events">
@@ -125,7 +128,8 @@ export default function MilletKiraathanesi() {
 
       {/* Popüler Tartışmalar */}
       <section className="py-20 bg-gradient-to-b from-gray-50 to-white dark:from-black dark:to-gray-950">
-        <div className="container mx-auto px-4">
+      <div className="flex justify-center px-4 sm:px-6 md:px-8 lg:px-16">
+      <div className="w-full max-w-6xl">
           <h2 className="text-3xl font-bold bg-clip-text text-transparent text-center bg-gradient-to-br from-purple-700 to-purple-900 dark:from-purple-400 dark:to-purple-600 mb-4">
             Popüler Tartışmalar
           </h2>
@@ -134,7 +138,7 @@ export default function MilletKiraathanesi() {
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <DiscussionCard
-              title="Yüzyıllık Yalnızlık üzerine düşünceler"
+              title="Yüzyıllık Yalnızlık üzerine"
               author="Gabriel Garcia Marquez"
               participants={32}
               comments={78}
@@ -154,8 +158,9 @@ export default function MilletKiraathanesi() {
               comments={92}
               lastActive="1 gün önce"
             />
-          </div>
-        </div>
+</div>
+    </div>
+  </div>
       </section>
     </div>
   );
