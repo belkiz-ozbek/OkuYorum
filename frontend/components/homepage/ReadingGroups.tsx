@@ -8,10 +8,10 @@ export function ReadingGroups() {
   return (
     <div className="py-16">
       <div className="text-center mb-12">
-        <h2 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-br from-purple-700 to-purple-900 dark:from-purple-400 dark:to-purple-600 mb-4">
+        <h2 className="text-3xl font-bold bg-clip-text text-transparent text-center bg-gradient-to-br from-purple-600 to-purple-800 mb-3 dark:from-purple-400 dark:to-purple-600">
           Okuma Grupları
         </h2>
-        <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+        <p className="text-center text-lg text-gray-600 dark:text-gray-400 mb-12 max-w-xl mx-auto">
           Kitap severlerle buluşun, fikirlerinizi paylaşın ve birlikte keşfedin.
         </p>
       </div>

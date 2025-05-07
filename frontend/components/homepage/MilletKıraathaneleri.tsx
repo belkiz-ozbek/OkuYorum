@@ -111,7 +111,7 @@ export function MilletKiraathaneleri() {
         {/* Section Header */}
         <div className="text-center mb-8">
           <motion.h2
-            className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-br from-purple-700 to-purple-900 dark:from-purple-400 dark:to-purple-600 mb-3"
+            className="text-3xl font-bold bg-clip-text text-transparent text-center bg-gradient-to-br from-purple-600 to-purple-800 mb-3 dark:from-purple-400 dark:to-purple-600 "
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -120,7 +120,7 @@ export function MilletKiraathaneleri() {
             Millet Kıraathaneleri
           </motion.h2>
           <motion.p
-            className="text-lg text-gray-700 dark:text-gray-300 max-w-2xl mx-auto"
+            className="text-center text-lg text-gray-600 dark:text-gray-400 mb-12 max-w-xl mx-auto"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
