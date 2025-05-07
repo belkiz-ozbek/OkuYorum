@@ -33,10 +33,10 @@ export function LiteraryMinds() {
             <Badge className="mb-4 bg-purple-100 text-purple-800 hover:bg-purple-200 px-4 py-1.5 text-sm rounded-full">
               Edebi Keşifler
             </Badge>
-            <h2 className="text-4xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-indigo-600 mb-6">
+            <h2 className="text-3xl font-bold bg-clip-text text-transparent text-center bg-gradient-to-br from-purple-600 to-purple-800 mb-3 dark:from-purple-400 dark:to-purple-600">
               Büyük Yazarların Dünyasına Adım Atın
             </h2>
-            <p className="text-lg text-gray-700 max-w-3xl mx-auto">
+            <p className="text-center text-lg text-gray-600 dark:text-gray-400 mb-12 max-w-xl mx-auto">
               Edebiyatın büyülü dünyasında yazarların zihinlerine yolculuk yapın ve onların eşsiz bakış açılarını
               keşfedin.
             </p>
@@ -75,7 +75,7 @@ export function LiteraryMinds() {
             transition={{ duration: 0.7, delay: 0.2 }}
           >
             <div className="space-y-6">
-              <p className="text-lg text-gray-700 leading-relaxed">
+              <p className="text-lg text-gray-600 dark:text-gray-400 leading-relaxed">
                 Edebiyat, yalnızca kitaplar değil, o kitapları yazan zihinlerin bir araya geldiği büyük bir sofradır.
                 Her kitap, bir yazarın düşünce dünyasına açılan bir kapıdır.
               </p>
