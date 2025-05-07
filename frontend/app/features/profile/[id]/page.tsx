@@ -25,6 +25,7 @@ import {
   BookText,
   Info,
   Layout,
+  Heart,
 } from "lucide-react"
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/form/button"
@@ -292,6 +293,7 @@ export default function ProfilePage() {
 
     // Favori durumu değişikliklerini dinle
     const handleFavoriteUpdate = async ({ bookId, isFavorite }: { bookId: number; isFavorite: boolean }) => {
+      // Kitap listesini güncelle
       setBooks(prevBooks =>
         prevBooks.map(book =>
           book.id === bookId
@@ -299,6 +301,22 @@ export default function ProfilePage() {
             : book
         )
       );
+
+      // Favori kitapları yeniden yükle
+      try {
+        const favoriteBooksData = await bookService.getFavoriteBooks();
+        const favoriteBookIds = new Set(favoriteBooksData.map(book => Number(book.id)));
+        
+        // Tüm kitapların favori durumunu güncelle
+        setBooks(prevBooks =>
+          prevBooks.map(book => ({
+            ...book,
+            isFavorite: favoriteBookIds.has(Number(book.id))
+          }))
+        );
+      } catch (error) {
+        console.error('Favori kitaplar yüklenirken hata:', error);
+      }
     };
 
     // Event listener'ları ekle
@@ -1494,7 +1512,7 @@ export default function ProfilePage() {
                             >
                               Tümü
                               <span className="bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full text-xs">
-                                {books.length}
+                                {books.filter(book => book.status !== null && book.status !== undefined).length}
                               </span>
                             </Button>
                             <Button
@@ -1557,8 +1575,14 @@ export default function ProfilePage() {
                           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
                             {books
                               .filter(book => {
-                                if (!selectedState) return true;
-                                if (selectedState === "FAVORITE") return book.isFavorite;
+                                if (!selectedState) {
+                                  // Tümü sekmesinde sadece bir durumu olan kitapları göster
+                                  return book.status !== null && book.status !== undefined;
+                                }
+                                if (selectedState === "FAVORITE") {
+                                  // Favori sekmesinde sadece favori olan kitapları göster
+                                  return book.isFavorite === true;
+                                }
                                 return book.status?.toUpperCase() === selectedState;
                               })
                               .map((book) => (
@@ -1585,6 +1609,13 @@ export default function ProfilePage() {
 
                                       {/* Status Badge */}
                                       <StatusBadge status={book.status?.toUpperCase() as 'READING' | 'READ' | 'WILL_READ' | 'DROPPED' | null} />
+                                      
+                                      {/* Favorite Badge - Only show in Favorites tab */}
+                                      {selectedState === "FAVORITE" && book.isFavorite && (
+                                        <div className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full">
+                                          <Heart className="w-4 h-4 fill-current" />
+                                        </div>
+                                      )}
                                     </div>
                                   </Link>
                                 </motion.div>

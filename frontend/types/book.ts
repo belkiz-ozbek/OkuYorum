@@ -12,6 +12,7 @@ export type Book = {
   readCount: number;
   reviewCount?: number;
   categories?: string[];
+  genre?: string;
   language?: string;
   publisher?: string;
   isbn?: string;

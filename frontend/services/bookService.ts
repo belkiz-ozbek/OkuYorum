@@ -17,6 +17,7 @@ export interface Book {
   createdAt?: string;
   updatedAt?: string;
   isFavorite?: boolean;
+  genre?: string;
 }
 
 export interface Review {
