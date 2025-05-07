@@ -77,23 +77,13 @@ export function Footer() {
             </div>
             <ul className="space-y-2">
               <li>
-                <Link href="/kitap-yorumlari" className="text-sm text-gray-600 hover:text-[#7e3af2] transition-colors">
-                  Kitap Yorumları
-                </Link>
-              </li>
-              <li>
                 <Link href="/okuma-gruplari" className="text-sm text-gray-600 hover:text-[#7e3af2] transition-colors">
                   Okuma Grupları
                 </Link>
               </li>
               <li>
                 <Link href="/etkinlikler" className="text-sm text-gray-600 hover:text-[#7e3af2] transition-colors">
-                  Etkinlikler
-                </Link>
-              </li>
-              <li>
-                <Link href="/blog" className="text-sm text-gray-600 hover:text-[#7e3af2] transition-colors">
-                  Blog
+                  Tartışmalar
                 </Link>
               </li>
             </ul>
