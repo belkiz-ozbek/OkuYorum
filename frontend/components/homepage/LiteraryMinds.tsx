@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button"
 import { ArrowRight, BookOpen, Users, MessageSquare, Star, TrendingUp } from "lucide-react"
 import { useState } from "react"
 import { Badge } from "@/components/ui/badge"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 const stats = [
   { icon: <BookOpen className="h-5 w-5" />, value: "10,000+", label: "Kitap" },
@@ -19,7 +18,6 @@ export function LiteraryMinds() {
 
   return (
     <div className="py-24 relative overflow-hidden">
-      {/* Decorative elements */}
 
       {/* Background gradient */}
       <div className="absolute inset-0 bg-gradient-to-b from-white/50 to-white/50 rounded-[3rem] -z-10" />
