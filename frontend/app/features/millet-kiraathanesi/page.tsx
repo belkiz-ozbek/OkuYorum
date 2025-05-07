@@ -105,10 +105,13 @@ export default function MilletKiraathanesi() {
       {/* Events Section */}
       <section className="py-20 bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-black">
         <div className="container mx-auto px-4">
+
           {/* Kıraathaneler Bölümü */}
-          <div className="mb-24">
-            <MilletKiraathaneleri />
-          </div>
+          <div className="mb-24 flex justify-center px-4 sm:px-6 md:px-8 lg:px-16">
+  <div className="w-full max-w-6xl">
+    <MilletKiraathaneleri />
+  </div>
+</div>
 
           {/* Events Calendar Section */}
           <div id="upcoming-events">
