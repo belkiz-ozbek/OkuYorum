@@ -360,17 +360,32 @@ export default function BookPage({ params }: PageProps) {
         }
     };
 
-    const handleShareQuote = async (quoteId: number) => {
+    const handleShareQuote = async (bookId: number) => {
         try {
-            const response = await quoteService.shareQuote(quoteId);
-            if (response.url) {
-                window.open(response.url, '_blank');
+            // Kitap paylaşım URL'sini oluştur
+            const shareUrl = `${window.location.origin}/books/${bookId}`;
+            
+            // Web Share API'yi kontrol et
+            if (navigator.share) {
+                await navigator.share({
+                    title: book?.title || 'Kitap',
+                    text: `${book?.title} kitabını OkuYorum'da keşfet!`,
+                    url: shareUrl
+                });
+            } else {
+                // Web Share API desteklenmiyorsa URL'yi panoya kopyala
+                await navigator.clipboard.writeText(shareUrl);
+                toast({
+                    title: "Başarılı",
+                    description: "Paylaşım linki panoya kopyalandı!",
+                    variant: "default",
+                });
             }
         } catch (error) {
-            console.error('Alıntı paylaşma hatası:', error);
+            console.error('Kitap paylaşma hatası:', error);
             toast({
                 title: "Hata",
-                description: "Alıntı paylaşılırken bir hata oluştu.",
+                description: "Kitap paylaşılırken bir hata oluştu.",
                 variant: "destructive",
             });
         }
@@ -433,7 +448,7 @@ export default function BookPage({ params }: PageProps) {
                                 </div>
 
                                 {/* Kitap Detayları - Daha ferah */}
-                                <div className="w-full mt-10 bg-white/80 backdrop-blur-sm rounded-2xl p-8
+                                <div className="w-full mt-6 bg-white/80 backdrop-blur-sm rounded-2xl p-8
                   shadow-[0_8px_30px_rgb(0,0,0,0.04)] space-y-6">
                                     <h3 className="font-medium text-gray-700 mb-6">Kitap Detayları</h3>
                                     <div className="space-y-4 text-sm">
@@ -626,7 +641,9 @@ export default function BookPage({ params }: PageProps) {
                                         className="relative group"
                                     >
                                         <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 via-pink-500 to-purple-600 rounded-xl blur opacity-0 group-hover:opacity-25 transition duration-1000 group-hover:duration-300"></div>
-                                        <Button className="relative flex items-center gap-3 px-6 py-3 bg-white dark:bg-gray-900 hover:bg-purple-50 dark:hover:bg-gray-800 border border-purple-100 dark:border-purple-800/30 rounded-lg shadow-xl shadow-purple-500/10 hover:shadow-purple-500/20 transition-all duration-300">
+                                        <Button 
+                                            onClick={() => handleShareQuote(book.id)}
+                                            className="relative flex items-center gap-3 px-6 py-3 bg-white dark:bg-gray-900 hover:bg-purple-50 dark:hover:bg-gray-800 border border-purple-100 dark:border-purple-800/30 rounded-lg shadow-xl shadow-purple-500/10 hover:shadow-purple-500/20 transition-all duration-300">
                                             <div className="relative">
                                                 <Share2 className="w-5 h-5 text-purple-500 dark:text-purple-400 group-hover:text-purple-600 dark:group-hover:text-purple-300 transition-colors duration-300" />
                                                 <div className="absolute inset-0 animate-pulse opacity-30 text-purple-500 group-hover:opacity-50">
