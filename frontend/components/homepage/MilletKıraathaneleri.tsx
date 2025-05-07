@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/Card"
 import { BookOpen, ChevronLeft, ChevronRight, Clock, Coffee, ExternalLink, MapPin, Star, Wifi } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
+import Link from "next/link"
 
 export function MilletKiraathaneleri() {
   const kiraathaneData = [
@@ -161,10 +162,12 @@ export function MilletKiraathaneleri() {
                   </div>
                 </div>
                 <p className="text-white/80 mb-3 max-w-2xl line-clamp-2">{featuredKiraathaneler[0].description}</p>
+                <Link href="/features/millet-kiraathanesi">
                 <Button size="sm" className="w-fit bg-purple-600 hover:bg-purple-700">
-                  Detayları Görüntüle
-                  <ExternalLink className="ml-2 h-4 w-4" />
+                Detayları Görüntüle
+                <ExternalLink className="ml-2 h-4 w-4" />
                 </Button>
+                </Link>
               </div>
             </div>
           </motion.div>
