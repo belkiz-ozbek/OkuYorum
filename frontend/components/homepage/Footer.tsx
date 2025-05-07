@@ -24,21 +24,8 @@ export function Footer() {
         <div className="max-w-2xl mx-auto text-center mb-12">
           <h3 className="text-xl font-medium text-[#7e3af2] mb-4">Kitap Dünyasından Haberdar Olun</h3>
           <p className="text-sm text-gray-600 mb-6">
-            Yeni kitaplar, etkinlikler ve okuma önerileri için bültenimize abone olun.
+            Yeni kitaplar, etkinlikler ve okuma önerileri için bültenimize kayıt olun.
           </p>
-          <form onSubmit={handleSubscribe} className="flex gap-2 max-w-md mx-auto">
-            <Input
-              type="email"
-              placeholder="E-posta adresiniz"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="flex-1 border-[#e9e4ff] focus-visible:ring-[#7e3af2]"
-              required
-            />
-            <Button type="submit" className="bg-[#7e3af2] hover:bg-[#6929d4] text-white">
-              Abone Ol
-            </Button>
-          </form>
         </div>
 
         {/* Ana İçerik */}
