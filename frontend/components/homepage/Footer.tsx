@@ -24,7 +24,7 @@ export function Footer() {
         <div className="max-w-2xl mx-auto text-center mb-12">
           <h3 className="text-xl font-medium text-[#7e3af2] mb-4">Kitap Dünyasından Haberdar Olun</h3>
           <p className="text-sm text-gray-600 mb-6">
-            Yeni kitaplar, etkinlikler ve okuma önerileri için bültenimize kayıt olun.
+            Yeni kitaplar, etkinlikler ve okuma önerileri için kayıt olun.
           </p>
         </div>
 
