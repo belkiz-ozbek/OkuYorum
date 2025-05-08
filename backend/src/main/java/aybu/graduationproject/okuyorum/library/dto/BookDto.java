@@ -7,6 +7,7 @@ public class BookDto {
     private String title;
     private String author;
     private String summary;
+    private String genre;
     private Long userId;
     private String googleBooksId;
     private String imageUrl;
@@ -49,6 +50,14 @@ public class BookDto {
 
     public void setSummary(String summary) {
         this.summary = summary;
+    }
+
+    public String getGenre() {
+        return genre;
+    }
+
+    public void setGenre(String genre) {
+        this.genre = genre;
     }
 
     public Long getUserId() {

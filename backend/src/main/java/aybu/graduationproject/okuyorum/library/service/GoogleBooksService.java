@@ -85,7 +85,13 @@ public class GoogleBooksService {
         bookDto.setGoogleBooksId(googleBooksId);
         bookDto.setTitle(getTextValue(volumeInfo, "title", "Unknown Title"));
         bookDto.setAuthor(getAuthors(volumeInfo));
-        bookDto.setSummary(getTextValue(volumeInfo, "description", "No description available"));
+        
+        // Summary alanını daha detaylı doldur
+        String description = getTextValue(volumeInfo, "description", "No description available");
+        if (description.equals("No description available") && volumeInfo.has("subtitle")) {
+            description = volumeInfo.get("subtitle").asText();
+        }
+        bookDto.setSummary(description);
         
         // Kitap kapak görseli URL'sini HTTPS'e çevir
         JsonNode imageLinks = volumeInfo.get("imageLinks");
@@ -97,8 +103,21 @@ public class GoogleBooksService {
         
         bookDto.setPublishedDate(getTextValue(volumeInfo, "publishedDate", null));
         
+        // PageCount alanını doldur
         if (volumeInfo.has("pageCount")) {
             bookDto.setPageCount(volumeInfo.get("pageCount").asInt());
+        } else if (volumeInfo.has("printedPageCount")) {
+            bookDto.setPageCount(volumeInfo.get("printedPageCount").asInt());
+        }
+        
+        // Genre alanını doldur
+        if (volumeInfo.has("categories") && volumeInfo.get("categories").isArray()) {
+            List<String> categories = new ArrayList<>();
+            volumeInfo.get("categories").forEach(category -> categories.add(category.asText()));
+            // İlk kategoriyi genre olarak kullan
+            if (!categories.isEmpty()) {
+                bookDto.setGenre(categories.get(0));
+            }
         }
         
         return bookDto;

@@ -57,11 +57,30 @@ public class AuthenticationService {
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
         try {
+            // Kullanıcı adı kontrolü
+            if (request.getUsername() == null || request.getUsername().trim().isEmpty()) {
+                throw new RuntimeException("Kullanıcı adı boş olamaz");
+            }
+
+            // Şifre kontrolü
+            if (request.getPassword() == null || request.getPassword().trim().isEmpty()) {
+                throw new RuntimeException("Şifre boş olamaz");
+            }
+
+            // Kullanıcı var mı kontrolü
+            User user = userRepository.findByUsername(request.getUsername())
+                    .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı"));
+
+            // Hesap aktif mi kontrolü
+            if (!user.isEnabled()) {
+                throw new RuntimeException("Hesabınız aktif değil. Lütfen e-posta adresinizi doğrulayın.");
+            }
+
             Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
             );
             
-            User user = (User) authentication.getPrincipal();
+            user = (User) authentication.getPrincipal();
             String jwtToken = jwtService.generateToken(user);
             
             return AuthenticationResponse.builder()
@@ -73,6 +92,11 @@ public class AuthenticationService {
             throw new RuntimeException("Geçersiz kullanıcı adı veya şifre");
         } catch (AuthenticationException e) {
             throw new RuntimeException("Kimlik doğrulama hatası: " + e.getMessage());
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (Exception e) {
+            logger.error("Login error: ", e);
+            throw new RuntimeException("Giriş yapılırken bir hata oluştu");
         }
     }
 

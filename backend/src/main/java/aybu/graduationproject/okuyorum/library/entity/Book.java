@@ -30,6 +30,9 @@ public class Book {
     @Column(columnDefinition = "TEXT")
     private String summary;
 
+    @Column
+    private String genre;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -92,6 +95,14 @@ public class Book {
 
     public void setSummary(String summary) {
         this.summary = summary;
+    }
+
+    public String getGenre() {
+        return genre;
+    }
+
+    public void setGenre(String genre) {
+        this.genre = genre;
     }
 
     public LocalDateTime getCreatedAt() {

@@ -12,4 +12,12 @@
 
     <!-- Veri değişikliklerini buraya include edeceğiz -->
     <include file="db/changelog/data/data-master.xml"/>
+
+    <changeSet id="add-genre-to-books" author="okuyorum">
+        <addColumn tableName="books">
+            <column name="genre" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

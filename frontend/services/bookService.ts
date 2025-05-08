@@ -137,4 +137,10 @@ class BookService {
   }
 }
 
-export const bookService = new BookService(); 
+export const bookService = new BookService();
+
+export async function getAllBooks(page: number = 0) {
+  const response = await fetch(`/api/books?page=${page}&size=20`);
+  if (!response.ok) throw new Error('Kitaplar alınamadı');
+  return response.json();
+} 

@@ -10,6 +10,7 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true
 })
 
 // İstek interceptor'ı
@@ -53,7 +54,7 @@ api.interceptors.response.use(
 
 export const fetchUserReviews = async (userId: number): Promise<Review[]> => {
   try {
-    const response = await axios.get(`${baseURL}/reviews/user/${userId}`);
+    const response = await api.get(`/reviews/user/${userId}`);
     return response.data;
   } catch (error) {
     console.error('Error fetching user reviews:', error);

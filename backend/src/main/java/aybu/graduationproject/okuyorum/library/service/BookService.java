@@ -201,13 +201,6 @@ public class BookService {
                 .collect(Collectors.toList());
     }
 
-    public List<BookDto> getUserBooksByStatus(Long userId, UserBook.ReadingStatus status) {
-        List<UserBook> userBooks = userBookRepository.findByUserIdAndStatus(userId, status);
-        return userBooks.stream()
-                .map(userBook -> convertToDto(userBook.getBook(), userBook))
-                .collect(Collectors.toList());
-    }
-
     @Transactional
     public BookDto toggleFavorite(Long bookId, Long userId) {
         Book book = bookRepository.findById(bookId)

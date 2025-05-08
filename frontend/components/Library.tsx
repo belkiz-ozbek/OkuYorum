@@ -7,13 +7,15 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {BookOpen, CheckCircle, Clock, Star, Library as LibraryIcon, Compass, Users, Heart, Moon, Sun, Check, Bookmark, UserPlus, ChevronLeft, ChevronRight} from "lucide-react";
 import { ScratchToReveal } from "@/components/ui/scratch-to-reveal";
+import { useRouter } from "next/navigation";
+import { getAllBooks } from "@/services/bookService";
 
 interface Book {
   id: number;
   title: string;
   author: string;
   isbn?: string;
-  coverImage: string;
+  imageUrl: string;
   status: "available" | "borrowed" | "read" | "to-read" | "favorite";
   borrowedBy?: string;
   borrower?: {
@@ -33,7 +35,7 @@ interface User {
 }
 
 interface LibraryProps {
-  activeTab?: 'all' | 'favorites' | 'to-read' | 'read' | 'borrowed' | 'lending';
+  activeTab?: 'all' | 'favorites' | 'to-read' | 'read' | 'borrowed' | 'lending' | 'recommendations';
 }
 
 const Library = ({ activeTab = 'all' }: LibraryProps): JSX.Element => {
@@ -64,319 +66,35 @@ const Library = ({ activeTab = 'all' }: LibraryProps): JSX.Element => {
   ]);
   const [selectedUser, setSelectedUser] = useState<string>('');
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const router = useRouter();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
   
-  // İstemci tarafında olduğumuzu kontrol et ve localStorage'dan verileri yükle
   useEffect(() => {
     setIsClient(true);
-
-    const initialBooks: Book[] = [
-      {
-        id: 1,
-        title: "Kürk Mantolu Madonna",
-        author: "Sabahattin Ali",
-        coverImage: "/books/kürk mantolu madonna.jpg",
-        rating: 9,
-        status: 'read' as const
-      },
-      {
-        id: 2,
-        title: "Hayvan Çiftliği",
-        author: "George Orwell",
-        coverImage: "/books/hayvan çiftliği.jpg",
-        rating: 9,
-        status: 'read' as const
-      },
-      {
-        id: 3,
-        title: "Satranç",
-        author: "Stefan Zweig",
-        coverImage: "/books/satranç.jpg",
-        rating: 8,
-        status: 'read' as const
-      },
-      {
-        id: 4,
-        title: "Küçük Prens",
-        author: "Antoine de Saint-Exupéry",
-        coverImage: "/books/kucukprens-1.webp",
-        rating: 9,
-        status: 'read' as const
-      },
-      {
-        id: 5,
-        title: "Şeker Portakalı",
-        author: "José Mauro de Vasconcelos",
-        coverImage: "/books/şeker portakalı.jpg",
-        rating: 9,
-        status: 'read' as const
-      },
-      {
-        id: 6,
-        title: "Bilinmeyen Bir Kadının Mektubu",
-        author: "Stefan Zweig",
-        coverImage: "/books/bilinmeyen bir kadının mektubu.png",
-        rating: 8,
-        status: 'read' as const
-      },
-      {
-        id: 7,
-        title: "Dönüşüm",
-        author: "Franz Kafka",
-        coverImage: "/books/dönüşüm.jpg",
-        rating: 8,
-        status: 'read' as const
-      },
-      {
-        id: 8,
-        title: "Simyacı",
-        author: "Paulo Coelho",
-        coverImage: "/books/simyacı.jpg",
-        rating: 8,
-        status: 'read' as const
-      },
-      {
-        id: 9,
-        title: "İnsan Neyle Yaşar?",
-        author: "Lev Tolstoy",
-        coverImage: "/books/insan ne ile yaşar.jpg",
-        rating: 8,
-        status: 'read' as const
-      },
-      {
-        id: 10,
-        title: "Kuyucaklı Yusuf",
-        author: "Sabahattin Ali",
-        coverImage: "/books/kuyucaklı yusuf.jpg",
-        rating: 8,
-        status: 'read' as const
-      },
-      {
-        id: 11,
-        title: "Fareler ve İnsanlar",
-        author: "John Steinbeck",
-        coverImage: "/books/fareler ve insanlar.jpg",
-        rating: 9,
-        status: 'read' as const
-      },
-      {
-        id: 12,
-        title: "İçimizdeki Şeytan",
-        author: "Sabahattin Ali",
-        coverImage: "/books/içimizdeki şeytan.jpg",
-        rating: 8,
-        status: 'read' as const
-      },
-      {
-        id: 13,
-        title: "1984",
-        author: "George Orwell",
-        coverImage: "/19844.jpg",
-        rating: 9,
-        status: 'read' as const
-      },
-      {
-        id: 14,
-        title: "Uçurtma Avcısı",
-        author: "Khaled Hosseini",
-        coverImage: "/uçurtma avcısı.jpg",
-        rating: 9,
-        status: 'read' as const
-      },
-      {
-        id: 15,
-        title: "Suç ve Ceza",
-        author: "Fyodor Dostoyevski",
-        coverImage: "/suç ve ceza.jpg",
-        rating: 9,
-        status: 'read' as const
-      },
-      {
-        id: 16,
-        title: "Olağanüstü Bir Gece",
-        author: "Stefan Zweig",
-        coverImage: "/olağanüstü bir gece.jpg",
-        rating: 7,
-        status: 'to-read' as const
-      },
-      {
-        id: 17,
-        title: "Serenad",
-        author: "Zülfü Livaneli",
-        coverImage: "/serenad.jpg",
-        rating: 9,
-        status: 'read' as const
-      },
-      {
-        id: 18,
-        title: "Yeraltından Notlar",
-        author: "Fyodor Dostoyevski",
-        coverImage: "/yeraltından notlar.jpg",
-        rating: 8,
-        status: 'read' as const
-      },
-      {
-        id: 19,
-        title: "Bir Kadının Yaşamından Yirmi Dört Saat",
-        author: "Stefan Zweig",
-        coverImage: "/bir kadının yaşamından 24 saat.jpg",
-        rating: 8,
-        status: 'read' as const
-      },
-      {
-        id: 20,
-        title: "Genç Werther'in Acıları",
-        author: "Johann Wolfgang Von Goethe",
-        coverImage: "/gem. wertherin acıları.jpg",
-        rating: 8,
-        status: 'read' as const
-      },
-      {
-        id: 21,
-        title: "Bir İdam Mahkûmunun Son Günü",
-        author: "Victor Hugo",
-        coverImage: "/bir idam mahkumunun son günü.jpg",
-        rating: 8,
-        status: 'read' as const
-      },
-      {
-        id: 22,
-        title: "Aşk",
-        author: "Elif Şafak",
-        coverImage: "https://r2.1k-cdn.com/sig/size:384/plain/https%3A%2F%2F1k-cdn.com%2Fresimler%2F%2Fkitaplar%2F131_1431127652.jpg",
-        rating: 8,
-        status: 'to-read' as const
-      },
-      {
-        id: 23,
-        title: "Nutuk",
-        author: "Mustafa Kemal Atatürk",
-        coverImage: "https://r2.1k-cdn.com/sig/size:96/plain/https%3A%2F%2F1k-cdn.com%2Fresimler%2F%2Fkitaplar%2F2582_1451326603.jpg",
-        rating: 9,
-        status: 'to-read' as const
-      },
-      {
-        id: 24,
-        title: "Olasılıksız",
-        author: "Adam Fawer",
-        coverImage: "https://r2.1k-cdn.com/sig/size:96/plain/https%3A%2F%2F1k-cdn.com%2Fresimler%2Fkitaplar%2F102_Olasiliksiz-Adam_Fawer324.jpg",
-        rating: 8,
-        status: 'to-read' as const
-      },
-      {
-        id: 25,
-        title: "Başlangıç",
-        author: "Dan Brown",
-        coverImage: "https://r2.1k-cdn.com/sig/size:96/plain/https%3A%2F%2F1k-cdn.com%2Fresimler%2Fkitaplar%2F107518_WmRwU_1505307242.jpg",
-        rating: 8,
-        status: 'to-read' as const
-      },
-      {
-        id: 26,
-        title: "Bin Muhteşem Güneş",
-        author: "Khaled Hosseini",
-        coverImage: "https://r2.1k-cdn.com/sig/size:96/plain/https%3A%2F%2F1k-cdn.com%2Fresimler%2Fkitaplar%2F120_Bin_Muhtesem_Gunes-Khaled_Hosseini453.jpg",
-        rating: 9,
-        status: 'to-read' as const
-      },
-      {
-        id: 27,
-        title: "Zamanın Kısa Tarihi",
-        author: "Stephen Hawking",
-        coverImage: "https://r2.1k-cdn.com/sig/size:96/plain/https%3A%2F%2F1k-cdn.com%2Fresimler%2Fkitaplar%2F1637855_1701893339_Rq9AK.jpg",
-        rating: 8,
-        status: 'to-read' as const
-      },
-      {
-        id: 28,
-        title: "Harry Potter ve Felsefe Taşı",
-        author: "J.K. Rowling",
-        coverImage: "https://r2.1k-cdn.com/sig/size:96/plain/https%3A%2F%2F1k-cdn.com%2Fresimler%2Fkitaplar%2F2267_1464005642.jpg",
-        rating: 9,
-        status: 'to-read' as const
-      },
-      {
-        id: 29,
-        title: "Kırmızı ve Siyah",
-        author: "Stendhal",
-        coverImage: "https://r2.1k-cdn.com/sig/size:96/plain/https%3A%2F%2F1k-cdn.com%2Fresimler%2Fkitaplar%2F2331481_1720352639_Zeblw.jpg",
-        rating: 8,
-        status: 'to-read' as const
-      },
-      {
-        id: 30,
-        title: "Eşekli Kütüphaneci",
-        author: "Fakir Baykurt",
-        coverImage: "https://r2.1k-cdn.com/sig/size:96/plain/https%3A%2F%2F1k-cdn.com%2Fresimler%2Fkitaplar%2F2398_Esekli_Kutuphaneci-Fakir_Baykurt489.jpg",
-        rating: 8,
-        status: 'to-read' as const
-      },
-      {
-        id: 31,
-        title: "Baba ve Piç",
-        author: "Elif Şafak",
-        coverImage: "https://r2.1k-cdn.com/sig/size:96/plain/https%3A%2F%2F1k-cdn.com%2Fresimler%2Fkitaplar%2F257_Baba_ve_Pic-Elif_safak983.jpg",
-        rating: 8,
-        status: 'to-read' as const
-      },
-      {
-        id: 32,
-        title: "İstanbul Hatırası",
-        author: "Ahmet Ümit",
-        coverImage: "https://r2.1k-cdn.com/sig/size:96/plain/https%3A%2F%2F1k-cdn.com%2Fresimler%2Fkitaplar%2F27823_1708166890_2xbNH.jpg",
-        rating: 8,
-        status: 'to-read' as const
-      },
-      {
-        id: 33,
-        title: "Dava",
-        author: "Franz Kafka",
-        coverImage: "https://r2.1k-cdn.com/sig/size:96/plain/https%3A%2F%2F1k-cdn.com%2Fresimler%2Fkitaplar%2F27823_2906d_1608143858.jpg",
-        rating: 8,
-        status: 'to-read' as const
-      }
-    ];
-
-    if (typeof window !== 'undefined') {
-      // Kitapları localStorage'dan yükle
-      const savedBooks = localStorage.getItem('libraryBooks');
-      if (savedBooks) {
-        try {
-          setBooks(JSON.parse(savedBooks));
-        } catch (e) {
-          console.error('Error loading books from localStorage:', e);
-          setBooks(initialBooks); // Hata olursa başlangıç kitaplarını kullan
+    setLoading(true);
+    getAllBooks(currentPage)
+      .then((data) => {
+        setBooks(data.content || data);
+        if (data.totalPages !== undefined) {
+          setTotalPages(data.totalPages);
         }
-      } else {
-        setBooks(initialBooks); // localStorage boşsa başlangıç kitaplarını kullan
-      }
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError(err.message || "Kitaplar yüklenemedi");
+        setLoading(false);
+      });
+  }, [currentPage]);
 
-      // Diğer state'leri (favori, okunan vb.) localStorage'dan yükle
-      const loadSetFromLocalStorage = (key: string, setter: React.Dispatch<React.SetStateAction<Set<number>>>) => {
-        const savedData = localStorage.getItem(key);
-        if (savedData) {
-          try {
-            setter(new Set(JSON.parse(savedData)));
-          } catch (e) {
-            console.error(`Error loading ${key} from localStorage:`, e);
-          }
-        }
-      };
-
-      loadSetFromLocalStorage('favoriteBooks', setFavoriteBooks);
-      loadSetFromLocalStorage('readBooks', setReadBooks);
-      loadSetFromLocalStorage('toReadBooks', setToReadBooks);
-      loadSetFromLocalStorage('borrowedBooks', setBorrowedBooks);
-    }
-  }, []);
-
-  // LocalStorage'a kitap listesini kaydetme
   useEffect(() => {
     if (isClient && books.length > 0) {
       localStorage.setItem('libraryBooks', JSON.stringify(books));
     }
   }, [books, isClient]);
 
-  // Diğer localStorage kaydetme işlemleri (favori, okunan vb.)
   useEffect(() => {
     if (isClient) {
       localStorage.setItem('favoriteBooks', JSON.stringify(Array.from(favoriteBooks)));
@@ -403,10 +121,6 @@ const Library = ({ activeTab = 'all' }: LibraryProps): JSX.Element => {
 
   const filteredBooks = useMemo(() => books.filter(book => {
     if (activeTab === 'all') return true;
-    if (activeTab === 'favorites') return favoriteBooks.has(book.id);
-    if (activeTab === 'read') return readBooks.has(book.id);
-    if (activeTab === 'to-read') return toReadBooks.has(book.id);
-    if (activeTab === 'borrowed') return borrowedBooks.has(book.id);
     return book.status === activeTab;
   }), [books, activeTab, favoriteBooks, readBooks, toReadBooks, borrowedBooks]);
 
@@ -429,7 +143,6 @@ const Library = ({ activeTab = 'all' }: LibraryProps): JSX.Element => {
     return books.filter(book => book.status === status).length;
   };
 
-  // Theme kontrolü
   useEffect(() => {
     if (isClient && window.matchMedia('(prefers-color-scheme: dark)').matches) {
       setTheme('dark');
@@ -516,28 +229,62 @@ const Library = ({ activeTab = 'all' }: LibraryProps): JSX.Element => {
       setBooks(updatedBooks);
       setShowSuccessMessage(true);
       
-      // Sadece başarı mesajını kapat
       setTimeout(() => {
         setShowSuccessMessage(false);
       }, 1000);
-      
-      // Değerlendirme alanlarını sıfırlamıyoruz
-      // setRating(0);
-      // setFeedback('');
     }
   };
 
-  // Kapat butonuna tıklandığında değerlendirme alanlarını sıfırla
   const handleCloseModal = () => {
     setShowBorrowerModal(false);
     setRating(0);
     setFeedback('');
   };
 
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+  };
+
+  const renderPagination = () => {
+    if (totalPages <= 1) return null;
+
+    return (
+      <div className="flex justify-center items-center space-x-2 mt-6">
+        <button
+          onClick={() => handlePageChange(currentPage - 1)}
+          disabled={currentPage === 0}
+          className={`px-3 py-1 rounded ${
+            currentPage === 0
+              ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+              : 'bg-purple-600 text-white hover:bg-purple-700'
+          }`}
+        >
+          Önceki
+        </button>
+        <span className="text-gray-600">
+          Sayfa {currentPage + 1} / {totalPages}
+        </span>
+        <button
+          onClick={() => handlePageChange(currentPage + 1)}
+          disabled={currentPage === totalPages - 1}
+          className={`px-3 py-1 rounded ${
+            currentPage === totalPages - 1
+              ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+              : 'bg-purple-600 text-white hover:bg-purple-700'
+          }`}
+        >
+          Sonraki
+        </button>
+      </div>
+    );
+  };
+
+  if (loading) return <div>Kitaplar yükleniyor...</div>;
+  if (error) return <div>Hata: {error}</div>;
+
   return (
     <div className="flex min-h-screen flex-col">
       <div className="flex-1">
-        {/* Sol taraftaki ince dikey tab bar */}
         <div className={`fixed left-0 top-16 bottom-0 transition-all duration-300 ${isSidebarOpen ? 'w-48' : 'w-12'} bg-background/60 backdrop-blur-lg border-r border-border`}>
           <div className="flex flex-col h-full py-8 space-y-6">
             <button
@@ -594,10 +341,23 @@ const Library = ({ activeTab = 'all' }: LibraryProps): JSX.Element => {
                 <span className="font-medium text-sm">Ödünç Verme İşlemleri</span>
               </div>
             </Link>
+
+            <Link
+              href="/features/book-recommendations"
+              className={`flex items-center gap-2 px-4 py-3 transition-all duration-300 border-l-4 ${
+                activeTab === 'recommendations'
+                  ? 'bg-primary/10 border-primary text-primary'
+                  : 'border-transparent text-muted-foreground hover:bg-primary/5 hover:border-primary/50'
+              }`}
+            >
+              <Compass className="w-5 h-5 flex-shrink-0" />
+              <div className={`transition-all duration-300 ${isSidebarOpen ? 'opacity-100' : 'opacity-0 w-0'}`}>
+                <span className="font-medium text-sm">Kitap Önerileri</span>
+              </div>
+            </Link>
           </div>
         </div>
 
-        {/* Ana içerik - sol tab bar'a göre ayarlanmış margin */}
         <div className={`transition-all duration-300 ${isSidebarOpen ? 'ml-48' : 'ml-12'}`}>
           <div className="max-w-7xl mx-auto px-6 pb-12">
             <div className="relative bg-[#6B4423] dark:bg-[#523018] rounded-3xl p-8 shadow-2xl">
@@ -691,7 +451,7 @@ const Library = ({ activeTab = 'all' }: LibraryProps): JSX.Element => {
                                 onClick={() => handleBookClick(book)}
                               >
                                 <img
-                                  src={book.coverImage}
+                                  src={book.imageUrl}
                                   alt={book.title}
                                   className="w-full h-full object-cover"
                                 />
@@ -738,14 +498,13 @@ const Library = ({ activeTab = 'all' }: LibraryProps): JSX.Element => {
 
             <div className="flex justify-center mt-8">
               <div className="bg-white dark:bg-gray-900 text-[#8B4513] dark:text-white rounded-full py-2 px-6 shadow-lg">
-                Sayfa 1 / {Math.ceil(filteredBooks.length / 8)}
+                {renderPagination()}
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Başarı Mesajı Modal */}
       {showSuccessMessage && (
         <div className="fixed top-4 right-4 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-2 z-[60]">
           <Check className="w-5 h-5" />
@@ -753,7 +512,6 @@ const Library = ({ activeTab = 'all' }: LibraryProps): JSX.Element => {
         </div>
       )}
 
-      {/* Ödünç Alan Kişi Bilgileri Modal */}
       {showBorrowerModal && selectedBook && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-gray-800 p-6 rounded-lg shadow-xl max-w-md w-full mx-4">
@@ -821,7 +579,6 @@ const Library = ({ activeTab = 'all' }: LibraryProps): JSX.Element => {
         </div>
       )}
 
-      {/* Ödünç Verme Modal */}
       {showLendModal && selectedBook && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl max-w-md w-full">
