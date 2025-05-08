@@ -30,7 +30,7 @@ public class Review {
     @Column(columnDefinition = "TEXT")
     private String content;
 
-    @Column(name = "is_deleted", nullable = false)
+    @Column(name = "deleted", nullable = false)
     private boolean isDeleted = false;
 
     @CreationTimestamp
