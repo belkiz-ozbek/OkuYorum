@@ -10,6 +10,7 @@
 
     <include file="db/changelog/changes/initial-changelog.xml"/>
     <include file="db/changelog/changes/add-genre-changelog.xml"/>
+    <include file="db/changelog/changes/update-reading-activity-changelog.xml"/>
 
     <!-- Veri değişikliklerini buraya include edeceğiz -->
     <include file="db/changelog/data/data-master.xml"/>

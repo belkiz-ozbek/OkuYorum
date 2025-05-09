@@ -90,8 +90,13 @@ export const ACHIEVEMENT_DETAILS: Record<AchievementType, AchievementDetails> = 
 
 export interface ReadingActivity {
   id: number;
-  month: string;
-  books: number;
+  userId: number;
+  activityDate: string;
+  booksRead: number;
+  pagesRead: number;
+  readingMinutes: number;
+  lastReadDate: string;
+  consecutiveDays: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -163,7 +168,11 @@ export const profileService = {
   },
 
   // Yeni okuma aktivitesi ekle
-  addReadingActivity: async (activity: Omit<ReadingActivity, "id" | "createdAt" | "updatedAt">): Promise<ReadingActivity> => {
+  addReadingActivity: async (activity: {
+    booksRead: number;
+    pagesRead: number;
+    readingMinutes: number;
+  }): Promise<ReadingActivity> => {
     try {
       const response = await api.post('/api/profile/reading-activity', activity);
       return response.data;

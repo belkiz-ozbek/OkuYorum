@@ -15,8 +15,17 @@ public class ReadingActivity {
     @JoinColumn(name = "user_id")
     private User user;
 
-    private String month;
-    private Integer books;
+    @Column(name = "activity_date")
+    private LocalDate activityDate;
+
+    @Column(name = "books_read")
+    private Integer booksRead;
+
+    @Column(name = "pages_read")
+    private Integer pagesRead;
+
+    @Column(name = "reading_minutes")
+    private Integer readingMinutes;
 
     @Column(name = "last_read_date")
     private LocalDate lastReadDate;
@@ -63,20 +72,36 @@ public class ReadingActivity {
         this.user = user;
     }
 
-    public String getMonth() {
-        return month;
+    public LocalDate getActivityDate() {
+        return activityDate;
     }
 
-    public void setMonth(String month) {
-        this.month = month;
+    public void setActivityDate(LocalDate activityDate) {
+        this.activityDate = activityDate;
     }
 
-    public Integer getBooks() {
-        return books;
+    public Integer getBooksRead() {
+        return booksRead;
     }
 
-    public void setBooks(Integer books) {
-        this.books = books;
+    public void setBooksRead(Integer booksRead) {
+        this.booksRead = booksRead;
+    }
+
+    public Integer getPagesRead() {
+        return pagesRead;
+    }
+
+    public void setPagesRead(Integer pagesRead) {
+        this.pagesRead = pagesRead;
+    }
+
+    public Integer getReadingMinutes() {
+        return readingMinutes;
+    }
+
+    public void setReadingMinutes(Integer readingMinutes) {
+        this.readingMinutes = readingMinutes;
     }
 
     public LocalDate getLastReadDate() {

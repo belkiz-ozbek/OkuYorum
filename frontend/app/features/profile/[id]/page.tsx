@@ -26,6 +26,7 @@ import {
   Info,
   Layout,
   Heart,
+  Flame,
 } from "lucide-react"
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/form/button"
@@ -56,6 +57,8 @@ import { ReviewCard } from "@/components/reviews/ReviewCard"
 import PostCard from "@/components/PostCard"
 import { AxiosError } from "axios"
 import { on, off } from "@/lib/bookEventEmitter"
+import { Select, SelectTrigger, SelectValue, SelectItem, SelectContent } from "@/components/ui/select"
+import { format } from "date-fns"
 
 // Add this type definition before the ProfilePage component
 type CombinedContentItem = {
@@ -1857,58 +1860,106 @@ export default function ProfilePage() {
             >
               <Card className="overflow-hidden border-none bg-white/70 backdrop-blur-sm shadow-md">
                 <CardContent className="p-6">
-                  <h3 className="text-lg font-semibold mb-4 flex items-center">
-                    <BarChart3 className="mr-2 h-5 w-5 text-purple-400" /> Okuma Aktivitesi
-                  </h3>
+                  <div className="flex justify-between items-center mb-6">
+                    <h3 className="text-lg font-semibold flex items-center">
+                      <BarChart3 className="mr-2 h-5 w-5 text-purple-400" /> Okuma Aktivitesi
+                    </h3>
+                    <Select defaultValue="books">
+                      <SelectTrigger className="w-[140px]">
+                        <SelectValue placeholder="Görünüm seç" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="books">Kitap Sayısı</SelectItem>
+                        <SelectItem value="pages">Sayfa Sayısı</SelectItem>
+                        <SelectItem value="time">Okuma Süresi</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
 
                   <div className="relative">
                     {/* Grid lines */}
                     <div className="absolute inset-0 grid grid-rows-5 gap-0">
                       {[...Array(5)].map((_, i) => (
-                          <div key={i} className="border-b border-gray-100"></div>
+                        <div key={i} className="border-b border-gray-100"></div>
                       ))}
                     </div>
 
                     {/* Activity bars */}
                     <div className="h-64 flex items-end justify-between relative">
-                      { }
                       {readingActivity.map((item) => (
-                          <div key={item.id} className="flex flex-col items-center group">
-                            <div
-                                className="w-8 bg-gradient-to-t from-purple-300 to-purple-100 hover:from-purple-400 hover:to-purple-200 transition-all rounded-t-md relative"
-                                style={{
-                                  height: `${(item.books / getMaxBooks()) * 180}px`
-                                }}
-                            >
-                              <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                                {item.books} kitap
+                        <div key={item.id} className="flex flex-col items-center group">
+                          <div
+                            className="w-8 bg-gradient-to-t from-purple-300 to-purple-100 hover:from-purple-400 hover:to-purple-200 transition-all rounded-t-md relative"
+                            style={{
+                              height: `${(item.booksRead / getMaxBooks()) * 180}px`
+                            }}
+                          >
+                            <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                              <div className="flex flex-col gap-1">
+                                <span>{item.booksRead} kitap</span>
+                                <span>{item.pagesRead} sayfa</span>
+                                <span>{Math.round(item.readingMinutes / 60)} saat</span>
                               </div>
                             </div>
-                            <p className="mt-2 text-xs font-medium text-gray-600">{item.month}</p>
                           </div>
+                          <p className="mt-2 text-xs font-medium text-gray-600">
+                            {format(new Date(item.activityDate), 'MMM yyyy')}
+                          </p>
+                        </div>
                       ))}
                     </div>
                   </div>
 
                   {/* Summary stats */}
-                  <div className="mt-6 grid grid-cols-3 gap-4 pt-4 border-t">
+                  <div className="mt-6 grid grid-cols-4 gap-4 pt-4 border-t">
                     <div className="text-center">
                       <div className="text-xl font-bold text-purple-500">
-                        {readingActivity.reduce((sum, item) => sum + item.books, 0)}
+                        {readingActivity.reduce((sum, item) => sum + item.booksRead, 0)}
                       </div>
                       <div className="text-sm text-gray-500">Toplam Kitap</div>
                     </div>
                     <div className="text-center">
                       <div className="text-xl font-bold text-purple-500">
-                        {Math.round(readingActivity.reduce((sum, item) => sum + item.books, 0) / 12)}
+                        {readingActivity.reduce((sum, item) => sum + item.pagesRead, 0)}
                       </div>
-                      <div className="text-sm text-gray-500">Aylık Ortalama</div>
+                      <div className="text-sm text-gray-500">Toplam Sayfa</div>
                     </div>
                     <div className="text-center">
                       <div className="text-xl font-bold text-purple-500">
-                        {getMaxBooks()}
+                        {Math.round(readingActivity.reduce((sum, item) => sum + item.readingMinutes, 0) / 60)}
                       </div>
-                      <div className="text-sm text-gray-500">En Yüksek Ay</div>
+                      <div className="text-sm text-gray-500">Toplam Saat</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-xl font-bold text-purple-500">
+                        {readingActivity.length > 0 ? Math.round(readingActivity.reduce((sum, item) => sum + item.booksRead, 0) / readingActivity.length) : 0}
+                      </div>
+                      <div className="text-sm text-gray-500">Aylık Ortalama</div>
+                    </div>
+                  </div>
+
+                  {/* Reading Streak */}
+                  <div className="mt-6 pt-4 border-t">
+                    <div className="flex items-center justify-between mb-4">
+                      <h4 className="text-sm font-semibold text-gray-700 flex items-center">
+                        <Flame className="mr-2 h-4 w-4 text-orange-400" /> Okuma Serisi
+                      </h4>
+                      <span className="text-sm text-gray-500">
+                        {readingActivity[0]?.consecutiveDays || 0} gün
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-7 gap-1">
+                      {[...Array(7)].map((_, i) => {
+                        const isActive = i < (readingActivity[0]?.consecutiveDays || 0) % 7;
+                        return (
+                          <div
+                            key={i}
+                            className={`h-2 rounded-full ${
+                              isActive ? 'bg-orange-400' : 'bg-gray-200'
+                            }`}
+                          />
+                        );
+                      })}
                     </div>
                   </div>
                 </CardContent>

@@ -9,9 +9,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
+import java.time.YearMonth;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ReadingActivityService {
@@ -19,24 +21,28 @@ public class ReadingActivityService {
     private final AchievementService achievementService;
 
     @Autowired
-    public ReadingActivityService(ReadingActivityRepository readingActivityRepository,
-                                AchievementService achievementService) {
+    public ReadingActivityService(
+            ReadingActivityRepository readingActivityRepository,
+            AchievementService achievementService) {
         this.readingActivityRepository = readingActivityRepository;
         this.achievementService = achievementService;
     }
 
     @Transactional
-    public ReadingActivity addReadingActivity(Long userId, String month, Integer books) {
+    public ReadingActivity addReadingActivity(Long userId, Integer booksRead, Integer pagesRead, Integer readingMinutes) {
         User user = new User();
         user.setId(userId);
 
+        LocalDate today = LocalDate.now();
+        
         ReadingActivity activity = new ReadingActivity();
         activity.setUser(user);
-        activity.setMonth(month);
-        activity.setBooks(books);
+        activity.setActivityDate(today);
+        activity.setBooksRead(booksRead);
+        activity.setPagesRead(pagesRead);
+        activity.setReadingMinutes(readingMinutes);
 
         // Update consecutive days
-        LocalDate today = LocalDate.now();
         Optional<ReadingActivity> lastActivity = readingActivityRepository.findFirstByUserIdOrderByLastReadDateDesc(userId);
         
         if (lastActivity.isPresent()) {
@@ -61,13 +67,54 @@ public class ReadingActivityService {
         activity.setLastReadDate(today);
         ReadingActivity savedActivity = readingActivityRepository.save(activity);
         
-        // Update marathon reader achievement
+        // Update achievements
         achievementService.updateMarathonReaderProgress(userId, activity.getConsecutiveDays());
         
         return savedActivity;
     }
 
     public List<ReadingActivity> getUserReadingActivity(Long userId) {
-        return readingActivityRepository.findByUserIdOrderByMonthDesc(userId);
+        return readingActivityRepository.findByUserIdOrderByActivityDateDesc(userId);
+    }
+
+    public Map<YearMonth, ReadingActivitySummary> getMonthlyReadingStats(Long userId) {
+        List<ReadingActivity> activities = getUserReadingActivity(userId);
+        
+        return activities.stream()
+            .collect(Collectors.groupingBy(
+                activity -> YearMonth.from(activity.getActivityDate()),
+                Collectors.collectingAndThen(
+                    Collectors.toList(),
+                    list -> new ReadingActivitySummary(
+                        list.stream().mapToInt(ReadingActivity::getBooksRead).sum(),
+                        list.stream().mapToInt(ReadingActivity::getPagesRead).sum(),
+                        list.stream().mapToInt(ReadingActivity::getReadingMinutes).sum()
+                    )
+                )
+            ));
+    }
+
+    public static class ReadingActivitySummary {
+        private final int totalBooks;
+        private final int totalPages;
+        private final int totalMinutes;
+
+        public ReadingActivitySummary(int totalBooks, int totalPages, int totalMinutes) {
+            this.totalBooks = totalBooks;
+            this.totalPages = totalPages;
+            this.totalMinutes = totalMinutes;
+        }
+
+        public int getTotalBooks() {
+            return totalBooks;
+        }
+
+        public int getTotalPages() {
+            return totalPages;
+        }
+
+        public int getTotalMinutes() {
+            return totalMinutes;
+        }
     }
 } 

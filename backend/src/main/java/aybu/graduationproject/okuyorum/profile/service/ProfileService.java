@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -140,7 +141,7 @@ public class ProfileService {
     @Transactional(readOnly = true)
     public List<ReadingActivity> getUserReadingActivity(Long userId) {
         User user = getUserProfile(userId);
-        return readingActivityRepository.findByUserOrderByMonthDesc(user);
+        return readingActivityRepository.findByUserOrderByActivityDateDesc(user);
     }
 
     @Transactional
@@ -149,8 +150,12 @@ public class ProfileService {
         
         ReadingActivity activity = new ReadingActivity();
         activity.setUser(user);
-        activity.setMonth(month);
-        activity.setBooks(books);
+        activity.setActivityDate(LocalDate.now());
+        activity.setBooksRead(books);
+        activity.setPagesRead(0); // Default değer
+        activity.setReadingMinutes(0); // Default değer
+        activity.setLastReadDate(LocalDate.now());
+        activity.setConsecutiveDays(1); // Yeni aktivite için başlangıç değeri
         
         return readingActivityRepository.save(activity);
     }
