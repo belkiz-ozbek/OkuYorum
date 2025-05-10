@@ -10,6 +10,8 @@ export interface User {
     following: number;
     booksRead: number;
     readerScore: number;
+    role?: string;
+    status?: string;
     createdAt: string;
     updatedAt: string;
 } 

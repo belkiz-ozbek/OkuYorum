@@ -1,9 +1,12 @@
 package aybu.graduationproject.okuyorum.user.controller;
 
 import aybu.graduationproject.okuyorum.user.dto.UserDto;
+import aybu.graduationproject.okuyorum.user.dto.UserAdminUpdateDTO;
 import aybu.graduationproject.okuyorum.user.entity.User;
 import aybu.graduationproject.okuyorum.user.service.UserService;
 import aybu.graduationproject.okuyorum.user.service.ReadingStatsService;
+import aybu.graduationproject.okuyorum.user.enums.Role;
+import aybu.graduationproject.okuyorum.user.enums.UserStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -43,6 +46,8 @@ public class UserController {
             userDto.setProfileImage(user.getProfileImage());
             userDto.setReaderScore(user.getReaderScore());
             userDto.setCreatedAt(user.getCreatedAt());
+            userDto.setRole(user.getRole() != null ? user.getRole().name() : null);
+            userDto.setStatus(user.getStatus() != null ? user.getStatus().name() : null);
             return userDto;
         }).toList();
         return ResponseEntity.ok(userDtos);
@@ -136,5 +141,68 @@ public class UserController {
     public ResponseEntity<String> calculateReadingHours(@PathVariable Long userId) {
         readingStatsService.updateAllStats(userId);
         return ResponseEntity.ok("Reading statistics calculation triggered for user: " + userId);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody UserAdminUpdateDTO userUpdateDTO) {
+        try {
+            // Current user check to ensure only admins or the user themselves can update
+            User currentUser = userService.getCurrentUser();
+            if (currentUser.getRole() != Role.ADMIN && !currentUser.getId().equals(id)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("error", "Bu işlemi gerçekleştirmek için yetkiniz bulunmamaktadır."));
+            }
+            
+            // Convert DTO to User entity for updating
+            User userToUpdate = new User();
+            userToUpdate.setUsername(userUpdateDTO.getUsername());
+            userToUpdate.setEmail(userUpdateDTO.getEmail());
+            userToUpdate.setNameSurname(userUpdateDTO.getNameSurname());
+            
+            // Only admins can change role and status
+            if (currentUser.getRole() == Role.ADMIN) {
+                if (userUpdateDTO.getRole() != null) {
+                    userToUpdate.setRole(Role.valueOf(userUpdateDTO.getRole()));
+                }
+                
+                if (userUpdateDTO.getStatus() != null) {
+                    userToUpdate.setStatus(UserStatus.valueOf(userUpdateDTO.getStatus()));
+                }
+            }
+            
+            User updatedUser = userService.updateUser(id, userToUpdate);
+            
+            // Convert updated user to DTO for response
+            UserDto userDto = new UserDto();
+            userDto.setId(updatedUser.getId());
+            userDto.setUsername(updatedUser.getUsername());
+            userDto.setNameSurname(updatedUser.getNameSurname());
+            userDto.setEmail(updatedUser.getEmail());
+            userDto.setRole(updatedUser.getRole() != null ? updatedUser.getRole().name() : null);
+            userDto.setStatus(updatedUser.getStatus() != null ? updatedUser.getStatus().name() : null);
+            
+            return ResponseEntity.ok(userDto);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                .body(Map.of("error", "Kullanıcı güncellenirken bir hata oluştu: " + e.getMessage()));
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteUser(@PathVariable Long id) {
+        try {
+            // Only admins can delete users
+            User currentUser = userService.getCurrentUser();
+            if (currentUser.getRole() != Role.ADMIN) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("error", "Bu işlemi gerçekleştirmek için yetkiniz bulunmamaktadır."));
+            }
+            
+            userService.deleteUser(id);
+            return ResponseEntity.ok(Map.of("message", "Kullanıcı başarıyla silindi."));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                .body(Map.of("error", "Kullanıcı silinirken bir hata oluştu: " + e.getMessage()));
+        }
     }
 }
