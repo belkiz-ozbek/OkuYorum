@@ -246,6 +246,54 @@ export default function DonatePage() {
   const { toast } = useToast()
   const router = useRouter()
 
+  // İstatistikler için state
+  const [stats, setStats] = useState({
+    totalDonations: 0,
+    totalRecipients: 0,
+    isLoading: true
+  })
+  
+  // İstatistikleri API'den çek
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const token = localStorage.getItem('token')
+        if (!token) {
+          console.warn("Token bulunamadı, istatistikler alınamadı")
+          setStats(prev => ({ ...prev, isLoading: false }))
+          return
+        }
+
+        const response = await fetch('http://localhost:8080/api/donations/stats', {
+          headers: {
+            'Authorization': `Bearer ${token.replace(/"/g, '')}`,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          credentials: 'include'
+        })
+
+        if (!response.ok) {
+          console.warn("İstatistikler API yanıtı başarısız:", response.status)
+          setStats(prev => ({ ...prev, isLoading: false }))
+          return
+        }
+
+        const data = await response.json()
+        setStats({
+          totalDonations: data.totalDonations || 0, 
+          totalRecipients: data.totalRecipients || 0,
+          isLoading: false
+        })
+      } catch (error) {
+        console.error("İstatistikler alınırken hata oluştu:", error)
+        setStats(prev => ({ ...prev, isLoading: false }))
+      }
+    }
+
+    fetchStats()
+  }, [])
+
   useEffect(() => {
     // Sistem dark mode tercihini kontrol et
     if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
@@ -625,65 +673,6 @@ export default function DonatePage() {
                   </div>
 
                   <div className="grid md:grid-cols-3 gap-6">
-                    <div>
-                      {renderInput("genre", "Tür", genre, (e) => setGenre(e.target.value as BookGenre), {
-                        required: true,
-                        children: (
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <Button
-                                variant="outline"
-                                role="combobox"
-                                className={cn(
-                                  "w-full justify-between mt-1",
-                                  "h-10 px-3 py-2",
-                                  "font-normal text-left bg-white",
-                                  "border border-gray-200 hover:border-gray-300",
-                                  "transition-all duration-200",
-                                  errors.genre && "border-red-500 focus-visible:ring-red-500"
-                                )}
-                              >
-                                <div className="flex items-center gap-2">
-                                  <span className="text-lg">
-                                    {GENRES.find(g => g.value === genre)?.icon}
-                                  </span>
-                                  <span className="text-sm">
-                                    {GENRES.find(g => g.value === genre)?.label}
-                                  </span>
-                                </div>
-                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                              </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-2 bg-white shadow-lg border border-gray-200">
-                              <div className="space-y-1">
-                                {GENRES.map((g) => (
-                                  <button
-                                    key={g.value}
-                                    type="button"
-                                    onClick={() => {
-                                      setGenre(g.value as BookGenre)
-                                    }}
-                                    className={cn(
-                                      "w-full flex items-center px-3 py-2 rounded-md",
-                                      "transition-colors duration-150",
-                                      genre === g.value 
-                                        ? "bg-purple-50 text-purple-700" 
-                                        : "hover:bg-gray-50 text-gray-700"
-                                    )}
-                                  >
-                                    <span className="text-lg mr-2">{g.icon}</span>
-                                    <span className="text-sm font-medium">{g.label}</span>
-                                    {genre === g.value && (
-                                      <Check className="h-4 w-4 text-purple-500 ml-auto" />
-                                    )}
-                                  </button>
-                                ))}
-                              </div>
-                            </PopoverContent>
-                          </Popover>
-                        )
-                      })}
-                    </div>
                     <div>
                       {renderInput("condition", "Durumu", condition, (e) => setCondition(e.target.value as BookCondition), {
                         required: true,
@@ -1069,11 +1058,23 @@ export default function DonatePage() {
           <div className="mt-6 flex justify-center gap-2">
             <div className="flex items-center gap-2 bg-purple-50 px-3 py-1.5 rounded-full text-sm text-purple-700">
               <BookHeart className="h-4 w-4" />
-              <span>1,234+ Bağış Yapıldı</span>
+              {stats.isLoading ? (
+                <span className="flex items-center">
+                  <Spinner size="sm" className="mr-1" /> Yükleniyor...
+                </span>
+              ) : (
+                <span>{stats.totalDonations.toLocaleString('tr-TR')}+ Bağış Yapıldı</span>
+              )}
             </div>
             <div className="flex items-center gap-2 bg-purple-50 px-3 py-1.5 rounded-full text-sm text-purple-700">
               <Users className="h-4 w-4" />
-              <span>5,678+ Kişiye Ulaştı</span>
+              {stats.isLoading ? (
+                <span className="flex items-center">
+                  <Spinner size="sm" className="mr-1" /> Yükleniyor...
+                </span>
+              ) : (
+                <span>{stats.totalRecipients.toLocaleString('tr-TR')}+ Kişiye Ulaştı</span>
+              )}
             </div>
           </div>
         </div>

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { useToast } from "@/components/ui/feedback/use-toast"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/Card"
-import { BookOpen, MapPin, User, Package, Calendar, Search, Moon, Sun, Library, Compass, Users, Heart } from "lucide-react"
+import { BookOpen, MapPin, User, Package, Calendar, Search} from "lucide-react"
 import Link from "next/link"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
@@ -15,7 +15,6 @@ import {
 } from "@/components/ui/select"
 import {Button} from "@/components/ui/form/button";
 import {Input} from "@/components/ui/form/input";
-import {SearchForm} from "@/components/ui/form/search-form"
 
 type Donation = {
   id?: number
@@ -53,8 +52,6 @@ export default function DonationsPage() {
   const [isLoading, setIsLoading] = useState(true)
   const { toast } = useToast()
   const [searchTerm, setSearchTerm] = useState("")
-  const [isScrolled, setIsScrolled] = useState(false)
-  const [theme, setTheme] = useState<'light' | 'dark'>('light')
   const [filters, setFilters] = useState<{
     donationType: string;
     dateRange: DateRange;
@@ -68,24 +65,16 @@ export default function DonationsPage() {
   useEffect(() => {
     // Sistem dark mode tercihini kontrol et
     if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      setTheme('dark')
       document.documentElement.setAttribute('data-theme', 'dark')
     }
 
     const handleScroll = () => {
-      const scrollPosition = window.scrollY
-      setIsScrolled(scrollPosition > 50)
+      // Empty function but keeping event listener for potential future use
     }
 
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
-
-  const toggleTheme = () => {
-    const newTheme = theme === 'light' ? 'dark' : 'light'
-    setTheme(newTheme)
-    document.documentElement.setAttribute('data-theme', newTheme)
-  }
 
   useEffect(() => {
     const fetchDonations = async () => {
@@ -140,8 +129,17 @@ export default function DonationsPage() {
   }, [toast])
 
   const filteredDonations = donations.filter(donation => {
-    return donation.bookTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
-           donation.author.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesSearch =
+      donation.bookTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      donation.author.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesStatus =
+      filters.status === "all" ? true : donation.status?.toLowerCase() === filters.status;
+
+    // Eğer dateRange filtresi de uygulanacaksa buraya ekleyebilirsin
+    // const matchesDate = ...
+
+    return matchesSearch && matchesStatus;
   })
 
   if (isLoading) {
@@ -165,7 +163,7 @@ export default function DonationsPage() {
           </Link>
         </div>
 
-        <div className="mb-8 flex flex-col md:flex-row gap-4">
+        <div className="mb-8 flex flex-col md:flex-row gap-4" style={{ overflow: "visible" }}>
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
             <Input
@@ -235,91 +233,97 @@ export default function DonationsPage() {
             </TabsTrigger>
           </TabsList>
 
-          {['all', 'schools', 'libraries', 'individual'].map((tabValue) => (
-            <TabsContent key={tabValue} value={tabValue}>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredDonations.map((donation, index) => (
-                  <Card 
-                    key={index} 
-                    className="overflow-hidden hover:shadow-lg transition-all border-purple-100 hover:border-purple-200"
-                  >
-                    <CardHeader className="bg-gradient-to-r from-purple-100/50 to-pink-100/50 border-b border-purple-100">
-                      <CardTitle className="flex items-center gap-2 text-purple-800">
-                        <BookOpen className="h-5 w-5 text-purple-600" />
-                        {donation.bookTitle}
-                      </CardTitle>
-                      <CardDescription className="text-purple-600/80">
-                        {donation.author}
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="pt-6 space-y-3">
-                      <div className="flex items-center gap-2 text-gray-600">
-                        <User className="h-4 w-4" />
-                        <span>{donationTypeMap[donation.donationType as keyof typeof donationTypeMap]}</span>
-                      </div>
-                      {donation.institutionName && (
+          {['all', 'schools', 'libraries', 'individual'].map((tabValue) => {
+            // Sekmeye göre filtreleme
+            const tabDonations = filteredDonations.filter(donation =>
+              tabValue === 'all' ? true : donation.donationType === tabValue
+            );
+            return (
+              <TabsContent key={tabValue} value={tabValue}>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {tabDonations.map((donation, index) => (
+                    <Card 
+                      key={index} 
+                      className="overflow-hidden hover:shadow-lg transition-all border-purple-100 hover:border-purple-200"
+                    >
+                      <CardHeader className="bg-gradient-to-r from-purple-100/50 to-pink-100/50 border-b border-purple-100">
+                        <CardTitle className="flex items-center gap-2 text-purple-800">
+                          <BookOpen className="h-5 w-5 text-purple-600" />
+                          {donation.bookTitle}
+                        </CardTitle>
+                        <CardDescription className="text-purple-600/80">
+                          {donation.author}
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="pt-6 space-y-3">
                         <div className="flex items-center gap-2 text-gray-600">
-                          <MapPin className="h-4 w-4" />
-                          <span>{donation.institutionName}</span>
+                          <User className="h-4 w-4" />
+                          <span>{donationTypeMap[donation.donationType as keyof typeof donationTypeMap]}</span>
                         </div>
-                      )}
-                      <div className="flex items-center gap-2 text-gray-600">
-                        <Package className="h-4 w-4" />
-                        <span>{conditionMap[donation.condition as keyof typeof conditionMap]} • {donation.quantity} adet</span>
-                      </div>
-                      {donation.description && (
-                        <p className="text-sm text-gray-500 mt-2">{donation.description}</p>
-                      )}
-                      <div className="flex items-center gap-2 text-gray-400 text-sm mt-4">
-                        <Calendar className="h-4 w-4" />
-                        <span>{new Date(donation.createdAt).toLocaleDateString('tr-TR')}</span>
-                      </div>
-                    </CardContent>
-                    <CardFooter className="pt-0 pb-4">
-                      <Link href={`/features/donations/${donation.id}`} className="w-full">
-                        <Button 
-                          variant="outline" 
-                          className="w-full border-purple-200 text-purple-700 hover:bg-purple-50"
-                          onClick={(e) => {
-                            if (!donation.id) {
-                              e.preventDefault()
-                              e.stopPropagation()
-                              toast({
-                                title: "Hata",
-                                description: "Bağış ID'si bulunamadı",
-                                variant: "destructive"
-                              })
-                            } else {
-                              console.log("Navigating to donation detail:", donation.id)
-                            }
-                          }}
-                        >
-                          Detayları Görüntüle
-                        </Button>
-                      </Link>
-                    </CardFooter>
-                  </Card>
-                ))}
-              </div>
-
-              {filteredDonations.length === 0 && (
-                <div className="text-center py-12">
-                  <BookOpen className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                  <h3 className="text-xl font-semibold text-gray-600 mb-2">
-                    {tabValue === 'all' 
-                      ? 'Henüz bağış yapmamışsınız'
-                      : `${donationTypeMap[tabValue as keyof typeof donationTypeMap]} türünde bağışınız bulunmuyor`}
-                  </h3>
-                  <p className="text-gray-500 mb-4">Yeni bir bağış yapmak için hemen başlayın!</p>
-                  <Link href="/features/donate">
-                    <Button className="bg-purple-600 hover:bg-purple-700">
-                      Bağış Yap
-                    </Button>
-                  </Link>
+                        {donation.institutionName && (
+                          <div className="flex items-center gap-2 text-gray-600">
+                            <MapPin className="h-4 w-4" />
+                            <span>{donation.institutionName}</span>
+                          </div>
+                        )}
+                        <div className="flex items-center gap-2 text-gray-600">
+                          <Package className="h-4 w-4" />
+                          <span>{conditionMap[donation.condition as keyof typeof conditionMap]} • {donation.quantity} adet</span>
+                        </div>
+                        {donation.description && (
+                          <p className="text-sm text-gray-500 mt-2">{donation.description}</p>
+                        )}
+                        <div className="flex items-center gap-2 text-gray-400 text-sm mt-4">
+                          <Calendar className="h-4 w-4" />
+                          <span>{new Date(donation.createdAt).toLocaleDateString('tr-TR')}</span>
+                        </div>
+                      </CardContent>
+                      <CardFooter className="pt-0 pb-4">
+                        <Link href={`/features/donations/${donation.id}`} className="w-full">
+                          <Button 
+                            variant="outline" 
+                            className="w-full border-purple-200 text-purple-700 hover:bg-purple-50"
+                            onClick={(e) => {
+                              if (!donation.id) {
+                                e.preventDefault()
+                                e.stopPropagation()
+                                toast({
+                                  title: "Hata",
+                                  description: "Bağış ID'si bulunamadı",
+                                  variant: "destructive"
+                                })
+                              } else {
+                                console.log("Navigating to donation detail:", donation.id)
+                              }
+                            }}
+                          >
+                            Detayları Görüntüle
+                          </Button>
+                        </Link>
+                      </CardFooter>
+                    </Card>
+                  ))}
                 </div>
-              )}
-            </TabsContent>
-          ))}
+
+                {tabDonations.length === 0 && (
+                  <div className="text-center py-12">
+                    <BookOpen className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                    <h3 className="text-xl font-semibold text-gray-600 mb-2">
+                      {tabValue === 'all' 
+                        ? 'Henüz bağış yapmamışsınız'
+                        : `${donationTypeMap[tabValue as keyof typeof donationTypeMap]} türünde bağışınız bulunmuyor`}
+                    </h3>
+                    <p className="text-gray-500 mb-4">Yeni bir bağış yapmak için hemen başlayın!</p>
+                    <Link href="/features/donate">
+                      <Button className="bg-purple-600 hover:bg-purple-700">
+                        Bağış Yap
+                      </Button>
+                    </Link>
+                  </div>
+                )}
+              </TabsContent>
+            )
+          })}
         </Tabs>
       </main>
     </div>

@@ -14,6 +14,7 @@ import Image from 'next/image'
 import {Button} from "@/components/ui/form/button";
 import QRCode from 'qrcode';
 import { useRouter } from "next/navigation"
+import { bookService, Book } from '@/services/bookService'
 
 type DonationData = {
   bookTitle: string;
@@ -57,6 +58,7 @@ const genreMap = {
 
 export default function DonationSuccessPage() {
   const [userName, setUserName] = useState<string>("")
+  const [fullName, setFullName] = useState<string>("")
   const [donationDetails, setDonationDetails] = useState<DonationData | null>(null)
   const [stats, setStats] = useState<DonationStats>({
     totalDonations: 0,
@@ -69,15 +71,76 @@ export default function DonationSuccessPage() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const { toast } = useToast()
   const router = useRouter()
+  const [bookGenre, setBookGenre] = useState<string | null>(null)
   
   // Kullanıcı bilgilerini ve bağış detaylarını al
   useEffect(() => {
     const fetchDonationDetails = async () => {
       try {
         // Kullanıcı adını localStorage'dan al
-        const storedUserName = localStorage.getItem('userName') || ""
-        const cleanUserName = storedUserName.replace(/"/g, '')
-        setUserName(cleanUserName)
+        let storedUserName = localStorage.getItem('userName') || ""
+        storedUserName = storedUserName.replace(/"/g, '').trim()
+        console.log("localStorage'dan alınan isim:", storedUserName)
+        
+        // İsim soyisim için önce localStorage'ı kontrol et
+        let storedFullName = localStorage.getItem('name_surname') || ""
+        storedFullName = storedFullName.replace(/"/g, '').trim()
+        console.log("localStorage'dan alınan isim_soyisim:", storedFullName)
+        
+        // Eğer localStorage'da bilgiler yoksa, API'den kullanıcı detaylarını almayı dene
+        if (!storedUserName || !storedFullName) {
+          try {
+            const token = localStorage.getItem('token')
+            if (token) {
+              const userResponse = await fetch('http://localhost:8080/api/users/me', {
+                headers: {
+                  'Authorization': `Bearer ${token.replace(/"/g, '')}`,
+                  'Content-Type': 'application/json',
+                  'Accept': 'application/json'
+                },
+                credentials: 'include'
+              })
+              
+              if (userResponse.ok) {
+                const userData = await userResponse.json()
+                console.log("API'den alınan kullanıcı verisi:", userData)
+                
+                // İsim bilgisini userData'daki çeşitli alanlardan almayı dene
+                if (userData) {
+                  // Kullanıcı adı için
+                  if (userData.name) storedUserName = userData.name;
+                  else if (userData.fullName) storedUserName = userData.fullName;
+                  else if (userData.firstName) {
+                    storedUserName = userData.firstName;
+                    if (userData.lastName) storedUserName += " " + userData.lastName;
+                  }
+                  // Diğer olası alan isimleri
+                  else if (userData.username) storedUserName = userData.username;
+                  else if (userData.displayName) storedUserName = userData.displayName;
+                  
+                  // İsim soyisim için 
+                  if (userData.name_surname) storedFullName = userData.name_surname;
+                  else if (userData.nameSurname) storedFullName = userData.nameSurname;
+                  else if (userData.fullName) storedFullName = userData.fullName;
+                  else if (userData.firstName && userData.lastName) {
+                    storedFullName = userData.firstName + " " + userData.lastName;
+                  }
+                  // Eğer API'den isim-soyisim alınamazsa, userName'i kullan
+                  else if (!storedFullName && storedUserName) {
+                    storedFullName = storedUserName;
+                  }
+                }
+              }
+            }
+          } catch (error) {
+            console.warn('Kullanıcı bilgileri alınamadı:', error)
+          }
+        }
+        
+        console.log("Ayarlanan kullanıcı adı:", storedUserName)
+        console.log("Ayarlanan isim soyisim:", storedFullName)
+        setUserName(storedUserName)
+        setFullName(storedFullName)
         
         // Token kontrolü
         const token = localStorage.getItem('token')
@@ -173,16 +236,16 @@ export default function DonationSuccessPage() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        // Varsayılan değerler ile başla
+        // API verisi gelene kadar boş değerler kullan ve yükleme durumunu göster
         setStats({
-          totalDonations: 1234,
-          totalRecipients: 5678,
+          totalDonations: 0,
+          totalRecipients: 0,
           isLoading: true
         })
 
         const token = localStorage.getItem('token')
         if (!token) {
-          console.warn("Token bulunamadı, varsayılan değerler kullanılıyor")
+          console.warn("Token bulunamadı")
           setStats(prev => ({ ...prev, isLoading: false }))
           return
         }
@@ -197,7 +260,7 @@ export default function DonationSuccessPage() {
         })
 
         if (response.status === 403) {
-          console.warn("Yetkilendirme hatası, varsayılan değerler kullanılıyor")
+          console.warn("Yetkilendirme hatası")
           setStats(prev => ({ ...prev, isLoading: false }))
           return
         }
@@ -210,8 +273,8 @@ export default function DonationSuccessPage() {
 
         const data = await response.json()
         setStats({
-          totalDonations: data.totalDonations || 1234,
-          totalRecipients: data.totalRecipients || 5678,
+          totalDonations: data.totalDonations || 0,
+          totalRecipients: data.totalRecipients || 0,
           isLoading: false
         })
       } catch (error) {
@@ -222,6 +285,19 @@ export default function DonationSuccessPage() {
 
     fetchStats()
   }, [])
+
+  // Kitap detayını DB'den çek
+  useEffect(() => {
+    if (donationDetails?.bookTitle && donationDetails?.author) {
+      bookService.getBookByTitleAndAuthor(donationDetails.bookTitle, donationDetails.author)
+        .then((book: Book | null) => {
+          if (book && book.genre) {
+            setBookGenre(book.genre)
+          }
+        })
+        .catch(() => setBookGenre(null))
+    }
+  }, [donationDetails])
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -317,12 +393,28 @@ export default function DonationSuccessPage() {
 
   // Sertifika oluşturma ve önizleme fonksiyonu
   const generateCertificate = useCallback(async (forDownload = false) => {
-    const canvas = canvasRef.current
-    if (!canvas) {
-      console.error('Canvas elementi bulunamadı')
+    if (!isCanvasReady()) {
+      console.error('Canvas elementi bulunamadı veya hazır değil')
+      // 3 kere daha deneme yap
+      let attempts = 0
+      const checkInterval = setInterval(() => {
+        attempts++
+        if (isCanvasReady()) {
+          clearInterval(checkInterval)
+          generateCertificate(forDownload)
+        } else if (attempts >= 3) {
+          clearInterval(checkInterval)
+          toast({
+            title: "Hata",
+            description: "Sertifika oluşturulamadı. Lütfen sayfayı yenileyin.",
+            variant: "destructive"
+          })
+        }
+      }, 200)
       return
     }
 
+    const canvas = canvasRef.current!
     const ctx = canvas.getContext('2d')
     if (!ctx) {
       console.error('Canvas context oluşturulamadı')
@@ -423,7 +515,16 @@ export default function DonationSuccessPage() {
       // İsim ve teşekkür metni
       ctx.font = 'bold 80px Arial'
       ctx.fillStyle = '#1f2937'
-      ctx.fillText(`Sayın ${userName}`, canvas.width / 2, 800)
+      
+      console.log("Sertifikada gösterilecek fullName:", fullName)
+      console.log("Sertifikada alternatif gösterilecek userName:", userName)
+      
+      // Önce fullName (isim soyisim) kullan, yoksa userName, hiçbiri yoksa sadece "Sayın" göster
+      const displayName = fullName && fullName.trim() 
+        ? `Sayın ${fullName}` 
+        : (userName && userName.trim() ? `Sayın ${userName}` : "Sayın");
+        
+      ctx.fillText(displayName, canvas.width / 2, 800)
       
       ctx.font = '60px Arial'
       ctx.fillStyle = '#4b5563'
@@ -461,8 +562,8 @@ export default function DonationSuccessPage() {
         const details = [
           `Kitap: ${donationDetails.bookTitle}`,
           `Yazar: ${donationDetails.author}`,
-          `Tür: ${genreMap[donationDetails.genre as keyof typeof genreMap] || donationDetails.genre}`,
-          `Durum: ${conditionMap[donationDetails.condition as keyof typeof conditionMap] || donationDetails.condition}`,
+          `Tür: ${genreLabel}`,
+          `Durum: ${conditionLabel}`,
           `Bağış Türü: ${donationTypeMap[donationDetails.donationType as keyof typeof donationTypeMap]}`,
           `Miktar: ${donationDetails.quantity} adet`,
           `Tarih: ${new Date().toLocaleDateString('tr-TR')}`
@@ -541,18 +642,44 @@ export default function DonationSuccessPage() {
         variant: "destructive"
       })
     }
-  }, [donationDetails, userName, certificateTheme, getShareUrl])
+  }, [donationDetails, userName, certificateTheme, getShareUrl, bookGenre, fullName, toast])
 
   // Sayfa yüklendiğinde sertifika önizlemesini oluştur
   useEffect(() => {
-    if (donationDetails && userName) {
-      generateCertificate(false)
+    // Canvas'ın DOM'a tamamen yüklenmesi için bir miktar gecikme ekliyoruz
+    if (donationDetails && (userName || fullName)) {
+      // setTimeout kullanarak DOM render cycle'ının tamamlanmasını bekle
+      const timer = setTimeout(() => {
+        generateCertificate(false)
+      }, 500)
+      
+      return () => clearTimeout(timer)
     }
-  }, [donationDetails, userName, certificateTheme, generateCertificate])
+  }, [donationDetails, userName, fullName, certificateTheme, generateCertificate])
+
+  // genre ve condition label'larını hesapla
+  const genreKey = bookGenre || donationDetails?.genre || '';
+  const genreLabel = genreKey in genreMap ? genreMap[genreKey as keyof typeof genreMap] : genreKey;
+  const conditionKey = donationDetails?.condition || '';
+  const conditionLabel = conditionKey in conditionMap ? conditionMap[conditionKey as keyof typeof conditionMap] : conditionKey;
+
+  // Canvas'ın hazır olup olmadığını kontrol eden yardımcı fonksiyon
+  const isCanvasReady = () => {
+    return canvasRef.current !== null && 
+           typeof canvasRef.current.getContext === 'function'
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-rose-50 to-pink-100">
-      <main className="container mx-auto px-4 py-8">
+    <div className="min-h-screen bg-background">
+      {/* Gizli canvas elementini daha erken render et */}
+      <canvas 
+        ref={canvasRef} 
+        className="hidden"
+        width="2480"
+        height="3508"
+        data-testid="certificate-canvas"
+      />
+      <main className="container mx-auto py-8 px-4">
         <motion.div 
           className="text-center max-w-2xl mx-auto px-4"
           variants={containerVariants}
@@ -596,7 +723,7 @@ export default function DonationSuccessPage() {
             className="mb-8"
           >
             <h1 className="text-4xl font-bold text-gray-800 mb-4 bg-gradient-to-r from-purple-600 to-pink-600 text-transparent bg-clip-text">
-              {userName ? `Teşekkürler ${userName}!` : 'Bağışınız için Teşekkürler!'}
+              {fullName ? `Teşekkürler ${fullName}!` : (userName ? `Teşekkürler ${userName}!` : 'Bağışınız için Teşekkürler!')}
             </h1>
             <p className="text-gray-600 text-lg mb-6">
               {donationDetails?.bookTitle ? `${donationDetails.bookTitle} kitabınız yeni sahibini bekliyor...` : 'Kitaplarınız yeni sahiplerini bekliyor...'}
@@ -629,23 +756,23 @@ export default function DonationSuccessPage() {
                     </div>
                     <div className="flex items-center gap-2 text-gray-700">
                       <Package className="h-4 w-4 text-purple-600" />
-                      <span className="font-medium">Durum: </span> {conditionMap[donationDetails.condition as keyof typeof conditionMap] || donationDetails.condition}
+                      <span className="font-medium">Tür:</span> {genreLabel}
                     </div>
                     <div className="flex items-center gap-2 text-gray-700">
-                      <BookOpen className="h-4 w-4 text-purple-600" />
-                      <span className="font-medium">Tür:</span> {genreMap[donationDetails.genre as keyof typeof genreMap] || donationDetails.genre}
+                      <Package className="h-4 w-4 text-purple-600" />
+                      <span className="font-medium">Durum:</span> {conditionLabel}
                     </div>
                     <div className="flex items-center gap-2 text-gray-700">
                       <User className="h-4 w-4 text-purple-600" />
                       <span className="font-medium">Bağış Türü:</span> {donationTypeMap[donationDetails.donationType as keyof typeof donationTypeMap] || donationDetails.donationType}
                     </div>
-                    {donationDetails.institutionName && (
+                    {donationDetails.donationType !== "individual" && donationDetails.institutionName && (
                       <div className="flex items-center gap-2 text-gray-700">
                         <MapPin className="h-4 w-4 text-purple-600" />
                         <span className="font-medium">Kurum:</span> {donationDetails.institutionName}
                       </div>
                     )}
-                    {donationDetails.recipientName && (
+                    {donationDetails.donationType === "individual" && donationDetails.recipientName && (
                       <div className="flex items-center gap-2 text-gray-700">
                         <User className="h-4 w-4 text-purple-600" />
                         <span className="font-medium">Alıcı:</span> {donationDetails.recipientName}
@@ -757,13 +884,6 @@ export default function DonationSuccessPage() {
                         <p className="text-sm text-gray-500">Sertifikanız hazırlanıyor...</p>
                       </div>
                     )}
-                    
-                    {/* Gizli Canvas */}
-                    <canvas 
-                      ref={canvasRef} 
-                      className="hidden"
-                      style={{ width: '2480px', height: '3508px' }}
-                    />
                   </div>
                   
                   {/* Tema Seçenekleri */}

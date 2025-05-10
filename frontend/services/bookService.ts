@@ -157,6 +157,18 @@ class BookService {
       throw handleError(error);
     }
   }
+
+  async getBookByTitleAndAuthor(title: string, author: string): Promise<Book | null> {
+    try {
+      const response = await api.get(`/api/books/search?title=${encodeURIComponent(title)}&author=${encodeURIComponent(author)}`);
+      if (Array.isArray(response.data) && response.data.length > 0) {
+        return response.data[0];
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  }
 }
 
 export const bookService = new BookService(); 
