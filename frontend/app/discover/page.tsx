@@ -1,8 +1,23 @@
+"use client"
+
 import { DiscoverHeader } from "@/components/discover/DiscoverHeader"
 import { DiscoverFilters } from "@/components/discover/DiscoverFilters"
 import { DiscoverContent } from "@/components/discover/DiscoverContent"
+import { SearchDialog } from "@/components/discover/SearchDialog"
+import { CreateContentDialog } from "@/components/ui/discover/create-content-dialog"
+import { useState } from "react"
 
 export default function DiscoverPage() {
+  const [isSearchOpen, setIsSearchOpen] = useState(false)
+  const [isCreateOpen, setIsCreateOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState("")
+  
+  const handleSearch = (query: string) => {
+    setSearchQuery(query)
+    // Burada arama sonuçlarını filtreleyebilirsiniz
+    console.log("Searching for:", query)
+  }
+  
   return (
     <div className="min-h-screen relative overflow-hidden">
       {/* Arka plan degrade ve doku efekti */}
@@ -19,9 +34,9 @@ export default function DiscoverPage() {
       <div className="relative container py-8">
         <div className="max-w-7xl mx-auto">
           <DiscoverHeader
-            onOpenSearch={() => {}}
+            onOpenSearch={() => setIsSearchOpen(true)}
             onOpenFilter={() => {}}
-            onOpenCreate={() => {}}
+            onOpenCreate={() => setIsCreateOpen(true)}
           />
           
           <div className="relative">
@@ -36,12 +51,23 @@ export default function DiscoverPage() {
             <div className="relative mt-8">
               <div className="absolute inset-0 bg-gradient-to-b from-transparent via-purple-50/50 to-transparent dark:via-purple-950/20 rounded-3xl"></div>
               <div className="relative p-6">
-                <DiscoverContent />
+                <DiscoverContent searchQuery={searchQuery} />
               </div>
             </div>
           </div>
         </div>
       </div>
+      
+      <SearchDialog 
+        open={isSearchOpen} 
+        onOpenChange={setIsSearchOpen}
+        onSearch={handleSearch}
+      />
+      
+      <CreateContentDialog
+        open={isCreateOpen}
+        onOpenChange={setIsCreateOpen}
+      />
     </div>
   )
 } 

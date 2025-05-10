@@ -6,6 +6,9 @@ import aybu.graduationproject.okuyorum.user.repository.ReadingActivityRepository
 import aybu.graduationproject.okuyorum.user.repository.UserRepository;
 import aybu.graduationproject.okuyorum.profile.entity.Achievement;
 import aybu.graduationproject.okuyorum.profile.repository.AchievementRepository;
+import aybu.graduationproject.okuyorum.user.service.ReadingStatsService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -18,10 +21,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
 public class ProfileService {
+    private static final Logger logger = LoggerFactory.getLogger(ProfileService.class);
 
     @Value("${app.upload.dir:uploads}")
     private String uploadDir;
@@ -34,6 +39,9 @@ public class ProfileService {
 
     @Autowired
     private ReadingActivityRepository readingActivityRepository;
+
+    @Autowired
+    private ReadingStatsService readingStatsService;
 
     @Transactional(readOnly = true)
     public User getUserProfile(Long userId) {
@@ -145,19 +153,69 @@ public class ProfileService {
     }
 
     @Transactional
-    public ReadingActivity addReadingActivity(Long userId, String month, Integer books) {
-        User user = getUserProfile(userId);
+    public ReadingActivity addReadingActivity(Long userId, Integer booksRead, Integer pagesRead, Integer readingMinutes) {
+        logger.info("Starting to add reading activity for user: {}, books: {}, pages: {}, minutes: {}", 
+                    userId, booksRead, pagesRead, readingMinutes);
         
-        ReadingActivity activity = new ReadingActivity();
-        activity.setUser(user);
-        activity.setActivityDate(LocalDate.now());
-        activity.setBooksRead(books);
-        activity.setPagesRead(0); // Default değer
-        activity.setReadingMinutes(0); // Default değer
-        activity.setLastReadDate(LocalDate.now());
-        activity.setConsecutiveDays(1); // Yeni aktivite için başlangıç değeri
-        
-        return readingActivityRepository.save(activity);
+        try {
+            // Get user
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+            logger.debug("Found user: {} with name: {}", user.getId(), user.getNameSurname());
+            
+            // Create new activity
+            ReadingActivity activity = new ReadingActivity();
+            activity.setUser(user);
+            activity.setActivityDate(LocalDate.now());
+            activity.setBooksRead(booksRead != null ? booksRead : 0);
+            activity.setPagesRead(pagesRead != null ? pagesRead : 0);
+            activity.setReadingMinutes(readingMinutes != null ? readingMinutes : 0);
+            activity.setLastReadDate(LocalDate.now());
+            
+            logger.debug("Created new ReadingActivity object: {}", activity);
+            
+            // Update consecutive days
+            Optional<ReadingActivity> lastActivity = readingActivityRepository.findFirstByUserIdOrderByLastReadDateDesc(userId);
+            logger.debug("Found last activity present: {}", lastActivity.isPresent());
+            
+            if (lastActivity.isPresent()) {
+                ReadingActivity last = lastActivity.get();
+                LocalDate lastReadDate = last.getLastReadDate();
+                logger.debug("Last activity found with date: {} and consecutive days: {}", 
+                            lastReadDate, last.getConsecutiveDays());
+                
+                if (lastReadDate.plusDays(1).equals(LocalDate.now())) {
+                    // Consecutive day
+                    activity.setConsecutiveDays(last.getConsecutiveDays() + 1);
+                    logger.debug("Consecutive day, new streak: {}", activity.getConsecutiveDays());
+                } else if (!lastReadDate.equals(LocalDate.now())) {
+                    // Not consecutive, reset counter
+                    activity.setConsecutiveDays(1);
+                    logger.debug("Streak reset to 1");
+                } else {
+                    // Same day, keep the same count
+                    activity.setConsecutiveDays(last.getConsecutiveDays());
+                    logger.debug("Same day, keeping streak at: {}", activity.getConsecutiveDays());
+                }
+            } else {
+                // First reading activity
+                activity.setConsecutiveDays(1);
+                logger.debug("First activity for user");
+            }
+            
+            // Save activity
+            ReadingActivity savedActivity = readingActivityRepository.save(activity);
+            logger.info("Successfully saved reading activity with id: {}", savedActivity.getId());
+            
+            // Update user stats
+            readingStatsService.updateAllStats(userId);
+            logger.info("Updated reading stats for user: {}", userId);
+            
+            return savedActivity;
+        } catch (Exception e) {
+            logger.error("Error saving reading activity for user {}: {}", userId, e.getMessage(), e);
+            throw new RuntimeException("Failed to save reading activity: " + e.getMessage(), e);
+        }
     }
 
     @Transactional

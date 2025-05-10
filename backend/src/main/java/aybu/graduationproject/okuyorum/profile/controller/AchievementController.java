@@ -67,4 +67,10 @@ public class AchievementController {
         achievementService.updateMarathonReaderProgress(userId, days);
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping("/recalculate/{userId}")
+    public ResponseEntity<Void> recalculateAchievements(@PathVariable Long userId) {
+        achievementService.recalculateAllAchievements(userId);
+        return ResponseEntity.ok().build();
+    }
 } 

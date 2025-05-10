@@ -10,6 +10,7 @@ import aybu.graduationproject.okuyorum.user.repository.UserRepository;
 import aybu.graduationproject.okuyorum.library.repository.ReviewRepository;
 import aybu.graduationproject.okuyorum.user.service.UserService;
 import aybu.graduationproject.okuyorum.profile.service.AchievementService;
+import aybu.graduationproject.okuyorum.user.service.ReadingActivityService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -33,6 +34,7 @@ public class BookService {
     private final UserService userService;
     private final ReviewRepository reviewRepository;
     private final AchievementService achievementService;
+    private final ReadingActivityService readingActivityService;
 
     public BookService(BookRepository bookRepository, 
                       UserRepository userRepository, 
@@ -40,7 +42,8 @@ public class BookService {
                       GoogleBooksService googleBooksService,
                       UserService userService,
                       ReviewRepository reviewRepository,
-                      AchievementService achievementService) {
+                      AchievementService achievementService,
+                      ReadingActivityService readingActivityService) {
         this.bookRepository = bookRepository;
         this.userRepository = userRepository;
         this.userBookRepository = userBookRepository;
@@ -48,6 +51,7 @@ public class BookService {
         this.userService = userService;
         this.reviewRepository = reviewRepository;
         this.achievementService = achievementService;
+        this.readingActivityService = readingActivityService;
     }
 
     @Transactional
@@ -187,8 +191,22 @@ public class BookService {
 
         // Update achievement progress when a book is marked as read
         if (status == UserBook.ReadingStatus.READ) {
+            // Update achievements
             int readCount = userBookRepository.countByUserIdAndStatus(userId, UserBook.ReadingStatus.READ);
             achievementService.updateBookWormProgress(userId, readCount);
+
+            // Create reading activity
+            Book book = userBook.getBook();
+            if (book.getPageCount() != null) {
+                // Ortalama okuma hızı: bir sayfa 1.5 dakika
+                int readingMinutes = (int) Math.round(book.getPageCount() * 1.5);
+                readingActivityService.addReadingActivity(
+                    userId,
+                    1, // One book read
+                    book.getPageCount(),
+                    readingMinutes
+                );
+            }
         }
 
         return convertToDto(userBook.getBook(), userBook);

@@ -1,5 +1,6 @@
 import { api } from './api';
 import { EventEmitter } from 'events';
+import { AxiosError } from 'axios';
 
 export type ReadingStatus = 'reading' | 'read' | 'will_read' | 'dropped' | null;
 
@@ -42,6 +43,16 @@ export interface Quote {
 
 // Event emitter for book status changes and profile updates
 export const bookEventEmitter = new EventEmitter();
+
+const handleError = (error: unknown) => {
+  if (error instanceof AxiosError) {
+    if (error.response?.status === 401) {
+      throw new Error('Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.');
+    }
+    throw new Error(`İşlem sırasında bir hata oluştu: ${error.response?.data?.message || error.message}`);
+  }
+  throw new Error('Beklenmeyen bir hata oluştu');
+};
 
 class BookService {
   async getBooks(userId: string): Promise<Book[]> {
@@ -125,16 +136,26 @@ class BookService {
   }
 
   async updateBookStatus(id: string, status: ReadingStatus): Promise<Book> {
-    const response = await api.put(
-      `/api/books/${id}/status`,
-      JSON.stringify({ status })
-    );
-    
-    // Emit both events to ensure all components are updated
-    bookEventEmitter.emit('bookStatusUpdated', response.data);
-    bookEventEmitter.emit('profileNeedsUpdate');
-    
-    return response.data;
+    try {
+      console.log('Starting updateBookStatus:', { id, status });
+      
+      // Book status update
+      const response = await api.put(
+        `/api/books/${id}/status`,
+        JSON.stringify({ status })
+      );
+      console.log('Book status update response:', response.data);
+      
+      // Emit events to update UI
+      console.log('Emitting update events');
+      bookEventEmitter.emit('bookStatusUpdated', response.data);
+      bookEventEmitter.emit('profileNeedsUpdate');
+      
+      return response.data;
+    } catch (error) {
+      console.error('Error in updateBookStatus:', error);
+      throw handleError(error);
+    }
   }
 }
 

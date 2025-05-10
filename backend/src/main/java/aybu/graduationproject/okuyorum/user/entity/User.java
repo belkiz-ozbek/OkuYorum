@@ -59,6 +59,9 @@ public class User implements UserDetails {
     @Column(name = "following")
     private Integer following = 0;
 
+    @Column(name = "pages_read")
+    private Integer pagesRead = 0;
+
     @Column(name = "books_read")
     private Integer booksRead = 0;
 
@@ -209,6 +212,14 @@ public class User implements UserDetails {
 
     public void setFollowing(Integer following) {
         this.following = following;
+    }
+
+    public Integer getPagesRead() {
+        return pagesRead;
+    }
+
+    public void setPagesRead(Integer pagesRead) {
+        this.pagesRead = pagesRead;
     }
 
     public Integer getBooksRead() {

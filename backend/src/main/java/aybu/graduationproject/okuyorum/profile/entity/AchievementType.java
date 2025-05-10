@@ -2,7 +2,7 @@ package aybu.graduationproject.okuyorum.profile.entity;
 
 public enum AchievementType {
     BOOK_WORM(100, "Kitap Kurdu", "100 kitap okuyarak bu başarıyı kazanabilirsin"),
-    SOCIAL_READER(50, "Sosyal Okur", "50 kitap yorumu yaparak bu başarıyı kazanabilirsin"),
+    SOCIAL_READER(50, "Sosyal Okur", "İleti, inceleme veya alıntılara toplam 50 yorum yaparak bu başarıyı kazanabilirsin"),
     QUOTE_MASTER(200, "Alıntı Ustası", "200 alıntı paylaşarak bu başarıyı kazanabilirsin"),
     MARATHON_READER(30, "Maraton Okuyucu", "30 gün arka arkaya okuyarak bu başarıyı kazanabilirsin");
 

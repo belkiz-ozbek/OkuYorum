@@ -15,6 +15,7 @@ public class UserDto {
     private Integer followers;
     private Integer following;
     private Integer booksRead;
+    private Integer pagesRead;
     private Integer readerScore;
     private Integer yearlyGoal;
     private Integer readingHours;
@@ -108,6 +109,14 @@ public class UserDto {
 
     public void setBooksRead(Integer booksRead) {
         this.booksRead = booksRead;
+    }
+
+    public Integer getPagesRead() {
+        return pagesRead;
+    }
+
+    public void setPagesRead(Integer pagesRead) {
+        this.pagesRead = pagesRead;
     }
 
     public Integer getReaderScore() {

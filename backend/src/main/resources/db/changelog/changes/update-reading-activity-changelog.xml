@@ -12,12 +12,12 @@
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="user_id" type="bigint">
-                <constraints nullable="false"/>
+                <constraints nullable="false" foreignKeyName="fk_reading_activity_user" references="users(id)"/>
             </column>
             <column name="activity_date" type="date">
                 <constraints nullable="false"/>
             </column>
-            <column name="books_read" type="int">
+            <column name="books_read" type="int" defaultValue="0">
                 <constraints nullable="false"/>
             </column>
             <column name="pages_read" type="int" defaultValue="0">
@@ -40,13 +40,21 @@
             </column>
         </createTable>
 
-        <!-- Add foreign key constraint -->
-        <addForeignKeyConstraint baseTableName="reading_activity"
-                                baseColumnNames="user_id"
-                                constraintName="fk_reading_activity_user"
-                                referencedTableName="users"
-                                referencedColumnNames="id"
-                                onDelete="CASCADE"/>
+        <!-- Add indexes -->
+        <createIndex indexName="idx_reading_activity_user_id"
+                    tableName="reading_activity">
+            <column name="user_id"/>
+        </createIndex>
+
+        <createIndex indexName="idx_reading_activity_date"
+                    tableName="reading_activity">
+            <column name="activity_date"/>
+        </createIndex>
+
+        <createIndex indexName="idx_reading_activity_last_read"
+                    tableName="reading_activity">
+            <column name="last_read_date"/>
+        </createIndex>
     </changeSet>
 
     <changeSet id="20250509-13-30-drop-old-table" author="belkiz.ozbek">

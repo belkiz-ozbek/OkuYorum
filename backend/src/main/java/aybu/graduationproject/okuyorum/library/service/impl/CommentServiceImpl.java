@@ -14,6 +14,7 @@ import aybu.graduationproject.okuyorum.library.repository.QuoteRepository;
 import aybu.graduationproject.okuyorum.library.repository.ReviewRepository;
 import aybu.graduationproject.okuyorum.library.service.CommentService;
 import aybu.graduationproject.okuyorum.notification.service.NotificationService;
+import aybu.graduationproject.okuyorum.profile.service.AchievementService;
 import aybu.graduationproject.okuyorum.user.entity.User;
 import aybu.graduationproject.okuyorum.user.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -35,6 +36,7 @@ public class CommentServiceImpl implements CommentService {
     private final ReviewRepository reviewRepository;
     private final PostRepository postRepository;
     private final NotificationService notificationService;
+    private final AchievementService achievementService;
 
     @Autowired
     public CommentServiceImpl(
@@ -44,7 +46,8 @@ public class CommentServiceImpl implements CommentService {
             QuoteRepository quoteRepository,
             ReviewRepository reviewRepository,
             PostRepository postRepository,
-            NotificationService notificationService) {
+            NotificationService notificationService,
+            AchievementService achievementService) {
         this.commentRepository = commentRepository;
         this.commentLikeRepository = commentLikeRepository;
         this.userRepository = userRepository;
@@ -52,6 +55,7 @@ public class CommentServiceImpl implements CommentService {
         this.reviewRepository = reviewRepository;
         this.postRepository = postRepository;
         this.notificationService = notificationService;
+        this.achievementService = achievementService;
     }
 
     @Override
@@ -115,6 +119,10 @@ public class CommentServiceImpl implements CommentService {
         }
 
         Comment savedComment = commentRepository.save(comment);
+        
+        // Update the Social Reader achievement
+        achievementService.updateTotalCommentsProgress(userId);
+        
         return convertToDTO(savedComment, userId);
     }
 
@@ -130,6 +138,9 @@ public class CommentServiceImpl implements CommentService {
 
         comment.setDeleted(true);
         commentRepository.save(comment);
+        
+        // Update the Social Reader achievement after deleting a comment
+        achievementService.updateTotalCommentsProgress(userId);
     }
 
     @Override
@@ -233,6 +244,9 @@ public class CommentServiceImpl implements CommentService {
                     : String.format("/features/reviews/%d", parentComment.getReview().getId())
             );
         }
+
+        // Update the Social Reader achievement for replies too
+        achievementService.updateTotalCommentsProgress(userId);
 
         return convertToDTO(savedReply, userId);
     }
