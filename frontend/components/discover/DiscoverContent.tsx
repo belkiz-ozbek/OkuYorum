@@ -1,8 +1,21 @@
 import { motion } from "framer-motion"
 
-export const DiscoverContent = () => {
+interface DiscoverContentProps {
+  searchQuery?: string
+}
+
+export const DiscoverContent = ({ searchQuery = "" }: DiscoverContentProps) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {/* Arama sorgusu olduğunda gösterim */}
+      {searchQuery && (
+        <div className="col-span-full mb-4">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            <span className="font-medium">&#34;{searchQuery}&#34;</span> için arama sonuçları:
+          </p>
+        </div>
+      )}
+      
       {/* Örnek kartlar - gerçek veri geldiğinde bu kısım değişecek */}
       {[1, 2, 3, 4, 5, 6].map((item, index) => (
         <motion.div

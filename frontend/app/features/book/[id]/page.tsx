@@ -1,6 +1,6 @@
 "use client"
 
-import { BookOpen, Quote, Calendar, BookText, Heart, Share2, Bookmark, MessageCircle, Sparkles, Award } from 'lucide-react'
+import { BookOpen, Quote, Calendar, BookText, Heart, Share2, Bookmark, BookmarkCheck, MessageCircle, Sparkles, Award } from 'lucide-react'
 import Image from 'next/image'
 import { useEffect, useState } from 'react'
 import { use } from 'react'
@@ -81,19 +81,19 @@ export default function BookPage({ params }: PageProps) {
                     id: data.id,
                     title: data.title,
                     status: data.status,
+                    favorite: data.favorite,
+                    genre: data.genre,
                     fullResponse: data
                 })
                 
-                // Favori durumunu localStorage'dan kontrol et
-                const savedFavorites = localStorage.getItem('favoriteBooks')
-                const favoriteBooks = savedFavorites ? JSON.parse(savedFavorites) : []
-                const isFavorite = favoriteBooks.includes(Number(data.id))
-                
+                // API yanıtındaki favorite alanını isFavorite olarak ayarla
                 setBook({
                     ...data,
-                    id: Number(data.id),
-                    isFavorite: isFavorite
+                    isFavorite: data.favorite
                 })
+
+                // Genre'yi kontrol et
+                console.log('Genre after setting book:', data.genre)
             } catch (err) {
                 console.error('Kitap detayı getirme hatası:', err)
                 setError(err instanceof Error ? err.message : 'Bir hata oluştu')
@@ -289,74 +289,44 @@ export default function BookPage({ params }: PageProps) {
                 throw new Error('Geçersiz kitap ID');
             }
 
-            // Optimistic update - UI'ı hemen güncelle
-            const newFavoriteStatus = !book.isFavorite;
-            setBook(prev => {
-                if (!prev) return null;
-                return {
-                    ...prev,
-                    isFavorite: newFavoriteStatus
-                };
-            });
-
             // API çağrısı
-            const response = await api.put(`/api/books/${bookId}/favorite`, {
-                status: null,
-                isFavorite: newFavoriteStatus
+            const response = await fetch(`http://localhost:8080/api/books/${bookId}/favorite`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
             });
             
-            if (response.status !== 200) {
+            if (!response.ok) {
                 throw new Error('Favori durumu güncellenemedi');
             }
 
             // API yanıtını doğrudan kullan
-            const isFavorite = response.data?.isFavorite ?? newFavoriteStatus;
+            const updatedBook = await response.json();
             
             // Book state'ini güncelle
             setBook(prev => {
                 if (!prev) return null;
                 return {
                     ...prev,
-                    isFavorite: isFavorite
+                    isFavorite: updatedBook.favorite // API'den gelen alanı doğru şekilde kullan
                 };
             });
 
-            // Favori durumunu localStorage'a kaydet
-            const savedFavorites = localStorage.getItem('favoriteBooks')
-            let favoriteBooks = savedFavorites ? JSON.parse(savedFavorites) : []
-            
-            if (isFavorite) {
-                if (!favoriteBooks.includes(bookId)) {
-                    favoriteBooks.push(bookId)
-                }
-            } else {
-                favoriteBooks = favoriteBooks.filter((id: number) => id !== bookId)
-            }
-            
-            localStorage.setItem('favoriteBooks', JSON.stringify(favoriteBooks))
-
             // Favori durumu değiştiğinde event tetikle
-            emit('favoriteUpdated', { bookId, isFavorite });
+            emit('favoriteUpdated', { bookId, isFavorite: updatedBook.favorite });
 
             // Başarılı mesajı göster
             toast({
-                title: isFavorite ? "Favorilere eklendi!" : "Favorilerden çıkarıldı",
-                description: isFavorite ? 
+                title: updatedBook.favorite ? "Favorilere eklendi!" : "Favorilerden çıkarıldı",
+                description: updatedBook.favorite ? 
                     "Kitap favorilerinize eklendi." : 
                     "Kitap favorilerinizden çıkarıldı.",
                 variant: "default",
             });
 
         } catch (err) {
-            // Hata durumunda optimistic update'i geri al
-            setBook(prev => {
-                if (!prev) return null;
-                return {
-                    ...prev,
-                    isFavorite: !prev.isFavorite
-                };
-            });
-
             console.error('Favori güncelleme hatası:', err);
             toast({
                 title: "Hata!",
@@ -390,17 +360,32 @@ export default function BookPage({ params }: PageProps) {
         }
     };
 
-    const handleShareQuote = async (quoteId: number) => {
+    const handleShareQuote = async (bookId: number) => {
         try {
-            const response = await quoteService.shareQuote(quoteId);
-            if (response.url) {
-                window.open(response.url, '_blank');
+            // Kitap paylaşım URL'sini oluştur
+            const shareUrl = `${window.location.origin}/books/${bookId}`;
+            
+            // Web Share API'yi kontrol et
+            if (navigator.share) {
+                await navigator.share({
+                    title: book?.title || 'Kitap',
+                    text: `${book?.title} kitabını OkuYorum'da keşfet!`,
+                    url: shareUrl
+                });
+            } else {
+                // Web Share API desteklenmiyorsa URL'yi panoya kopyala
+                await navigator.clipboard.writeText(shareUrl);
+                toast({
+                    title: "Başarılı",
+                    description: "Paylaşım linki panoya kopyalandı!",
+                    variant: "default",
+                });
             }
         } catch (error) {
-            console.error('Alıntı paylaşma hatası:', error);
+            console.error('Kitap paylaşma hatası:', error);
             toast({
                 title: "Hata",
-                description: "Alıntı paylaşılırken bir hata oluştu.",
+                description: "Kitap paylaşılırken bir hata oluştu.",
                 variant: "destructive",
             });
         }
@@ -463,7 +448,7 @@ export default function BookPage({ params }: PageProps) {
                                 </div>
 
                                 {/* Kitap Detayları - Daha ferah */}
-                                <div className="w-full mt-10 bg-white/80 backdrop-blur-sm rounded-2xl p-8
+                                <div className="w-full mt-6 bg-white/80 backdrop-blur-sm rounded-2xl p-8
                   shadow-[0_8px_30px_rgb(0,0,0,0.04)] space-y-6">
                                     <h3 className="font-medium text-gray-700 mb-6">Kitap Detayları</h3>
                                     <div className="space-y-4 text-sm">
@@ -631,12 +616,22 @@ export default function BookPage({ params }: PageProps) {
                                             onClick={() => handleStatusChange("WILL_READ")}
                                             className="relative flex items-center gap-3 px-6 py-3 bg-white dark:bg-gray-900 hover:bg-purple-50 dark:hover:bg-gray-800 border border-purple-100 dark:border-purple-800/30 rounded-lg shadow-xl shadow-purple-500/10 hover:shadow-purple-500/20 transition-all duration-300">
                                             <div className="relative">
-                                                <Bookmark className="w-5 h-5 text-purple-500 dark:text-purple-400 group-hover:text-purple-600 dark:group-hover:text-purple-300 transition-colors duration-300" />
+                                                {book?.status === "WILL_READ" ? (
+                                                    <BookmarkCheck className="w-5 h-5 text-purple-500 dark:text-purple-400 group-hover:text-purple-600 dark:group-hover:text-purple-300 transition-colors duration-300" />
+                                                ) : (
+                                                    <Bookmark className="w-5 h-5 text-purple-500 dark:text-purple-400 group-hover:text-purple-600 dark:group-hover:text-purple-300 transition-colors duration-300" />
+                                                )}
                                                 <div className="absolute inset-0 animate-pulse opacity-30 text-purple-500 group-hover:opacity-50">
-                                                    <Bookmark className="w-5 h-5" />
+                                                    {book?.status === "WILL_READ" ? (
+                                                        <BookmarkCheck className="w-5 h-5" />
+                                                    ) : (
+                                                        <Bookmark className="w-5 h-5" />
+                                                    )}
                                                 </div>
                                             </div>
-                                            <span className="font-medium text-gray-700 dark:text-gray-300 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors duration-300">Okuma Listeme Ekle</span>
+                                            <span className="font-medium text-gray-700 dark:text-gray-300 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors duration-300">
+                                                {book?.status === "WILL_READ" ? "Okuma Listemde" : "Okuma Listeme Ekle"}
+                                            </span>
                                         </Button>
                                     </motion.div>
 
@@ -646,7 +641,9 @@ export default function BookPage({ params }: PageProps) {
                                         className="relative group"
                                     >
                                         <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 via-pink-500 to-purple-600 rounded-xl blur opacity-0 group-hover:opacity-25 transition duration-1000 group-hover:duration-300"></div>
-                                        <Button className="relative flex items-center gap-3 px-6 py-3 bg-white dark:bg-gray-900 hover:bg-purple-50 dark:hover:bg-gray-800 border border-purple-100 dark:border-purple-800/30 rounded-lg shadow-xl shadow-purple-500/10 hover:shadow-purple-500/20 transition-all duration-300">
+                                        <Button 
+                                            onClick={() => handleShareQuote(book.id)}
+                                            className="relative flex items-center gap-3 px-6 py-3 bg-white dark:bg-gray-900 hover:bg-purple-50 dark:hover:bg-gray-800 border border-purple-100 dark:border-purple-800/30 rounded-lg shadow-xl shadow-purple-500/10 hover:shadow-purple-500/20 transition-all duration-300">
                                             <div className="relative">
                                                 <Share2 className="w-5 h-5 text-purple-500 dark:text-purple-400 group-hover:text-purple-600 dark:group-hover:text-purple-300 transition-colors duration-300" />
                                                 <div className="absolute inset-0 animate-pulse opacity-30 text-purple-500 group-hover:opacity-50">
@@ -661,21 +658,15 @@ export default function BookPage({ params }: PageProps) {
 
                             {/* Etiketler */}
                             <div className="flex flex-wrap gap-2 mb-6">
-                                <span className="px-3 py-1 bg-amber-50 text-amber-600 rounded-full text-sm hover:bg-amber-100 transition-colors">
-                                    Fantastik
-                                </span>
-                                <span className="px-3 py-1 bg-indigo-50 text-indigo-600 rounded-full text-sm hover:bg-indigo-100 transition-colors">
-                                    Büyü ve Sihir
-                                </span>
-                                <span className="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-full text-sm hover:bg-emerald-100 transition-colors">
-                                    Macera
-                                </span>
-                                <span className="px-3 py-1 bg-purple-50 text-purple-600 rounded-full text-sm hover:bg-purple-100 transition-colors">
-                                    Hogwarts
-                                </span>
-                                <span className="px-3 py-1 bg-rose-50 text-rose-600 rounded-full text-sm hover:bg-rose-100 transition-colors">
-                                    Genç-Yetişkin
-                                </span>
+                                {book.genre ? (
+                                    <span className="px-4 py-2 bg-purple-100 text-purple-700 rounded-full text-sm font-medium hover:bg-purple-200 transition-colors">
+                                        {book.genre}
+                                    </span>
+                                ) : (
+                                    <span className="px-4 py-2 bg-gray-100 text-gray-600 rounded-full text-sm font-medium">
+                                        Tür belirtilmemiş
+                                    </span>
+                                )}
                             </div>
 
                             {/* Alıntı ve İnceleme Ekleme Butonları */}

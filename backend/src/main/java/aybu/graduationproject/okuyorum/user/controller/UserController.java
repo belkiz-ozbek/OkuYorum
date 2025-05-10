@@ -71,8 +71,8 @@ public class UserController {
     public ResponseEntity<UserDto> getUserById(@PathVariable Long id) {
         User user = userService.getUserById(id);
         
-        // Okuma saatlerini güncelle
-        readingStatsService.updateReadingHours(id);
+        // Tüm okuma istatistiklerini güncelle
+        readingStatsService.updateAllStats(id);
         
         UserDto userDto = new UserDto();
         userDto.setId(user.getId());
@@ -89,6 +89,7 @@ public class UserController {
         userDto.setReaderScore(user.getReaderScore());
         userDto.setYearlyGoal(user.getYearlyGoal());
         userDto.setReadingHours(user.getReadingHours());
+        userDto.setPagesRead(user.getPagesRead());
         userDto.setCreatedAt(user.getCreatedAt());
         userDto.setUpdatedAt(user.getUpdatedAt());
         return ResponseEntity.ok(userDto);
@@ -133,7 +134,7 @@ public class UserController {
 
     @GetMapping("/{userId}/calculate-reading-hours")
     public ResponseEntity<String> calculateReadingHours(@PathVariable Long userId) {
-        readingStatsService.updateReadingHours(userId);
-        return ResponseEntity.ok("Reading hours calculation triggered for user: " + userId);
+        readingStatsService.updateAllStats(userId);
+        return ResponseEntity.ok("Reading statistics calculation triggered for user: " + userId);
     }
 }

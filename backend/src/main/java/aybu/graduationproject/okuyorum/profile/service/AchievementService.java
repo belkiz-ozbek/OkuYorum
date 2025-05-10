@@ -3,6 +3,7 @@ package aybu.graduationproject.okuyorum.profile.service;
 import aybu.graduationproject.okuyorum.profile.entity.Achievement;
 import aybu.graduationproject.okuyorum.profile.entity.AchievementType;
 import aybu.graduationproject.okuyorum.profile.repository.AchievementRepository;
+import aybu.graduationproject.okuyorum.library.repository.CommentRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -16,9 +17,11 @@ public class AchievementService {
     private static final Logger log = LoggerFactory.getLogger(AchievementService.class);
 
     private final AchievementRepository achievementRepository;
+    private final CommentRepository commentRepository;
 
-    public AchievementService(AchievementRepository achievementRepository) {
+    public AchievementService(AchievementRepository achievementRepository, CommentRepository commentRepository) {
         this.achievementRepository = achievementRepository;
+        this.commentRepository = commentRepository;
     }
 
     public List<Achievement> getUserAchievements(Long userId) {
@@ -50,14 +53,14 @@ public class AchievementService {
     @Transactional
     public void updateBookWormProgress(Long userId, int count) {
         Achievement achievement = getOrCreateAchievement(userId, AchievementType.BOOK_WORM);
-        int progress = (count * 100) / 10; // 10 kitap = %100
+        int progress = (count * 100) / 100; // 100 kitap = %100
         updateAchievementProgress(achievement, progress);
     }
 
     @Transactional
     public void updateSocialReaderProgress(Long userId, int count) {
         Achievement achievement = getOrCreateAchievement(userId, AchievementType.SOCIAL_READER);
-        int progress = (count * 100) / 5; // 5 yorum = %100
+        int progress = (count * 100) / 50; // 50 yorum = %100
         updateAchievementProgress(achievement, progress);
     }
 
@@ -71,8 +74,24 @@ public class AchievementService {
     @Transactional
     public void updateMarathonReaderProgress(Long userId, int days) {
         Achievement achievement = getOrCreateAchievement(userId, AchievementType.MARATHON_READER);
-        int progress = (days * 100) / 7; // 7 gün = %100
+        int progress = (days * 100) / 30; // 30 gün = %100
         updateAchievementProgress(achievement, progress);
+    }
+
+    @Transactional
+    public void updateTotalCommentsProgress(Long userId) {
+        int totalComments = commentRepository.countByUserIdAndNotDeleted(userId);
+        updateSocialReaderProgress(userId, totalComments);
+    }
+
+    @Transactional
+    public void recalculateAllAchievements(Long userId) {
+        // Recalculate Social Reader achievement
+        int totalComments = commentRepository.countByUserIdAndNotDeleted(userId);
+        updateSocialReaderProgress(userId, totalComments);
+        
+        // We can add other achievement recalculations here in the future
+        log.info("Recalculated all achievements for user ID: {}", userId);
     }
 
     private Achievement getOrCreateAchievement(Long userId, AchievementType type) {

@@ -9,7 +9,11 @@
     <property name="defaultSchemaName" value="public"/>
 
     <include file="db/changelog/changes/initial-changelog.xml"/>
+    <include file="db/changelog/changes/add-genre-changelog.xml"/>
+    <include file="db/changelog/changes/update-reading-activity-changelog.xml"/>
+    <include file="db/changelog/changes/add-pages-read-to-user.xml"/>
 
     <!-- Veri değişikliklerini buraya include edeceğiz -->
     <include file="db/changelog/data/data-master.xml"/>
+
 </databaseChangeLog>

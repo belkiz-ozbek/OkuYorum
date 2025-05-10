@@ -25,6 +25,8 @@ import {
   BookText,
   Info,
   Layout,
+  Heart,
+  Flame,
 } from "lucide-react"
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/form/button"
@@ -55,6 +57,7 @@ import { ReviewCard } from "@/components/reviews/ReviewCard"
 import PostCard from "@/components/PostCard"
 import { AxiosError } from "axios"
 import { on, off } from "@/lib/bookEventEmitter"
+import { format } from "date-fns"
 
 // Add this type definition before the ProfilePage component
 type CombinedContentItem = {
@@ -130,6 +133,7 @@ export default function ProfilePage() {
   const params = useParams();
   const router = useRouter();
   const { toast } = useToast();
+  const id = params?.id && !Array.isArray(params.id) ? params.id.toString() : null;
 
   const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -159,46 +163,20 @@ export default function ProfilePage() {
   const [newPost, setNewPost] = useState("");
   const [isEditingYearlyGoal, setIsEditingYearlyGoal] = useState(false);
   const [yearlyGoal, setYearlyGoal] = useState<number>(0);
-
+  const [totalHours, setTotalHours] = useState(0);
+  
   const { fetchPosts } = usePosts(params, toast, setPosts, router);
 
-  // Params kontrolü
-  if (!params?.id || Array.isArray(params.id)) {
-    router.push('/');
-    return null;
-  }
-
-  const id: string = params.id.toString();
-
-  // PROFİL İLETİLERİNİ HER ZAMAN YÜKLE
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  useEffect(() => {
-    fetchPosts();
-  }, [fetchPosts]);
-
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  useEffect(() => {
-    const loadUserInfo = async () => {
-      try {
-        const response = await UserService.getCurrentUser();
-        setCurrentUser(response.data);
-        // Kullanıcı giriş yapmışsa ve profil sayfası başka bir kullanıcıya aitse takip durumunu kontrol et
-        if (response.data && id !== response.data.id.toString()) {
-          const isFollowingStatus = await followService.isFollowing(id);
-          setIsFollowing(isFollowingStatus);
-        }
-      } catch (error) {
-        console.error('Error loading user info:', error);
-        setCurrentUser(null);
-      }
-    };
-
-    loadUserInfo();
-  }, [id]);
-
   const fetchProfileData = async () => {
+    console.log('Starting fetchProfileData...');
     try {
+      if (!id) {
+        setError("Invalid profile ID");
+        return;
+      }
+
       const profileData = await profileService.getUserProfile(id);
+      console.log('Profile data received:', profileData);
       
       if (id !== currentUser?.id?.toString()) {
         console.log('Fetching data for other user profile');
@@ -207,6 +185,12 @@ export default function ProfilePage() {
           profileService.getUserReadingActivity(id),
           bookService.getBooks(id)
         ]);
+        
+        console.log('Other user data received:', {
+          achievements: achievementsData,
+          readingActivity: readingActivityData,
+          books: booksData
+        });
         
         setProfile(profileData);
         setAchievements(achievementsData);
@@ -222,10 +206,10 @@ export default function ProfilePage() {
         ]);
         
         console.log('Current user data received:', {
-          achievementsData,
-          readingActivityData,
-          booksData,
-          favoriteBooksData
+          achievements: achievementsData,
+          readingActivity: readingActivityData,
+          books: booksData,
+          favoriteBooks: favoriteBooksData
         });
         
         setProfile(profileData);
@@ -254,44 +238,40 @@ export default function ProfilePage() {
     }
   };
 
-  // eslint-disable-next-line react-hooks/rules-of-hooks
+  // Kullanıcının incelemelerini çeken fonksiyon
+  const fetchUserReviews = useCallback(async () => {
+    if (!profile?.id) return;
+    
+    try {
+      setIsLoadingReviews(true);
+      const userReviews = await reviewService.getReviewsByUser(profile.id.toString());
+      setReviews(userReviews);
+    } catch (error) {
+      console.error('İncelemeler yüklenirken hata:', error);
+      toast({
+        title: 'Hata',
+        description: 'İncelemeler yüklenirken bir hata oluştu.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoadingReviews(false);
+    }
+  }, [profile?.id, toast]);
+
+  // Redirect if invalid ID
   useEffect(() => {
-    const loadProfile = async () => {
-      if (!params.id) {
-        setError("Invalid profile ID");
-        return;
-      }
+    if (!params?.id || Array.isArray(params.id)) {
+      router.push('/');
+    }
+  }, [params?.id, router]);
 
-      try {
-        setLoading(true);
-        const [profileResponse, booksData, favoriteBooksData] = await Promise.all([
-          api.get(`/api/users/${params.id}`),
-          bookService.getBooks(params.id.toString()),
-          bookService.getFavoriteBooks()
-        ]);
-        
-        // Favori kitapları işaretle
-        const favoriteBookIds = new Set(favoriteBooksData.map(book => Number(book.id)));
-        const updatedBooks = booksData.map(book => ({
-          ...book,
-          id: Number(book.id),
-          isFavorite: favoriteBookIds.has(Number(book.id))
-        }));
-        
-        setProfile(profileResponse.data);
-        setBooks(updatedBooks);
-        setLoading(false);
-      } catch (error) {
-        console.error("Error loading profile:", error);
-        setError("Failed to load profile");
-        setLoading(false);
-      }
-    };
-
-    loadProfile();
+  // Load profile data
+  useEffect(() => {
+    fetchProfileData();
 
     // Favori durumu değişikliklerini dinle
     const handleFavoriteUpdate = async ({ bookId, isFavorite }: { bookId: number; isFavorite: boolean }) => {
+      // Kitap listesini güncelle
       setBooks(prevBooks =>
         prevBooks.map(book =>
           book.id === bookId
@@ -299,28 +279,180 @@ export default function ProfilePage() {
             : book
         )
       );
+
+      // Favori kitapları yeniden yükle
+      try {
+        const favoriteBooksData = await bookService.getFavoriteBooks();
+        const favoriteBookIds = new Set(favoriteBooksData.map(book => Number(book.id)));
+        
+        // Tüm kitapların favori durumunu güncelle
+        setBooks(prevBooks =>
+          prevBooks.map(book => ({
+            ...book,
+            isFavorite: favoriteBookIds.has(Number(book.id))
+          }))
+        );
+      } catch (error) {
+        console.error('Favori kitaplar yüklenirken hata:', error);
+      }
     };
+    
+    // Force refresh of achievements specifically
+    const refreshAchievements = async () => {
+      try {
+        if (!id) {
+          return;
+        }
+        
+        // First force recalculation on the backend
+        await profileService.recalculateAchievements(id);
+        
+        // Then get the fresh achievements
+        const refreshedAchievements = await profileService.getUserAchievements(id);
+        setAchievements(refreshedAchievements);
+      } catch (error) {
+        console.error('Error refreshing achievements:', error);
+      }
+    };
+    
+    refreshAchievements();
 
     // Event listener'ları ekle
     on('favoriteUpdated', handleFavoriteUpdate);
-    on('profileNeedsUpdate', loadProfile);
-    on('bookStatusUpdated', loadProfile);
+    on('profileNeedsUpdate', fetchProfileData);
+    on('bookStatusUpdated', fetchProfileData);
 
     return () => {
       // Event listener'ları temizle
       off('favoriteUpdated', handleFavoriteUpdate);
-      off('profileNeedsUpdate', loadProfile);
-      off('bookStatusUpdated', loadProfile);
+      off('profileNeedsUpdate', fetchProfileData);
+      off('bookStatusUpdated', fetchProfileData);
     };
-  }, [params.id]);
+  }, [id, currentUser?.id, fetchProfileData]);
 
-  // eslint-disable-next-line react-hooks/rules-of-hooks
+  // Load user profile posts
+  useEffect(() => {
+    fetchPosts();
+  }, [fetchPosts]);
+
+  // Load user info and following status
+  useEffect(() => {
+    const loadUserInfo = async () => {
+      try {
+        const response = await UserService.getCurrentUser();
+        setCurrentUser(response.data);
+        // Kullanıcı giriş yapmışsa ve profil sayfası başka bir kullanıcıya aitse takip durumunu kontrol et
+        if (response.data && id !== response.data.id.toString()) {
+          const isFollowingStatus = await followService.isFollowing(id!);
+          setIsFollowing(isFollowingStatus);
+        }
+      } catch (error) {
+        console.error('Error loading user info:', error);
+        setCurrentUser(null);
+      }
+    };
+
+    if (id) {
+      loadUserInfo();
+    }
+  }, [id]);
+
+  // Check system dark mode preference
   useEffect(() => {
     // Sistem dark mode tercihini kontrol et
     if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
       document.documentElement.setAttribute("data-theme", "dark")
     }
-  }, [])
+  }, []);
+
+  // Load quotes
+  useEffect(() => {
+    const fetchQuotes = async () => {
+      if (!id) {
+        toast({
+          title: "Hata",
+          description: "Kullanıcı ID'si bulunamadı.",
+          variant: "destructive"
+        });
+        return;
+      }
+      try {
+        const quotesData = await quoteService.getQuotesByUser(id);
+        setQuotes(quotesData);
+      } catch (err) {
+        console.error('Alıntılar yüklenirken hata:', err);
+        toast({
+          title: "Hata",
+          description: "Alıntılar yüklenirken bir hata oluştu.",
+          variant: "destructive"
+        });
+      }
+    };
+
+    if (id) {
+      fetchQuotes();
+    }
+  }, [id, toast]);
+
+  // Load reviews
+  useEffect(() => {
+    if (profile?.id) {
+      fetchUserReviews();
+    }
+  }, [profile?.id, fetchUserReviews]);
+
+  // Fetch profile stats
+  useEffect(() => {
+    const fetchProfileStats = async () => {
+      console.log('Fetching profile stats with id:', id);
+      if (!id) {
+        console.log('No id provided, skipping fetch');
+        return;
+      }
+
+      try {
+        console.log('Making API calls...');
+        const profilePromise = profileService.getUserProfile(id);
+        const activitiesPromise = profileService.getUserReadingActivity(id);
+        const statsPromise = profileService.getReadingStats(id);
+
+        console.log('Waiting for API responses...');
+        const [profile, activities, stats] = await Promise.all([
+          profilePromise, 
+          activitiesPromise,
+          statsPromise
+        ]);
+
+        console.log('Received profile:', profile);
+        console.log('Received activities:', activities);
+        console.log('Received stats:', stats);
+
+        if (profile) {
+          setProfile(profile);
+        }
+
+        if (activities) {
+          setReadingActivity(activities);
+        }
+
+        // Update only the stats we actually use in the UI
+        if (stats) {
+          setTotalHours(stats.readingHours || 0);
+        }
+      } catch (error) {
+        console.error('Error fetching profile stats:', error);
+        toast({
+          title: 'Hata',
+          description: 'Profil bilgileri yüklenirken bir hata oluştu.',
+          variant: 'destructive',
+        });
+      }
+    };
+
+    if (id) {
+      fetchProfileStats();
+    }
+  }, [id, toast]);
 
   const handleProfileUpdate = async (field: keyof UserProfile, value: string | number) => {
     try {
@@ -382,9 +514,6 @@ export default function ProfilePage() {
     setIsEditing(false)
     setEditSection(null)
     // Değişiklikleri geri al
-  }
-  const getMaxBooks = () => {
-    return Math.max(...readingActivity.map((item) => item.books))
   }
 
   const handleFollow = async () => {
@@ -495,62 +624,6 @@ export default function ProfilePage() {
       });
     }
   };
-
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  useEffect(() => {
-    const fetchQuotes = async () => {
-      if (!params?.id || Array.isArray(params.id)) {
-        toast({
-          title: "Hata",
-          description: "Kullanıcı ID'si bulunamadı.",
-          variant: "destructive"
-        });
-        return;
-      }
-      try {
-        const quotesData = await quoteService.getQuotesByUser(params.id.toString());
-        setQuotes(quotesData);
-      } catch (err) {
-        console.error('Alıntılar yüklenirken hata:', err);
-        toast({
-          title: "Hata",
-          description: "Alıntılar yüklenirken bir hata oluştu.",
-          variant: "destructive"
-        });
-      }
-    };
-
-    fetchQuotes();
-  }, [params?.id, toast]);
-
-  // Kullanıcının incelemelerini çeken fonksiyon
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const fetchUserReviews = useCallback(async () => {
-    if (!profile?.id) return;
-    
-    try {
-      setIsLoadingReviews(true);
-      const userReviews = await reviewService.getReviewsByUser(profile.id.toString());
-      setReviews(userReviews);
-    } catch (error) {
-      console.error('İncelemeler yüklenirken hata:', error);
-      toast({
-        title: 'Hata',
-        description: 'İncelemeler yüklenirken bir hata oluştu.',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsLoadingReviews(false);
-    }
-  }, [profile?.id, toast]);
-
-  // Profile bilgileri yüklendiğinde incelemeleri de çek
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  useEffect(() => {
-    if (profile?.id) {
-      fetchUserReviews();
-    }
-  }, [profile?.id, fetchUserReviews]);
 
   // Düzenleme ve silme fonksiyonları
   const handleDelete = async (id: number, type: 'post' | 'quote' | 'review') => {
@@ -668,7 +741,6 @@ export default function ProfilePage() {
   };
 
   // Tüm içerikleri birleştirip sıralayan fonksiyon
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   const combineAndSortContent = useCallback(() => {
     const combined = [
       ...posts.map(post => ({
@@ -694,7 +766,6 @@ export default function ProfilePage() {
   }, [posts, quotes, reviews]);
 
   // İçerikleri güncelleme
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   useEffect(() => {
     combineAndSortContent();
   }, [posts, quotes, reviews, combineAndSortContent]);
@@ -813,6 +884,34 @@ export default function ProfilePage() {
         variant: "destructive",
       });
     }
+  };
+
+  // Helper function to group activities by month
+  const groupActivitiesByMonth = (activities: ReadingActivity[]) => {
+    const monthlyData = activities.reduce((acc, item) => {
+      const monthKey = format(new Date(item.activityDate), 'MMM yyyy');
+      if (!acc[monthKey]) {
+        acc[monthKey] = {
+          booksRead: 0,
+          pagesRead: 0,
+          readingMinutes: 0,
+          date: new Date(item.activityDate)
+        };
+      }
+      acc[monthKey].booksRead += item.booksRead || 0;
+      acc[monthKey].pagesRead += item.pagesRead || 0;
+      acc[monthKey].readingMinutes += item.readingMinutes || 0;
+      return acc;
+    }, {} as Record<string, { booksRead: number; pagesRead: number; readingMinutes: number; date: Date }>);
+
+    return Object.entries(monthlyData)
+      .sort(([, a], [, b]) => a.date.getTime() - b.date.getTime())
+      .slice(-6); // Show last 6 months
+  };
+
+  // Helper function to get max monthly books
+  const getMaxMonthlyBooks = (monthlyData: [string, { booksRead: number }][]) => {
+    return Math.max(...monthlyData.map(([, data]) => data.booksRead), 1);
   };
 
   // Profile stats section
@@ -1136,7 +1235,7 @@ export default function ProfilePage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.1 }}
             >
-              <Card className="overflow-hidden border-none bg-gradient-to-br from-white/80 to-white/50 backdrop-blur-sm shadow-sm hover:shadow-md transition-all duration-300">
+              <Card className="overflow-hidden border-none bg-white/70 backdrop-blur-sm shadow-md">
                 <CardContent className="p-6">
                   <h3 className="text-lg font-semibold mb-6 flex items-center text-gray-700">
                     <BarChart3 className="mr-2 h-5 w-5 text-purple-400" /> Okuma İstatistikleri
@@ -1144,9 +1243,24 @@ export default function ProfilePage() {
 
                   <div className="grid grid-cols-3 gap-4">
                     {/* Achievements */}
-                    <div className="text-center p-4 rounded-xl bg-gradient-to-br from-purple-50/50 to-purple-100/30 hover:from-purple-100/50 hover:to-purple-200/30 transition-all duration-300 group">
-                      <div className="text-2xl font-bold text-purple-500 mb-1 group-hover:scale-105 transition-transform duration-300">{achievements.length}</div>
-                      <div className="text-sm text-gray-600 font-medium">Kazanılan Başarı</div>
+                    <div className="text-center p-4 rounded-xl bg-gradient-to-br from-purple-50/50 to-purple-100/30 hover:from-purple-100/50 hover:to-purple-200/30 transition-all duration-300 group flex flex-col items-center justify-center relative">
+                      <div className="text-2xl font-bold text-purple-500 mb-1 group-hover:scale-105 transition-transform duration-300">{achievements.filter(a => a.isEarned).length}/4</div>
+                      <div className="text-sm text-gray-600 font-medium">Rozet Tamamlandı</div>
+                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full flex items-center justify-center">
+                        <div className="relative">
+                          <div className="absolute left-full bottom-0 ml-2 w-64 p-3 bg-white rounded-md shadow-lg text-xs text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50">
+                            <div className="flex items-start gap-2">
+                              <div className="bg-purple-50 rounded-full p-1.5 mt-0.5">
+                                <Award className="h-4 w-4 text-purple-400" />
+                              </div>
+                              <div>
+                                <p className="font-medium text-gray-800 text-sm mb-1">Başarı Rozetleri</p>
+                                <p className="text-gray-600">Kitap Kurdu, Sosyal Okur, Alıntı Ustası ve Maraton Okuyucu rozetlerini tamamlayarak ilerlemenizi görebilirsiniz.</p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
 
                     {/* Yearly Goal */}
@@ -1215,6 +1329,22 @@ export default function ProfilePage() {
                               {profile.yearlyGoal ? Math.round((books.filter(book => book.status?.toUpperCase() === "READ").length / profile.yearlyGoal) * 100) : 0}%
                             </div>
                           </div>
+                          
+                          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full flex items-center justify-center">
+                            <div className="relative">
+                              <div className="absolute right-0 bottom-full mb-2 w-48 p-2 bg-white rounded-md shadow-md text-xs text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50">
+                                <div className="flex items-start gap-1">
+                                  <div className="bg-blue-50 rounded-full p-1">
+                                    <BookOpenCheck className="h-3 w-3 text-blue-400" />
+                                  </div>
+                                  <div>
+                                    <p className="font-medium text-gray-800">Yıllık Okuma Hedefi</p>
+                                    <p className="text-gray-500">Bu yıl içinde okumayı hedeflediğiniz kitap sayısı. Profil sahibiyseniz hedefinizi değiştirebilirsiniz.</p>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
                         </>
                       )}
                     </div>
@@ -1222,7 +1352,7 @@ export default function ProfilePage() {
                     {/* Reading Hours */}
                     <div className="text-center p-4 rounded-xl bg-gradient-to-br from-green-50/50 to-green-100/30 hover:from-green-100/50 hover:to-green-200/30 transition-all duration-300 group relative">
                       <div className="text-2xl font-bold text-green-500 mb-1 group-hover:scale-105 transition-transform duration-300">
-                        {profile.readingHours || 0}
+                        {totalHours}
                       </div>
                       <div className="text-sm text-gray-600 font-medium">Okuma Saati</div>
                       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full flex items-center justify-center">
@@ -1234,7 +1364,7 @@ export default function ProfilePage() {
                               </div>
                               <div>
                                 <p className="font-medium text-gray-800">Toplam Okuma Saati</p>
-                                <p className="text-gray-500">Okuduğunuz kitapların sayfa sayılarına göre hesaplanmıştır.</p>
+                                <p className="text-gray-500">Okuduğunuz kitapların sayfa sayılarına göre hesaplanmıştır (bir sayfa 1.5 dakika).</p>
                               </div>
                             </div>
                           </div>
@@ -1246,7 +1376,7 @@ export default function ProfilePage() {
                   {/* Achievements Section */}
                   <div className="mt-6 pt-4 border-t">
                     <h3 className="text-lg font-semibold mb-3 flex items-center text-gray-700">
-                      <Award className="mr-2 h-4 w-4 text-purple-400" /> Kazanılan Başarılar
+                      <Award className="mr-2 h-4 w-4 text-purple-400" /> Başarı Rozetleri
                     </h3>
                     <div className="grid grid-cols-2 gap-2">
                       <motion.div
@@ -1255,19 +1385,19 @@ export default function ProfilePage() {
                       >
                         <div className="flex items-center gap-1.5">
                           <div className={`rounded-full p-1.5 inline-flex items-center justify-center ${
-                            achievements.some(a => a.type === "BOOK_WORM") 
+                            achievements.some(a => a.type === "BOOK_WORM" && a.isEarned) 
                               ? "bg-purple-100" 
                               : "bg-gray-100"
                           }`}>
                             <BookOpenCheck className={`h-4 w-4 ${
-                              achievements.some(a => a.type === "BOOK_WORM") 
+                              achievements.some(a => a.type === "BOOK_WORM" && a.isEarned) 
                                 ? "text-purple-400" 
                                 : "text-gray-400"
                             }`} />
                           </div>
                           <div className="flex flex-col">
                             <span className={`text-xs font-medium ${
-                              achievements.some(a => a.type === "BOOK_WORM") 
+                              achievements.some(a => a.type === "BOOK_WORM" && a.isEarned) 
                                 ? "text-gray-800" 
                                 : "text-gray-400"
                             }`}>Kitap Kurdu</span>
@@ -1304,19 +1434,19 @@ export default function ProfilePage() {
                       >
                         <div className="flex items-center gap-1.5">
                           <div className={`rounded-full p-1.5 inline-flex items-center justify-center ${
-                            achievements.some(a => a.type === "SOCIAL_READER") 
+                            achievements.some(a => a.type === "SOCIAL_READER" && a.isEarned) 
                               ? "bg-purple-100" 
                               : "bg-gray-100"
                           }`}>
                             <MessageSquare className={`h-4 w-4 ${
-                              achievements.some(a => a.type === "SOCIAL_READER") 
+                              achievements.some(a => a.type === "SOCIAL_READER" && a.isEarned) 
                                 ? "text-purple-400" 
                                 : "text-gray-400"
                             }`} />
                           </div>
                           <div className="flex flex-col">
                             <span className={`text-xs font-medium ${
-                              achievements.some(a => a.type === "SOCIAL_READER") 
+                              achievements.some(a => a.type === "SOCIAL_READER" && a.isEarned) 
                                 ? "text-gray-800" 
                                 : "text-gray-400"
                             }`}>Sosyal Okur</span>
@@ -1333,12 +1463,18 @@ export default function ProfilePage() {
                                 </div>
                                 <div>
                                   <p className="font-medium text-gray-800">Sosyal Okur</p>
-                                  <p className="text-gray-500">50 yorum yapınca kazanılır</p>
+                                  <p className="text-gray-500">İleti, inceleme ve alıntılara toplam 50 yorum yapınca kazanılır</p>
                                   <div className="mt-1.5 flex items-center gap-1">
                                     <div className="h-1 w-full bg-gray-100 rounded-full overflow-hidden">
-                                      <div className="h-full bg-purple-400 rounded-full" style={{ width: `${(reviews.length / 50) * 100}%` }}></div>
+                                      <div className="h-full bg-purple-400 rounded-full" style={{ 
+                                        width: `${achievements.find(a => a.type === "SOCIAL_READER")?.progress || 0}%` 
+                                      }}></div>
                                     </div>
-                                    <span className="text-[10px] text-gray-500">{reviews.length}/50</span>
+                                    <span className="text-[10px] text-gray-500">
+                                      {achievements.find(a => a.type === "SOCIAL_READER")?.progress 
+                                        ? Math.floor((achievements.find(a => a.type === "SOCIAL_READER")?.progress || 0) * 50 / 100) 
+                                        : 0}/50
+                                    </span>
                                   </div>
                                 </div>
                               </div>
@@ -1353,19 +1489,19 @@ export default function ProfilePage() {
                       >
                         <div className="flex items-center gap-1.5">
                           <div className={`rounded-full p-1.5 inline-flex items-center justify-center ${
-                            achievements.some(a => a.type === "QUOTE_MASTER") 
+                            achievements.some(a => a.type === "QUOTE_MASTER" && a.isEarned) 
                               ? "bg-purple-100" 
                               : "bg-gray-100"
                           }`}>
                             <QuoteIcon className={`h-4 w-4 ${
-                              achievements.some(a => a.type === "QUOTE_MASTER") 
+                              achievements.some(a => a.type === "QUOTE_MASTER" && a.isEarned) 
                                 ? "text-purple-400" 
                                 : "text-gray-400"
                             }`} />
                           </div>
                           <div className="flex flex-col">
                             <span className={`text-xs font-medium ${
-                              achievements.some(a => a.type === "QUOTE_MASTER") 
+                              achievements.some(a => a.type === "QUOTE_MASTER" && a.isEarned) 
                                 ? "text-gray-800" 
                                 : "text-gray-400"
                             }`}>Alıntı Ustası</span>
@@ -1402,19 +1538,19 @@ export default function ProfilePage() {
                       >
                         <div className="flex items-center gap-1.5">
                           <div className={`rounded-full p-1.5 inline-flex items-center justify-center ${
-                            achievements.some(a => a.type === "MARATHON_READER") 
+                            achievements.some(a => a.type === "MARATHON_READER" && a.isEarned) 
                               ? "bg-purple-100" 
                               : "bg-gray-100"
                           }`}>
                             <Zap className={`h-4 w-4 ${
-                              achievements.some(a => a.type === "MARATHON_READER") 
+                              achievements.some(a => a.type === "MARATHON_READER" && a.isEarned) 
                                 ? "text-purple-400" 
                                 : "text-gray-400"
                             }`} />
                           </div>
                           <div className="flex flex-col">
                             <span className={`text-xs font-medium ${
-                              achievements.some(a => a.type === "MARATHON_READER") 
+                              achievements.some(a => a.type === "MARATHON_READER" && a.isEarned) 
                                 ? "text-gray-800" 
                                 : "text-gray-400"
                             }`}>Maraton Okuyucu</span>
@@ -1431,12 +1567,12 @@ export default function ProfilePage() {
                                 </div>
                                 <div>
                                   <p className="font-medium text-gray-800">Maraton Okuyucu</p>
-                                  <p className="text-gray-500">1 ayda 5+ kitap bitirince kazanılır</p>
+                                  <p className="text-gray-500">30 gün arka arkaya okuyarak kazanılır</p>
                                   <div className="mt-1.5 flex items-center gap-1">
                                     <div className="h-1 w-full bg-gray-100 rounded-full overflow-hidden">
-                                      <div className="h-full bg-purple-400 rounded-full" style={{ width: `${(readingActivity[0]?.books || 0) / 5 * 100}%` }}></div>
+                                      <div className="h-full bg-purple-400 rounded-full" style={{ width: `${(readingActivity.length > 0 ? readingActivity[0].consecutiveDays : 0) / 30 * 100}%` }}></div>
                                     </div>
-                                    <span className="text-[10px] text-gray-500">{readingActivity[0]?.books || 0}/5</span>
+                                    <span className="text-[10px] text-gray-500">{readingActivity.length > 0 ? readingActivity[0].consecutiveDays : 0}/30</span>
                                   </div>
                                 </div>
                               </div>
@@ -1494,7 +1630,7 @@ export default function ProfilePage() {
                             >
                               Tümü
                               <span className="bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full text-xs">
-                                {books.length}
+                                {books.filter(book => book.status !== null && book.status !== undefined).length}
                               </span>
                             </Button>
                             <Button
@@ -1557,8 +1693,14 @@ export default function ProfilePage() {
                           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
                             {books
                               .filter(book => {
-                                if (!selectedState) return true;
-                                if (selectedState === "FAVORITE") return book.isFavorite;
+                                if (!selectedState) {
+                                  // Tümü sekmesinde sadece bir durumu olan kitapları göster
+                                  return book.status !== null && book.status !== undefined;
+                                }
+                                if (selectedState === "FAVORITE") {
+                                  // Favori sekmesinde sadece favori olan kitapları göster
+                                  return book.isFavorite === true;
+                                }
                                 return book.status?.toUpperCase() === selectedState;
                               })
                               .map((book) => (
@@ -1585,6 +1727,13 @@ export default function ProfilePage() {
 
                                       {/* Status Badge */}
                                       <StatusBadge status={book.status?.toUpperCase() as 'READING' | 'READ' | 'WILL_READ' | 'DROPPED' | null} />
+                                      
+                                      {/* Favorite Badge - Only show in Favorites tab */}
+                                      {selectedState === "FAVORITE" && book.isFavorite && (
+                                        <div className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full">
+                                          <Heart className="w-4 h-4 fill-current" />
+                                        </div>
+                                      )}
                                     </div>
                                   </Link>
                                 </motion.div>
@@ -1690,7 +1839,7 @@ export default function ProfilePage() {
                         {quotes.length > 0 ? (
                           <AuthProvider>
                             <QuoteList quotes={quotes} onQuotesChange={async () => {
-                              if (!params.id) {
+                              if (!id) {
                                 toast({
                                   title: "Hata",
                                   description: "Kullanıcı ID'si bulunamadı.",
@@ -1699,7 +1848,7 @@ export default function ProfilePage() {
                                 return;
                               }
                               try {
-                                const quotesData = await quoteService.getQuotesByUser(params.id.toString());
+                                const quotesData = await quoteService.getQuotesByUser(id);
                                 setQuotes(quotesData);
                               } catch (err) {
                                 console.error('Alıntılar yüklenirken hata:', err);
@@ -1826,58 +1975,104 @@ export default function ProfilePage() {
             >
               <Card className="overflow-hidden border-none bg-white/70 backdrop-blur-sm shadow-md">
                 <CardContent className="p-6">
-                  <h3 className="text-lg font-semibold mb-4 flex items-center">
-                    <BarChart3 className="mr-2 h-5 w-5 text-purple-400" /> Okuma Aktivitesi
-                  </h3>
-
+                  <div className="flex justify-between items-center mb-6">
+                    <h3 className="text-lg font-semibold flex items-center">
+                      <BarChart3 className="mr-2 h-5 w-5 text-purple-400" /> Okuma Aktivitesi
+                    </h3>
+                  </div>
                   <div className="relative">
                     {/* Grid lines */}
                     <div className="absolute inset-0 grid grid-rows-5 gap-0">
                       {[...Array(5)].map((_, i) => (
-                          <div key={i} className="border-b border-gray-100"></div>
+                        <div key={i} className="border-b border-gray-100"></div>
                       ))}
                     </div>
 
                     {/* Activity bars */}
                     <div className="h-64 flex items-end justify-between relative">
-                      { }
-                      {readingActivity.map((item) => (
-                          <div key={item.id} className="flex flex-col items-center group">
-                            <div
-                                className="w-8 bg-gradient-to-t from-purple-300 to-purple-100 hover:from-purple-400 hover:to-purple-200 transition-all rounded-t-md relative"
-                                style={{
-                                  height: `${(item.books / getMaxBooks()) * 180}px`
-                                }}
-                            >
-                              <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                                {item.books} kitap
+                      {groupActivitiesByMonth(readingActivity).map(([month, data]) => (
+                        <div key={month} className="flex flex-col items-center group">
+                          <div
+                            className="w-8 bg-gradient-to-t from-purple-300 to-purple-100 hover:from-purple-400 hover:to-purple-200 transition-all rounded-t-md relative"
+                            style={{
+                              height: `${(data.booksRead / getMaxMonthlyBooks(groupActivitiesByMonth(readingActivity))) * 180}px`
+                            }}
+                          >
+                            <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                              <div className="flex flex-col gap-1">
+                                <span>{data.booksRead} kitap</span>
+                                <span>{data.pagesRead} sayfa</span>
+                                <span>{Math.round(data.readingMinutes / 60)} saat</span>
                               </div>
                             </div>
-                            <p className="mt-2 text-xs font-medium text-gray-600">{item.month}</p>
                           </div>
+                          <p className="mt-2 text-xs font-medium text-gray-600">
+                            {month}
+                          </p>
+                        </div>
                       ))}
                     </div>
                   </div>
 
                   {/* Summary stats */}
-                  <div className="mt-6 grid grid-cols-3 gap-4 pt-4 border-t">
+                  <div className="mt-6 grid grid-cols-4 gap-4 pt-4 border-t">
                     <div className="text-center">
                       <div className="text-xl font-bold text-purple-500">
-                        {readingActivity.reduce((sum, item) => sum + item.books, 0)}
+                        {readingActivity.reduce((sum, item) => {
+                          console.log('Books read item:', item);
+                          return sum + (item.booksRead || 0);
+                        }, 0)}
                       </div>
                       <div className="text-sm text-gray-500">Toplam Kitap</div>
                     </div>
                     <div className="text-center">
                       <div className="text-xl font-bold text-purple-500">
-                        {Math.round(readingActivity.reduce((sum, item) => sum + item.books, 0) / 12)}
+                        {readingActivity.reduce((sum, item) => {
+                          console.log('Pages read item:', item);
+                          return sum + (item.pagesRead || 0);
+                        }, 0)}
                       </div>
-                      <div className="text-sm text-gray-500">Aylık Ortalama</div>
+                      <div className="text-sm text-gray-500">Toplam Sayfa</div>
                     </div>
                     <div className="text-center">
                       <div className="text-xl font-bold text-purple-500">
-                        {getMaxBooks()}
+                        {Math.round(readingActivity.reduce((sum, item) => {
+                          console.log('Reading minutes item:', item);
+                          return sum + (item.readingMinutes || 0);
+                        }, 0) / 60)}
                       </div>
-                      <div className="text-sm text-gray-500">En Yüksek Ay</div>
+                      <div className="text-sm text-gray-500">Toplam Saat</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-xl font-bold text-purple-500">
+                        {readingActivity.length > 0 ? Math.round(readingActivity.reduce((sum, item) => sum + (item.booksRead || 0), 0) / readingActivity.length) : 0}
+                      </div>
+                      <div className="text-sm text-gray-500">Aylık Ortalama</div>
+                    </div>
+                  </div>
+
+                  {/* Reading Streak */}
+                  <div className="mt-6 pt-4 border-t">
+                    <div className="flex items-center justify-between mb-4">
+                      <h4 className="text-sm font-semibold text-gray-700 flex items-center">
+                        <Flame className="mr-2 h-4 w-4 text-orange-400" /> Okuma Serisi
+                      </h4>
+                      <span className="text-sm text-gray-500">
+                        {readingActivity.length > 0 ? readingActivity[0].consecutiveDays || 0 : 0} gün
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-7 gap-1">
+                      {[...Array(7)].map((_, i) => {
+                        const isActive = readingActivity.length > 0 && i < ((readingActivity[0].consecutiveDays || 0) % 7);
+                        return (
+                          <div
+                            key={i}
+                            className={`h-2 rounded-full ${
+                              isActive ? 'bg-orange-400' : 'bg-gray-200'
+                            }`}
+                          />
+                        );
+                      })}
                     </div>
                   </div>
                 </CardContent>

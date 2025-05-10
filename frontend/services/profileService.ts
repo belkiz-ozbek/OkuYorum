@@ -68,7 +68,7 @@ export const ACHIEVEMENT_DETAILS: Record<AchievementType, AchievementDetails> = 
   [AchievementType.SOCIAL_READER]: {
     type: AchievementType.SOCIAL_READER,
     title: "Sosyal Okur",
-    description: "50 yorum yapınca kazanılır",
+    description: "İleti, inceleme ve alıntılara toplam 50 yorum yapınca kazanılır",
     target: 50,
     icon: "MessageSquare"
   },
@@ -90,14 +90,29 @@ export const ACHIEVEMENT_DETAILS: Record<AchievementType, AchievementDetails> = 
 
 export interface ReadingActivity {
   id: number;
-  month: string;
-  books: number;
+  userId: number;
+  activityDate: string;
+  booksRead: number;
+  pagesRead: number;
+  readingMinutes: number;
+  lastReadDate: string;
+  consecutiveDays: number;
   createdAt: string;
   updatedAt: string;
 }
 
 const handleError = (error: unknown) => {
+  console.error('API Error:', error);
   if (error instanceof AxiosError) {
+    console.error('API Error Details:', {
+      status: error.response?.status,
+      data: error.response?.data,
+      config: {
+        url: error.config?.url,
+        method: error.config?.method,
+        headers: error.config?.headers
+      }
+    });
     if (error.response?.status === 403 || error.response?.status === 401) {
       localStorage.removeItem('token');
       window.location.href = '/login';
@@ -111,8 +126,10 @@ const handleError = (error: unknown) => {
 export const profileService = {
   // Profil bilgilerini getir
   getProfile: async (): Promise<UserProfile> => {
+    console.log('Fetching profile...');
     try {
       const response = await api.get('/api/profile');
+      console.log('Profile response:', response.data);
       return response.data;
     } catch (error) {
       throw handleError(error);
@@ -154,20 +171,73 @@ export const profileService = {
 
   // Okuma aktivitesini getir
   getReadingActivity: async (): Promise<ReadingActivity[]> => {
+    console.log('Fetching reading activities...');
     try {
       const response = await api.get('/api/profile/reading-activity');
+      console.log('Reading activities response:', response.data);
+      
+      if (!response.data) {
+        console.error('No data received from reading activities API');
+        return [];
+      }
+      
+      // Validate the data structure
+      if (!Array.isArray(response.data)) {
+        console.error('Invalid data structure received:', response.data);
+        return [];
+      }
+      
       return response.data;
     } catch (error) {
+      console.error('Error fetching reading activities:', error);
+      throw handleError(error);
+    }
+  },
+
+  // Başarıları yeniden hesapla
+  recalculateAchievements: async (userId: string): Promise<void> => {
+    try {
+      console.log('Recalculating achievements for user:', userId);
+      await api.post(`/api/achievements/recalculate/${userId}`);
+    } catch (error) {
+      console.error('Error recalculating achievements:', error);
       throw handleError(error);
     }
   },
 
   // Yeni okuma aktivitesi ekle
-  addReadingActivity: async (activity: Omit<ReadingActivity, "id" | "createdAt" | "updatedAt">): Promise<ReadingActivity> => {
+  addReadingActivity: async (activity: {
+    booksRead: number;
+    pagesRead: number;
+    readingMinutes: number;
+  }): Promise<ReadingActivity> => {
+    console.log('Starting addReadingActivity with data:', activity);
     try {
-      const response = await api.post('/api/profile/reading-activity', activity);
+      const token = localStorage.getItem('token');
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json'
+      };
+      
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+
+      console.log('Making API request with data:', activity);
+      const response = await api.post('/api/profile/reading-activity', {
+        booksRead: activity.booksRead,
+        pagesRead: activity.pagesRead,
+        readingMinutes: activity.readingMinutes
+      }, { headers });
+      
+      console.log('Add reading activity API response:', response);
+      
+      if (!response.data) {
+        throw new Error('No data received from add reading activity API');
+      }
+      
       return response.data;
     } catch (error) {
+      console.error('Error in addReadingActivity:', error);
       throw handleError(error);
     }
   },
@@ -308,10 +378,22 @@ export const profileService = {
       console.log('Reading activity API response:', response.data);
       
       if (!response.data) {
-        throw new Error('Okuma aktivitesi verileri alınamadı');
+        console.error('No data received from reading activity API');
+        return [];
       }
       
-      return response.data;
+      // Validate the data structure
+      if (!Array.isArray(response.data)) {
+        console.error('Invalid data structure received:', response.data);
+        return [];
+      }
+      
+      // Sort activities by date in descending order
+      const sortedActivities = response.data.sort((a, b) => 
+        new Date(b.activityDate).getTime() - new Date(a.activityDate).getTime()
+      );
+      
+      return sortedActivities;
     } catch (error) {
       console.error('Error in getUserReadingActivity:', error);
       if (error instanceof AxiosError) {
@@ -331,6 +413,66 @@ export const profileService = {
       return response.data;
     } catch (error) {
       throw handleError(error);
+    }
+  },
+
+  calculateReadingStats: async (userId: string): Promise<void> => {
+    await api.get(`/api/users/${userId}/calculate-reading-hours`);
+  },
+
+  // Okuma istatistiklerini getir
+  getReadingStats: async (userId: string): Promise<{
+    totalBooks: number;
+    totalPages: number;
+    readingHours: number;
+    monthlyAverage: number;
+    consecutiveDays: number;
+  }> => {
+    try {
+      console.log('Fetching reading stats for user:', userId);
+      const response = await api.get(`/api/profile/${userId}/reading-stats`);
+      
+      console.log('Reading stats API response:', response.data);
+      
+      if (!response.data) {
+        console.error('No data received from reading stats API');
+        return {
+          totalBooks: 0,
+          totalPages: 0,
+          readingHours: 0,
+          monthlyAverage: 0,
+          consecutiveDays: 0
+        };
+      }
+      
+      return response.data;
+    } catch (error) {
+      console.error('Error in getReadingStats:', error);
+      if (error instanceof AxiosError) {
+        if (error.response?.status === 401) {
+          throw new Error('Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.');
+        }
+        throw new Error(`Okuma istatistikleri yüklenirken bir hata oluştu: ${error.response?.data?.message || error.message}`);
+      }
+      throw new Error('Okuma istatistikleri yüklenirken beklenmeyen bir hata oluştu');
+    }
+  },
+
+  // Mevcut okuma aktivitelerini yeni hesaplama metoduyla güncelle
+  updateReadingActivities: async (userId: string): Promise<void> => {
+    try {
+      console.log('Updating reading activities for user:', userId);
+      const response = await api.put(`/api/profile/${userId}/update-reading-activities`);
+      console.log('Update reading activities response:', response.data);
+    } catch (error) {
+      console.error('Error updating reading activities:', error);
+      if (error instanceof AxiosError) {
+        if (error.response?.status === 401) {
+          throw new Error('Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.');
+        }
+        throw new Error(`Okuma aktiviteleri güncellenirken bir hata oluştu: ${error.response?.data?.message || error.message}`);
+      }
+      throw new Error('Okuma aktiviteleri güncellenirken beklenmeyen bir hata oluştu');
     }
   },
 }; 

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+
+    <changeSet id="20250509-13-00-create-reading-activity" author="belkiz.ozbek">
+        <!-- Create reading_activity table -->
+        <createTable tableName="reading_activity">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="bigint">
+                <constraints nullable="false" foreignKeyName="fk_reading_activity_user" references="users(id)"/>
+            </column>
+            <column name="activity_date" type="date">
+                <constraints nullable="false"/>
+            </column>
+            <column name="books_read" type="int" defaultValue="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="pages_read" type="int" defaultValue="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="reading_minutes" type="int" defaultValue="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_read_date" type="date">
+                <constraints nullable="false"/>
+            </column>
+            <column name="consecutive_days" type="int" defaultValue="1">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <!-- Add indexes -->
+        <createIndex indexName="idx_reading_activity_user_id"
+                    tableName="reading_activity">
+            <column name="user_id"/>
+        </createIndex>
+
+        <createIndex indexName="idx_reading_activity_date"
+                    tableName="reading_activity">
+            <column name="activity_date"/>
+        </createIndex>
+
+        <createIndex indexName="idx_reading_activity_last_read"
+                    tableName="reading_activity">
+            <column name="last_read_date"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="20250509-13-30-drop-old-table" author="belkiz.ozbek">
+        <!-- Drop the old reading_activities table -->
+        <dropTable tableName="reading_activities"/>
+    </changeSet>
+
+</databaseChangeLog> 

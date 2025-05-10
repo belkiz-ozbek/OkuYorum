@@ -21,6 +21,8 @@ interface DialogsWrapperProps {
   /** Handlers for filter selection */
   onFilterTypeChange: (type: ContentFilters['type']) => void
   onFilterSortChange: (sort: ContentFilters['sort']) => void
+  /** Search handler */
+  onSearch?: (term: string) => void
 }
 
 export const DialogsWrapper: React.FC<DialogsWrapperProps> = ({
@@ -34,22 +36,36 @@ export const DialogsWrapper: React.FC<DialogsWrapperProps> = ({
   onFilterChange,
   onFilterTypeChange,
   onFilterSortChange,
-}) => (
-  <>
-    <CreateContentDialog open={createOpen} onOpenChange={onCreateChange} />
-    <SearchDialog open={searchOpen} onOpenChange={onSearchChange} onSearch={function (term: string): void {
-            throw new Error('Function not implemented.')
-        } } />
-    <FilterDialog
-      open={filterOpen}
-      selectedType={selectedType}
-      selectedSort={selectedSort}
-      onFilterChange={onFilterTypeChange}
-      onSortChange={onFilterSortChange}
-      onOpenChange={onFilterChange}
-    />
-    <MobileMenu open={false} onOpenChange={() => {}} />
-  </>
-)
+  onSearch,
+}) => {
+  const handleSearch = (term: string) => {
+    if (onSearch) {
+      onSearch(term);
+    } else {
+      console.log("Search term:", term);
+      // Burada varsayılan arama işlemi yapılabilir
+    }
+  };
+
+  return (
+    <>
+      <CreateContentDialog open={createOpen} onOpenChange={onCreateChange} />
+      <SearchDialog 
+        open={searchOpen} 
+        onOpenChange={onSearchChange} 
+        onSearch={handleSearch} 
+      />
+      <FilterDialog
+        open={filterOpen}
+        selectedType={selectedType}
+        selectedSort={selectedSort}
+        onFilterChange={onFilterTypeChange}
+        onSortChange={onFilterSortChange}
+        onOpenChange={onFilterChange}
+      />
+      <MobileMenu open={false} onOpenChange={() => {}} />
+    </>
+  );
+};
 
 export default DialogsWrapper
