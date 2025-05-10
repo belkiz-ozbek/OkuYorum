@@ -18,7 +18,6 @@ import { User } from '../types/user'
 //   })
 // }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'
 
 export const userService = {
   async getUsers(): Promise<User[]> {
@@ -130,6 +129,45 @@ export class UserService {
         throw new Error(`Kullanıcılar alınırken bir hata oluştu: ${error.response?.data?.message || error.message}`);
       }
       throw new Error('Kullanıcılar alınırken beklenmeyen bir hata oluştu');
+    }
+  }
+
+  static async updateUser(userId: number, userData: Partial<User>) {
+    try {
+      // Ensure role and status are simple string values
+      const userUpdateData = {
+        username: userData.username,
+        email: userData.email,
+        nameSurname: userData.nameSurname,
+        role: userData.role,
+        status: userData.status
+      };
+      
+      const response = await api.put(`/api/users/${userId}`, userUpdateData);
+      return response;
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        if (error.response?.status === 401) {
+          throw new Error('Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.');
+        }
+        throw new Error(`Kullanıcı güncellenirken bir hata oluştu: ${error.response?.data?.message || error.response?.data?.error || error.message}`);
+      }
+      throw new Error('Kullanıcı güncellenirken beklenmeyen bir hata oluştu');
+    }
+  }
+
+  static async deleteUser(userId: number) {
+    try {
+      const response = await api.delete(`/api/users/${userId}`);
+      return response;
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        if (error.response?.status === 401) {
+          throw new Error('Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.');
+        }
+        throw new Error(`Kullanıcı silinirken bir hata oluştu: ${error.response?.data?.message || error.message}`);
+      }
+      throw new Error('Kullanıcı silinirken beklenmeyen bir hata oluştu');
     }
   }
 } 
