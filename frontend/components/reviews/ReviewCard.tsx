@@ -183,8 +183,12 @@ export function ReviewCard({
             exit="exit"
             transition={{ duration: 0.3 }}
         >
-            <Card className="w-full overflow-hidden bg-white dark:bg-gray-900/50 backdrop-blur-sm border border-gray-200/50 dark:border-gray-800/50 hover:border-purple-200 dark:hover:border-purple-800/50 shadow-sm hover:shadow-md transition-all duration-300">
-                <div className="p-4 border-b border-gray-100 dark:border-gray-800/50">
+            <Card className="w-full overflow-hidden bg-white dark:bg-gray-900/50 backdrop-blur-sm 
+                  border border-gray-200/50 dark:border-gray-800/50 
+                  hover:border-purple-300/80 dark:hover:border-purple-700/50 
+                  shadow-sm hover:shadow-lg hover:shadow-purple-200/20 dark:hover:shadow-purple-900/30
+                  transition-all duration-300 rounded-xl">
+                <div className="p-4 border-b border-gray-100/80 dark:border-gray-800/30 bg-gradient-to-r from-white to-purple-50/20 dark:from-gray-900 dark:to-purple-950/20">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                             <Avatar className="h-8 w-8">
@@ -243,7 +247,7 @@ export function ReviewCard({
                         )}
                     </div>
                 </div>
-                <CardContent className="p-4 pt-5 pb-6">
+                <CardContent className="p-5 pt-5 pb-6 bg-gradient-to-br from-white to-purple-50/30 dark:from-gray-900 dark:to-purple-950/30 backdrop-blur-sm">
                     {/* Book Info */}
                     <Link 
                         href={`/features/book/${review.bookId}`} 
@@ -276,14 +280,27 @@ export function ReviewCard({
                     </Link>
 
                     {/* Review Content */}
-                    <div className="prose prose-sm dark:prose-invert max-w-none">
-                        <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-                            {review.content}
-                        </p>
+                    <div className="mt-2 mb-1 relative">
+                        <div className="prose prose-sm dark:prose-invert max-w-none">
+                            <p className="text-gray-700 dark:text-gray-300 leading-relaxed text-base font-normal
+                               pt-2 border-t border-gray-100 dark:border-gray-800/30
+                               first-letter:text-lg first-letter:font-medium first-letter:text-purple-600 dark:first-letter:text-purple-400
+                               whitespace-pre-line">
+                                {review.content}
+                            </p>
+                        </div>
+                        {review.content.length > 300 && (
+                            <div className="absolute bottom-0 left-0 right-0 h-10 
+                                bg-gradient-to-t from-white dark:from-gray-900 to-transparent 
+                                pointer-events-none opacity-60"></div>
+                        )}
                     </div>
                 </CardContent>
 
-                <CardFooter className="px-4 py-3 border-t border-purple-50 dark:border-purple-900/20 flex items-center justify-between bg-purple-50/30 dark:bg-purple-900/10">
+                <CardFooter className="px-4 py-3 border-t border-purple-100/50 dark:border-purple-900/20 
+                    flex items-center justify-between 
+                    bg-gradient-to-r from-purple-50/50 to-white dark:from-purple-950/30 dark:to-gray-900
+                    backdrop-blur-sm">
                     <div className="flex items-center space-x-6">
                         <TooltipProvider>
                             <Tooltip>
