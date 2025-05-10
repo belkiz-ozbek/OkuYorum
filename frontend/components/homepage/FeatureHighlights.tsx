@@ -12,11 +12,10 @@ type FeatureCardProps = {
 // İçeride tanımlı FeatureCard bileşeni
 function FeatureCard({ icon, title, description }: FeatureCardProps) {
   return (
-    <div className="bg-white/70 backdrop-blur-sm p-8 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-500 hover:-translate-y-1 group h-full flex flex-col">
+    <div className="bg-white/80 backdrop-blur-sm p-8 rounded-3xl shadow-md hover:shadow-lg transition-all duration-500 hover:-translate-y-1 group h-full flex flex-col">
       <div className="flex flex-col items-center text-center space-y-6 flex-1">
         <div className="relative w-16 h-16 flex items-center justify-center">
-          <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-all duration-500" />
-          <div className="relative bg-gradient-to-br from-purple-50 to-pink-50 p-4 rounded-2xl transform group-hover:scale-105 transition-all duration-500 w-full h-full flex items-center justify-center">
+          <div className="relative bg-purple-50/50 p-4 rounded-2xl transform group-hover:scale-105 transition-all duration-500 w-full h-full flex items-center justify-center">
             {icon}
           </div>
         </div>
@@ -41,10 +40,6 @@ export function FeatureHighlights() {
       transition={{ duration: 0.5 }}
       viewport={{ once: true }}
     >
-      {/* Arka plan dekorasyonu */}
-      <div className="absolute inset-0 bg-gradient-to-b from-purple-50/80 to-white/50 rounded-[3rem] -z-10" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-purple-100/30 via-transparent to-transparent rounded-[3rem] -z-10" />
-
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center mb-16">
           <div className="relative max-w-4xl mx-auto">
@@ -83,7 +78,7 @@ export function FeatureHighlights() {
             </motion.p>
           </div>
         </div>
-
+        
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           <motion.div
             className="h-full"

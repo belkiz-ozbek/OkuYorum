@@ -214,7 +214,7 @@ export function BookReviewSection() {
   }, [])
 
   return (
-    <div className="py-16">
+    <div className="py-16" id="book-review-section">
       <div className="mb-12">
         <h2 className="text-3xl font-bold bg-clip-text text-transparent text-center bg-gradient-to-br from-purple-600 to-purple-800 mb-3 dark:from-purple-400 dark:to-purple-600 ">
           Topluluk Yorumları

@@ -132,7 +132,7 @@ export function Header() {
                     <Link className="flex items-center text-muted-foreground hover:text-primary transition-colors duration-300 relative" href="/features/messages">
                       <MessageSquare className="h-5 w-5" />
                       {unreadCount > 0 && (
-                        <span className="absolute -top-2 -right-2 bg-primary text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                        <span className="absolute -top-2 -right-1.5 bg-primary text-white text-[10px] font-medium rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">
                           {unreadCount}
                         </span>
                       )}
@@ -214,7 +214,7 @@ export function Header() {
           <Link href="/features/messages" className="relative">
             <MessageSquare className="h-5 w-5 text-muted-foreground hover:text-primary transition-colors duration-300" />
             {unreadCount > 0 && (
-              <span className="absolute -top-2 -right-2 bg-primary text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
+              <span className="absolute -top-2 -right-1.5 bg-primary text-white text-[10px] font-medium rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">
                 {unreadCount}
               </span>
             )}
