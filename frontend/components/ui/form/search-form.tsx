@@ -117,19 +117,6 @@ export function SearchForm({ isScrolled = false }: SearchFormProps) {
         return () => clearTimeout(debounceTimer)
     }, [searchQuery])
 
-    useEffect(() => {
-        const handleRouteChange = () => {
-            setSearchQuery('')
-            setShowResults(false)
-        }
-        
-        window.addEventListener('popstate', handleRouteChange)
-        
-        return () => {
-            window.removeEventListener('popstate', handleRouteChange)
-        }
-    }, [])
-
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault()
         if (searchQuery.trim()) {
@@ -180,10 +167,7 @@ export function SearchForm({ isScrolled = false }: SearchFormProps) {
                                 <Link
                                     href={result.type === 'book' ? `/features/book/${result.id}` : `/features/profile/${result.id}`}
                                     className="flex items-center gap-3 p-2 hover:bg-muted rounded-md transition-colors"
-                                    onClick={() => {
-                                        setShowResults(false)
-                                        setSearchQuery('')
-                                    }}
+                                    onClick={() => setShowResults(false)}
                                 >
                                     {result.imageUrl && (
                                         result.type === 'user' ? (
