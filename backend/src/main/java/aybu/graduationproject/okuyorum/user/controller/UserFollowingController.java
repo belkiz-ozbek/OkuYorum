@@ -54,7 +54,7 @@ public class UserFollowingController {
     }
 
     @GetMapping("/{userId}/is-following")
-    public ResponseEntity<Boolean> isFollowing(
+    public ResponseEntity<Boolean> isCurrentUserFollowing(
             Authentication authentication,
             @PathVariable Long userId) {
         User currentUser = (User) authentication.getPrincipal();
