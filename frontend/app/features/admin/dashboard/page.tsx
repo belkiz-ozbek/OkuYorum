@@ -311,6 +311,45 @@ export default function AdminDashboardPage() {
             </div>
           </CardContent>
         </Card>
+        
+        {/* Millet Kiraathaneleri Yönetimi Kartı */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Millet Kiraathaneleri Yönetimi</CardTitle>
+            <CardDescription>Kiraathane etkinliklerini yönetin</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <Button 
+                asChild 
+                variant="outline" 
+                className="w-full justify-between"
+              >
+                <Link href="/millet-kiraathaneleri/admin">
+                  <div className="flex items-center">
+                    <BookOpen className="mr-2 h-5 w-5" />
+                    <span>Etkinlik Oluştur</span>
+                  </div>
+                  <ChevronRight className="h-5 w-5" />
+                </Link>
+              </Button>
+              
+              <Button 
+                asChild 
+                variant="outline" 
+                className="w-full justify-between"
+              >
+                <Link href="/millet-kiraathaneleri">
+                  <div className="flex items-center">
+                    <Package className="mr-2 h-5 w-5" />
+                    <span>Etkinlik Takvimini Görüntüle</span>
+                  </div>
+                  <ChevronRight className="h-5 w-5" />
+                </Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   )

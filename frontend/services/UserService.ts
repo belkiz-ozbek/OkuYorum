@@ -126,9 +126,9 @@ export class UserService {
         if (error.response?.status === 401) {
           throw new Error('Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.');
         }
-        throw new Error(`Kullanıcılar alınırken bir hata oluştu: ${error.response?.data?.message || error.message}`);
+        throw new Error(`Kullanıcılar getirilirken bir hata oluştu: ${error.response?.data?.message || error.message}`);
       }
-      throw new Error('Kullanıcılar alınırken beklenmeyen bir hata oluştu');
+      throw new Error('Kullanıcılar getirilirken beklenmeyen bir hata oluştu');
     }
   }
 

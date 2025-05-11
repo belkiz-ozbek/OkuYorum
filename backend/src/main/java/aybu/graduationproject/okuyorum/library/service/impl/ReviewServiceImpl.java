@@ -61,8 +61,8 @@ public class ReviewServiceImpl implements ReviewService {
                 .orElseThrow(() -> new EntityNotFoundException("Book not found with id: " + request.getBookId()));
 
         // Check if user already has a review for this book
-        Review existingReview = reviewRepository.findByUserIdAndBookId(currentUser.getId(), book.getId())
-                .orElse(null);
+        List<Review> existingReviews = reviewRepository.findByUserIdAndBookId(currentUser.getId(), book.getId());
+        Review existingReview = existingReviews.isEmpty() ? null : existingReviews.get(0);
 
         Review review;
         if (existingReview != null) {
@@ -183,13 +183,14 @@ public class ReviewServiceImpl implements ReviewService {
     @Override
     @Transactional(readOnly = true)
     public List<ReviewDTO> getReviewsByUserAndBook(Long userId, Long bookId) {
-        return reviewRepository.findByUserIdAndBookId(userId, bookId)
-                .map(review -> {
-                    List<ReviewDTO> reviews = new ArrayList<>();
-                    reviews.add(convertToDTO(review));
-                    return reviews;
-                })
-                .orElse(Collections.emptyList());
+        List<Review> reviews = reviewRepository.findByUserIdAndBookId(userId, bookId)
+                .stream()
+                .filter(review -> !review.isDeleted())
+                .collect(Collectors.toList());
+        
+        return reviews.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
 
     @Override

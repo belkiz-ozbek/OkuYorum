@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+
+    <changeSet id="20250511 00:12" author="belkiz.ozbek">
+        <createTable tableName="kiraathanes">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="address" type="VARCHAR(500)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="TEXT"/>
+            <column name="city" type="VARCHAR(100)"/>
+            <column name="district" type="VARCHAR(100)"/>
+            <column name="phone_number" type="VARCHAR(20)"/>
+            <column name="email" type="VARCHAR(100)"/>
+            <column name="working_hours" type="VARCHAR(255)"/>
+            <column name="image_url" type="VARCHAR(500)"/>
+            <column name="map_coordinates" type="VARCHAR(100)"/>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="002-create-kiraathane-events-table" author="okuyorum">
+        <createTable tableName="kiraathane_events">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="title" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="event_date" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="end_date" type="TIMESTAMP"/>
+            <column name="event_type" type="VARCHAR(50)"/>
+            <column name="image_url" type="VARCHAR(500)"/>
+            <column name="capacity" type="INT"/>
+            <column name="registered_attendees" type="INT" defaultValue="0"/>
+            <column name="is_active" type="BOOLEAN" defaultValueBoolean="true"/>
+            <column name="kiraathane_id" type="BIGINT">
+                <constraints nullable="false" foreignKeyName="fk_event_kiraathane"
+                           referencedTableName="kiraathanes" referencedColumnNames="id"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="003-create-event-registrations-table" author="okuyorum">
+        <createTable tableName="event_registrations">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="event_id" type="BIGINT">
+                <constraints nullable="false" foreignKeyName="fk_registration_event"
+                           referencedTableName="kiraathane_events" referencedColumnNames="id"/>
+            </column>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false" foreignKeyName="fk_registration_user"
+                           referencedTableName="users" referencedColumnNames="id"/>
+            </column>
+            <column name="registered_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="attended" type="BOOLEAN" defaultValueBoolean="false"/>
+        </createTable>
+        
+        <!-- Add unique constraint to prevent duplicate registrations -->
+        <addUniqueConstraint tableName="event_registrations" 
+                            columnNames="event_id, user_id"
+                            constraintName="uk_event_user_registration"/>
+    </changeSet>
+
+    <changeSet id="004-add-index-to-kiraathane-events" author="okuyorum">
+        <createIndex tableName="kiraathane_events" indexName="idx_event_date">
+            <column name="event_date"/>
+        </createIndex>
+        
+        <createIndex tableName="kiraathane_events" indexName="idx_event_type">
+            <column name="event_type"/>
+        </createIndex>
+        
+        <createIndex tableName="kiraathane_events" indexName="idx_is_active">
+            <column name="is_active"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="005-add-index-to-kiraathanes" author="okuyorum">
+        <createIndex tableName="kiraathanes" indexName="idx_city_district">
+            <column name="city"/>
+            <column name="district"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog> 

@@ -34,6 +34,8 @@ public class UserService {
     public User getCurrentUser() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         return userRepository.findByUsername(username)
+            .stream()
+            .findFirst()
             .orElseThrow(() -> new RuntimeException("User not found"));
     }
     
@@ -58,6 +60,8 @@ public class UserService {
 
     public Long getUserIdByUsername(String username) {
         return userRepository.findByUsername(username)
+                .stream()
+                .findFirst()
                 .map(User::getId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
     }
@@ -69,6 +73,8 @@ public class UserService {
 
     public User getUserByUsername(String username) {
         return userRepository.findByUsername(username)
+                .stream()
+                .findFirst()
                 .orElseThrow(() -> new EntityNotFoundException("User not found with username: " + username));
     }
 

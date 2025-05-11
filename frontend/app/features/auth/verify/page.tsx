@@ -13,8 +13,7 @@ export default function VerifyPage() {
   const [countdown, setCountdown] = useState(600) // 10 dakika
   const router = useRouter()
   const searchParams = useSearchParams()
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-expect-error
+
   const tokenId = searchParams.get('tokenId')
   const { toast } = useToast()
 
@@ -126,7 +125,7 @@ export default function VerifyPage() {
               <p>Doğrulama kodunun süresi doldu.</p>
               <Button 
                 variant="link"
-                onClick={() => router.push('/auth/signup')}
+                onClick={() => router.push('/features/auth/signup')}
                 className="text-purple-600 mt-2"
               >
                 Yeniden kayıt ol

@@ -1,5 +1,5 @@
 import { api } from './api';
-import { Quote, ShareQuoteResponse } from '@/types/quote';
+import { Quote, ShareQuoteResponse, CreateQuoteRequest } from '@/types/quote';
 
 export const quoteService = {
     async getLikedQuotes(): Promise<Quote[]> {
@@ -32,7 +32,7 @@ export const quoteService = {
         return response.data;
     },
 
-    async createQuote(quote: Omit<Quote, 'id'>): Promise<Quote> {
+    async createQuote(quote: CreateQuoteRequest): Promise<Quote> {
         const response = await api.post('/api/quotes', quote);
         return response.data;
     },

@@ -10,5 +10,6 @@
     <include file="db/changelog/data/book-data.xml"/>
     <include file="db/changelog/data/user-books-data.xml"/>
     <include file="db/changelog/data/update-book-genres-data.xml"/>
+    <include file="db/changelog/data/kiraathane-data.xml"/>
 
 </databaseChangeLog>
