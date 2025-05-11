@@ -25,10 +25,10 @@ export default function MilletKiraathaneleriPage() {
         success: true,
         message: "API bağlantısı başarılı! Etkinlikler yüklendi."
       })
-    } catch (error: any) {
+    } catch (error: unknown) {
       setApiStatus({
         success: false,
-        message: `API hatası: ${error.message || 'Bilinmeyen hata'}`
+        message: `API hatası: ${error instanceof Error ? error.message : 'Bilinmeyen hata'}`
       })
     }
   }
