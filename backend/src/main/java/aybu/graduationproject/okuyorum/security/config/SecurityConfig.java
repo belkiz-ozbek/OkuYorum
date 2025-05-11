@@ -1,11 +1,13 @@
 package aybu.graduationproject.okuyorum.security.config;
 
 import aybu.graduationproject.okuyorum.security.filter.JwtAuthenticationFilter;
+import aybu.graduationproject.okuyorum.security.service.JwtService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -20,18 +22,22 @@ import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final AuthenticationProvider authenticationProvider;
+    private final JwtService jwtService;
 
     @Autowired
     public SecurityConfig(
         JwtAuthenticationFilter jwtAuthFilter,
-        AuthenticationProvider authenticationProvider
+        AuthenticationProvider authenticationProvider,
+        JwtService jwtService
     ) {
         this.jwtAuthFilter = jwtAuthFilter;
         this.authenticationProvider = authenticationProvider;
+        this.jwtService = jwtService;
     }
 
     @Bean
@@ -54,10 +60,15 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/comments/quote/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/comments/user/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/comments/post/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/kiraathane-events/between-dates").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/kiraathane-events").permitAll()
                 .requestMatchers("/api/profile/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
                 .requestMatchers("/api/donations/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
                 .requestMatchers("/api/messages/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
-                .requestMatchers(HttpMethod.PUT, "/api/books/*/status").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/kiraathane-events/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/kiraathane-events/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/kiraathane-events/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
+                .requestMatchers("/api/event-registrations/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
                 .requestMatchers(HttpMethod.POST, "/api/books/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/api/books/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
                 .requestMatchers(HttpMethod.POST, "/api/quotes/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
@@ -68,7 +79,6 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.DELETE, "/api/posts/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
                 .requestMatchers(HttpMethod.POST, "/api/comments/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
                 .requestMatchers(HttpMethod.PUT, "/api/comments/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/api/comments/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session

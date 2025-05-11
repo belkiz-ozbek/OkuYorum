@@ -3,7 +3,7 @@
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
-                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
 
     <!-- Add defaultSchemaName attribute -->
     <property name="defaultSchemaName" value="public"/>
@@ -13,6 +13,7 @@
     <include file="db/changelog/changes/update-reading-activity-changelog.xml"/>
     <include file="db/changelog/changes/add-pages-read-to-user.xml"/>
     <include file="db/changelog/changes/add-millet-kiraathaneleri.xml"/>
+    <include file="db/changelog/changes/update-event-registrations-add-status.xml"/>
 
     <!-- Veri değişikliklerini buraya include edeceğiz -->
     <include file="db/changelog/data/data-master.xml"/>

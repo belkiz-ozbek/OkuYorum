@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -61,11 +62,13 @@ public class KiraathaneEventController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<KiraathaneEventDTO> createEvent(@RequestBody KiraathaneEventDTO eventDTO) {
         return new ResponseEntity<>(eventService.createEvent(eventDTO), HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<KiraathaneEventDTO> updateEvent(
             @PathVariable Long id,
             @RequestBody KiraathaneEventDTO eventDTO) {
@@ -73,6 +76,7 @@ public class KiraathaneEventController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteEvent(@PathVariable Long id) {
         eventService.deleteEvent(id);
         return ResponseEntity.noContent().build();

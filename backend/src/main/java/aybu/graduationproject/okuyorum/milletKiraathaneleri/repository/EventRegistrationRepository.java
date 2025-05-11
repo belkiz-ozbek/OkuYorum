@@ -1,6 +1,7 @@
 package aybu.graduationproject.okuyorum.milletKiraathaneleri.repository;
 
 import aybu.graduationproject.okuyorum.milletKiraathaneleri.entity.EventRegistration;
+import aybu.graduationproject.okuyorum.milletKiraathaneleri.model.AttendanceStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -23,4 +24,12 @@ public interface EventRegistrationRepository extends JpaRepository<EventRegistra
     
     @Query("SELECT er FROM EventRegistration er WHERE er.event.id = :eventId AND er.event.kiraathane.id = :kiraathaneId")
     List<EventRegistration> findByEventIdAndKiraathaneId(@Param("eventId") Long eventId, @Param("kiraathaneId") Long kiraathaneId);
+
+    boolean existsByEventIdAndUserId(Long eventId, Long userId);
+
+    boolean existsByEventIdAndUserIdAndAttendanceStatusNot(Long eventId, Long userId, AttendanceStatus status);
+
+    List<EventRegistration> findByAttendanceStatus(AttendanceStatus status);
+    
+    List<EventRegistration> findByEventIdAndAttendanceStatus(Long eventId, AttendanceStatus status);
 } 

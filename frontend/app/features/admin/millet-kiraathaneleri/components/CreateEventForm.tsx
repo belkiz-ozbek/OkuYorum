@@ -11,6 +11,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import kiraathaneEventService, { KiraathaneEvent } from '@/services/kiraathaneEventService'
+import { useAuth } from '@/contexts/AuthContext'
 
 // Kıraathane türü
 interface Kiraathane {
@@ -22,10 +24,26 @@ interface Kiraathane {
 }
 
 export function CreateEventForm() {
+  const { getAuthHeader, user, loading, token } = useAuth()
   const [kiraathanes, setKiraathanes] = useState<Kiraathane[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Debug logs
+  useEffect(() => {
+    console.log('Current user:', user);
+    const storedToken = localStorage.getItem('token');
+    console.log('Token:', storedToken);
+    if (storedToken) {
+      try {
+        const tokenPayload = JSON.parse(atob(storedToken.split('.')[1]));
+        console.log('Token payload:', tokenPayload);
+      } catch (error) {
+        console.error('Token parsing error:', error);
+      }
+    }
+  }, [user]);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -34,7 +52,7 @@ export function CreateEventForm() {
     eventDate: '',
     eventTime: '',
     endTime: '',
-    eventType: 'GENEL_TARTISMA',
+    eventType: 'GENEL_TARTISMA' as KiraathaneEvent['eventType'],
     capacity: '30',
     kiraathaneId: '',
   });
@@ -42,23 +60,43 @@ export function CreateEventForm() {
   // Kıraathaneleri getir
   useEffect(() => {
     const fetchKiraathanes = async () => {
+      // Token yoksa veya yükleme devam ediyorsa bekle
+      if (!token || loading) {
+        return;
+      }
+
       try {
-        // API servisi eklendikten sonra gerçek veri çekilecek
-        // Şimdilik örnek veri kullanıyoruz
-        setKiraathanes([
-          { id: 1, name: 'Mamak Millet Kıraathanesi', address: 'Mamak, Ankara', city: 'Ankara', district: 'Mamak' },
-          { id: 2, name: 'Sincan Millet Kıraathanesi', address: 'Sincan, Ankara', city: 'Ankara', district: 'Sincan' },
-          { id: 3, name: 'Şişli Kültür Evi', address: 'Şişli, İstanbul', city: 'İstanbul', district: 'Şişli' },
-          { id: 4, name: 'Bakırköy Kıraathanesi', address: 'Bakırköy, İstanbul', city: 'İstanbul', district: 'Bakırköy' },
-        ]);
+        const headers = getAuthHeader();
+        console.log('Fetching kiraathanes with auth header:', headers);
+        
+        const response = await fetch('/api/kiraathanes', {
+          headers: {
+            'Accept': 'application/json',
+            ...headers
+          },
+          cache: 'no-store'
+        });
+        
+        console.log('Kiraathane response status:', response.status);
+        
+        const data = await response.json();
+        
+        if (!response.ok) {
+          console.error('Kiraathane error data:', data);
+          throw new Error(data.error || 'Kıraathaneler yüklenirken bir hata oluştu');
+        }
+        
+        console.log('Received kiraathanes:', data);
+        setKiraathanes(data);
+        setErrorMessage(null);
       } catch (error) {
         console.error('Kıraathaneler getirilirken hata oluştu:', error);
-        setErrorMessage('Kıraathaneler yüklenirken bir hata oluştu.');
+        setErrorMessage(error instanceof Error ? error.message : 'Kıraathaneler yüklenirken bir hata oluştu');
       }
     };
 
     fetchKiraathanes();
-  }, []);
+  }, [getAuthHeader, token, loading]);
 
   // Form değişikliklerini izle
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -74,6 +112,19 @@ export function CreateEventForm() {
   // Form gönderimi
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Token kontrolü
+    if (!token) {
+      setErrorMessage('Oturum açmanız gerekiyor.');
+      return;
+    }
+
+    // Admin kontrolü
+    if (!user?.role || user.role !== 'ADMIN') {
+      setErrorMessage('Bu işlem için admin yetkisi gerekiyor.');
+      return;
+    }
+
     setSubmitting(true);
     setSuccessMessage(null);
     setErrorMessage(null);
@@ -88,10 +139,13 @@ export function CreateEventForm() {
         eventType: formData.eventType,
         capacity: parseInt(formData.capacity),
         kiraathaneId: parseInt(formData.kiraathaneId),
+        isActive: true,
+        registeredAttendees: 0,
+        imageUrl: null // Şu an için null olarak ayarlıyoruz, daha sonra resim yükleme özelliği eklenebilir
       };
 
-      // API çağrısı yapılacak
-      // const response = await createEvent(eventData);
+      // API çağrısı yap
+      const response = await kiraathaneEventService.createEvent(eventData);
       
       // Başarılı
       setSuccessMessage('Etkinlik başarıyla oluşturuldu!');
@@ -110,11 +164,33 @@ export function CreateEventForm() {
 
     } catch (error) {
       console.error('Etkinlik oluşturulurken hata:', error);
-      setErrorMessage('Etkinlik oluşturulurken bir hata oluştu.');
+      if (error instanceof Error) {
+        if (error.message.includes('403')) {
+          setErrorMessage('Bu işlem için yetkiniz bulunmamaktadır. Lütfen admin hesabıyla giriş yapın.');
+        } else {
+          setErrorMessage(`Etkinlik oluşturulurken bir hata oluştu: ${error.message}`);
+        }
+      } else {
+        setErrorMessage('Etkinlik oluşturulurken bir hata oluştu.');
+      }
     } finally {
       setSubmitting(false);
     }
   };
+
+  // Loading durumunda yükleniyor mesajı göster
+  if (loading) {
+    return <div className="text-center p-4">Yükleniyor...</div>;
+  }
+
+  // Kullanıcı yetkisi kontrolü
+  if (!user?.role || user.role !== 'ADMIN') {
+    return (
+      <div className="bg-red-100 text-red-700 p-4 rounded-lg">
+        Bu sayfaya erişim yetkiniz bulunmamaktadır. Lütfen admin hesabıyla giriş yapın.
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
@@ -203,18 +279,20 @@ export function CreateEventForm() {
             Etkinlik Türü
           </label>
           <Select
+            name="eventType"
             value={formData.eventType}
             onValueChange={(value) => handleSelectChange('eventType', value)}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Etkinlik türü seçin" />
+              <SelectValue placeholder="Etkinlik türünü seçin" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="GENEL_TARTISMA">Genel Tartışma</SelectItem>
-              <SelectItem value="KITAP_TANITIMI">Kitap Tanıtımı</SelectItem>
-              <SelectItem value="YAZAR_BULUSMASI">Yazar Buluşması</SelectItem>
-              <SelectItem value="OKUMA_GRUBU">Okuma Grubu</SelectItem>
-              <SelectItem value="COCUK_ETKINLIGI">Çocuk Etkinliği</SelectItem>
+              <SelectItem value="KITAP_TARTISMA">Kitap Tartışması</SelectItem>
+              <SelectItem value="YAZAR_SOHBETI">Yazar Sohbeti</SelectItem>
+              <SelectItem value="OKUMA_ETKINLIGI">Okuma Etkinliği</SelectItem>
+              <SelectItem value="SEMINER">Seminer</SelectItem>
+              <SelectItem value="EGITIM">Eğitim</SelectItem>
               <SelectItem value="DIGER">Diğer</SelectItem>
             </SelectContent>
           </Select>
@@ -222,7 +300,7 @@ export function CreateEventForm() {
         
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Katılımcı Kapasitesi
+            Kapasite
           </label>
           <Input
             type="number"
@@ -235,40 +313,33 @@ export function CreateEventForm() {
         </div>
         
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Kıraathane</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Kıraathane
+          </label>
           <Select
+            name="kiraathaneId"
             value={formData.kiraathaneId}
             onValueChange={(value) => handleSelectChange('kiraathaneId', value)}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Kıraathane seçiniz" />
+              <SelectValue placeholder="Kıraathane seçin" />
             </SelectTrigger>
             <SelectContent>
               {kiraathanes.map((kiraathane) => (
-                <SelectItem 
-                  key={kiraathane.id} 
-                  value={kiraathane.id.toString()}
-                >
-                  {kiraathane.name} ({kiraathane.district}, {kiraathane.city})
+                <SelectItem key={kiraathane.id} value={kiraathane.id.toString()}>
+                  {kiraathane.name}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
         
-        <Button 
-          type="submit" 
-          className="w-full"
+        <Button
+          type="submit"
           disabled={submitting}
+          className="w-full"
         >
-          {submitting ? (
-            <>
-              <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2"></div>
-              Kaydediliyor...
-            </>
-          ) : (
-            "Etkinliği Oluştur"
-          )}
+          {submitting ? 'Oluşturuluyor...' : 'Etkinlik Oluştur'}
         </Button>
       </form>
     </div>

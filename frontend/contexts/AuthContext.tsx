@@ -14,26 +14,31 @@ interface User {
     profileImage?: string;
     createdAt: string;
     updatedAt: string;
+    role?: string;
 }
 
 interface AuthContextType {
     user: User | null;
+    token: string | null;
     loading: boolean;
     error: string | null;
     isAuthenticated: boolean;
     login: (token: string) => void;
     logout: () => void;
     setUser: (user: User | null) => void;
+    getAuthHeader: () => { Authorization?: string };
 }
 
 const AuthContext = createContext<AuthContextType>({
     user: null,
+    token: null,
     loading: true,
     error: null,
     isAuthenticated: false,
     login: () => {},
     logout: () => {},
     setUser: () => {},
+    getAuthHeader: () => ({}),
 });
 
 export const useAuth = () => {
@@ -50,6 +55,7 @@ interface AuthProviderProps {
 
 export function AuthProvider({ children }: AuthProviderProps) {
     const [user, setUser] = useState<User | null>(null);
+    const [token, setToken] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -76,23 +82,30 @@ export function AuthProvider({ children }: AuthProviderProps) {
         }
     };
 
-    const login = (token: string) => {
-        localStorage.setItem('token', token);
-        api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    const getAuthHeader = () => {
+        return token ? { Authorization: `Bearer ${token}` } : {};
+    };
+
+    const login = (newToken: string) => {
+        localStorage.setItem('token', newToken);
+        setToken(newToken);
+        api.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
         fetchUser();
     };
 
     const logout = () => {
         localStorage.removeItem('token');
-        delete api.defaults.headers.common['Authorization'];
+        setToken(null);
         setUser(null);
         setError(null);
+        delete api.defaults.headers.common['Authorization'];
     };
 
     useEffect(() => {
-        const token = localStorage.getItem('token');
-        if (token) {
-            api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        const storedToken = localStorage.getItem('token');
+        if (storedToken) {
+            setToken(storedToken);
+            api.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
             fetchUser();
         } else {
             setLoading(false);
@@ -101,12 +114,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     const value = {
         user,
+        token,
         loading,
         error,
-        isAuthenticated: !!user,
+        isAuthenticated: !!user && !!token,
         login,
         logout,
         setUser,
+        getAuthHeader,
     };
 
     return (

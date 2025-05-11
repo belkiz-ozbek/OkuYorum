@@ -12,6 +12,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import aybu.graduationproject.okuyorum.milletKiraathaneleri.model.AttendanceStatus;
+
 @Service
 @RequiredArgsConstructor
 public class NotificationService {
@@ -94,5 +96,52 @@ public class NotificationService {
         dto.setRead(notification.isRead());
         dto.setCreatedAt(notification.getCreatedAt().toString());
         return dto;
+    }
+
+    public void sendEventRegistrationStatusUpdate(User user, String eventTitle, AttendanceStatus oldStatus, AttendanceStatus newStatus, String notes) {
+        String message = String.format("%s etkinliği için katılım durumunuz %s olarak güncellendi.", 
+            eventTitle, 
+            getStatusText(newStatus)
+        );
+        
+        if (notes != null && !notes.isEmpty()) {
+            message += " Not: " + notes;
+        }
+        
+        createNotification(
+            user.getId(),
+            user.getId(), // Sistem bildirimi olduğu için user'ın kendisi actor
+            "EVENT_STATUS_UPDATE",
+            message,
+            "/events/" + eventTitle // Frontend route'una göre düzenlenebilir
+        );
+    }
+
+    private String getStatusText(AttendanceStatus status) {
+        return switch (status) {
+            case REGISTERED -> "Kayıtlı";
+            case CONFIRMED -> "Onaylandı";
+            case ATTENDED -> "Katıldı";
+            case NO_SHOW -> "Katılmadı";
+            case CANCELLED -> "İptal Edildi";
+        };
+    }
+    
+    public void sendEventUpdateNotification(
+        Long eventId,
+        String eventTitle,
+        String updateType,
+        String message
+    ) {
+        // Implementation of sendEventUpdateNotification method
+    }
+    
+    public void sendEventReminderNotification(
+        User user,
+        String eventTitle,
+        String eventDateTime,
+        String eventLocation
+    ) {
+        // Implementation of sendEventReminderNotification method
     }
 }

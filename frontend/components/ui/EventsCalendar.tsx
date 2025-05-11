@@ -6,14 +6,14 @@ import { cn } from "@/lib/utils"
 import kiraathaneEventService, { KiraathaneEvent } from "@/services/kiraathaneEventService"
 import { format, startOfMonth, endOfMonth, parseISO } from "date-fns"
 import EventDetailModal from "./EventDetailModal"
-import { useAuth } from "@/hooks/useAuth" // Assuming you have an auth hook
+import { useAuth } from "@/contexts/AuthContext" // Auth context'ten import ediyoruz
 
 interface EventsCalendarProps {
   className?: string
 }
 
 export function EventsCalendar({ className }: EventsCalendarProps) {
-  const { user } = useAuth()
+  const { user, token, getAuthHeader } = useAuth()
   const [events, setEvents] = useState<KiraathaneEvent[]>([])
   const [selectedDate, setSelectedDate] = useState<Date>(new Date())
   const [selectedEvent, setSelectedEvent] = useState<KiraathaneEvent | null>(null)
@@ -66,44 +66,25 @@ export function EventsCalendar({ className }: EventsCalendarProps) {
     const fetchEvents = async () => {
       try {
         setIsLoading(true)
-        setError(null)
+        console.log('Fetching events with auth header:', getAuthHeader())
         
-        const start = format(startOfMonth(selectedDate), "yyyy-MM-dd'T'HH:mm:ss")
+        const start = format(startOfMonth(selectedDate), "yyyy-MM-dd'T'00:00:00")
         const end = format(endOfMonth(selectedDate), "yyyy-MM-dd'T'23:59:59")
         
-        console.log('Fetching events for dates:', { start, end })
+        const response = await kiraathaneEventService.getEventsBetweenDates(start, end)
+        console.log('Events response:', response)
         
-        const response = await fetch(`/api/kiraathane-events/between-dates?startDate=${start}&endDate=${end}`, {
-          headers: {
-            'Accept': 'application/json',
-          },
-        })
-        
-        console.log('Response status:', response.status)
-        
-        if (!response.ok) {
-          const errorData = await response.text()
-          console.error('API Error:', {
-            status: response.status,
-            statusText: response.statusText,
-            body: errorData
-          })
-          throw new Error('Etkinlikler yüklenirken bir hata oluştu')
-        }
-        
-        const data = await response.json()
-        console.log('Fetched events:', data)
-        setEvents(data)
-      } catch (err) {
-        console.error('Error in fetchEvents:', err)
-        setError(err instanceof Error ? err.message : 'Bilinmeyen bir hata oluştu')
-        setEvents([])
+        setEvents(response)
+        setError(null)
+      } catch (error) {
+        console.error('Error fetching events:', error)
+        setError('Etkinlikler yüklenirken bir hata oluştu')
       } finally {
         setIsLoading(false)
       }
     }
     fetchEvents()
-  }, [selectedDate])
+  }, [selectedDate, token])
 
   // Group events by date
   const getEventsByDate = () => {
@@ -159,17 +140,20 @@ export function EventsCalendar({ className }: EventsCalendarProps) {
 
   // Handle successful registration/cancellation
   const handleRegistrationUpdate = () => {
-    // Refresh events data
     const fetchEvents = async () => {
       try {
-        const response = await fetch('/api/kiraathane-events')
-        if (!response.ok) {
-          throw new Error('Etkinlikler yüklenirken bir hata oluştu')
-        }
-        const data = await response.json()
-        setEvents(data)
+        setIsLoading(true)
+        const start = format(startOfMonth(selectedDate), "yyyy-MM-dd'T'00:00:00")
+        const end = format(endOfMonth(selectedDate), "yyyy-MM-dd'T'23:59:59")
+        
+        const response = await kiraathaneEventService.getEventsBetweenDates(start, end)
+        setEvents(response)
+        setError(null)
       } catch (err) {
         console.error("Error refreshing events:", err)
+        setError('Etkinlikler güncellenirken bir hata oluştu')
+      } finally {
+        setIsLoading(false)
       }
     }
     
@@ -212,7 +196,17 @@ export function EventsCalendar({ className }: EventsCalendarProps) {
           </div>
         )}
         {error && (
-          <div className="p-4 text-center text-red-500">{error} (Takvim yine de görüntüleniyor)</div>
+          <div className="p-4 mb-4 text-center bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-red-700">{error}</p>
+            {error.includes('giriş yapmanız gerekiyor') && (
+              <button
+                onClick={() => window.location.href = '/auth/login'}
+                className="mt-2 px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+              >
+                Giriş Yap
+              </button>
+            )}
+          </div>
         )}
 
         <div className="grid grid-cols-7 gap-2 text-center font-medium mb-2">

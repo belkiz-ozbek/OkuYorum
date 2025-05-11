@@ -1,11 +1,11 @@
 package aybu.graduationproject.okuyorum.milletKiraathaneleri.entity;
 
+import aybu.graduationproject.okuyorum.milletKiraathaneleri.model.AttendanceStatus;
 import aybu.graduationproject.okuyorum.user.entity.User;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
+import lombok.AllArgsConstructor;
 
 import java.time.LocalDateTime;
 
@@ -15,7 +15,6 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class EventRegistration {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -28,8 +27,25 @@ public class EventRegistration {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @CreationTimestamp
+    @Column(name = "registered_at", nullable = false)
     private LocalDateTime registeredAt;
-    
-    private Boolean attended = false;
+
+    @Column(nullable = false)
+    private boolean attended;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "attendance_status", nullable = false)
+    private AttendanceStatus attendanceStatus = AttendanceStatus.REGISTERED;
+
+    @Column(name = "attendance_notes")
+    private String attendanceNotes;
+
+    @Column(name = "checked_in_at")
+    private LocalDateTime checkedInAt;
+
+    @Column(name = "checked_in_by")
+    private String checkedInBy;
+
+    @Column(name = "no_show_reason")
+    private String noShowReason;
 } 

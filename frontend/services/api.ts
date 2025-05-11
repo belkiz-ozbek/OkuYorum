@@ -22,6 +22,15 @@ api.interceptors.request.use(
       const token = localStorage.getItem('token')
       if (token) {
         config.headers.Authorization = `Bearer ${token}`
+        // Log the request details
+        console.log('API Request:', {
+          url: config.url,
+          method: config.method,
+          headers: config.headers,
+          data: config.data
+        });
+      } else {
+        console.warn('No token found in localStorage');
       }
     }
     return config
@@ -34,10 +43,29 @@ api.interceptors.request.use(
 
 // Yanıt interceptor'ı
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // Log successful response
+    console.log('API Response:', {
+      url: response.config.url,
+      status: response.status,
+      data: response.data
+    });
+    return response
+  },
   (error) => {
     if (error.response) {
       // Sunucu yanıt verdi, ancak 2xx aralığında olmayan bir durum koduyla
+      const errorData = {
+        url: error.config?.url,
+        method: error.config?.method,
+        requestData: error.config?.data,
+        status: error.response?.status,
+        responseData: error.response?.data,
+        headers: error.config?.headers
+      };
+      
+      console.error('API Error Details:', errorData);
+      
       switch (error.response.status) {
         case 401:
           console.error('Yetkilendirme hatası: Oturum süresi dolmuş olabilir')
@@ -48,6 +76,10 @@ api.interceptors.response.use(
           break
         case 403:
           console.error('Erişim reddedildi: Bu işlem için yetkiniz yok')
+          console.error('Request details:', {
+            headers: error.config?.headers,
+            data: error.config?.data
+          })
           break
         case 404:
           console.error('İstenen kaynak bulunamadı')

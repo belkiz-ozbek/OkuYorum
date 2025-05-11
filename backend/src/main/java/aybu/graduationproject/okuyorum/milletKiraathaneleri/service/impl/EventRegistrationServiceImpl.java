@@ -1,18 +1,22 @@
 package aybu.graduationproject.okuyorum.milletKiraathaneleri.service.impl;
 
 import aybu.graduationproject.okuyorum.milletKiraathaneleri.dto.EventRegistrationDTO;
+import aybu.graduationproject.okuyorum.milletKiraathaneleri.dto.UpdateAttendanceStatusRequest;
 import aybu.graduationproject.okuyorum.milletKiraathaneleri.entity.EventRegistration;
 import aybu.graduationproject.okuyorum.milletKiraathaneleri.entity.KiraathaneEvent;
+import aybu.graduationproject.okuyorum.milletKiraathaneleri.model.AttendanceStatus;
 import aybu.graduationproject.okuyorum.milletKiraathaneleri.repository.EventRegistrationRepository;
 import aybu.graduationproject.okuyorum.milletKiraathaneleri.repository.KiraathaneEventRepository;
 import aybu.graduationproject.okuyorum.milletKiraathaneleri.service.EventRegistrationService;
 import aybu.graduationproject.okuyorum.user.entity.User;
-import aybu.graduationproject.okuyorum.user.repository.UserRepository;
+import aybu.graduationproject.okuyorum.user.service.UserService;
+import aybu.graduationproject.okuyorum.notification.service.NotificationService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,7 +26,8 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
 
     private final EventRegistrationRepository registrationRepository;
     private final KiraathaneEventRepository eventRepository;
-    private final UserRepository userRepository;
+    private final UserService userService;
+    private final NotificationService notificationService;
 
     @Override
     @Transactional(readOnly = true)
@@ -35,30 +40,20 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
     @Override
     @Transactional(readOnly = true)
     public EventRegistrationDTO getRegistrationById(Long id) {
-        EventRegistration registration = registrationRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Registration not found with id: " + id));
-        return convertToDTO(registration);
+        return registrationRepository.findById(id)
+                .map(this::convertToDTO)
+                .orElseThrow(() -> new EntityNotFoundException("Kayıt bulunamadı: " + id));
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<EventRegistrationDTO> getRegistrationsByEventId(Long eventId) {
-        // Check if event exists
-        eventRepository.findById(eventId)
-                .orElseThrow(() -> new EntityNotFoundException("Event not found with id: " + eventId));
-        
         return registrationRepository.findByEventId(eventId).stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<EventRegistrationDTO> getRegistrationsByUserId(Long userId) {
-        // Check if user exists
-        userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
-        
         return registrationRepository.findByUserId(userId).stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
@@ -66,105 +61,128 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
 
     @Override
     @Transactional
+    public EventRegistrationDTO updateAttendanceStatus(Long registrationId, UpdateAttendanceStatusRequest request) {
+        EventRegistration registration = registrationRepository.findById(registrationId)
+                .orElseThrow(() -> new EntityNotFoundException("Kayıt bulunamadı: " + registrationId));
+        
+        AttendanceStatus oldStatus = registration.getAttendanceStatus();
+        registration.setAttendanceStatus(request.getStatus());
+        registration.setAttendanceNotes(request.getNotes());
+        
+        if (request.getStatus() == AttendanceStatus.ATTENDED) {
+            registration.setAttended(true);
+            registration.setCheckedInAt(LocalDateTime.now());
+            registration.setCheckedInBy(request.getCheckedInBy());
+        } else if (request.getStatus() == AttendanceStatus.NO_SHOW) {
+            registration.setAttended(false);
+            registration.setNoShowReason(request.getNoShowReason());
+        }
+        
+        EventRegistration updatedRegistration = registrationRepository.save(registration);
+        
+        // Send notification
+        notificationService.sendEventRegistrationStatusUpdate(
+            registration.getUser(),
+            registration.getEvent().getTitle(),
+            oldStatus,
+            request.getStatus(),
+            request.getNotes()
+        );
+        
+        return convertToDTO(updatedRegistration);
+    }
+
+    @Override
+    @Transactional
     public EventRegistrationDTO registerUserForEvent(Long eventId, Long userId) {
-        KiraathaneEvent event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new EntityNotFoundException("Event not found with id: " + eventId));
-        
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
-        
-        // Check if user is already registered for the event
         if (isUserRegisteredForEvent(eventId, userId)) {
-            throw new IllegalStateException("User is already registered for this event");
+            throw new IllegalStateException("Bu etkinliğe zaten kayıtlısınız");
         }
-        
-        // Check if the event has capacity
+
+        KiraathaneEvent event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new EntityNotFoundException("Etkinlik bulunamadı"));
+
         if (event.getCapacity() != null && event.getRegisteredAttendees() >= event.getCapacity()) {
-            throw new IllegalStateException("Event has reached its maximum capacity");
+            throw new IllegalStateException("Etkinlik kapasitesi dolu");
         }
-        
-        // Create new registration
+
+        User user = userService.getUserById(userId);
+
         EventRegistration registration = new EventRegistration();
         registration.setEvent(event);
         registration.setUser(user);
+        registration.setRegisteredAt(LocalDateTime.now());
         registration.setAttended(false);
-        
-        EventRegistration savedRegistration = registrationRepository.save(registration);
-        
-        // Update event attendee count
+        registration.setAttendanceStatus(AttendanceStatus.REGISTERED);
+
         event.setRegisteredAttendees(event.getRegisteredAttendees() + 1);
         eventRepository.save(event);
+
+        EventRegistration savedRegistration = registrationRepository.save(registration);
         
+        // Send notification
+        notificationService.sendEventRegistrationStatusUpdate(
+            user,
+            event.getTitle(),
+            null,
+            AttendanceStatus.REGISTERED,
+            "Etkinliğe başarıyla kayıt oldunuz."
+        );
+
         return convertToDTO(savedRegistration);
     }
 
     @Override
     @Transactional
-    public void cancelRegistration(Long eventId, Long userId) {
-        EventRegistration registration = registrationRepository.findByEventIdAndUserId(eventId, userId)
-                .orElseThrow(() -> new EntityNotFoundException("Registration not found for event id: " + eventId + " and user id: " + userId));
-        
-        KiraathaneEvent event = registration.getEvent();
-        
-        registrationRepository.delete(registration);
-        
-        // Update event attendee count
-        if (event.getRegisteredAttendees() > 0) {
-            event.setRegisteredAttendees(event.getRegisteredAttendees() - 1);
-            eventRepository.save(event);
-        }
+    public void cancelRegistration(Long registrationId) {
+        EventRegistration registration = registrationRepository.findById(registrationId)
+                .orElseThrow(() -> new EntityNotFoundException("Kayıt bulunamadı"));
+        registration.setAttendanceStatus(AttendanceStatus.CANCELLED);
+        registrationRepository.save(registration);
     }
 
     @Override
     @Transactional(readOnly = true)
     public boolean isUserRegisteredForEvent(Long eventId, Long userId) {
-        return registrationRepository.findByEventIdAndUserId(eventId, userId).isPresent();
-    }
-
-    @Override
-    @Transactional
-    public void markAsAttended(Long registrationId) {
-        EventRegistration registration = registrationRepository.findById(registrationId)
-                .orElseThrow(() -> new EntityNotFoundException("Registration not found with id: " + registrationId));
-        
-        registration.setAttended(true);
-        registrationRepository.save(registration);
+        return registrationRepository.existsByEventIdAndUserIdAndAttendanceStatusNot(
+            eventId, userId, AttendanceStatus.CANCELLED
+        );
     }
 
     @Override
     public EventRegistrationDTO convertToDTO(EventRegistration registration) {
-        EventRegistrationDTO dto = new EventRegistrationDTO();
-        dto.setId(registration.getId());
-        dto.setEventId(registration.getEvent().getId());
-        dto.setEventTitle(registration.getEvent().getTitle());
-        dto.setEventDate(registration.getEvent().getEventDate());
-        dto.setUserId(registration.getUser().getId());
-        dto.setUserName(registration.getUser().getUsername());
-        dto.setRegisteredAt(registration.getRegisteredAt());
-        dto.setAttended(registration.getAttended());
-        return dto;
+        return EventRegistrationDTO.builder()
+                .id(registration.getId())
+                .eventId(registration.getEvent().getId())
+                .userId(registration.getUser().getId())
+                .username(registration.getUser().getUsername())
+                .userEmail(registration.getUser().getEmail())
+                .eventTitle(registration.getEvent().getTitle())
+                .eventDate(registration.getEvent().getEventDate())
+                .registrationDate(registration.getRegisteredAt())
+                .attended(registration.isAttended())
+                .attendanceStatus(registration.getAttendanceStatus())
+                .attendanceNotes(registration.getAttendanceNotes())
+                .checkedInAt(registration.getCheckedInAt())
+                .checkedInBy(registration.getCheckedInBy())
+                .noShowReason(registration.getNoShowReason())
+                .build();
     }
 
     @Override
-    public EventRegistration convertToEntity(EventRegistrationDTO registrationDTO) {
+    public EventRegistration convertToEntity(EventRegistrationDTO dto) {
         EventRegistration registration = new EventRegistration();
-        
-        // Set event reference
-        if (registrationDTO.getEventId() != null) {
-            KiraathaneEvent event = eventRepository.findById(registrationDTO.getEventId())
-                    .orElseThrow(() -> new EntityNotFoundException("Event not found with id: " + registrationDTO.getEventId()));
-            registration.setEvent(event);
-        }
-        
-        // Set user reference
-        if (registrationDTO.getUserId() != null) {
-            User user = userRepository.findById(registrationDTO.getUserId())
-                    .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + registrationDTO.getUserId()));
-            registration.setUser(user);
-        }
-        
-        registration.setAttended(registrationDTO.getAttended());
-        
+        registration.setId(dto.getId());
+        registration.setEvent(eventRepository.findById(dto.getEventId())
+                .orElseThrow(() -> new EntityNotFoundException("Etkinlik bulunamadı")));
+        registration.setUser(userService.getUserById(dto.getUserId()));
+        registration.setRegisteredAt(dto.getRegistrationDate());
+        registration.setAttended(dto.isAttended());
+        registration.setAttendanceStatus(dto.getAttendanceStatus());
+        registration.setAttendanceNotes(dto.getAttendanceNotes());
+        registration.setCheckedInAt(dto.getCheckedInAt());
+        registration.setCheckedInBy(dto.getCheckedInBy());
+        registration.setNoShowReason(dto.getNoShowReason());
         return registration;
     }
 } 

@@ -339,10 +339,24 @@ export default function AdminDashboardPage() {
                 variant="outline" 
                 className="w-full justify-between"
               >
+                <Link href="/features/admin/millet-kiraathaneleri/registrations">
+                  <div className="flex items-center">
+                    <Users className="mr-2 h-5 w-5" />
+                    <span>Etkinlik Kayıtları</span>
+                  </div>
+                  <ChevronRight className="h-5 w-5" />
+                </Link>
+              </Button>
+              
+              <Button 
+                asChild 
+                variant="outline" 
+                className="w-full justify-between"
+              >
                 <Link href="/features/admin/millet-kiraathaneleri/calendar">
                   <div className="flex items-center">
                     <Package className="mr-2 h-5 w-5" />
-                    <span>Etkinlik Takvimini Görüntüle</span>
+                    <span>Etkinlik Takvimi</span>
                   </div>
                   <ChevronRight className="h-5 w-5" />
                 </Link>

@@ -18,14 +18,15 @@ import kiraathaneEventService from '@/services/kiraathaneEventService'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { AxiosError } from 'axios'
-import { Dialog, DialogContent } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
+import { useAuth } from '@/contexts/AuthContext'
 
 interface EventDetailModalProps {
   eventId: number | null
   isOpen: boolean
   onClose: () => void
-  userId?: number | null
   onRegister?: (event: KiraathaneEvent) => void
+  userId?: number
 }
 
 const eventTypeLabels: Record<string, string> = {
@@ -41,29 +42,37 @@ const eventTypeLabels: Record<string, string> = {
 export default function EventDetailModal({ 
   eventId, 
   isOpen, 
-  onClose, 
-  userId, 
-  onRegister 
+  onClose,
+  onRegister,
+  userId
 }: EventDetailModalProps) {
+  const { user, getAuthHeader } = useAuth()
   const [event, setEvent] = useState<KiraathaneEvent | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isRegistering, setIsRegistering] = useState(false)
+  const [successMessage, setSuccessMessage] = useState<string | null>(null)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [isUserRegistered, setIsUserRegistered] = useState(false)
 
   useEffect(() => {
     const fetchEventDetails = async () => {
-      if (!eventId) return
+      if (!eventId || !user) return
       
       try {
         setIsLoading(true)
-        const response = await fetch(`/api/kiraathane-events/${eventId}`)
-        if (!response.ok) {
-          throw new Error('Etkinlik detayları yüklenirken bir hata oluştu')
-        }
-        const data = await response.json()
-        setEvent(data)
+        setError(null)
+        
+        const [eventData, registrationStatus] = await Promise.all([
+          kiraathaneEventService.getEventById(eventId),
+          kiraathaneEventService.isUserRegisteredForEvent(eventId, user.id)
+        ])
+        
+        setEvent(eventData)
+        setIsUserRegistered(registrationStatus)
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Bilinmeyen bir hata oluştu')
+        console.error('Error fetching event details:', err)
+        setError(err instanceof Error ? err.message : 'Etkinlik detayları yüklenirken bir hata oluştu')
       } finally {
         setIsLoading(false)
       }
@@ -72,94 +81,75 @@ export default function EventDetailModal({
     if (isOpen) {
       fetchEventDetails()
     }
-  }, [eventId, isOpen])
+  }, [eventId, isOpen, user])
 
-  const handleRegister = async () => {
-    if (!event || !userId) return
+  const handleRegistrationAction = async () => {
+    if (!event || !user) return;
 
     try {
-      setIsRegistering(true)
-      const response = await fetch(`/api/kiraathane-events/${eventId}/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ userId }),
-      })
-
-      if (!response.ok) {
-        throw new Error('Kayıt işlemi başarısız oldu')
+      setIsRegistering(true);
+      setErrorMessage(null);
+      setSuccessMessage(null);
+      
+      if (isUserRegistered) {
+        // Cancel registration
+        await kiraathaneEventService.cancelRegistration(event.id, user.id);
+        setSuccessMessage('Etkinlik kaydınız iptal edildi.');
+        setIsUserRegistered(false);
+      } else {
+        // Register for event
+        await kiraathaneEventService.registerForEvent(event.id, user.id);
+        setSuccessMessage('Etkinliğe başarıyla kaydoldunuz!');
+        setIsUserRegistered(true);
       }
+      
+      // Refresh event details to update capacity
+      const updatedEvent = await kiraathaneEventService.getEventById(event.id);
+      setEvent(updatedEvent);
 
-      const updatedEvent = await response.json()
-      setEvent(updatedEvent)
-      onRegister?.(updatedEvent)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Kayıt işlemi sırasında bir hata oluştu')
+      if (onRegister) {
+        onRegister(updatedEvent);
+      }
+    } catch (error) {
+      console.error('Registration action error:', error);
+      setErrorMessage(error instanceof Error ? error.message : 'İşlem sırasında beklenmeyen bir hata oluştu.');
     } finally {
-      setIsRegistering(false)
+      setIsRegistering(false);
     }
-  }
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent 
+        className="max-w-2xl"
+        aria-describedby="event-description"
+      >
         {isLoading ? (
-          <div className="flex justify-center items-center h-64">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-700"></div>
-          </div>
+          <>
+            <DialogTitle className="text-xl font-semibold">Etkinlik Yükleniyor</DialogTitle>
+            <div className="flex justify-center items-center p-8">
+              <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
+            </div>
+          </>
         ) : error ? (
-          <div className="text-center text-red-500 p-4">{error}</div>
+          <>
+            <DialogTitle className="text-xl font-semibold">Hata</DialogTitle>
+            <div id="event-description" className="text-center text-red-600 p-4">{error}</div>
+          </>
         ) : event ? (
           <>
-            {event.imageUrl && (
-              <div className="w-full h-48 bg-gray-200 relative">
-                <img 
-                  src={event.imageUrl} 
-                  alt={event.title}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            )}
-            
-            <div className={cn("p-6", !event.imageUrl && "pt-10")}>
-              <div className="mb-4">
-                <span className="text-xs font-medium px-2 py-1 bg-purple-100 text-purple-800 rounded-full">
-                  {eventTypeLabels[event.eventType] || "Etkinlik"}
-                </span>
-              </div>
-              
-              <h3 className="text-xl font-bold mb-2">{event.title}</h3>
-              
-              <div className="space-y-3 mb-6">
+            <DialogTitle className="text-2xl font-bold mb-4">{event.title}</DialogTitle>
+            <div className="space-y-6">
+              <div id="event-description" className="space-y-4">
                 <div className="flex gap-3">
                   <Calendar className="w-5 h-5 text-gray-500 flex-shrink-0" />
                   <div>
                     <p className="text-sm font-medium">
-                      {format(new Date(event.eventDate), 'd MMMM yyyy, EEEE', { locale: tr })}
+                      {format(new Date(event.eventDate), 'd MMMM yyyy', { locale: tr })}
                     </p>
-                    {event.endDate && (
-                      <p className="text-xs text-gray-500">
-                        {format(new Date(event.endDate), 'd MMMM yyyy, EEEE', { locale: tr })}
-                      </p>
-                    )}
-                    <p className="text-xs text-gray-500 mt-1">
-                      {formatDistanceToNow(new Date(event.eventDate), { 
-                        addSuffix: true,
-                        locale: tr
-                      })}
-                    </p>
-                  </div>
-                </div>
-                
-                <div className="flex gap-3">
-                  <Clock className="w-5 h-5 text-gray-500 flex-shrink-0" />
-                  <div>
-                    <p className="text-sm">
+                    <p className="text-xs text-gray-500">
                       {format(new Date(event.eventDate), 'HH:mm', { locale: tr })}
-                      {event.endDate && 
-                        ` - ${format(new Date(event.endDate), 'HH:mm', { locale: tr })}`
-                      }
+                      {event.endDate && ` - ${format(new Date(event.endDate), 'HH:mm', { locale: tr })}`}
                     </p>
                   </div>
                 </div>
@@ -183,25 +173,51 @@ export default function EventDetailModal({
                 </div>
               </div>
               
-              <div className="prose prose-sm max-w-none mb-6">
+              <div id="event-description" className="prose prose-sm max-w-none mb-6">
                 <p>{event.description}</p>
               </div>
               
-              {userId && (
+              {successMessage && (
+                <div className="bg-green-50 text-green-700 p-3 rounded-md text-sm mb-4">
+                  {successMessage}
+                </div>
+              )}
+              
+              {errorMessage && (
+                <div className="bg-red-50 text-red-700 p-3 rounded-md text-sm mb-4">
+                  {errorMessage}
+                </div>
+              )}
+              
+              {user && (
                 <Button
-                  onClick={handleRegister}
-                  disabled={isRegistering || event.registeredAttendees >= (event.capacity ?? 0)}
-                  className="w-full"
+                  onClick={handleRegistrationAction}
+                  disabled={isRegistering || (!isUserRegistered && event.registeredAttendees >= (event.capacity ?? 0))}
+                  className={cn(
+                    "w-full",
+                    isUserRegistered && "bg-red-600 hover:bg-red-700"
+                  )}
                 >
                   {isRegistering ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Kaydediliyor...
+                      {isUserRegistered ? 'İptal Ediliyor...' : 'Kaydediliyor...'}
                     </>
-                  ) : (event.registeredAttendees >= (event.capacity ?? 0)) ? (
-                    'Kontenjan Dolu'
+                  ) : event.registeredAttendees >= (event.capacity ?? 0) && !isUserRegistered ? (
+                    <>
+                      <AlertCircle className="mr-2 h-4 w-4" />
+                      Kontenjan Dolu
+                    </>
+                  ) : isUserRegistered ? (
+                    <>
+                      <X className="mr-2 h-4 w-4" />
+                      Etkinlikten Çık
+                    </>
                   ) : (
-                    'Etkinliğe Katıl'
+                    <>
+                      <CheckCircle className="mr-2 h-4 w-4" />
+                      Etkinliğe Katıl
+                    </>
                   )}
                 </Button>
               )}
@@ -210,5 +226,5 @@ export default function EventDetailModal({
         ) : null}
       </DialogContent>
     </Dialog>
-  )
+  );
 } 
