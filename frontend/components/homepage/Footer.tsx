@@ -45,25 +45,25 @@ export function Footer() {
             </div>
             <ul className="space-y-2">
               <li>
-                <Link href="/kitapligim" className="text-sm text-gray-600 hover:text-[#7e3af2] transition-colors">
+                <Link href="/features/library" className="text-sm text-gray-600 hover:text-[#7e3af2] transition-colors">
                   Kitaplığım
                 </Link>
               </li>
               <li>
-                <Link href="/kesfet" className="text-sm text-gray-600 hover:text-[#7e3af2] transition-colors">
+                <Link href="/features/discover" className="text-sm text-gray-600 hover:text-[#7e3af2] transition-colors">
                   Keşfet
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/millet-kiraathaneleri"
+                  href="/features/millet-kiraathanesi"
                   className="text-sm text-gray-600 hover:text-[#7e3af2] transition-colors"
                 >
                   Millet Kıraathaneleri
                 </Link>
               </li>
               <li>
-                <Link href="/bagis-yap" className="text-sm text-gray-600 hover:text-[#7e3af2] transition-colors">
+                <Link href="/features/donate" className="text-sm text-gray-600 hover:text-[#7e3af2] transition-colors">
                   Bağış Yap
                 </Link>
               </li>
