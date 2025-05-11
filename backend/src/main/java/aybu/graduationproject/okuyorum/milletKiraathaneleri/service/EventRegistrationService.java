@@ -5,6 +5,7 @@ import aybu.graduationproject.okuyorum.milletKiraathaneleri.dto.UpdateAttendance
 import aybu.graduationproject.okuyorum.milletKiraathaneleri.entity.EventRegistration;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface EventRegistrationService {
     List<EventRegistrationDTO> getAllRegistrations();
@@ -26,4 +27,6 @@ public interface EventRegistrationService {
     EventRegistrationDTO convertToDTO(EventRegistration registration);
     
     EventRegistration convertToEntity(EventRegistrationDTO registrationDTO);
+    
+    Optional<EventRegistration> findByEventIdAndUserId(Long eventId, Long userId);
 } 

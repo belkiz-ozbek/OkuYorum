@@ -87,29 +87,66 @@ export function AuthProvider({ children }: AuthProviderProps) {
     };
 
     const login = (newToken: string) => {
-        localStorage.setItem('token', newToken);
-        setToken(newToken);
-        api.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
-        fetchUser();
+        try {
+            // Token formatını kontrol et
+            const parts = newToken.split('.');
+            if (parts.length !== 3) {
+                throw new Error('Invalid token format');
+            }
+
+            // Token'ı decode et ve kontrol et
+            const payload = JSON.parse(atob(parts[1]));
+            console.log('Token payload:', payload);
+
+            // Token'ı sakla
+            localStorage.setItem('token', newToken);
+            setToken(newToken);
+            
+            // API headers'a ekle
+            api.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
+            console.log('Token set in headers:', api.defaults.headers.common['Authorization']);
+
+            // Kullanıcı bilgilerini getir
+            fetchUser();
+        } catch (error) {
+            console.error('Login error:', error);
+            logout();
+            throw new Error('Invalid token format or authentication failed');
+        }
     };
 
     const logout = () => {
+        console.log('Logging out...');
         localStorage.removeItem('token');
+        sessionStorage.removeItem('token');
         setToken(null);
         setUser(null);
         setError(null);
         delete api.defaults.headers.common['Authorization'];
+        console.log('Auth headers after logout:', api.defaults.headers.common);
     };
 
     useEffect(() => {
-        const storedToken = localStorage.getItem('token');
-        if (storedToken) {
-            setToken(storedToken);
-            api.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
-            fetchUser();
-        } else {
-            setLoading(false);
-        }
+        const initializeAuth = async () => {
+            const storedToken = localStorage.getItem('token');
+            console.log('Stored token found:', !!storedToken);
+
+            if (storedToken) {
+                try {
+                    setToken(storedToken);
+                    api.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
+                    console.log('Token set in headers on init:', api.defaults.headers.common['Authorization']);
+                    await fetchUser();
+                } catch (error) {
+                    console.error('Auth initialization error:', error);
+                    logout();
+                }
+            } else {
+                setLoading(false);
+            }
+        };
+
+        initializeAuth();
     }, []);
 
     const value = {

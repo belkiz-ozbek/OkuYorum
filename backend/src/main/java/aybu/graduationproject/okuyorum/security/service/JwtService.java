@@ -82,14 +82,37 @@ public class JwtService {
     public boolean isCurrentUser(Long userId) {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            System.out.println("isCurrentUser check - Authentication: " + authentication);
+            
             if (authentication == null || !authentication.isAuthenticated()) {
+                System.out.println("isCurrentUser check - Authentication is null or not authenticated");
                 return false;
             }
 
             String username = authentication.getName();
+            System.out.println("isCurrentUser check - Username from authentication: " + username);
+            System.out.println("isCurrentUser check - User authorities: " + authentication.getAuthorities());
+
+            
+            // Admin rolü varsa true döndür
+            if (authentication.getAuthorities().stream()
+                    .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
+                System.out.println("isCurrentUser check - User has ADMIN role, allowing access");
+                return true;
+            }
+            
             User user = userService.getUserById(userId);
-            return user.getUsername().equals(username);
+            System.out.println("isCurrentUser check - Found user: " + user.getUsername());
+            
+            boolean isMatch = user.getUsername().equals(username);
+            System.out.println("isCurrentUser check - Username match result: " + isMatch);
+            
+            return isMatch;
         } catch (EntityNotFoundException e) {
+            System.out.println("isCurrentUser check - User not found: " + e.getMessage());
+            return false;
+        } catch (Exception e) {
+            System.out.println("isCurrentUser check - Unexpected error: " + e.getMessage());
             return false;
         }
     }

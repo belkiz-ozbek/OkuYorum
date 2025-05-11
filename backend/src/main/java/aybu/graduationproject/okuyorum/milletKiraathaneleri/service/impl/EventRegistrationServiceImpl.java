@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -95,10 +96,45 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
     @Override
     @Transactional
     public EventRegistrationDTO registerUserForEvent(Long eventId, Long userId) {
-        if (isUserRegisteredForEvent(eventId, userId)) {
-            throw new IllegalStateException("Bu etkinliğe zaten kayıtlısınız");
+        // Önce iptal edilmiş bir kayıt var mı kontrol et
+        Optional<EventRegistration> existingRegistration = registrationRepository.findByEventIdAndUserId(eventId, userId);
+        
+        if (existingRegistration.isPresent()) {
+            EventRegistration registration = existingRegistration.get();
+            if (registration.getAttendanceStatus() == AttendanceStatus.CANCELLED) {
+                // İptal edilmiş kaydı tekrar aktif et
+                registration.setAttendanceStatus(AttendanceStatus.REGISTERED);
+                registration.setRegisteredAt(LocalDateTime.now());
+                registration.setAttended(false);
+                
+                // Etkinlik kapasitesini kontrol et
+                KiraathaneEvent event = registration.getEvent();
+                if (event.getCapacity() != null && event.getRegisteredAttendees() >= event.getCapacity()) {
+                    throw new IllegalStateException("Etkinlik kapasitesi dolu");
+                }
+                
+                // Katılımcı sayısını artır
+                event.setRegisteredAttendees(event.getRegisteredAttendees() + 1);
+                eventRepository.save(event);
+                
+                EventRegistration updatedRegistration = registrationRepository.save(registration);
+                
+                // Bildirim gönder
+                notificationService.sendEventRegistrationStatusUpdate(
+                    registration.getUser(),
+                    event.getTitle(),
+                    AttendanceStatus.CANCELLED,
+                    AttendanceStatus.REGISTERED,
+                    "Etkinliğe başarıyla kayıt oldunuz."
+                );
+                
+                return convertToDTO(updatedRegistration);
+            } else if (registration.getAttendanceStatus() != AttendanceStatus.CANCELLED) {
+                throw new IllegalStateException("Bu etkinliğe zaten kayıtlısınız");
+            }
         }
 
+        // Yeni kayıt oluştur
         KiraathaneEvent event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new EntityNotFoundException("Etkinlik bulunamadı"));
 
@@ -120,7 +156,7 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
 
         EventRegistration savedRegistration = registrationRepository.save(registration);
         
-        // Send notification
+        // Bildirim gönder
         notificationService.sendEventRegistrationStatusUpdate(
             user,
             event.getTitle(),
@@ -137,8 +173,26 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
     public void cancelRegistration(Long registrationId) {
         EventRegistration registration = registrationRepository.findById(registrationId)
                 .orElseThrow(() -> new EntityNotFoundException("Kayıt bulunamadı"));
+                
+        // Etkinliği bul ve katılımcı sayısını azalt
+        KiraathaneEvent event = registration.getEvent();
+        if (event.getRegisteredAttendees() > 0) {
+            event.setRegisteredAttendees(event.getRegisteredAttendees() - 1);
+            eventRepository.save(event);
+        }
+        
+        // Kaydı iptal et
         registration.setAttendanceStatus(AttendanceStatus.CANCELLED);
         registrationRepository.save(registration);
+        
+        // Bildirim gönder
+        notificationService.sendEventRegistrationStatusUpdate(
+            registration.getUser(),
+            event.getTitle(),
+            registration.getAttendanceStatus(),
+            AttendanceStatus.CANCELLED,
+            "Etkinlik kaydınız iptal edildi."
+        );
     }
 
     @Override
@@ -184,5 +238,10 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
         registration.setCheckedInBy(dto.getCheckedInBy());
         registration.setNoShowReason(dto.getNoShowReason());
         return registration;
+    }
+
+    @Override
+    public Optional<EventRegistration> findByEventIdAndUserId(Long eventId, Long userId) {
+        return registrationRepository.findByEventIdAndUserId(eventId, userId);
     }
 } 

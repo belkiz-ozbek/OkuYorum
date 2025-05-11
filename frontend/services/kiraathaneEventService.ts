@@ -113,35 +113,54 @@ const kiraathaneEventService = {
   // Register user for an event
   registerForEvent: async (eventId: number, userId: number): Promise<{ message: string }> => {
     try {
-      console.log('Sending registration request:', {
-        eventId,
-        userId,
-        headers: api.defaults.headers.common
-      });
+        // Log request details
+        const token = localStorage.getItem('token');
+        console.log('Registration request details:', {
+            eventId,
+            userId,
+            token: token ? 'Present' : 'Missing',
+            headers: api.defaults.headers.common
+        });
 
-      const response = await api.post(`/api/event-registrations/event/${eventId}/user/${userId}`);
-      
-      console.log('Registration successful:', response.data);
-      return response.data;
+        // Make the API call
+        const response = await api.post(`/api/event-registrations/event/${eventId}/user/${userId}`);
+        console.log('Registration API response:', response);
+        
+        return response.data;
     } catch (error) {
-      console.error('Registration error details:', {
-        error,
-        config: error instanceof AxiosError ? error.config : null,
-        response: error instanceof AxiosError ? error.response : null
-      });
+        console.error('Registration error details:', {
+            error,
+            config: error instanceof AxiosError ? {
+                url: error.config?.url,
+                method: error.config?.method,
+                headers: error.config?.headers,
+                data: error.config?.data
+            } : null,
+            response: error instanceof AxiosError ? {
+                status: error.response?.status,
+                data: error.response?.data,
+                headers: error.response?.headers
+            } : null
+        });
 
-      if (error instanceof AxiosError) {
-        if (error.response?.status === 403) {
-          throw new Error('Bu işlem için yetkiniz bulunmamaktadır. Lütfen giriş yapın.');
+        if (error instanceof AxiosError) {
+            if (error.response?.status === 403) {
+                throw new Error('Bu işlem için yetkiniz bulunmamaktadır. Lütfen giriş yapın.');
+            }
+            if (error.response?.status === 401) {
+                // Token geçersiz veya eksik, kullanıcıyı logout yap
+                localStorage.removeItem('token');
+                window.location.href = '/login';
+                throw new Error('Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.');
+            }
+            if (error.response?.status === 409) {
+                throw new Error('Bu etkinliğe zaten kayıtlısınız.');
+            }
+            if (error.response?.data?.message) {
+                throw new Error(error.response.data.message);
+            }
         }
-        if (error.response?.status === 409) {
-          throw new Error('Bu etkinliğe zaten kayıtlısınız.');
-        }
-        if (error.response?.data?.message) {
-          throw new Error(error.response.data.message);
-        }
-      }
-      throw new Error('Etkinliğe kayıt olurken bir hata oluştu. Lütfen daha sonra tekrar deneyin.');
+        throw new Error('Etkinliğe kayıt olurken bir hata oluştu. Lütfen daha sonra tekrar deneyin.');
     }
   },
 
