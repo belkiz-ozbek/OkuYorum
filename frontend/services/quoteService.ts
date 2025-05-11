@@ -46,8 +46,8 @@ export const quoteService = {
         await api.delete(`/api/quotes/${id}`);
     },
 
-    async likeQuote(id: number): Promise<Quote> {
-        const response = await api.post(`/api/quotes/${id}/like`);
+    async likeQuote(id: string | number): Promise<Quote> {
+        const response = await api.post(`/api/quotes/${id.toString()}/like`);
         return response.data;
     },
 
