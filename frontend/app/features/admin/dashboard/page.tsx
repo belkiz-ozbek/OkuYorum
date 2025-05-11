@@ -325,7 +325,7 @@ export default function AdminDashboardPage() {
                 variant="outline" 
                 className="w-full justify-between"
               >
-                <Link href="/millet-kiraathaneleri/admin">
+                <Link href="/features/admin/millet-kiraathaneleri">
                   <div className="flex items-center">
                     <BookOpen className="mr-2 h-5 w-5" />
                     <span>Etkinlik Oluştur</span>
@@ -339,7 +339,7 @@ export default function AdminDashboardPage() {
                 variant="outline" 
                 className="w-full justify-between"
               >
-                <Link href="/millet-kiraathaneleri">
+                <Link href="/features/admin/millet-kiraathaneleri/calendar">
                   <div className="flex items-center">
                     <Package className="mr-2 h-5 w-5" />
                     <span>Etkinlik Takvimini Görüntüle</span>

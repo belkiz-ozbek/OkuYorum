@@ -13,18 +13,13 @@ interface EventsCalendarProps {
 }
 
 export function EventsCalendar({ className }: EventsCalendarProps) {
-  const { user } = useAuth() // Assuming you have an auth hook to get current user
-  const [currentDate, setCurrentDate] = useState(new Date())
+  const { user } = useAuth()
   const [events, setEvents] = useState<KiraathaneEvent[]>([])
-  const [loading, setLoading] = useState(false)
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date())
+  const [selectedEvent, setSelectedEvent] = useState<KiraathaneEvent | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [selectedEvent, setSelectedEvent] = useState<{
-    event: KiraathaneEvent
-    position: { x: number; y: number }
-  } | null>(null)
-  const [showEventTooltip, setShowEventTooltip] = useState(false)
-  const [selectedEventId, setSelectedEventId] = useState<number | null>(null)
-  const [showDetailModal, setShowDetailModal] = useState(false)
+  const [tooltip, setTooltip] = useState<{ event: KiraathaneEvent, x: number, y: number } | null>(null)
 
   const monthNames = [
     "Ocak",
@@ -42,21 +37,19 @@ export function EventsCalendar({ className }: EventsCalendarProps) {
   ]
 
   // Get current month and year
-  const currentMonth = currentDate.getMonth()
-  const currentYear = currentDate.getFullYear()
+  const currentMonth = selectedDate.getMonth()
+  const currentYear = selectedDate.getFullYear()
 
   // Navigate to previous month
   const prevMonth = () => {
-    setCurrentDate(new Date(currentYear, currentMonth - 1, 1))
+    setSelectedDate(new Date(currentYear, currentMonth - 1, 1))
     setSelectedEvent(null)
-    setShowEventTooltip(false)
   }
 
   // Navigate to next month
   const nextMonth = () => {
-    setCurrentDate(new Date(currentYear, currentMonth + 1, 1))
+    setSelectedDate(new Date(currentYear, currentMonth + 1, 1))
     setSelectedEvent(null)
-    setShowEventTooltip(false)
   }
 
   // Get days in month
@@ -69,111 +62,48 @@ export function EventsCalendar({ className }: EventsCalendarProps) {
     return new Date(year, month, 1).getDay()
   }
 
-  // Fetch events for the current month
   useEffect(() => {
     const fetchEvents = async () => {
-      setLoading(true)
-      setError(null)
-      
       try {
-        const start = startOfMonth(currentDate)
-        const end = endOfMonth(currentDate)
+        setIsLoading(true)
+        setError(null)
         
-        // Format dates for API
-        const startStr = format(start, "yyyy-MM-dd'T'HH:mm:ss")
-        const endStr = format(end, "yyyy-MM-dd'T'23:59:59")
+        const start = format(startOfMonth(selectedDate), "yyyy-MM-dd'T'HH:mm:ss")
+        const end = format(endOfMonth(selectedDate), "yyyy-MM-dd'T'23:59:59")
         
-        try {
-          const eventsData = await kiraathaneEventService.getEventsBetweenDates(startStr, endStr)
-          if (eventsData && eventsData.length > 0) {
-            setEvents(eventsData)
-          } else {
-            // Eğer API'den veri gelmezse örnek verileri göster
-            setEvents(mockEvents)
-          }
-        } catch (apiError) {
-          console.error("API hatası, örnek verilere dönülüyor:", apiError)
-          setEvents(mockEvents)
+        console.log('Fetching events for dates:', { start, end })
+        
+        const response = await fetch(`/api/kiraathane-events/between-dates?startDate=${start}&endDate=${end}`, {
+          headers: {
+            'Accept': 'application/json',
+          },
+        })
+        
+        console.log('Response status:', response.status)
+        
+        if (!response.ok) {
+          const errorData = await response.text()
+          console.error('API Error:', {
+            status: response.status,
+            statusText: response.statusText,
+            body: errorData
+          })
+          throw new Error('Etkinlikler yüklenirken bir hata oluştu')
         }
+        
+        const data = await response.json()
+        console.log('Fetched events:', data)
+        setEvents(data)
       } catch (err) {
-        console.error("Etkinlikler yüklenirken hata:", err)
-        setError("Etkinlikler yüklenirken bir hata oluştu")
-        setEvents(mockEvents) // Hata durumunda örnek verileri göster
+        console.error('Error in fetchEvents:', err)
+        setError(err instanceof Error ? err.message : 'Bilinmeyen bir hata oluştu')
+        setEvents([])
       } finally {
-        setLoading(false)
+        setIsLoading(false)
       }
     }
-    
     fetchEvents()
-  }, [currentDate])
-
-  // Örnek etkinlik verileri (test amaçlı)
-  const mockEvents: KiraathaneEvent[] = [
-    {
-      id: 1,
-      title: "Dijital çağda okuma alışkanlıkları",
-      description: "Teknolojinin okuma alışkanlıklarımıza etkisi",
-      eventDate: `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}-15T18:30:00`,
-      endDate: `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}-15T20:00:00`,
-      eventType: "GENEL_TARTISMA",
-      imageUrl: null,
-      capacity: 30,
-      registeredAttendees: 15,
-      isActive: true,
-      kiraathaneId: 1,
-      kiraathaneName: "Mamak Millet Kıraathanesi",
-      kiraathaneAddress: "Mamak, Ankara",
-      createdAt: `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}-01T12:00:00`
-    },
-    {
-      id: 2,
-      title: "Türk Edebiyatında modernizm",
-      description: "Türk edebiyatında modernist akımın gelişimi",
-      eventDate: `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}-12T17:00:00`,
-      endDate: `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}-12T19:00:00`,
-      eventType: "KITAP_TARTISMA",
-      imageUrl: null,
-      capacity: 25,
-      registeredAttendees: 20,
-      isActive: true,
-      kiraathaneId: 2,
-      kiraathaneName: "Sincan Millet Kıraathanesi",
-      kiraathaneAddress: "Sincan, Ankara",
-      createdAt: `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}-01T12:00:00`
-    },
-    {
-      id: 3,
-      title: "Yüzyıllık Yalnızlık üzerine düşünceler",
-      description: "Gabriel García Márquez'in başyapıtı üzerine edebi sohbet",
-      eventDate: `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}-18T15:00:00`,
-      endDate: `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}-18T17:00:00`,
-      eventType: "KITAP_TARTISMA",
-      imageUrl: null,
-      capacity: 20,
-      registeredAttendees: 10,
-      isActive: true,
-      kiraathaneId: 3,
-      kiraathaneName: "Şişli Kültür Evi",
-      kiraathaneAddress: "Şişli, İstanbul",
-      createdAt: `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}-01T12:00:00`
-    },
-    {
-      id: 4,
-      title: "Şiirde İmge ve Metaforların Gücü",
-      description: "Modern şiirde imge ve metafor kullanımı",
-      eventDate: `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}-20T19:00:00`,
-      endDate: `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}-20T21:00:00`,
-      eventType: "SEMINER",
-      imageUrl: null,
-      capacity: 40,
-      registeredAttendees: 25,
-      isActive: true,
-      kiraathaneId: 4,
-      kiraathaneName: "Bakırköy Kıraathanesi",
-      kiraathaneAddress: "Bakırköy, İstanbul",
-      createdAt: `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}-01T12:00:00`
-    }
-  ]
+  }, [selectedDate])
 
   // Group events by date
   const getEventsByDate = () => {
@@ -212,37 +142,19 @@ export function EventsCalendar({ className }: EventsCalendarProps) {
     return days
   }
 
-  // Handle showing event tooltip
+  // Tooltip gösterme
   const handleShowEventTooltip = (event: KiraathaneEvent, e: React.MouseEvent) => {
-    // Get position for the popup
     const rect = e.currentTarget.getBoundingClientRect()
     const x = rect.left + window.scrollX
     const y = rect.top + window.scrollY
-
-    setSelectedEvent({
-      event,
-      position: { x, y },
-    })
-    setShowEventTooltip(true)
+    setTooltip({ event, x, y })
   }
-
-  // Handle hiding event tooltip
-  const handleHideEventTooltip = () => {
-    setShowEventTooltip(false)
-  }
+  const handleHideEventTooltip = () => setTooltip(null)
 
   // Handle clicking on an event to show full details modal
   const handleEventClick = (event: KiraathaneEvent, e: React.MouseEvent) => {
     e.stopPropagation()
-    setSelectedEventId(event.id)
-    setShowDetailModal(true)
-    setShowEventTooltip(false)
-  }
-
-  // Handle modal close
-  const handleCloseModal = () => {
-    setShowDetailModal(false)
-    setSelectedEventId(null)
+    setSelectedEvent(event)
   }
 
   // Handle successful registration/cancellation
@@ -250,14 +162,12 @@ export function EventsCalendar({ className }: EventsCalendarProps) {
     // Refresh events data
     const fetchEvents = async () => {
       try {
-        const start = startOfMonth(currentDate)
-        const end = endOfMonth(currentDate)
-        
-        const startStr = format(start, "yyyy-MM-dd'T'HH:mm:ss")
-        const endStr = format(end, "yyyy-MM-dd'T'23:59:59")
-        
-        const eventsData = await kiraathaneEventService.getEventsBetweenDates(startStr, endStr)
-        setEvents(eventsData)
+        const response = await fetch('/api/kiraathane-events')
+        if (!response.ok) {
+          throw new Error('Etkinlikler yüklenirken bir hata oluştu')
+        }
+        const data = await response.json()
+        setEvents(data)
       } catch (err) {
         console.error("Error refreshing events:", err)
       }
@@ -295,98 +205,97 @@ export function EventsCalendar({ className }: EventsCalendarProps) {
           </button>
         </div>
 
-        {loading ? (
+        {isLoading && (
           <div className="p-8 text-center">
             <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin mx-auto mb-2"></div>
             <p className="text-sm text-gray-600">Etkinlikler yükleniyor...</p>
           </div>
-        ) : error ? (
-          <div className="p-8 text-center text-red-500">{error}</div>
-        ) : (
-          <>
-            <div className="grid grid-cols-7 gap-2 text-center font-medium mb-2">
-              {["Pzr", "Pzt", "Sal", "Çar", "Per", "Cum", "Cmt"].map((day) => (
-                <div key={day} className="p-2">
-                  {day}
-                </div>
-              ))}
-            </div>
-
-            <div className="grid grid-cols-7 gap-2">
-              {calendarDays.map((dayData, index) => (
-                <div
-                  key={index}
-                  className={cn(
-                    "aspect-square p-2 rounded-lg transition-all",
-                    dayData ? "bg-white/80 shadow-sm" : "",
-                    dayData?.events?.length ? "hover:shadow-md" : "",
-                  )}
-                >
-                  {dayData && (
-                    <div className="h-full flex flex-col">
-                      <span className="text-lg font-semibold">{dayData.day}</span>
-                      <div className="mt-1 flex-1 overflow-hidden">
-                        {dayData.events.map((event, eventIndex) => (
-                          <div
-                            key={event.id}
-                            className={cn(
-                              "text-xs truncate py-1 px-1.5 rounded-md cursor-pointer mb-1",
-                              eventIndex % 3 === 0 && "bg-blue-100 text-blue-800",
-                              eventIndex % 3 === 1 && "bg-purple-100 text-purple-800",
-                              eventIndex % 3 === 2 && "bg-amber-100 text-amber-800",
-                            )}
-                            onMouseEnter={(e) => handleShowEventTooltip(event, e)}
-                            onMouseLeave={handleHideEventTooltip}
-                            onClick={(e) => handleEventClick(event, e)}
-                          >
-                            {format(new Date(event.eventDate), 'HH:mm')} {event.title}
-                          </div>
-                        ))}
-                        {dayData.events.length > 3 && (
-                          <div className="text-xs text-gray-500 font-medium mt-1">
-                            +{dayData.events.length - 3} daha fazla
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </>
         )}
+        {error && (
+          <div className="p-4 text-center text-red-500">{error} (Takvim yine de görüntüleniyor)</div>
+        )}
+
+        <div className="grid grid-cols-7 gap-2 text-center font-medium mb-2">
+          {["Pzr", "Pzt", "Sal", "Çar", "Per", "Cum", "Cmt"].map((day) => (
+            <div key={day} className="p-2">
+              {day}
+            </div>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-7 gap-2">
+          {calendarDays.map((dayData, index) => (
+            <div
+              key={index}
+              className={cn(
+                "aspect-square p-2 rounded-lg transition-all",
+                dayData ? "bg-white/80 shadow-sm" : "",
+                dayData?.events?.length ? "hover:shadow-md" : "",
+              )}
+            >
+              {dayData && (
+                <div className="h-full flex flex-col">
+                  <span className="text-lg font-semibold">{dayData.day}</span>
+                  <div className="mt-1 flex-1 overflow-hidden">
+                    {dayData.events.map((event, eventIndex) => (
+                      <div
+                        key={event.id}
+                        className={cn(
+                          "text-xs truncate py-1 px-1.5 rounded-md cursor-pointer mb-1",
+                          eventIndex % 3 === 0 && "bg-blue-100 text-blue-800",
+                          eventIndex % 3 === 1 && "bg-purple-100 text-purple-800",
+                          eventIndex % 3 === 2 && "bg-amber-100 text-amber-800",
+                        )}
+                        onMouseEnter={(e) => handleShowEventTooltip(event, e)}
+                        onMouseLeave={handleHideEventTooltip}
+                        onClick={(e) => handleEventClick(event, e)}
+                      >
+                        {format(new Date(event.eventDate), 'HH:mm')} {event.title}
+                      </div>
+                    ))}
+                    {dayData.events.length > 3 && (
+                      <div className="text-xs text-gray-500 font-medium mt-1">
+                        +{dayData.events.length - 3} daha fazla
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
       </div>
 
-      {/* Event Tooltip */}
-      {selectedEvent && showEventTooltip && (
+      {/* Tooltip */}
+      {tooltip && (
         <div
           className="absolute z-10 bg-white rounded-lg shadow-lg p-3 w-52 border border-gray-200 text-xs"
           style={{
-            top: `${selectedEvent.position.y + 40}px`,
-            left: `${selectedEvent.position.x}px`,
+            top: `${tooltip.y + 40}px`,
+            left: `${tooltip.x}px`,
           }}
         >
-          <div className="font-bold text-sm mb-1">{selectedEvent.event.title}</div>
+          <div className="font-bold text-sm mb-1">{tooltip.event.title}</div>
 
           <div className="flex items-start gap-1.5 mb-1">
             <MapPin className="h-3 w-3 text-gray-500 mt-0.5 shrink-0" />
             <span className="text-xs text-gray-700">
-              {selectedEvent.event.kiraathaneName}
+              {tooltip.event.kiraathaneName}
             </span>
           </div>
 
           <div className="flex items-start gap-1.5 mb-1">
             <Clock className="h-3 w-3 text-gray-500 mt-0.5 shrink-0" />
             <span className="text-xs text-gray-700">
-              {format(new Date(selectedEvent.event.eventDate), 'HH:mm')}
-              {selectedEvent.event.endDate && 
-                ` - ${format(new Date(selectedEvent.event.endDate), 'HH:mm')}`}
+              {format(new Date(tooltip.event.eventDate), 'HH:mm')}
+              {tooltip.event.endDate && 
+                ` - ${format(new Date(tooltip.event.endDate), 'HH:mm')}`}
             </span>
           </div>
 
           <div className="flex items-start gap-1.5">
             <Calendar className="h-3 w-3 text-gray-500 mt-0.5 shrink-0" />
-            <span className="text-xs text-gray-700 line-clamp-2">{selectedEvent.event.description}</span>
+            <span className="text-xs text-gray-700 line-clamp-2">{tooltip.event.description}</span>
           </div>
           
           <div className="mt-2 text-center">
@@ -398,13 +307,15 @@ export function EventsCalendar({ className }: EventsCalendarProps) {
       )}
       
       {/* Event Detail Modal */}
-      <EventDetailModal 
-        eventId={selectedEventId}
-        isOpen={showDetailModal}
-        onClose={handleCloseModal}
-        userId={user?.id}
-        onRegister={handleRegistrationUpdate}
-      />
+      {selectedEvent && (
+        <EventDetailModal
+          eventId={selectedEvent.id}
+          isOpen={!!selectedEvent}
+          onClose={() => setSelectedEvent(null)}
+          userId={user?.id}
+          onRegister={handleRegistrationUpdate}
+        />
+      )}
     </div>
   )
 }

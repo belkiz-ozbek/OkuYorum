@@ -5,7 +5,7 @@ import { EventsCalendar } from "@/components/ui/EventsCalendar"
 import kiraathaneEventService from "@/services/kiraathaneEventService"
 import { format } from "date-fns"
 
-export default function MilletKiraathaneleriPage() {
+export default function MilletKiraathaneleriCalendarPage() {
   const [apiStatus, setApiStatus] = useState<{ success: boolean; message: string } | null>(null)
   const [testActive, setTestActive] = useState(false)
 
@@ -35,30 +35,20 @@ export default function MilletKiraathaneleriPage() {
 
   return (
     <div className="container mx-auto py-8 px-4">
-      <h1 className="text-3xl font-bold text-center mb-2 text-purple-800">
-        Yaklaşan Etkinlikler
-      </h1>
-      <p className="text-center mb-6 text-gray-600 max-w-2xl mx-auto">
-        Kültür ve sanat dolu etkinliklerimize katılarak bilgi ve deneyimlerinizi paylaşın
-      </p>
+      <h1 className="text-2xl font-bold mb-8 text-center">Millet Kıraathaneleri Etkinlik Takvimi</h1>
       
-      {/* Test düğmesi (geliştirme aşamasında) */}
-      <div className="text-center mb-4">
-        <button 
-          onClick={testApiConnection}
-          className="text-xs py-1 px-3 rounded bg-gray-200 hover:bg-gray-300"
-        >
-          {testActive ? 'API Bağlantısını Tekrar Test Et' : 'API Bağlantısını Test Et'}
-        </button>
+      <div className="max-w-4xl mx-auto">
+        <EventsCalendar />
         
+        {/* API Test Sonucu */}
         {apiStatus && (
-          <div className={`mt-2 text-xs p-2 rounded ${apiStatus.success ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+          <div className={`mt-4 p-4 rounded-lg ${
+            apiStatus.success ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+          }`}>
             {apiStatus.message}
           </div>
         )}
       </div>
-      
-      <EventsCalendar />
     </div>
   )
 } 

@@ -77,40 +77,26 @@ export function CreateEventForm() {
     setSubmitting(true);
     setSuccessMessage(null);
     setErrorMessage(null);
-    
+
     try {
-      // Formdaki verileri API'nin beklediği formata dönüştür
-      const eventDateObj = new Date(formData.eventDate);
-      const [hours, minutes] = formData.eventTime.split(':');
-      eventDateObj.setHours(parseInt(hours), parseInt(minutes), 0);
-      
-      let endDate = null;
-      if (formData.endTime) {
-        const [endHours, endMinutes] = formData.endTime.split(':');
-        endDate = new Date(formData.eventDate);
-        endDate.setHours(parseInt(endHours), parseInt(endMinutes), 0);
-      }
-      
+      // API'ye gönderilecek veriyi hazırla
       const eventData = {
         title: formData.title,
         description: formData.description,
-        eventDate: eventDateObj.toISOString(),
-        endDate: endDate ? endDate.toISOString() : null,
+        eventDate: `${formData.eventDate}T${formData.eventTime}:00`,
+        endDate: formData.endTime ? `${formData.eventDate}T${formData.endTime}:00` : null,
         eventType: formData.eventType,
         capacity: parseInt(formData.capacity),
         kiraathaneId: parseInt(formData.kiraathaneId),
-        registeredAttendees: 0,
-        isActive: true,
       };
+
+      // API çağrısı yapılacak
+      // const response = await createEvent(eventData);
       
-      // API'ye kaydet
-      console.log('Kaydedilecek veri:', eventData);
-      // Backend hazır olduğunda yorum satırını kaldırın
-      // await kiraathaneEventService.createEvent(eventData);
+      // Başarılı
+      setSuccessMessage('Etkinlik başarıyla oluşturuldu!');
       
-      setSuccessMessage('Etkinlik başarıyla oluşturuldu.');
-      
-      // Formu sıfırla
+      // Formu temizle
       setFormData({
         title: '',
         description: '',
@@ -121,7 +107,7 @@ export function CreateEventForm() {
         capacity: '30',
         kiraathaneId: '',
       });
-      
+
     } catch (error) {
       console.error('Etkinlik oluşturulurken hata:', error);
       setErrorMessage('Etkinlik oluşturulurken bir hata oluştu.');
@@ -131,117 +117,121 @@ export function CreateEventForm() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold mb-6 text-purple-800">Yeni Etkinlik Oluştur</h2>
-      
+    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
       {successMessage && (
-        <div className="bg-green-50 border-l-4 border-green-500 p-4 mb-4">
-          <p className="text-green-700">{successMessage}</p>
+        <div className="mb-4 p-4 bg-green-100 text-green-700 rounded-lg">
+          {successMessage}
         </div>
       )}
       
       {errorMessage && (
-        <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-4">
-          <p className="text-red-700">{errorMessage}</p>
+        <div className="mb-4 p-4 bg-red-100 text-red-700 rounded-lg">
+          {errorMessage}
         </div>
       )}
       
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Etkinlik Başlığı</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Etkinlik Başlığı
+          </label>
           <Input
+            type="text"
             name="title"
             value={formData.title}
             onChange={handleChange}
-            placeholder="Etkinlik başlığını giriniz"
+            placeholder="Etkinlik başlığını girin"
             required
-            minLength={5}
           />
         </div>
         
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Etkinlik Açıklaması</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Etkinlik Açıklaması
+          </label>
           <Textarea
             name="description"
             value={formData.description}
             onChange={handleChange}
-            placeholder="Etkinlik açıklamasını giriniz"
-            className="min-h-32"
+            placeholder="Etkinlik detaylarını girin"
             required
-            minLength={10}
           />
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Etkinlik Tarihi</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Etkinlik Tarihi
+            </label>
             <Input
-              name="eventDate"
               type="date"
+              name="eventDate"
               value={formData.eventDate}
               onChange={handleChange}
               required
             />
           </div>
           
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Başlangıç Saati</label>
-              <Input
-                name="eventTime"
-                type="time"
-                value={formData.eventTime}
-                onChange={handleChange}
-                required
-              />
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Bitiş Saati</label>
-              <Input
-                name="endTime"
-                type="time"
-                value={formData.endTime}
-                onChange={handleChange}
-              />
-            </div>
-          </div>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Etkinlik Türü</label>
-            <Select
-              value={formData.eventType}
-              onValueChange={(value) => handleSelectChange('eventType', value)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Etkinlik türü seçiniz" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="GENEL_TARTISMA">Genel Tartışma</SelectItem>
-                <SelectItem value="KITAP_TARTISMA">Kitap Tartışması</SelectItem>
-                <SelectItem value="YAZAR_SOHBETI">Yazar Sohbeti</SelectItem>
-                <SelectItem value="OKUMA_ETKINLIGI">Okuma Etkinliği</SelectItem>
-                <SelectItem value="SEMINER">Seminer</SelectItem>
-                <SelectItem value="EGITIM">Eğitim</SelectItem>
-                <SelectItem value="DIGER">Diğer</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Kapasite</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Başlangıç Saati
+            </label>
             <Input
-              name="capacity"
-              type="number"
-              min="1"
-              value={formData.capacity}
+              type="time"
+              name="eventTime"
+              value={formData.eventTime}
               onChange={handleChange}
-              placeholder="Etkinlik kapasitesi"
               required
             />
           </div>
+        </div>
+        
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Bitiş Saati (Opsiyonel)
+          </label>
+          <Input
+            type="time"
+            name="endTime"
+            value={formData.endTime}
+            onChange={handleChange}
+          />
+        </div>
+        
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Etkinlik Türü
+          </label>
+          <Select
+            value={formData.eventType}
+            onValueChange={(value) => handleSelectChange('eventType', value)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Etkinlik türü seçin" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="GENEL_TARTISMA">Genel Tartışma</SelectItem>
+              <SelectItem value="KITAP_TANITIMI">Kitap Tanıtımı</SelectItem>
+              <SelectItem value="YAZAR_BULUSMASI">Yazar Buluşması</SelectItem>
+              <SelectItem value="OKUMA_GRUBU">Okuma Grubu</SelectItem>
+              <SelectItem value="COCUK_ETKINLIGI">Çocuk Etkinliği</SelectItem>
+              <SelectItem value="DIGER">Diğer</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Katılımcı Kapasitesi
+          </label>
+          <Input
+            type="number"
+            name="capacity"
+            value={formData.capacity}
+            onChange={handleChange}
+            min="1"
+            required
+          />
         </div>
         
         <div>
