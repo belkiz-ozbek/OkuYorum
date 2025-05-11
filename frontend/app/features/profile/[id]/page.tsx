@@ -198,29 +198,37 @@ export default function ProfilePage() {
       setAchievements(achievementsData);
       setReadingActivity(readingActivityData);
       
-      // İstatistikleri ayarlayalım
-      if (statsData && 'readingHours' in statsData) {
-        setTotalHours(statsData.readingHours || 0);
+      // Favori kitapları çekelim (hem kendi profili hem de başka kullanıcının profili için)
+      try {
+        const favoriteBooksData = await bookService.getFavoriteBooks();
+        const favoriteBookIds = new Set(favoriteBooksData.map(book => Number(book.id)));
+        
+        // Kitapları güncellerken isFavorite özelliğini doğru şekilde ayarlayalım
+        const updatedBooks = booksData.map(book => ({
+          ...book,
+          id: Number(book.id),
+          isFavorite: favoriteBookIds.has(Number(book.id))
+        }));
+        
+        console.log('Favori kitaplar yüklendi:', {
+          favoriteBooks: favoriteBooksData,
+          updatedBooks: updatedBooks
+        });
+        
+        setBooks(updatedBooks);
+      } catch (error) {
+        console.error('Error loading favorite books:', error);
+        // Hata durumunda da kitapları yükleyelim ama isFavorite özelliğini false olarak ayarlayalım
+        setBooks(booksData.map(book => ({
+          ...book,
+          id: Number(book.id),
+          isFavorite: false
+        })));
       }
       
-      // Eğer kendi profili ise favori kitapları da çekelim
-      if (currentUser && id === currentUser.id.toString()) {
-        try {
-          const favoriteBooksData = await bookService.getFavoriteBooks();
-          const favoriteBookIds = new Set(favoriteBooksData.map(book => Number(book.id)));
-          const updatedBooks = booksData.map(book => ({
-            ...book,
-            id: Number(book.id),
-            isFavorite: favoriteBookIds.has(Number(book.id))
-          }));
-          
-          setBooks(updatedBooks);
-        } catch (error) {
-          console.error('Error loading favorite books:', error);
-          setBooks(booksData);
-        }
-      } else {
-        setBooks(booksData);
+      // Reading stats'i güncelleyelim
+      if (statsData) {
+        setTotalHours(statsData.readingHours || 0);
       }
       
     } catch (error) {
