@@ -66,6 +66,7 @@ public class AuthenticationService {
             
             return AuthenticationResponse.builder()
                     .token(jwtToken)
+                    .userId(user.getId())
                     .build();
         } catch (DisabledException e) {
             throw new RuntimeException("Kullanıcı hesabı aktif değil");

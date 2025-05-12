@@ -84,4 +84,59 @@ public class UserService {
         user.setYearlyGoal(yearlyGoal);
         userRepository.save(user);
     }
+    
+    @Transactional
+    public User updateUser(Long userId, User updatedUser) {
+        User existingUser = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("Kullanıcı bulunamadı: " + userId));
+        
+        // Güncellenecek alanları kontrol et
+        if (updatedUser.getUsername() != null) {
+            existingUser.setUsername(updatedUser.getUsername());
+        }
+        
+        if (updatedUser.getEmail() != null) {
+            existingUser.setEmail(updatedUser.getEmail());
+        }
+        
+        if (updatedUser.getNameSurname() != null) {
+            existingUser.setNameSurname(updatedUser.getNameSurname());
+        }
+        
+        if (updatedUser.getBio() != null) {
+            existingUser.setBio(updatedUser.getBio());
+        }
+        
+        if (updatedUser.getProfileImage() != null) {
+            existingUser.setProfileImage(updatedUser.getProfileImage());
+        }
+        
+        if (updatedUser.getHeaderImage() != null) {
+            existingUser.setHeaderImage(updatedUser.getHeaderImage());
+        }
+        
+        // Role ve Status alanlarını güncelle
+        if (updatedUser.getRole() != null) {
+            existingUser.setRole(updatedUser.getRole());
+        }
+        
+        if (updatedUser.getStatus() != null) {
+            existingUser.setStatus(updatedUser.getStatus());
+        }
+        
+        return userRepository.save(existingUser);
+    }
+    
+    @Transactional
+    public void deleteUser(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("Kullanıcı bulunamadı: " + userId));
+        
+        // Kullanıcıyı tamamen silmek yerine durumunu BANNED olarak işaretle
+        user.setStatus(aybu.graduationproject.okuyorum.user.enums.UserStatus.BANNED);
+        userRepository.save(user);
+        
+        // Alternatif olarak tamamen silme işlemi
+        // userRepository.delete(user);
+    }
 }
