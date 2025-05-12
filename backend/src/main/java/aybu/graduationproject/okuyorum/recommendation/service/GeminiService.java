@@ -90,10 +90,6 @@ public class GeminiService {
     }
 
     private String getFallbackResponse() {
-        return "Başlık: Yüzüklerin Efendisi\n" +
-               "Yazar: J.R.R. Tolkien\n" +
-               "Tür: Fantastik Kurgu\n" +
-               "Açıklama: Epik bir macera ve zengin bir hayal gücü arayanlar için mükemmel bir seçim.\n" +
-               "Zorluk: Orta";
+        return "Üzgünüm, belirtilen kriterlere uygun kitap bulunamadı.";
     }
 } 
