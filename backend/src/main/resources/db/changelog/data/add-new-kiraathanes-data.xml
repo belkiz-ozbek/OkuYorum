@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
+
+    <changeSet id="20250512 03:15" author="belkiz.ozbek" context="dev">
+        <insert tableName="kiraathanes">
+            <column name="id">6</column>
+            <column name="name">Merkezefendi Millet Kıraathanesi</column>
+            <column name="address">Merkezefendi Mahallesi, Mevlana Caddesi No:85, Zeytinburnu</column>
+            <column name="description">Merkezefendi'de bulunan kıraathane, zengin kitap koleksiyonu ve modern çalışma alanlarıyla hizmet vermektedir.</column>
+            <column name="city">İstanbul</column>
+            <column name="district">Zeytinburnu</column>
+            <column name="phone_number">0212 111 2233</column>
+            <column name="email">merkezefendi.kiraathane@example.com</column>
+        </insert>
+
+        <insert tableName="kiraathanes">
+            <column name="id">7</column>
+            <column name="name">Saimekadın Millet Kıraathanesi</column>
+            <column name="address">Saimekadın Mahallesi, Kültür Sokak No:12, Yıldırım</column>
+            <column name="description">Bursa'nın Yıldırım ilçesinde yer alan kıraathane, okuma ve kültür etkinlikleri için ideal bir ortam sunmaktadır.</column>
+            <column name="city">Bursa</column>
+            <column name="district">Yıldırım</column>
+            <column name="phone_number">0224 333 4455</column>
+            <column name="email">saime.kiraathane@example.com</column>
+        </insert>
+
+        <insert tableName="kiraathanes">
+            <column name="id">8</column>
+            <column name="name">Karesi Millet Kıraathanesi</column>
+            <column name="address">Karesi Mahallesi, Atatürk Bulvarı No:45, Karesi</column>
+            <column name="description">Balıkesir'in Karesi ilçesinde bulunan kıraathane, modern tasarımı ve geniş çalışma alanlarıyla dikkat çekmektedir.</column>
+            <column name="city">Balıkesir</column>
+            <column name="district">Karesi</column>
+            <column name="phone_number">0266 555 6677</column>
+            <column name="email">karesi.kiraathane@example.com</column>
+        </insert>
+
+        <insert tableName="kiraathanes">
+            <column name="id">9</column>
+            <column name="name">Dede Millet Kıraathanesi</column>
+            <column name="address">Dede Mahallesi, İstiklal Caddesi No:78, Osmangazi</column>
+            <column name="description">Bursa'nın Osmangazi ilçesinde hizmet veren kıraathane, tarihi atmosferi ve modern imkanlarıyla okuyucularını ağırlamaktadır.</column>
+            <column name="city">Bursa</column>
+            <column name="district">Osmangazi</column>
+            <column name="phone_number">0224 777 8899</column>
+            <column name="email">dede.kiraathane@example.com</column>
+        </insert>
+
+        <insert tableName="kiraathanes">
+            <column name="id">10</column>
+            <column name="name">Beştelsiz Millet Kıraathanesi</column>
+            <column name="address">Beştelsiz Mahallesi, Cumhuriyet Caddesi No:34, Zeytinburnu</column>
+            <column name="description">İstanbul'un Zeytinburnu ilçesinde yer alan kıraathane, modern tasarımı ve zengin kitap koleksiyonuyla hizmet vermektedir.</column>
+            <column name="city">İstanbul</column>
+            <column name="district">Zeytinburnu</column>
+            <column name="phone_number">0212 999 0011</column>
+            <column name="email">bestelsiz.kiraathane@example.com</column>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog> 

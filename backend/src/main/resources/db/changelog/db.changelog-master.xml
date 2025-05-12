@@ -14,8 +14,12 @@
     <include file="db/changelog/changes/add-pages-read-to-user.xml"/>
     <include file="db/changelog/changes/add-millet-kiraathaneleri.xml"/>
     <include file="db/changelog/changes/update-event-registrations-add-status.xml"/>
+    <include file="db/changelog/changes/add-kiraathane-features-and-ratings.xml"/>
+    <include file="db/changelog/changes/add-kiraathane-photos.xml"/>
+    <include file="db/changelog/changes/add-kiraathane-features-column.xml"/>
 
     <!-- Veri değişikliklerini buraya include edeceğiz -->
     <include file="db/changelog/data/data-master.xml"/>
+    <include file="db/changelog/data/update-kiraathane-features.xml"/>
 
 </databaseChangeLog>

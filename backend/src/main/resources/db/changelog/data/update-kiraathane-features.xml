@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
+
+    <changeSet id="20240512-1-delete-duplicate-saimekadin" author="belkiz.ozbek">
+        <!-- Delete the Saimekadin Kiraathanesi without photos -->
+        <delete tableName="kiraathanes">
+            <where>name = 'Saimekadın Millet Kıraathanesi' AND featured_photo_url IS NULL</where>
+        </delete>
+    </changeSet>
+
+    <changeSet id="20240512-2-update-kiraathane-features" author="belkiz.ozbek">
+        <!-- Update Saimekadin Millet Kiraathanesi -->
+        <update tableName="kiraathanes">
+            <column name="features" value="ARRAY['UCRETSIZ_WIFI', 'CAY_KAHVE', 'CALISMA_ALANLARI']"/>
+            <column name="book_count" value="15000"/>
+            <column name="opening_time" value="09:00"/>
+            <column name="closing_time" value="22:00"/>
+            <where>name = 'Saimekadın Millet Kıraathanesi'</where>
+        </update>
+
+        <!-- Update Dede Bahçesi Millet Kiraathanesi -->
+        <update tableName="kiraathanes">
+            <column name="features" value="ARRAY['BAHCE_ALANI', 'CAY_KAHVE', 'SESSIZ_OKUMA_BOLUMU']"/>
+            <column name="book_count" value="12000"/>
+            <column name="opening_time" value="08:30"/>
+            <column name="closing_time" value="21:00"/>
+            <where>name = 'Dede Bahçesi Millet Kıraathanesi'</where>
+        </update>
+
+        <!-- Update Merkezefendi Millet Kiraathanesi -->
+        <update tableName="kiraathanes">
+            <column name="features" value="ARRAY['UCRETSIZ_WIFI', 'CAY_KAHVE', 'ETKINLIK_ALANI', 'COCUK_BOLUMU']"/>
+            <column name="book_count" value="25000"/>
+            <column name="opening_time" value="09:00"/>
+            <column name="closing_time" value="23:00"/>
+            <where>name = 'Merkezefendi Millet Kıraathanesi'</where>
+        </update>
+
+        <!-- Update Karesi Millet Kiraathanesi -->
+        <update tableName="kiraathanes">
+            <column name="features" value="ARRAY['UCRETSIZ_WIFI', 'CAY_KAHVE', 'GRUP_CALISMA_ALANLARI']"/>
+            <column name="book_count" value="10000"/>
+            <column name="opening_time" value="09:30"/>
+            <column name="closing_time" value="21:30"/>
+            <where>name = 'Karesi Millet Kıraathanesi'</where>
+        </update>
+
+        <!-- Update Beştelsiz Millet Kiraathanesi -->
+        <update tableName="kiraathanes">
+            <column name="features" value="ARRAY['UCRETSIZ_WIFI', 'CAY_KAHVE', 'SESSIZ_OKUMA_BOLUMU', 'SEMINER_SALONU']"/>
+            <column name="book_count" value="18000"/>
+            <column name="opening_time" value="08:00"/>
+            <column name="closing_time" value="22:30"/>
+            <where>name = 'Beştelsiz Millet Kıraathanesi'</where>
+        </update>
+    </changeSet>
+
+</databaseChangeLog> 

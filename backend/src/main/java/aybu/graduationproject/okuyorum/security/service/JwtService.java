@@ -116,4 +116,16 @@ public class JwtService {
             return false;
         }
     }
+
+    public Long getCurrentUserId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new SecurityException("No authenticated user found");
+        }
+
+        String username = authentication.getName();
+        User user = userService.getUserByUsername(username);
+        
+        return user.getId();
+    }
 } 

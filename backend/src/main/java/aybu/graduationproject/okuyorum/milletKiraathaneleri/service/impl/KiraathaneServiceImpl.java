@@ -2,18 +2,22 @@ package aybu.graduationproject.okuyorum.milletKiraathaneleri.service.impl;
 
 import aybu.graduationproject.okuyorum.milletKiraathaneleri.dto.KiraathaneDTO;
 import aybu.graduationproject.okuyorum.milletKiraathaneleri.dto.KiraathaneEventDTO;
+import aybu.graduationproject.okuyorum.milletKiraathaneleri.dto.KiraathaneRatingDTO;
 import aybu.graduationproject.okuyorum.milletKiraathaneleri.entity.Kiraathane;
-import aybu.graduationproject.okuyorum.milletKiraathaneleri.entity.KiraathaneEvent;
+import aybu.graduationproject.okuyorum.milletKiraathaneleri.entity.KiraathaneRating;
+import aybu.graduationproject.okuyorum.milletKiraathaneleri.repository.KiraathaneRatingRepository;
 import aybu.graduationproject.okuyorum.milletKiraathaneleri.repository.KiraathaneRepository;
 import aybu.graduationproject.okuyorum.milletKiraathaneleri.service.KiraathaneEventService;
+import aybu.graduationproject.okuyorum.milletKiraathaneleri.service.KiraathaneRatingService;
 import aybu.graduationproject.okuyorum.milletKiraathaneleri.service.KiraathaneService;
+import aybu.graduationproject.okuyorum.user.entity.User;
+import aybu.graduationproject.okuyorum.user.service.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,11 +27,14 @@ public class KiraathaneServiceImpl implements KiraathaneService {
 
     private final KiraathaneRepository kiraathaneRepository;
     private final KiraathaneEventService kiraathaneEventService;
+    private final KiraathaneRatingService kiraathaneRatingService;
+    private final KiraathaneRatingRepository ratingRepository;
+    private final UserService userService;
 
     @Override
     @Transactional(readOnly = true)
     public List<KiraathaneDTO> getAllKiraathanes() {
-        return kiraathaneRepository.findAllOrderByNameAsc().stream()
+        return kiraathaneRepository.findAllByOrderByNameAsc().stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
@@ -77,9 +84,13 @@ public class KiraathaneServiceImpl implements KiraathaneService {
         kiraathane.setDistrict(kiraathaneDTO.getDistrict());
         kiraathane.setPhoneNumber(kiraathaneDTO.getPhoneNumber());
         kiraathane.setEmail(kiraathaneDTO.getEmail());
-        kiraathane.setWorkingHours(kiraathaneDTO.getWorkingHours());
-        kiraathane.setImageUrl(kiraathaneDTO.getImageUrl());
+        kiraathane.setOpeningTime(kiraathaneDTO.getOpeningTime());
+        kiraathane.setClosingTime(kiraathaneDTO.getClosingTime());
+        kiraathane.setPhotoUrls(kiraathaneDTO.getPhotoUrls());
+        kiraathane.setFeaturedPhotoUrl(kiraathaneDTO.getFeaturedPhotoUrl());
         kiraathane.setMapCoordinates(kiraathaneDTO.getMapCoordinates());
+        kiraathane.setBookCount(kiraathaneDTO.getBookCount());
+        kiraathane.setFeatures(kiraathaneDTO.getFeatures());
         
         Kiraathane updatedKiraathane = kiraathaneRepository.save(kiraathane);
         return convertToDTO(updatedKiraathane);
@@ -104,14 +115,26 @@ public class KiraathaneServiceImpl implements KiraathaneService {
         dto.setDistrict(kiraathane.getDistrict());
         dto.setPhoneNumber(kiraathane.getPhoneNumber());
         dto.setEmail(kiraathane.getEmail());
-        dto.setWorkingHours(kiraathane.getWorkingHours());
-        dto.setImageUrl(kiraathane.getImageUrl());
+        dto.setOpeningTime(kiraathane.getOpeningTime());
+        dto.setClosingTime(kiraathane.getClosingTime());
+        dto.setPhotoUrls(kiraathane.getPhotoUrls());
+        dto.setFeaturedPhotoUrl(kiraathane.getFeaturedPhotoUrl());
         dto.setMapCoordinates(kiraathane.getMapCoordinates());
+        dto.setBookCount(kiraathane.getBookCount());
+        dto.setAverageRating(kiraathane.getAverageRating());
+        dto.setTotalRatings(kiraathane.getTotalRatings());
+        dto.setFeatures(kiraathane.getFeatures());
         dto.setCreatedAt(kiraathane.getCreatedAt());
         
         // Get upcoming events for this kiraathane
         List<KiraathaneEventDTO> upcomingEvents = kiraathaneEventService.getUpcomingEventsByKiraathaneId(kiraathane.getId());
         dto.setUpcomingEvents(upcomingEvents);
+        
+        // Get recent ratings for this kiraathane
+        List<KiraathaneRatingDTO> recentRatings = kiraathaneRatingService
+                .getRatingsByKiraathaneId(kiraathane.getId(), PageRequest.of(0, 5))
+                .getContent();
+        dto.setRecentRatings(recentRatings);
         
         return dto;
     }
@@ -126,11 +149,34 @@ public class KiraathaneServiceImpl implements KiraathaneService {
         kiraathane.setDistrict(kiraathaneDTO.getDistrict());
         kiraathane.setPhoneNumber(kiraathaneDTO.getPhoneNumber());
         kiraathane.setEmail(kiraathaneDTO.getEmail());
-        kiraathane.setWorkingHours(kiraathaneDTO.getWorkingHours());
-        kiraathane.setImageUrl(kiraathaneDTO.getImageUrl());
+        kiraathane.setOpeningTime(kiraathaneDTO.getOpeningTime());
+        kiraathane.setClosingTime(kiraathaneDTO.getClosingTime());
+        kiraathane.setPhotoUrls(kiraathaneDTO.getPhotoUrls());
+        kiraathane.setFeaturedPhotoUrl(kiraathaneDTO.getFeaturedPhotoUrl());
         kiraathane.setMapCoordinates(kiraathaneDTO.getMapCoordinates());
-        // ID and timestamps will be handled by JPA/DB
+        kiraathane.setBookCount(kiraathaneDTO.getBookCount());
+        kiraathane.setFeatures(kiraathaneDTO.getFeatures());
+        // ID, ratings ve timestamps will be handled by JPA/DB
         
         return kiraathane;
+    }
+
+    @Override
+    @Transactional
+    public void rateKiraathane(Long kiraathaneId, KiraathaneRatingDTO ratingDTO, Long userId) {
+        Kiraathane kiraathane = kiraathaneRepository.findById(kiraathaneId)
+                .orElseThrow(() -> new EntityNotFoundException("Kiraathane not found with id: " + kiraathaneId));
+
+        KiraathaneRating rating = ratingRepository.findByKiraathaneIdAndUserId(kiraathaneId, userId)
+                .orElse(new KiraathaneRating());
+
+        rating.setKiraathane(kiraathane);
+        rating.setUser(userService.getUserById(userId));
+        rating.setRating(ratingDTO.getRating());
+        rating.setComment(ratingDTO.getComment());
+
+        KiraathaneRating savedRating = ratingRepository.save(rating);
+        kiraathane.addRating(savedRating.getRating());
+        kiraathaneRepository.save(kiraathane);
     }
 } 

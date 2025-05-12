@@ -14,6 +14,5 @@ public interface KiraathaneRepository extends JpaRepository<Kiraathane, Long> {
     
     List<Kiraathane> findByCityAndDistrict(String city, String district);
     
-    @Query("SELECT k FROM Kiraathane k ORDER BY k.name ASC")
-    List<Kiraathane> findAllOrderByNameAsc();
+    List<Kiraathane> findAllByOrderByNameAsc();
 } 
