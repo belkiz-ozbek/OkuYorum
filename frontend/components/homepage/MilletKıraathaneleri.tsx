@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/Card"
@@ -20,7 +20,8 @@ const getFeatureIcon = (feature: KiraathaneFeature) => {
     BAHCE_ALANI: <MapPin className="w-3 h-3" />,
     SESSIZ_OKUMA_BOLUMU: <BookOpen className="w-3 h-3" />,
     GRUP_CALISMA_ALANLARI: <Users className="w-3 h-3" />,
-    ETKINLIK_ALANI: <Users className="w-3 h-3" />
+    ETKINLIK_ALANI: <Users className="w-3 h-3" />,
+    SESLI_CALISMA_ALANI: <Users className="w-3 h-3" />
   }
   return icons[feature] || <BookOpen className="w-3 h-3" />
 }
@@ -35,7 +36,8 @@ const getFeatureLabel = (feature: KiraathaneFeature): string => {
     BAHCE_ALANI: "Bahçe Alanı",
     SESSIZ_OKUMA_BOLUMU: "Sessiz Okuma Bölümü",
     GRUP_CALISMA_ALANLARI: "Grup Çalışma Alanları",
-    ETKINLIK_ALANI: "Etkinlik Alanı"
+    ETKINLIK_ALANI: "Etkinlik Alanı",
+    SESLI_CALISMA_ALANI: "Sesli Çalışma Alanı"
   }
   return labels[feature] || feature
 }
@@ -46,6 +48,7 @@ export function MilletKiraathaneleri() {
   const [currentImageIndex, setCurrentImageIndex] = useState<number[]>([])
   const [hoveredCard, setHoveredCard] = useState<number | null>(null)
   const { toast } = useToast()
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const fetchKiraathanes = async () => {
@@ -83,6 +86,18 @@ export function MilletKiraathaneleri() {
     })
   }
 
+  const scrollLeft = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({ left: -300, behavior: 'smooth' })
+    }
+  }
+
+  const scrollRight = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({ left: 300, behavior: 'smooth' })
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
@@ -91,229 +106,168 @@ export function MilletKiraathaneleri() {
     )
   }
 
-  // Saimekadın Millet Kıraathanesi should always be featured
-  const featuredKiraathane = kiraathanes.find(k => k.name === 'Saimekadın Millet Kıraathanesi')
-  // Other kiraathanes
-  const otherKiraathanes = kiraathanes.filter(k => k.name !== 'Saimekadın Millet Kıraathanesi')
+  // Find the Saimekadin kiraathane which should be featured
+  const featuredKiraathane = kiraathanes.find(k => k.name.includes('Saimekadın'))
+  const otherKiraathanes = kiraathanes.filter(k => k.id !== featuredKiraathane?.id)
+
+  console.log('Featured Kiraathane:', {
+    name: featuredKiraathane?.name,
+    featuredPhotoUrl: featuredKiraathane?.featuredPhotoUrl,
+    photoUrls: featuredKiraathane?.photoUrls
+  })
 
   return (
     <section className="py-12">
-      <div className="container mx-auto">
+      <div className="container mx-auto px-4">
         {/* Section Header */}
         <div className="text-center mb-8">
-          <motion.h2
-            className="text-3xl font-bold bg-clip-text text-transparent text-center bg-gradient-to-br from-purple-600 to-purple-800 mb-3 dark:from-purple-400 dark:to-purple-600 "
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-          >
-            Millet Kıraathaneleri
-          </motion.h2>
-          <motion.p
-            className="text-center text-lg text-gray-600 dark:text-gray-400 mb-12 max-w-xl mx-auto"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-          >
-            Bilginin, sohbetin ve kültürün buluşma noktası. Siz de millet kıraathanelerine gelin, paylaşın, okuyun,
-            tartışın!
-          </motion.p>
+          <h1 className="text-4xl font-bold text-purple-600 mb-4">Millet Kıraathaneleri</h1>
+          <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+            Bilginin, sohbetin ve kültürün buluşma noktası. Siz de millet kıraathanelerine gelin, paylaşın, okuyun, tartışın!
+          </p>
         </div>
 
-        {/* Öne Çıkan Kıraathane - Saimekadın */}
+        {/* Featured Kiraathane */}
         {featuredKiraathane && (
-          <motion.div
-            className="relative rounded-xl overflow-hidden shadow-lg mb-8"
-            initial={{ scale: 0.98, opacity: 0 }}
-            whileInView={{ scale: 1, opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-          >
-            <div className="relative h-[400px]"> {/* Increased height */}
-              <img
-                src={featuredKiraathane.featuredPhotoUrl || featuredKiraathane.photoUrls[0] || "/placeholder.svg"}
-                alt={featuredKiraathane.name}
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-end p-6">
-                <Badge className="mb-2 bg-purple-600 hover:bg-purple-700 w-fit">Öne Çıkan</Badge>
-                <h3 className="text-xl md:text-2xl font-bold text-white mb-2">{featuredKiraathane.name}</h3>
-                <div className="flex items-center text-white/90 mb-2">
-                  <MapPin className="w-4 h-4 mr-1" />
-                  <span className="text-sm">
-                    {featuredKiraathane.district}, {featuredKiraathane.city}
-                  </span>
-                  <span className="mx-2">•</span>
-                  <div className="flex items-center">
-                    <Star className="w-4 h-4 text-yellow-400 mr-1" />
-                    <span>{featuredKiraathane.averageRating.toFixed(1)}</span>
-                  </div>
+          <div className="mb-12 rounded-2xl overflow-hidden shadow-lg relative">
+            <div className="relative h-[400px]">
+              {(featuredKiraathane.photoUrls?.length > 0 || featuredKiraathane.featuredPhotoUrl) ? (
+                <img
+                  src={featuredKiraathane.featuredPhotoUrl || featuredKiraathane.photoUrls?.[0]}
+                  alt={featuredKiraathane.name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                  <BookOpen className="w-12 h-12 text-gray-400" />
                 </div>
-                <p className="text-white/80 mb-3 max-w-2xl line-clamp-2">{featuredKiraathane.description}</p>
-                <Link href={`/features/millet-kiraathanesi/${featuredKiraathane.id}`}>
-                  <Button size="sm" className="w-fit bg-purple-600 hover:bg-purple-700">
-                    Detayları Görüntüle
-                    <ExternalLink className="ml-2 h-4 w-4" />
+              )}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent">
+                <div className="absolute bottom-0 left-0 right-0 p-8">
+                  <Badge className="mb-4 bg-purple-600 text-white border-none">Öne Çıkan</Badge>
+                  <h2 className="text-3xl font-bold text-white mb-2">{featuredKiraathane.name}</h2>
+                  <div className="flex items-center text-white/90 mb-2">
+                    <MapPin className="w-4 h-4 mr-1" />
+                    <span>{featuredKiraathane.district}, {featuredKiraathane.city}</span>
+                    <span className="mx-2">•</span>
+                    <Star className="w-4 h-4 text-yellow-400 mr-1" />
+                    <span>{featuredKiraathane.averageRating?.toFixed(1)}</span>
+                  </div>
+                  <p className="text-white/80 text-lg mb-4 max-w-3xl">
+                    {featuredKiraathane.description}
+                  </p>
+                  <Button asChild variant="secondary" className="bg-white/10 hover:bg-white/20 text-white border-white/20">
+                    <Link href={`/features/millet-kiraathanesi/${featuredKiraathane.id}`}>
+                      Detayları Görüntüle
+                      <ExternalLink className="w-4 h-4 ml-2" />
+                    </Link>
                   </Button>
-                </Link>
+                </div>
               </div>
             </div>
-          </motion.div>
+          </div>
         )}
 
-        {/* Diğer Kıraathaneler Yatay Kaydırmalı Liste */}
-        <div className="relative">
-          <div className="overflow-x-auto pb-4 hide-scrollbar">
-            <div className="flex gap-4 min-w-full">
+        {/* Horizontal Scrollable Kiraathanes */}
+        <div className="relative mx-5">
+          {/* Left Arrow */}
+          <button 
+            onClick={scrollLeft}
+            className="absolute left-0 top-1/2 -translate-y-1/2 -ml-5 z-10 bg-white/90 rounded-full p-2 shadow-md hover:bg-white transition-all"
+          >
+            <ChevronLeft className="h-6 w-6 text-gray-700" />
+          </button>
+          
+          {/* Scrollable Container */}
+          <div 
+            ref={scrollContainerRef} 
+            className="flex overflow-x-auto pb-6 scrollbar-hide"
+            style={{ 
+              scrollbarWidth: 'none', 
+              msOverflowStyle: 'none' 
+            }}
+          >
+            {/* Add CSS to hide scrollbar */}
+            <style jsx global>{`
+              .scrollbar-hide::-webkit-scrollbar {
+                display: none;
+              }
+              .scrollbar-hide {
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+              }
+            `}</style>
+            <div className="flex gap-6">
               {otherKiraathanes.map((kiraathane, index) => (
                 <motion.div
                   key={kiraathane.id}
                   initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                  onMouseEnter={() => setHoveredCard(index)}
-                  onMouseLeave={() => setHoveredCard(null)}
-                  className="w-[300px] flex-shrink-0"
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: index * 0.1 }}
+                  className="flex-shrink-0 w-[280px]"
                 >
-                  <Card className="overflow-hidden h-full hover:shadow-lg transition-shadow">
-                    <Link href={`/features/millet-kiraathanesi/${kiraathane.id}`} className="block">
-                      <CardHeader className="p-0">
-                        <div className="relative aspect-video">
-                          <img
-                            src={kiraathane.photoUrls[currentImageIndex[index]] || "/placeholder.jpg"}
-                            alt={kiraathane.name}
-                            className="w-full h-full object-cover"
-                          />
-                          
-                          {hoveredCard === index && kiraathane.photoUrls.length > 1 && (
-                            <>
-                              <button
-                                onClick={(e) => {
-                                  e.preventDefault()
-                                  prevImage(index)
-                                }}
-                                className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1"
-                                aria-label="Önceki fotoğraf"
-                              >
-                                <ChevronLeft className="w-4 h-4" />
-                              </button>
-                              <button
-                                onClick={(e) => {
-                                  e.preventDefault()
-                                  nextImage(index)
-                                }}
-                                className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1"
-                                aria-label="Sonraki fotoğraf"
-                              >
-                                <ChevronRight className="w-4 h-4" />
-                              </button>
-                            </>
-                          )}
+                  <Card className="h-full flex flex-col">
+                    <div className="relative aspect-[4/3]">
+                      <img
+                        src={kiraathane.photoUrls[0]}
+                        alt={kiraathane.name}
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute top-2 right-2 bg-white rounded-full px-2 py-0.5 flex items-center gap-1 shadow">
+                        <Star className="w-3 h-3 text-yellow-400" />
+                        <span className="text-sm font-medium">{kiraathane.averageRating?.toFixed(1)}</span>
+                      </div>
+                    </div>
 
-                          <div className="absolute bottom-2 inset-x-0 flex justify-center gap-1.5 z-10">
-                            {kiraathane.photoUrls.map((_, imgIndex) => (
-                              <button
-                                key={imgIndex}
-                                onClick={(e) => {
-                                  e.preventDefault()
-                                  setCurrentImageIndex((prev) => {
-                                    const clone = [...prev]
-                                    clone[index] = imgIndex
-                                    return clone
-                                  })
-                                }}
-                                className={`w-1.5 h-1.5 rounded-full transition-colors ${
-                                  currentImageIndex[index] === imgIndex ? "bg-white" : "bg-white/50 hover:bg-white/80"
-                                }`}
-                                aria-label={`${imgIndex + 1}. fotoğrafı göster`}
-                              />
-                            ))}
-                          </div>
+                    <CardContent className="flex-1 p-4">
+                      <h3 className="font-semibold text-lg mb-1">{kiraathane.name}</h3>
+                      <div className="flex items-center text-gray-600 mb-2">
+                        <MapPin className="w-4 h-4 mr-1" />
+                        <span className="text-sm">{kiraathane.district}, {kiraathane.city}</span>
+                      </div>
+                      <p className="text-gray-600 text-sm mb-4 line-clamp-2">{kiraathane.description}</p>
+                      
+                      <div className="flex items-center text-gray-600 text-sm mb-3">
+                        <Clock className="w-4 h-4 mr-1" />
+                        <span>{kiraathane.openingTime} - {kiraathane.closingTime}</span>
+                        <span className="mx-2">•</span>
+                        <BookOpen className="w-4 h-4 mr-1" />
+                        <span>{kiraathane.bookCount?.toLocaleString()}+</span>
+                      </div>
 
-                          <div className="absolute top-2 right-2 bg-white dark:bg-gray-900 rounded-full px-2 py-0.5 flex items-center shadow-md">
-                            <Star className="w-3 h-3 text-yellow-500 mr-1" />
-                            <span className="text-xs font-semibold">{kiraathane.averageRating.toFixed(1)}</span>
-                          </div>
-                        </div>
-                      </CardHeader>
+                      <div className="flex flex-wrap gap-1">
+                        {kiraathane.features?.slice(0, 3).map((feature, i) => (
+                          <Badge
+                            key={i}
+                            variant="outline"
+                            className="text-xs bg-purple-50 text-purple-700 border-purple-200"
+                          >
+                            {getFeatureIcon(feature)}
+                            <span className="ml-1">{getFeatureLabel(feature)}</span>
+                          </Badge>
+                        ))}
+                      </div>
+                    </CardContent>
 
-                      <CardContent className="flex-grow p-4">
-                        <div className="flex justify-between items-start mb-2">
-                          <CardTitle className="text-lg">{kiraathane.name}</CardTitle>
-                        </div>
-
-                        <div className="flex items-center text-gray-600 dark:text-gray-400 mb-2">
-                          <MapPin className="w-4 h-4 mr-1 text-purple-600 dark:text-purple-400" />
-                          <span className="text-sm">
-                            {kiraathane.district}, {kiraathane.city}
-                          </span>
-                        </div>
-
-                        <div className="flex items-center text-gray-600 dark:text-gray-400 mb-4">
-                          <Clock className="w-4 h-4 mr-1 text-purple-600 dark:text-purple-400" />
-                          <span className="text-sm">
-                            {kiraathane.openingTime} - {kiraathane.closingTime}
-                          </span>
-                          <span className="mx-2">•</span>
-                          <BookOpen className="w-4 h-4 mr-1 text-purple-600 dark:text-purple-400" />
-                          <span className="text-sm">{kiraathane.bookCount ? kiraathane.bookCount.toLocaleString() : '0'}+ Kitap</span>
-                        </div>
-
-                        <div className="flex flex-wrap gap-2">
-                          {kiraathane.features?.map((feature, featureIndex) => (
-                            <Badge
-                              key={featureIndex}
-                              variant="outline"
-                              className="flex items-center gap-1 text-xs bg-purple-50 dark:bg-purple-900/20"
-                            >
-                              {getFeatureIcon(feature)}
-                              {getFeatureLabel(feature)}
-                            </Badge>
-                          ))}
-                        </div>
-                      </CardContent>
-
-                      <CardFooter className="p-4 pt-0">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="w-full hover:bg-purple-50 dark:hover:bg-purple-900/20"
-                        >
+                    <CardFooter className="p-4 pt-0">
+                      <Button asChild variant="outline" className="w-full">
+                        <Link href={`/features/millet-kiraathanesi/${kiraathane.id}`}>
                           Detayları Görüntüle
-                          <ExternalLink className="ml-2 h-4 w-4" />
-                        </Button>
-                      </CardFooter>
-                    </Link>
+                        </Link>
+                      </Button>
+                    </CardFooter>
                   </Card>
                 </motion.div>
               ))}
             </div>
           </div>
           
-          {/* Kaydırma Butonları */}
-          <button
-            onClick={() => {
-              const container = document.querySelector('.overflow-x-auto');
-              container?.scrollBy({ left: -300, behavior: 'smooth' });
-            }}
-            className="absolute left-0 top-1/2 -translate-y-1/2 bg-white/80 dark:bg-gray-800/80 hover:bg-white dark:hover:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-full p-2 shadow-lg z-10 -ml-4"
-            aria-label="Önceki kıraathaneler"
+          {/* Right Arrow */}
+          <button 
+            onClick={scrollRight}
+            className="absolute right-0 top-1/2 -translate-y-1/2 -mr-5 z-10 bg-white/90 rounded-full p-2 shadow-md hover:bg-white transition-all"
           >
-            <ChevronLeft className="w-6 h-6" />
-          </button>
-          
-          <button
-            onClick={() => {
-              const container = document.querySelector('.overflow-x-auto');
-              container?.scrollBy({ left: 300, behavior: 'smooth' });
-            }}
-            className="absolute right-0 top-1/2 -translate-y-1/2 bg-white/80 dark:bg-gray-800/80 hover:bg-white dark:hover:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-full p-2 shadow-lg z-10 -mr-4"
-            aria-label="Sonraki kıraathaneler"
-          >
-            <ChevronRight className="w-6 h-6" />
+            <ChevronRight className="h-6 w-6 text-gray-700" />
           </button>
         </div>
       </div>

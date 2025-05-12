@@ -75,6 +75,10 @@ public class Kiraathane {
     @Column(name = "total_rating_sum")
     private Integer totalRatingSum = 0;
 
+    // Öne çıkarma durumu
+    @Column(name = "is_featured")
+    private Boolean isFeatured = false;
+
     // Kıraathane özellikleri
     @ElementCollection
     @CollectionTable(name = "kiraathane_features", joinColumns = @JoinColumn(name = "kiraathane_id"))

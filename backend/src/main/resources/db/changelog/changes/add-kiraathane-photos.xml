@@ -29,10 +29,5 @@
         <createIndex tableName="kiraathane_photos" indexName="idx_kiraathane_photos_kiraathane_id">
             <column name="kiraathane_id"/>
         </createIndex>
-
-        <!-- Kiraathane tablosuna featured photo alanı ekleme -->
-        <addColumn tableName="kiraathanes">
-            <column name="featured_photo_url" type="varchar(255)"/>
-        </addColumn>
     </changeSet>
 </databaseChangeLog> 

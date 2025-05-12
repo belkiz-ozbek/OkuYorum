@@ -27,19 +27,6 @@
         <dropColumn tableName="kiraathanes" columnName="working_hours"/>
         <dropColumn tableName="kiraathanes" columnName="image_url"/>
 
-        <!-- Kiraathane fotoğrafları için yeni tablo -->
-        <createTable tableName="kiraathane_photos">
-            <column name="kiraathane_id" type="bigint">
-                <constraints nullable="false"
-                           foreignKeyName="fk_kiraathane_photos_kiraathane"
-                           references="kiraathanes(id)"
-                           deleteCascade="true"/>
-            </column>
-            <column name="photo_url" type="varchar(255)">
-                <constraints nullable="false"/>
-            </column>
-        </createTable>
-
         <!-- Kiraathane özellikleri için yeni tablo -->
         <createTable tableName="kiraathane_features">
             <column name="kiraathane_id" type="bigint">
@@ -95,10 +82,6 @@
 
         <createIndex tableName="kiraathane_ratings" indexName="idx_kiraathane_ratings_user_id">
             <column name="user_id"/>
-        </createIndex>
-
-        <createIndex tableName="kiraathane_photos" indexName="idx_kiraathane_photos_kiraathane_id">
-            <column name="kiraathane_id"/>
         </createIndex>
 
         <createIndex tableName="kiraathane_features" indexName="idx_kiraathane_features_kiraathane_id">

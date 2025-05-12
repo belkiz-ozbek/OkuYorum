@@ -19,6 +19,7 @@ export interface Kiraathane {
   averageRating: number;
   totalRatings: number;
   features: KiraathaneFeature[];
+  isFeatured: boolean;
   upcomingEvents?: KiraathaneEvent[];
   recentRatings?: KiraathaneRating[];
   createdAt: string;
@@ -42,7 +43,8 @@ export enum KiraathaneFeature {
   BAHCE_ALANI = "BAHCE_ALANI",
   SESSIZ_OKUMA_BOLUMU = "SESSIZ_OKUMA_BOLUMU",
   GRUP_CALISMA_ALANLARI = "GRUP_CALISMA_ALANLARI",
-  ETKINLIK_ALANI = "ETKINLIK_ALANI"
+  ETKINLIK_ALANI = "ETKINLIK_ALANI",
+  SESLI_CALISMA_ALANI = "SESLI_CALISMA_ALANI"
 }
 
 export interface KiraathaneEvent {
