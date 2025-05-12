@@ -101,7 +101,11 @@ export function MilletKiraathaneleri() {
   // Check if features are in database
   useEffect(() => {
     if (kiraathanes.length > 0) {
-      console.log('Sample kiraathane features:', kiraathanes[0].features);
+      console.log('Sample kiraathane features:', {
+        name: kiraathanes[0].name,
+        features: kiraathanes[0].features,
+        rawData: kiraathanes[0]
+      });
     }
   }, [kiraathanes]);
 
@@ -253,7 +257,7 @@ export function MilletKiraathaneleri() {
 
                       <div className="flex flex-wrap gap-1 mb-2">
                         {kiraathane.features && kiraathane.features.length > 0 ? (
-                          kiraathane.features.slice(0, 3).map((feature, i) => (
+                          kiraathane.features.map((feature, i) => (
                             <Badge
                               key={i}
                               variant="outline"
