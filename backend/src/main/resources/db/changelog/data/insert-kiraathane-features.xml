@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
+
+    <changeSet id="20240513-01" author="belkiz.ozbek">
+        <!-- Mamak Millet Kıraathanesi Features -->
+        <insert tableName="kiraathane_features">
+            <column name="kiraathane_id">11</column>
+            <column name="features">UCRETSIZ_WIFI</column>
+        </insert>
+        <insert tableName="kiraathane_features">
+            <column name="kiraathane_id">11</column>
+            <column name="features">CAY_KAHVE</column>
+        </insert>
+        <insert tableName="kiraathane_features">
+            <column name="kiraathane_id">11</column>
+            <column name="features">CALISMA_ALANLARI</column>
+        </insert>
+
+        <!-- Sincan Millet Kıraathanesi Features -->
+        <insert tableName="kiraathane_features">
+            <column name="kiraathane_id">12</column>
+            <column name="features">UCRETSIZ_WIFI</column>
+        </insert>
+        <insert tableName="kiraathane_features">
+            <column name="kiraathane_id">12</column>
+            <column name="features">CAY_KAHVE</column>
+        </insert>
+        <insert tableName="kiraathane_features">
+            <column name="kiraathane_id">12</column>
+            <column name="features">SESSIZ_OKUMA_BOLUMU</column>
+        </insert>
+
+        <!-- Şişli Kültür Evi Features -->
+        <insert tableName="kiraathane_features">
+            <column name="kiraathane_id">13</column>
+            <column name="features">UCRETSIZ_WIFI</column>
+        </insert>
+        <insert tableName="kiraathane_features">
+            <column name="kiraathane_id">13</column>
+            <column name="features">CAY_KAHVE</column>
+        </insert>
+        <insert tableName="kiraathane_features">
+            <column name="kiraathane_id">13</column>
+            <column name="features">ETKINLIK_ALANI</column>
+        </insert>
+
+        <!-- Bakırköy Kıraathanesi Features -->
+        <insert tableName="kiraathane_features">
+            <column name="kiraathane_id">14</column>
+            <column name="features">UCRETSIZ_WIFI</column>
+        </insert>
+        <insert tableName="kiraathane_features">
+            <column name="kiraathane_id">14</column>
+            <column name="features">CAY_KAHVE</column>
+        </insert>
+        <insert tableName="kiraathane_features">
+            <column name="kiraathane_id">14</column>
+            <column name="features">GRUP_CALISMA_ALANLARI</column>
+        </insert>
+
+        <!-- Merkezefendi Millet Kıraathanesi Features -->
+        <insert tableName="kiraathane_features">
+            <column name="kiraathane_id">6</column>
+            <column name="features">UCRETSIZ_WIFI</column>
+        </insert>
+        <insert tableName="kiraathane_features">
+            <column name="kiraathane_id">6</column>
+            <column name="features">CAY_KAHVE</column>
+        </insert>
+        <insert tableName="kiraathane_features">
+            <column name="kiraathane_id">6</column>
+            <column name="features">ETKINLIK_ALANI</column>
+        </insert>
+        <insert tableName="kiraathane_features">
+            <column name="kiraathane_id">6</column>
+            <column name="features">COCUK_BOLUMU</column>
+        </insert>
+
+        <!-- Saimekadın Millet Kıraathanesi Features -->
+        <insert tableName="kiraathane_features">
+            <column name="kiraathane_id">7</column>
+            <column name="features">UCRETSIZ_WIFI</column>
+        </insert>
+        <insert tableName="kiraathane_features">
+            <column name="kiraathane_id">7</column>
+            <column name="features">CAY_KAHVE</column>
+        </insert>
+        <insert tableName="kiraathane_features">
+            <column name="kiraathane_id">7</column>
+            <column name="features">CALISMA_ALANLARI</column>
+        </insert>
+
+        <!-- Karesi Millet Kıraathanesi Features -->
+        <insert tableName="kiraathane_features">
+            <column name="kiraathane_id">8</column>
+            <column name="features">UCRETSIZ_WIFI</column>
+        </insert>
+        <insert tableName="kiraathane_features">
+            <column name="kiraathane_id">8</column>
+            <column name="features">CAY_KAHVE</column>
+        </insert>
+        <insert tableName="kiraathane_features">
+            <column name="kiraathane_id">8</column>
+            <column name="features">GRUP_CALISMA_ALANLARI</column>
+        </insert>
+
+        <!-- Dede Bahçesi Millet Kıraathanesi Features -->
+        <insert tableName="kiraathane_features">
+            <column name="kiraathane_id">9</column>
+            <column name="features">BAHCE_ALANI</column>
+        </insert>
+        <insert tableName="kiraathane_features">
+            <column name="kiraathane_id">9</column>
+            <column name="features">CAY_KAHVE</column>
+        </insert>
+        <insert tableName="kiraathane_features">
+            <column name="kiraathane_id">9</column>
+            <column name="features">SESSIZ_OKUMA_BOLUMU</column>
+        </insert>
+
+        <!-- Beştelsiz Millet Kıraathanesi Features -->
+        <insert tableName="kiraathane_features">
+            <column name="kiraathane_id">10</column>
+            <column name="features">UCRETSIZ_WIFI</column>
+        </insert>
+        <insert tableName="kiraathane_features">
+            <column name="kiraathane_id">10</column>
+            <column name="features">CAY_KAHVE</column>
+        </insert>
+        <insert tableName="kiraathane_features">
+            <column name="kiraathane_id">10</column>
+            <column name="features">SESSIZ_OKUMA_BOLUMU</column>
+        </insert>
+        <insert tableName="kiraathane_features">
+            <column name="kiraathane_id">10</column>
+            <column name="features">SEMINER_SALONU</column>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog> 
