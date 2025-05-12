@@ -16,21 +16,9 @@ interface DiscussionCardProps {
 }
 
 export default function MilletKiraathanesi() {
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [currentUser, setCurrentUser] = useState<{ id: number; username: string } | null>(null);
 
   useEffect(() => {
-    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      setTheme('dark');
-      document.documentElement.setAttribute('data-theme', 'dark');
-    }
-
-    const handleScroll = () => {
-      const scrollPosition = window.scrollY;
-      setIsScrolled(scrollPosition > 50);
-    };
-
     const loadUserInfo = async () => {
       try {
         const response = await UserService.getCurrentUser();
@@ -40,26 +28,17 @@ export default function MilletKiraathanesi() {
       }
     };
 
-    window.addEventListener('scroll', handleScroll);
     loadUserInfo();
-
-    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  const toggleTheme = () => {
-    const newTheme = theme === 'light' ? 'dark' : 'light';
-    setTheme(newTheme);
-    document.documentElement.setAttribute('data-theme', newTheme);
-  };
 
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Hero Section with Parallax */}
+      {/* Hero Section */}
       <div className="relative h-[60vh] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 transform scale-110">
           <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/50 to-black/80 z-10" />
           <Image
-            src="/image4.png"
+            src="/images/kiraathanes/hero-bg.jpg"
             alt="Millet Kıraathanesi"
             fill
             className="object-cover object-[center_85%] motion-safe:animate-ken-burns"
@@ -72,49 +51,22 @@ export default function MilletKiraathanesi() {
             Millet Kıraathaneleri
           </h1>
           <p className="text-lg md:text-xl mb-8 max-w-2xl text-center animate-fade-in text-white/95 font-medium drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] [text-shadow:_0_1px_10px_rgb(0_0_0_/_40%)]">
-            Kitaplarla dolu keyifli sohbetlerin, bilgi paylaşımının ve kültürel etkinliklerin merkezi
+            Bilginin, sohbetin ve kültürün buluşma noktası. Siz de millet kıraathanelerine gelin, paylaşın, okuyun,
+            tartışın!
           </p>
-          <a 
-            className="group relative inline-flex items-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-md hover:bg-white/20 border border-white/30 text-white rounded-xl transition-all duration-500 hover:gap-4 hover:pr-10 overflow-hidden shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_25px_rgba(255,255,255,0.2)]"
-            onClick={() => {
-              const element = document.getElementById('upcoming-events');
-              if (element) {
-                element.scrollIntoView({ behavior: 'smooth' });
-              }
-            }}
-          >
-            <span className="relative z-10 font-medium">Etkinlikleri Keşfet</span>
-            <svg 
-              className="w-5 h-5 transition-transform duration-500 group-hover:translate-x-1" 
-              fill="none" 
-              viewBox="0 0 24 24" 
-              stroke="currentColor"
-            >
-              <path 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                strokeWidth={2} 
-                d="M17 8l4 4m0 0l-4 4m4-4H3" 
-              />
-            </svg>
-            <div className="absolute inset-0 w-0 bg-gradient-to-r from-white/20 to-transparent transition-all duration-500 group-hover:w-full" />
-          </a>
         </div>
       </div>
 
-      {/* Events Section */}
-      <section className="py-20 bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-black">
-        <div className="container mx-auto px-4">
-
-          {/* Kıraathaneler Bölümü */}
-          <div className="mb-24 flex justify-center px-4 sm:px-6 md:px-8 lg:px-16">
-  <div className="w-full max-w-6xl">
-    <MilletKiraathaneleri />
-  </div>
-</div>
+      {/* Main Content */}
+      <div className="bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-black">
+        <div className="container mx-auto px-4 py-16">
+          {/* Kıraathaneler Section */}
+          <div className="mb-24">
+            <MilletKiraathaneleri />
+          </div>
 
           {/* Events Calendar Section */}
-          <div id="upcoming-events">
+          <div id="upcoming-events" className="mb-24">
             <h2 className="text-3xl font-bold bg-clip-text text-transparent text-center bg-gradient-to-br from-purple-700 to-purple-900 dark:from-purple-400 dark:to-purple-600 mb-4">
               Yaklaşan Etkinlikler
             </h2>
@@ -124,44 +76,7 @@ export default function MilletKiraathanesi() {
             <EventsCalendar className="mb-8" />
           </div>
         </div>
-      </section>
-
-      {/* Popüler Tartışmalar */}
-      <section className="py-20 bg-gradient-to-b from-gray-50 to-white dark:from-black dark:to-gray-950">
-      <div className="flex justify-center px-4 sm:px-6 md:px-8 lg:px-16">
-      <div className="w-full max-w-6xl">
-          <h2 className="text-3xl font-bold bg-clip-text text-transparent text-center bg-gradient-to-br from-purple-700 to-purple-900 dark:from-purple-400 dark:to-purple-600 mb-4">
-            Popüler Tartışmalar
-          </h2>
-          <p className="text-gray-600 dark:text-gray-400 text-center mb-12 max-w-2xl mx-auto">
-            Devam eden tartışmalara katılın ve fikirlerinizi paylaşın
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <DiscussionCard
-              title="Yüzyıllık Yalnızlık üzerine"
-              author="Gabriel Garcia Marquez"
-              participants={32}
-              comments={78}
-              lastActive="2 saat önce"
-            />
-            <DiscussionCard
-              title="Dijital çağda okuma alışkanlıkları"
-              author="Genel Tartışma"
-              participants={45}
-              comments={124}
-              lastActive="5 saat önce"
-            />
-            <DiscussionCard
-              title="Türk Edebiyatında modernizm"
-              author="Akademik Tartışma"
-              participants={28}
-              comments={92}
-              lastActive="1 gün önce"
-            />
-</div>
-    </div>
-  </div>
-      </section>
+      </div>
     </div>
   );
 }

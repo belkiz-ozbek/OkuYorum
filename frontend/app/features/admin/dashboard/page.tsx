@@ -134,7 +134,7 @@ export default function AdminDashboardPage() {
     <div className="container mx-auto py-8 px-4">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Yönetim Paneli</h1>
-        <p className="text-gray-600">Bağış yönetimi ve sistem istatistikleri</p>
+        <p className="text-gray-600">Sistem istatistikleri</p>
       </div>
 
       {/* İstatistik Kartları */}
@@ -304,6 +304,59 @@ export default function AdminDashboardPage() {
                   <div className="flex items-center">
                     <Settings className="mr-2 h-5 w-5" />
                     <span>Sistem Ayarları</span>
+                  </div>
+                  <ChevronRight className="h-5 w-5" />
+                </Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+        
+        {/* Millet Kiraathaneleri Yönetimi Kartı */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Millet Kiraathaneleri Yönetimi</CardTitle>
+            <CardDescription>Kiraathane etkinliklerini yönetin</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <Button 
+                asChild 
+                variant="outline" 
+                className="w-full justify-between"
+              >
+                <Link href="/features/admin/millet-kiraathaneleri">
+                  <div className="flex items-center">
+                    <BookOpen className="mr-2 h-5 w-5" />
+                    <span>Etkinlik Oluştur</span>
+                  </div>
+                  <ChevronRight className="h-5 w-5" />
+                </Link>
+              </Button>
+              
+              <Button 
+                asChild 
+                variant="outline" 
+                className="w-full justify-between"
+              >
+                <Link href="/features/admin/millet-kiraathaneleri/registrations">
+                  <div className="flex items-center">
+                    <Users className="mr-2 h-5 w-5" />
+                    <span>Etkinlik Kayıtları</span>
+                  </div>
+                  <ChevronRight className="h-5 w-5" />
+                </Link>
+              </Button>
+              
+              <Button 
+                asChild 
+                variant="outline" 
+                className="w-full justify-between"
+              >
+                <Link href="/features/admin/millet-kiraathaneleri/calendar">
+                  <div className="flex items-center">
+                    <Package className="mr-2 h-5 w-5" />
+                    <span>Etkinlik Takvimi</span>
                   </div>
                   <ChevronRight className="h-5 w-5" />
                 </Link>

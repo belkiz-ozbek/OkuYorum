@@ -10,6 +10,9 @@ export interface Comment {
     likesCount: number;
     isLiked: boolean;
     replies?: Comment[];
+    replyCount?: number;
+    quoteId?: number;
+    reviewId?: number;
 }
 
 export interface CreateCommentRequest {

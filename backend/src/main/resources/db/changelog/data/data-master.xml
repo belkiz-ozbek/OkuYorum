@@ -10,5 +10,13 @@
     <include file="db/changelog/data/book-data.xml"/>
     <include file="db/changelog/data/user-books-data.xml"/>
     <include file="db/changelog/data/update-book-genres-data.xml"/>
-
+    <include file="db/changelog/data/kiraathane-data.xml"/>
+    <include file="db/changelog/data/kiraathane-initial-data.xml"/>
+    <include file="db/changelog/data/add-new-kiraathanes-data.xml"/>
+    <include file="db/changelog/data/kiraathane-photos-data.xml"/>
+    <include file="db/changelog/data/update-kiraathane-features.xml"/>
+    <include file="db/changelog/data/update-kiraathane-display-data.xml"/>
+    <include file="db/changelog/data/insert-kiraathane-features.xml"/>
+    <include file="db/changelog/data/insert-user-content-data.xml"/>
+    
 </databaseChangeLog>

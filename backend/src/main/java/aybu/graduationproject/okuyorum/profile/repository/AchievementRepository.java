@@ -12,9 +12,9 @@ import java.util.Optional;
 public interface AchievementRepository extends JpaRepository<Achievement, Long> {
     List<Achievement> findByUserId(Long userId);
     List<Achievement> findAllByUserId(Long userId);
-    Optional<Achievement> findByUserIdAndType(Long userId, AchievementType type);
+    List<Achievement> findByUserIdAndType(Long userId, AchievementType type);
     boolean existsByUserIdAndType(Long userId, AchievementType type);
     boolean existsByUserIdAndTypeAndEarnedIsTrue(Long userId, AchievementType type);
     List<Achievement> findByUserIdOrderByProgressDesc(Long userId);
-    Optional<Achievement> findByIdAndUserId(Long id, Long userId);
+    List<Achievement> findByIdAndUserId(Long id, Long userId);
 } 

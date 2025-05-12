@@ -84,6 +84,8 @@ public class DonationService {
     public List<DonationDto> getMyDonations() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepository.findByUsername(username)
+            .stream()
+            .findFirst()
             .orElseThrow(() -> new RuntimeException("User not found"));
         
         List<Donation> donations = donationRepository.findByUser(user);

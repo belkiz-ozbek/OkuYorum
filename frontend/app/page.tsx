@@ -9,6 +9,7 @@ import {ArrowRight, Bookmark, BookMarked, BookOpen, BookOpenCheck, Lock, User, E
 import {AnimatePresence, motion} from 'framer-motion'
 import {useToast} from "@/components/ui/feedback/use-toast";
 import { api } from '@/services/api';
+import { Header } from '@/components/homepage/Header';
 
 export default function LoginPage() {
     const {toast} = useToast()
@@ -135,14 +136,17 @@ export default function LoginPage() {
     ]
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-purple-50/80 via-rose-50/80 to-pink-50/80 relative overflow-hidden py-8">
-            {/* Enhanced Background Elements */}
+        <div className="min-h-screen flex items-center justify-center bg-background relative overflow-hidden py-8">
+            {/* Background Elements */}
             <div className="absolute inset-0 w-full h-full opacity-30">
                 <div className="absolute w-[800px] h-[800px] rounded-full bg-purple-100/40 blur-3xl -top-40 -left-20 animate-pulse" />
                 <div className="absolute w-[600px] h-[600px] rounded-full bg-rose-100/30 blur-3xl bottom-0 right-0 animate-pulse delay-700" />
                 <div className="absolute w-[300px] h-[300px] rounded-full bg-pink-100/30 blur-3xl top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 animate-pulse delay-1000" />
                 <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-5" />
             </div>
+
+            {/* Header */}
+            <Header />
 
             {/* Refined Floating Icons */}
             {mounted && starPositions.map((position, i) => (

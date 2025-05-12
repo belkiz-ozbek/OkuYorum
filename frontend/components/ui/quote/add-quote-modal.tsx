@@ -5,6 +5,8 @@ import { Input } from '@/components/ui/form/input';
 import { Textarea } from '@/components/ui/form/textarea';
 import { useToast } from '@/components/ui/feedback/use-toast';
 import { quoteService } from '@/services/quoteService';
+import { CreateQuoteRequest } from '@/types/quote';
+import { AxiosError } from 'axios';
 
 interface AddQuoteModalProps {
     bookId: number;
@@ -30,13 +32,27 @@ export function AddQuoteModal({ bookId, isOpen, onClose, onQuoteCreated }: AddQu
             return;
         }
 
+        if (content.length > 255) {
+            toast({
+                title: 'Hata',
+                description: 'Alıntı içeriği en fazla 255 karakter olabilir.',
+                variant: 'destructive',
+            });
+            return;
+        }
+
         try {
             setIsLoading(true);
-            await quoteService.createQuote({
+            const quoteData: CreateQuoteRequest = {
                 content,
-                pageNumber: pageNumber ? parseInt(pageNumber) : undefined,
                 bookId
-            });
+            };
+            
+            if (pageNumber) {
+                quoteData.pageNumber = parseInt(pageNumber);
+            }
+            
+            await quoteService.createQuote(quoteData);
             
             toast({
                 title: 'Başarılı',
@@ -47,11 +63,22 @@ export function AddQuoteModal({ bookId, isOpen, onClose, onQuoteCreated }: AddQu
             setPageNumber('');
             onClose();
             onQuoteCreated();
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        } catch (error) {
+        } catch (error: unknown) {
+            let errorMessage = 'Alıntı eklenirken bir hata oluştu.';
+            
+            if (error instanceof AxiosError) {
+                if (error.response?.status === 403) {
+                    errorMessage = 'Bu işlemi gerçekleştirmek için yetkiniz yok. Lütfen giriş yapın veya hesabınızı doğrulayın.';
+                    // Close the modal on auth error
+                    onClose();
+                } else if (error.response?.data?.message) {
+                    errorMessage = error.response.data.message;
+                }
+            }
+            
             toast({
                 title: 'Hata',
-                description: 'Alıntı eklenirken bir hata oluştu.',
+                description: errorMessage,
                 variant: 'destructive',
             });
         } finally {
@@ -72,7 +99,11 @@ export function AddQuoteModal({ bookId, isOpen, onClose, onQuoteCreated }: AddQu
                             value={content}
                             onChange={(e) => setContent(e.target.value)}
                             className="min-h-[100px]"
+                            maxLength={255}
                         />
+                        <div className="text-xs text-gray-500 mt-1 text-right">
+                            {content.length}/255 karakter
+                        </div>
                     </div>
                     <div>
                         <Input

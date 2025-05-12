@@ -408,7 +408,7 @@ export default function AboutPage() {
 
             <TeamMember
               name="Belkız Özbek"
-              role="Kurucu & Backend Developer"
+              role="Kurucu & Full-Stack Developer"
               bio="Belkız, proje yönetimi ve iş geliştirme konularında deneyimli bir Bilgisayar Mühendisliği öğrencisidir. OkuYorum'un backend geliştirme ve veri tabanı yönetiminden sorumludur."
               skills={["Backend Geliştirme", "Veri Tabanı Yönetimi", "API Entegrasyonu"]}
               socialLinks={{

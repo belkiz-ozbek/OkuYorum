@@ -35,18 +35,19 @@ import {
 } from "@/components/ui/tooltip";
 import { toast } from "@/components/ui/use-toast";
 
-interface QuoteCardProps {
+export interface QuoteCardProps {
     quote: Quote;
     onDelete?: (id: number) => void;
     onEdit?: (id: number, content: string, pageNumber?: string) => void;
-    onLike?: (id: number) => void;
+    onLike?: (id: string | number) => void;
     onSave?: (id: number) => void;
     onShare?: () => Promise<void>;
 }
 
-export function QuoteCard({ quote, onDelete, onEdit, onLike, onSave, onShare }: QuoteCardProps) {
+export function QuoteCard({ quote: propQuote, onDelete, onEdit, onLike, onSave, onShare }: QuoteCardProps) {
     const { user } = useAuth();
-    const isOwner = user?.id === quote.userId;
+    const isOwner = user?.id === propQuote.userId;
+    const [quote, setQuote] = useState(propQuote);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [showEditDialog, setShowEditDialog] = useState(false);
     const [editContent, setEditContent] = useState(quote.content);
@@ -62,6 +63,10 @@ export function QuoteCard({ quote, onDelete, onEdit, onLike, onSave, onShare }: 
         hover: { scale: 1.1, transition: { duration: 0.2 } },
         tap: { scale: 0.9, transition: { duration: 0.1 } },
     };
+
+    useEffect(() => {
+        setQuote(propQuote);
+    }, [propQuote]);
 
     useEffect(() => {
         const fetchInitialComments = async () => {
@@ -109,14 +114,18 @@ export function QuoteCard({ quote, onDelete, onEdit, onLike, onSave, onShare }: 
 
     const handleLike = async () => {
         if (isLikeProcessing) return;
-        
         try {
             setIsLikeProcessing(true);
-            
+            setQuote(prev => ({
+                ...prev,
+                isLiked: !prev.isLiked,
+                likes: prev.isLiked ? prev.likes - 1 : prev.likes + 1
+            }));
             if (onLike) {
-                await onLike(quote.id);
+                await onLike(quote.id.toString());
             }
         } catch (error) {
+            setQuote(propQuote);
             console.error('Beğeni işlemi başarısız:', error);
             toast({
                 title: 'Hata',

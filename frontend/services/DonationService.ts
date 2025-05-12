@@ -31,8 +31,17 @@ interface DonationStatistics {
 
 export class DonationService {
     static async getDonations(): Promise<AxiosResponse<Donation[]>> {
-        // Gerçek API'ye bağlanıyoruz
-        return api.get('/api/donations')
+        try {
+            const token = localStorage.getItem('token');
+            console.log("Fetching donations with token:", token ? "Token exists" : "No token");
+            if (!token) {
+                throw new Error("No authentication token found");
+            }
+            return api.get('/api/donations');
+        } catch (error) {
+            console.error("Error fetching donations:", error);
+            throw error;
+        }
     }
 
     static async getDonationById(id: number): Promise<AxiosResponse<Donation>> {

@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
+
+    <changeSet id="20250512 17:45" author="belkiz.ozbek">
+        <!-- Quotes -->
+        <insert tableName="quotes">
+            <column name="content">Hayat, yaşadığımız gibi değil, hatırladığımız gibidir.</column>
+            <column name="created_at">2025-05-02 16:30:00</column>
+            <column name="is_deleted">false</column>
+            <column name="page_number">42</column>
+            <column name="updated_at">2025-05-02 16:30:00</column>
+            <column name="book_id">1</column> <!-- Aşk -->
+            <column name="user_id">1</column> <!-- Enfal Yetiş -->
+        </insert>
+
+        <insert tableName="quotes">
+            <column name="content">Savaş barıştır. Özgürlük köleliktir. Cahillik güçtür.</column>
+            <column name="created_at">2025-05-02 16:31:00</column>
+            <column name="is_deleted">false</column>
+            <column name="page_number">25</column>
+            <column name="updated_at">2025-05-02 16:31:00</column>
+            <column name="book_id">2</column> <!-- 1984 -->
+            <column name="user_id">2</column> <!-- Ayşenur Şirin -->
+        </insert>
+
+        <insert tableName="quotes">
+            <column name="content">Bir sabah Gregor Samsa bunaltıcı düşlerden uyandığında, kendini yatağında dev bir böceğe dönüşmüş olarak buldu.</column>
+            <column name="created_at">2025-05-02 16:32:00</column>
+            <column name="is_deleted">false</column>
+            <column name="page_number">1</column>
+            <column name="updated_at">2025-05-02 16:32:00</column>
+            <column name="book_id">3</column> <!-- Dönüşüm -->
+            <column name="user_id">3</column> <!-- Yasemin Yalçın -->
+        </insert>
+
+        <!-- Reviews -->
+        <insert tableName="reviews">
+            <column name="content">Elif Şafak'ın en etkileyici eserlerinden biri. Tasavvuf felsefesini modern bir aşk hikayesiyle harmanlayan kitap, okuyucuyu derinden etkiliyor. Özellikle Şems ve Rumi'nin ilişkisinin anlatıldığı bölümler çok etkileyici.</column>
+            <column name="created_at">2025-05-02 16:33:00</column>
+            <column name="is_deleted">false</column>
+            <column name="rating">5</column>
+            <column name="updated_at">2025-05-02 16:33:00</column>
+            <column name="book_id">1</column> <!-- Aşk -->
+            <column name="user_id">4</column> <!-- Belkız Özbek -->
+        </insert>
+
+        <insert tableName="reviews">
+            <column name="content">Distopik edebiyatın başyapıtlarından. Orwell'in totaliter rejim eleştirisi bugün bile geçerliliğini koruyor. Büyük Birader'in gözetleme toplumu kavramı günümüz teknoloji çağında daha da anlam kazanıyor.</column>
+            <column name="created_at">2025-05-02 16:34:00</column>
+            <column name="is_deleted">false</column>
+            <column name="rating">5</column>
+            <column name="updated_at">2025-05-02 16:34:00</column>
+            <column name="book_id">2</column> <!-- 1984 -->
+            <column name="user_id">5</column> <!-- Merve Halaç -->
+        </insert>
+
+        <insert tableName="reviews">
+            <column name="content">Kafka'nın absürt ve alegorik anlatımının en güzel örneklerinden. İnsanın yabancılaşması ve modern toplumda bireyin varoluş sancıları çok iyi işlenmiş.</column>
+            <column name="created_at">2025-05-02 16:35:00</column>
+            <column name="is_deleted">false</column>
+            <column name="rating">4</column>
+            <column name="updated_at">2025-05-02 16:35:00</column>
+            <column name="book_id">3</column> <!-- Dönüşüm -->
+            <column name="user_id">6</column> <!-- Nuran Kocabey -->
+        </insert>
+
+        <!-- Messages -->
+        <insert tableName="messages">
+            <column name="content">Merhaba! Aşk kitabını okudun mu? Çok etkileyici buldum, özellikle Şems karakteri.</column>
+            <column name="created_at">2025-05-02 16:36:00</column>
+            <column name="is_read">false</column>
+            <column name="updated_at">2025-05-02 16:36:00</column>
+            <column name="sender_id">1</column> <!-- Enfal Yetiş -->
+            <column name="receiver_id">2</column> <!-- Ayşenur Şirin -->
+        </insert>
+
+        <insert tableName="messages">
+            <column name="content">Evet, ben de çok beğendim! Özellikle tasavvuf felsefesinin modern bir dille anlatılması çok başarılı.</column>
+            <column name="created_at">2025-05-02 16:37:00</column>
+            <column name="is_read">true</column>
+            <column name="updated_at">2025-05-02 16:37:00</column>
+            <column name="sender_id">2</column> <!-- Ayşenur Şirin -->
+            <column name="receiver_id">1</column> <!-- Enfal Yetiş -->
+        </insert>
+
+        <insert tableName="messages">
+            <column name="content">1984'ü okumaya başladım, çok etkileyici bir distopya. Birlikte tartışabilir miyiz?</column>
+            <column name="created_at">2025-05-02 16:38:00</column>
+            <column name="is_read">false</column>
+            <column name="updated_at">2025-05-02 16:38:00</column>
+            <column name="sender_id">3</column> <!-- Yasemin Yalçın -->
+            <column name="receiver_id">4</column> <!-- Belkız Özbek -->
+        </insert>
+    </changeSet>
+</databaseChangeLog> 

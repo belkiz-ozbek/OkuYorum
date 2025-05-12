@@ -39,14 +39,14 @@ interface ReviewCardProps {
     review: Review;
     onDelete?: (id: number) => void;
     onEdit?: (id: number, content: string, rating: number) => void;
-    onLike?: (id: number) => Promise<Review>;
+    onLike?: (id: string | number) => Promise<Review>;
     onSave?: (id: number) => void;
     onShare?: () => void;
     onReviewsChange?: () => void;
 }
 
 export function ReviewCard({ 
-    review: initialReview, 
+    review: propReview, 
     onDelete, 
     onEdit, 
     onLike, 
@@ -55,21 +55,21 @@ export function ReviewCard({
     onReviewsChange 
 }: ReviewCardProps) {
     const { user } = useAuth();
-    const isOwner = user?.id === initialReview.userId;
+    const isOwner = user?.id === propReview.userId;
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [showEditDialog, setShowEditDialog] = useState(false);
-    const [editContent, setEditContent] = useState(initialReview.content);
-    const [editRating, setEditRating] = useState(initialReview.rating);
+    const [editContent, setEditContent] = useState(propReview.content);
+    const [editRating, setEditRating] = useState(propReview.rating);
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [showComments, setShowComments] = useState(false);
     const [comments, setComments] = useState<Comment[]>([]);
     const [isLoadingComments, setIsLoadingComments] = useState(false);
     const [isLikeProcessing, setIsLikeProcessing] = useState(false);
-    const [review, setReview] = useState(initialReview);
+    const [review, setReview] = useState(propReview);
 
     useEffect(() => {
-        setReview(initialReview);
-    }, [initialReview]);
+        setReview(propReview);
+    }, [propReview]);
 
     const cardVariants = {
         initial: { opacity: 0, y: 20 },
@@ -130,28 +130,18 @@ export function ReviewCard({
 
     const handleLike = async () => {
         if (isLikeProcessing) return;
-        
         try {
             setIsLikeProcessing(true);
-            
-            // Optimistic update
             setReview(prevReview => ({
                 ...prevReview,
                 isLiked: !prevReview.isLiked,
                 likesCount: prevReview.isLiked ? prevReview.likesCount - 1 : prevReview.likesCount + 1
             }));
-            
             if (onLike) {
-                // API çağrısı
-                const updatedReview = await onLike(review.id);
-                
-                // API yanıtıyla güncelleme
-                setReview(updatedReview);
+                await onLike(review.id.toString());
             }
         } catch (error) {
-            // Hata durumunda eski haline döndür
-            setReview(initialReview);
-            
+            setReview(propReview);
             console.error('Beğeni işlemi başarısız:', error);
             toast({
                 title: 'Hata',

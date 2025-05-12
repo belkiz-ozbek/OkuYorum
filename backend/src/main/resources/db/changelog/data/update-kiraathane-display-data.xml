@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
+
+    <changeSet id="20240512-update-kiraathane-display" author="belkiz.ozbek">
+        <!-- Update Saimekadin Millet Kiraathanesi -->
+        <update tableName="kiraathanes">
+            <column name="name">Saimekadın Millet Kıraathanesi</column>
+            <column name="description">Geniş kitap koleksiyonu ve ferah çalışma alanlarıyla hizmet veren modern bir kıraathane.</column>
+            <column name="city">Ankara</column>
+            <column name="district">Mamak</column>
+            <column name="features" value="{UCRETSIZ_WIFI,CAY_KAHVE,CALISMA_ALANLARI}"/>
+            <column name="book_count" value="15000"/>
+            <column name="opening_time" value="09:00"/>
+            <column name="closing_time" value="22:00"/>
+            <column name="average_rating" value="4.7"/>
+            <column name="is_featured" valueBoolean="true"/>
+            <where>id = 7</where>
+        </update>
+
+        <!-- Update Dede Bahçesi Millet Kiraathanesi -->
+        <update tableName="kiraathanes">
+            <column name="name">Dede Bahçesi Millet Kıraathanesi</column>
+            <column name="description">Tarihi bir bahçe içerisinde huzurlu bir okuma deneyimi sunan kıraathane.</column>
+            <column name="city">Konya</column>
+            <column name="district">Meram</column>
+            <column name="features" value="{BAHCE_ALANI,CAY_KAHVE,SESSIZ_OKUMA_BOLUMU}"/>
+            <column name="book_count" value="12000"/>
+            <column name="opening_time" value="08:30"/>
+            <column name="closing_time" value="21:00"/>
+            <column name="average_rating" value="4.5"/>
+            <column name="is_featured" valueBoolean="true"/>
+            <where>id = 9</where>
+        </update>
+
+        <!-- Update Merkezefendi Millet Kiraathanesi -->
+        <update tableName="kiraathanes">
+            <column name="name">Merkezefendi Millet Kıraathanesi</column>
+            <column name="description">Modern mimari ve zengin kitap koleksiyonuyla İstanbul'un en güzel kıraathanelerinden.</column>
+            <column name="city">İstanbul</column>
+            <column name="district">Zeytinburnu</column>
+            <column name="features" value="{UCRETSIZ_WIFI,CAY_KAHVE,ETKINLIK_ALANI,COCUK_BOLUMU}"/>
+            <column name="book_count" value="25000"/>
+            <column name="opening_time" value="09:00"/>
+            <column name="closing_time" value="23:00"/>
+            <column name="average_rating" value="4.8"/>
+            <column name="is_featured" valueBoolean="true"/>
+            <where>id = 6</where>
+        </update>
+
+        <!-- Update Karesi Millet Kiraathanesi -->
+        <update tableName="kiraathanes">
+            <column name="name">Karesi Millet Kıraathanesi</column>
+            <column name="description">Şehir merkezinde kolay ulaşılabilir konumuyla her yaştan okuyucuya hizmet veriyor.</column>
+            <column name="city">Balıkesir</column>
+            <column name="district">Karesi</column>
+            <column name="features" value="{UCRETSIZ_WIFI,CAY_KAHVE,GRUP_CALISMA_ALANLARI}"/>
+            <column name="book_count" value="10000"/>
+            <column name="opening_time" value="09:30"/>
+            <column name="closing_time" value="21:30"/>
+            <column name="average_rating" value="4.3"/>
+            <column name="is_featured" valueBoolean="true"/>
+            <where>id = 8</where>
+        </update>
+
+        <!-- Update Beştelsiz Millet Kiraathanesi -->
+        <update tableName="kiraathanes">
+            <column name="name">Beştelsiz Millet Kıraathanesi</column>
+            <column name="description">Geniş ve ferah iç mekanıyla öğrencilerin ve kitapseverlerin buluşma noktası.</column>
+            <column name="city">İstanbul</column>
+            <column name="district">Zeytinburnu</column>
+            <column name="features" value="{UCRETSIZ_WIFI,CAY_KAHVE,SESSIZ_CALISMA_ALANI,SEMINER_SALONU}"/>
+            <column name="book_count" value="18000"/>
+            <column name="opening_time" value="08:00"/>
+            <column name="closing_time" value="22:30"/>
+            <column name="average_rating" value="4.6"/>
+            <column name="is_featured" valueBoolean="true"/>
+            <where>id = 10</where>
+        </update>
+    </changeSet>
+
+</databaseChangeLog> 

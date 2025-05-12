@@ -175,58 +175,62 @@ export default function ProfilePage() {
         return;
       }
 
+      // Tüm profil verilerini bir arada çekelim
       const profileData = await profileService.getUserProfile(id);
       console.log('Profile data received:', profileData);
       
-      if (id !== currentUser?.id?.toString()) {
-        console.log('Fetching data for other user profile');
-        const [achievementsData, readingActivityData, booksData] = await Promise.all([
-          profileService.getUserAchievements(id),
-          profileService.getUserReadingActivity(id),
-          bookService.getBooks(id)
-        ]);
-        
-        console.log('Other user data received:', {
-          achievements: achievementsData,
-          readingActivity: readingActivityData,
-          books: booksData
-        });
-        
-        setProfile(profileData);
-        setAchievements(achievementsData);
-        setReadingActivity(readingActivityData);
-        setBooks(booksData);
-      } else {
-        console.log('Fetching data for current user profile');
-        const [achievementsData, readingActivityData, booksData, favoriteBooksData] = await Promise.all([
-          profileService.getUserAchievements(id),
-          profileService.getUserReadingActivity(id),
-          bookService.getBooks(id),
-          bookService.getFavoriteBooks()
-        ]);
-        
-        console.log('Current user data received:', {
-          achievements: achievementsData,
-          readingActivity: readingActivityData,
-          books: booksData,
-          favoriteBooks: favoriteBooksData
-        });
-        
-        setProfile(profileData);
-        setAchievements(achievementsData);
-        setReadingActivity(readingActivityData);
-        
-        // Favori kitapları işaretle
+      // Profile state'ini hemen güncelleyelim
+      setProfile(profileData);
+      
+      // Her veri türü için ayrı ayrı Promise oluşturalım
+      const achievementsPromise = profileService.getUserAchievements(id);
+      const readingActivityPromise = profileService.getUserReadingActivity(id);
+      const booksPromise = bookService.getBooks(id);
+      const statsPromise = profileService.getReadingStats(id);
+      
+      // Promise'leri çalıştıralım
+      const achievementsData = await achievementsPromise;
+      const readingActivityData = await readingActivityPromise;
+      const booksData = await booksPromise;
+      const statsData = await statsPromise;
+      
+      // State'leri güncelleyelim
+      setAchievements(achievementsData);
+      setReadingActivity(readingActivityData);
+      
+      // Favori kitapları çekelim (hem kendi profili hem de başka kullanıcının profili için)
+      try {
+        const favoriteBooksData = await bookService.getFavoriteBooks();
         const favoriteBookIds = new Set(favoriteBooksData.map(book => Number(book.id)));
+        
+        // Kitapları güncellerken isFavorite özelliğini doğru şekilde ayarlayalım
         const updatedBooks = booksData.map(book => ({
           ...book,
           id: Number(book.id),
           isFavorite: favoriteBookIds.has(Number(book.id))
         }));
         
-        console.log('Updated books with favorite status:', updatedBooks);
+        console.log('Favori kitaplar yüklendi:', {
+          favoriteBooks: favoriteBooksData,
+          updatedBooks: updatedBooks
+        });
+        
         setBooks(updatedBooks);
+      } catch (error) {
+        console.error('Error loading favorite books:', error);
+        // Hata durumunda da kitapları yükleyelim ama isFavorite özelliğini false olarak ayarlayalım
+        setBooks(booksData.map(book => ({
+          ...book,
+          id: Number(book.id),
+          isFavorite: false
+        })));
       }
+      
+      // Reading stats'i güncelleyelim
+      if (statsData) {
+        setTotalHours(statsData.readingHours || 0);
+      }
+      
     } catch (error) {
       console.error('Error loading profile data:', error);
       setError('Profil yüklenirken bir hata oluştu');
@@ -267,11 +271,38 @@ export default function ProfilePage() {
 
   // Load profile data
   useEffect(() => {
-    fetchProfileData();
-
-    // Favori durumu değişikliklerini dinle
+    if (!params?.id || Array.isArray(params.id)) {
+      router.push('/');
+      return;
+    }
+    
+    // Kullanıcı bilgilerini önce çekelim
+    const loadUserInfo = async () => {
+      try {
+        const response = await UserService.getCurrentUser();
+        setCurrentUser(response.data);
+        
+        // Kullanıcı bilgileri çekildikten sonra profil verilerini çekelim
+        fetchProfileData();
+        
+        // Takip durumunu kontrol edelim (kendi profili değilse)
+        if (response.data && id && id !== response.data.id.toString()) {
+          const isFollowingStatus = await followService.isFollowing(id);
+          setIsFollowing(isFollowingStatus);
+        }
+      } catch (error) {
+        console.error('Error loading user info:', error);
+        setCurrentUser(null);
+        
+        // Kullanıcı bilgileri çekilemese bile profil verilerini çekelim
+        fetchProfileData();
+      }
+    };
+    
+    loadUserInfo();
+    
+    // Event listener'ları ekleyelim
     const handleFavoriteUpdate = async ({ bookId, isFavorite }: { bookId: number; isFavorite: boolean }) => {
-      // Kitap listesini güncelle
       setBooks(prevBooks =>
         prevBooks.map(book =>
           book.id === bookId
@@ -279,56 +310,19 @@ export default function ProfilePage() {
             : book
         )
       );
-
-      // Favori kitapları yeniden yükle
-      try {
-        const favoriteBooksData = await bookService.getFavoriteBooks();
-        const favoriteBookIds = new Set(favoriteBooksData.map(book => Number(book.id)));
-        
-        // Tüm kitapların favori durumunu güncelle
-        setBooks(prevBooks =>
-          prevBooks.map(book => ({
-            ...book,
-            isFavorite: favoriteBookIds.has(Number(book.id))
-          }))
-        );
-      } catch (error) {
-        console.error('Favori kitaplar yüklenirken hata:', error);
-      }
     };
     
-    // Force refresh of achievements specifically
-    const refreshAchievements = async () => {
-      try {
-        if (!id) {
-          return;
-        }
-        
-        // First force recalculation on the backend
-        await profileService.recalculateAchievements(id);
-        
-        // Then get the fresh achievements
-        const refreshedAchievements = await profileService.getUserAchievements(id);
-        setAchievements(refreshedAchievements);
-      } catch (error) {
-        console.error('Error refreshing achievements:', error);
-      }
-    };
-    
-    refreshAchievements();
-
-    // Event listener'ları ekle
     on('favoriteUpdated', handleFavoriteUpdate);
     on('profileNeedsUpdate', fetchProfileData);
     on('bookStatusUpdated', fetchProfileData);
-
+    
     return () => {
-      // Event listener'ları temizle
+      // Temizleme işlemleri
       off('favoriteUpdated', handleFavoriteUpdate);
       off('profileNeedsUpdate', fetchProfileData);
       off('bookStatusUpdated', fetchProfileData);
     };
-  }, [id, currentUser?.id, fetchProfileData]);
+  }, [id, router]); // Sadece id ve router değişince tetiklensin
 
   // Load user profile posts
   useEffect(() => {

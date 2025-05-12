@@ -1,111 +1,25 @@
 "use client"
 
-import type React from "react"
-
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { ChevronLeft, ChevronRight, Clock, MapPin, Calendar } from "lucide-react"
 import { cn } from "@/lib/utils"
-
-// Expanded event data structure with more details
-interface EventDetails {
-  name: string
-  location: string
-  isOnline: boolean
-  time: string
-  description: string
-}
-
-// Sample events data with expanded details
-const SAMPLE_EVENTS: Record<string, EventDetails> = {
-  "2025-04-22": {
-    name: "Yüzyıllık Yalnızlık üzerine düşünceler",
-    location: "Kadıköy Kıraathanesi",
-    isOnline: false,
-    time: "18:00 - 20:00",
-    description: "Gabriel García Márquez'in başyapıtı üzerine edebi sohbet",
-  },
-  "2025-04-23": {
-    name: "Dünya Kitap Günü",
-    location: "Beşiktaş Kültür Merkezi",
-    isOnline: false,
-    time: "14:00 - 18:00",
-    description: "Kitap değişim etkinliği ve yazar söyleşileri",
-  },
-  "2025-04-25": {
-    name: "Yeni Nesil Yazarlarla Söyleşi",
-    location: "Online Etkinlik",
-    isOnline: true,
-    time: "19:30 - 21:00",
-    description: "Genç yazarların edebi yolculukları ve deneyimleri",
-  },
-  "2025-04-27": {
-    name: "Felsefi Romanların İzinde",
-    location: "Beyoğlu Sahaf Kıraathanesi",
-    isOnline: false,
-    time: "16:00 - 18:30",
-    description: "Felsefi romanların toplum üzerindeki etkileri",
-  },
-  "2025-04-28": {
-    name: "Distopik Romanlarda Toplumsal Eleştiri",
-    location: "Online Etkinlik",
-    isOnline: true,
-    time: "20:00 - 21:30",
-    description: "Distopik edebiyatın günümüz toplumuna yansımaları",
-  },
-  "2025-05-12": {
-    name: "Türk Edebiyatında modernizm",
-    location: "Üsküdar Kitap Kahve",
-    isOnline: false,
-    time: "17:00 - 19:00",
-    description: "Türk edebiyatında modernist akımın gelişimi",
-  },
-  "2025-05-15": {
-    name: "Dijital çağda okuma alışkanlıkları",
-    location: "Online Etkinlik",
-    isOnline: true,
-    time: "18:30 - 20:00",
-    description: "Teknolojinin okuma alışkanlıklarımıza etkisi",
-  },
-  "2025-05-18": {
-    name: "Yüzyıllık Yalnızlık üzerine düşünceler",
-    location: "Şişli Kültür Evi",
-    isOnline: false,
-    time: "15:00 - 17:00",
-    description: "Gabriel García Márquez'in başyapıtı üzerine edebi sohbet",
-  },
-  "2025-05-20": {
-    name: "Şiirde İmge ve Metaforların Gücü",
-    location: "Bakırköy Kıraathanesi",
-    isOnline: false,
-    time: "19:00 - 21:00",
-    description: "Modern şiirde imge ve metafor kullanımı",
-  },
-  "2025-05-25": {
-    name: "Bilim Kurgu Edebiyatında Yapay Zeka Teması",
-    location: "Online Etkinlik",
-    isOnline: true,
-    time: "20:00 - 21:30",
-    description: "Bilim kurgu eserlerinde yapay zeka temsillerinin incelenmesi",
-  },
-  "2025-05-28": {
-    name: "Edebiyat ve Sinema Uyarlamaları",
-    location: "Taksim Sanat Kıraathanesi",
-    isOnline: false,
-    time: "17:30 - 19:30",
-    description: "Edebi eserlerin sinema uyarlamalarındaki başarı kriterleri",
-  },
-}
+import kiraathaneEventService, { KiraathaneEvent } from "@/services/kiraathaneEventService"
+import { format, startOfMonth, endOfMonth, parseISO } from "date-fns"
+import EventDetailModal from "./EventDetailModal"
+import { useAuth } from "@/contexts/AuthContext" // Auth context'ten import ediyoruz
 
 interface EventsCalendarProps {
   className?: string
 }
 
 export function EventsCalendar({ className }: EventsCalendarProps) {
-  const [currentDate, setCurrentDate] = useState(new Date())
-  const [selectedEvent, setSelectedEvent] = useState<{
-    event: EventDetails
-    position: { x: number; y: number }
-  } | null>(null)
+  const { user, token, getAuthHeader } = useAuth()
+  const [events, setEvents] = useState<KiraathaneEvent[]>([])
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date())
+  const [selectedEvent, setSelectedEvent] = useState<KiraathaneEvent | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [tooltip, setTooltip] = useState<{ event: KiraathaneEvent, x: number, y: number } | null>(null)
 
   const monthNames = [
     "Ocak",
@@ -123,18 +37,18 @@ export function EventsCalendar({ className }: EventsCalendarProps) {
   ]
 
   // Get current month and year
-  const currentMonth = currentDate.getMonth()
-  const currentYear = currentDate.getFullYear()
+  const currentMonth = selectedDate.getMonth()
+  const currentYear = selectedDate.getFullYear()
 
   // Navigate to previous month
   const prevMonth = () => {
-    setCurrentDate(new Date(currentYear, currentMonth - 1, 1))
+    setSelectedDate(new Date(currentYear, currentMonth - 1, 1))
     setSelectedEvent(null)
   }
 
   // Navigate to next month
   const nextMonth = () => {
-    setCurrentDate(new Date(currentYear, currentMonth + 1, 1))
+    setSelectedDate(new Date(currentYear, currentMonth + 1, 1))
     setSelectedEvent(null)
   }
 
@@ -148,11 +62,51 @@ export function EventsCalendar({ className }: EventsCalendarProps) {
     return new Date(year, month, 1).getDay()
   }
 
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        setIsLoading(true)
+        console.log('Fetching events with auth header:', getAuthHeader())
+        
+        const start = format(startOfMonth(selectedDate), "yyyy-MM-dd'T'00:00:00")
+        const end = format(endOfMonth(selectedDate), "yyyy-MM-dd'T'23:59:59")
+        
+        const response = await kiraathaneEventService.getEventsBetweenDates(start, end)
+        console.log('Events response:', response)
+        
+        setEvents(response)
+        setError(null)
+      } catch (error) {
+        console.error('Error fetching events:', error)
+        setError('Etkinlikler yüklenirken bir hata oluştu')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchEvents()
+  }, [selectedDate, token])
+
+  // Group events by date
+  const getEventsByDate = () => {
+    const eventsByDate: Record<string, KiraathaneEvent[]> = {}
+    
+    events.forEach(event => {
+      const dateStr = format(parseISO(event.eventDate), 'yyyy-MM-dd')
+      if (!eventsByDate[dateStr]) {
+        eventsByDate[dateStr] = []
+      }
+      eventsByDate[dateStr].push(event)
+    })
+    
+    return eventsByDate
+  }
+
   // Generate calendar days
   const generateCalendarDays = () => {
     const daysInMonth = getDaysInMonth(currentYear, currentMonth)
     const firstDay = getFirstDayOfMonth(currentYear, currentMonth)
     const days = []
+    const eventsByDate = getEventsByDate()
 
     // Add empty cells for days before the first day of the month
     for (let i = 0; i < firstDay; i++) {
@@ -162,29 +116,48 @@ export function EventsCalendar({ className }: EventsCalendarProps) {
     // Add days of the month
     for (let day = 1; day <= daysInMonth; day++) {
       const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`
-      const event = SAMPLE_EVENTS[dateStr]
-      days.push({ day, event, dateStr })
+      const dayEvents = eventsByDate[dateStr] || []
+      days.push({ day, events: dayEvents, dateStr })
     }
 
     return days
   }
 
-  // Handle showing event details
-  const handleShowEventDetails = (event: EventDetails, e: React.MouseEvent) => {
-    // Get position for the popup
+  // Tooltip gösterme
+  const handleShowEventTooltip = (event: KiraathaneEvent, e: React.MouseEvent) => {
     const rect = e.currentTarget.getBoundingClientRect()
     const x = rect.left + window.scrollX
     const y = rect.top + window.scrollY
+    setTooltip({ event, x, y })
+  }
+  const handleHideEventTooltip = () => setTooltip(null)
 
-    setSelectedEvent({
-      event,
-      position: { x, y },
-    })
+  // Handle clicking on an event to show full details modal
+  const handleEventClick = (event: KiraathaneEvent, e: React.MouseEvent) => {
+    e.stopPropagation()
+    setSelectedEvent(event)
   }
 
-  // Handle hiding event details
-  const handleHideEventDetails = () => {
-    setSelectedEvent(null)
+  // Handle successful registration/cancellation
+  const handleRegistrationUpdate = () => {
+    const fetchEvents = async () => {
+      try {
+        setIsLoading(true)
+        const start = format(startOfMonth(selectedDate), "yyyy-MM-dd'T'00:00:00")
+        const end = format(endOfMonth(selectedDate), "yyyy-MM-dd'T'23:59:59")
+        
+        const response = await kiraathaneEventService.getEventsBetweenDates(start, end)
+        setEvents(response)
+        setError(null)
+      } catch (err) {
+        console.error("Error refreshing events:", err)
+        setError('Etkinlikler güncellenirken bir hata oluştu')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    
+    fetchEvents()
   }
 
   const calendarDays = generateCalendarDays()
@@ -216,6 +189,26 @@ export function EventsCalendar({ className }: EventsCalendarProps) {
           </button>
         </div>
 
+        {isLoading && (
+          <div className="p-8 text-center">
+            <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin mx-auto mb-2"></div>
+            <p className="text-sm text-gray-600">Etkinlikler yükleniyor...</p>
+          </div>
+        )}
+        {error && (
+          <div className="p-4 mb-4 text-center bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-red-700">{error}</p>
+            {error.includes('giriş yapmanız gerekiyor') && (
+              <button
+                onClick={() => window.location.href = '/auth/login'}
+                className="mt-2 px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+              >
+                Giriş Yap
+              </button>
+            )}
+          </div>
+        )}
+
         <div className="grid grid-cols-7 gap-2 text-center font-medium mb-2">
           {["Pzr", "Pzt", "Sal", "Çar", "Per", "Cum", "Cmt"].map((day) => (
             <div key={day} className="p-2">
@@ -231,18 +224,35 @@ export function EventsCalendar({ className }: EventsCalendarProps) {
               className={cn(
                 "aspect-square p-2 rounded-lg transition-all",
                 dayData ? "bg-white/80 shadow-sm" : "",
-                dayData?.event ? "hover:shadow-md cursor-pointer" : "",
+                dayData?.events?.length ? "hover:shadow-md" : "",
               )}
-              onClick={dayData?.event ? (e) => handleShowEventDetails(dayData.event, e) : undefined}
-              onMouseEnter={dayData?.event ? (e) => handleShowEventDetails(dayData.event, e) : undefined}
-              onMouseLeave={handleHideEventDetails}
             >
               {dayData && (
                 <div className="h-full flex flex-col">
-                  {dayData.event && (
-                    <span className="text-xs mb-1 text-gray-600 line-clamp-2 font-medium">{dayData.event.name}</span>
-                  )}
                   <span className="text-lg font-semibold">{dayData.day}</span>
+                  <div className="mt-1 flex-1 overflow-hidden">
+                    {dayData.events.map((event, eventIndex) => (
+                      <div
+                        key={event.id}
+                        className={cn(
+                          "text-xs truncate py-1 px-1.5 rounded-md cursor-pointer mb-1",
+                          eventIndex % 3 === 0 && "bg-blue-100 text-blue-800",
+                          eventIndex % 3 === 1 && "bg-purple-100 text-purple-800",
+                          eventIndex % 3 === 2 && "bg-amber-100 text-amber-800",
+                        )}
+                        onMouseEnter={(e) => handleShowEventTooltip(event, e)}
+                        onMouseLeave={handleHideEventTooltip}
+                        onClick={(e) => handleEventClick(event, e)}
+                      >
+                        {format(new Date(event.eventDate), 'HH:mm')} {event.title}
+                      </div>
+                    ))}
+                    {dayData.events.length > 3 && (
+                      <div className="text-xs text-gray-500 font-medium mt-1">
+                        +{dayData.events.length - 3} daha fazla
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
@@ -250,35 +260,55 @@ export function EventsCalendar({ className }: EventsCalendarProps) {
         </div>
       </div>
 
-      {/* Event Details Popup */}
-      {selectedEvent && (
+      {/* Tooltip */}
+      {tooltip && (
         <div
           className="absolute z-10 bg-white rounded-lg shadow-lg p-3 w-52 border border-gray-200 text-xs"
           style={{
-            top: `${selectedEvent.position.y + 40}px`,
-            left: `${selectedEvent.position.x}px`,
+            top: `${tooltip.y + 40}px`,
+            left: `${tooltip.x}px`,
           }}
         >
-          <div className="font-bold text-sm mb-1">{selectedEvent.event.name}</div>
+          <div className="font-bold text-sm mb-1">{tooltip.event.title}</div>
 
           <div className="flex items-start gap-1.5 mb-1">
             <MapPin className="h-3 w-3 text-gray-500 mt-0.5 shrink-0" />
             <span className="text-xs text-gray-700">
-              {selectedEvent.event.location}
-              {selectedEvent.event.isOnline && " (Online)"}
+              {tooltip.event.kiraathaneName}
             </span>
           </div>
 
           <div className="flex items-start gap-1.5 mb-1">
             <Clock className="h-3 w-3 text-gray-500 mt-0.5 shrink-0" />
-            <span className="text-xs text-gray-700">{selectedEvent.event.time}</span>
+            <span className="text-xs text-gray-700">
+              {format(new Date(tooltip.event.eventDate), 'HH:mm')}
+              {tooltip.event.endDate && 
+                ` - ${format(new Date(tooltip.event.endDate), 'HH:mm')}`}
+            </span>
           </div>
 
           <div className="flex items-start gap-1.5">
             <Calendar className="h-3 w-3 text-gray-500 mt-0.5 shrink-0" />
-            <span className="text-xs text-gray-700 line-clamp-2">{selectedEvent.event.description}</span>
+            <span className="text-xs text-gray-700 line-clamp-2">{tooltip.event.description}</span>
+          </div>
+          
+          <div className="mt-2 text-center">
+            <span className="text-xs text-purple-700 font-medium cursor-pointer hover:underline">
+              Detayları Görüntüle
+            </span>
           </div>
         </div>
+      )}
+      
+      {/* Event Detail Modal */}
+      {selectedEvent && (
+        <EventDetailModal
+          eventId={selectedEvent.id}
+          isOpen={!!selectedEvent}
+          onClose={() => setSelectedEvent(null)}
+          userId={user?.id}
+          onRegister={handleRegistrationUpdate}
+        />
       )}
     </div>
   )

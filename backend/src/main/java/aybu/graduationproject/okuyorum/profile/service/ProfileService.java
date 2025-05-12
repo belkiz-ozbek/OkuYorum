@@ -139,9 +139,13 @@ public class ProfileService {
     @Transactional
     public Achievement updateAchievementProgress(Long userId, Long achievementId, Integer progress) {
         User user = getUserProfile(userId);
-        Achievement achievement = achievementRepository.findByIdAndUserId(achievementId, userId)
-                .orElseThrow(() -> new RuntimeException("Başarı bulunamadı"));
-
+        List<Achievement> achievements = achievementRepository.findByIdAndUserId(achievementId, userId);
+        
+        if (achievements.isEmpty()) {
+            throw new RuntimeException("Başarı bulunamadı");
+        }
+        
+        Achievement achievement = achievements.get(0);
         achievement.setProgress(progress);
         return achievementRepository.save(achievement);
     }

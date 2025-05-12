@@ -482,8 +482,17 @@ export default function BookPage({ params }: PageProps) {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-rose-50 via-slate-50 to-purple-50">
-            <main className="max-w-6xl mx-auto px-8 py-16">
+        <div className="min-h-screen bg-background relative overflow-hidden">
+            {/* Arka plan degrade ve doku efekti */}
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-50/80 via-white to-purple-50/50 dark:from-purple-950/20 dark:via-background dark:to-purple-950/10">
+                <div className="absolute inset-0 opacity-[0.03] bg-[url('/noise.png')] mix-blend-overlay"></div>
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-200/20 via-transparent to-purple-300/20 dark:from-purple-900/20 dark:via-transparent dark:to-purple-800/20"></div>
+                
+                {/* Dekoratif elementler */}
+                <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-purple-200/20 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2"></div>
+                <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-purple-300/20 rounded-full blur-3xl translate-x-1/2 translate-y-1/2"></div>
+            </div>
+            <main className="max-w-6xl mx-auto px-8 py-16 relative">
                 <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-sm overflow-hidden border border-gray-100/50">
                     <div className="md:flex">
                         {/* Sol Taraf - Daha zarif */}

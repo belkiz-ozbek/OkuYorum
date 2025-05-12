@@ -133,6 +133,8 @@ export default function DiscoverPage() {
           data={displayData}
           status={status as "error" | "success" | "loading"}
           lastRef={ref}
+          filters={filters}
+          searchQuery={searchQuery}
         />
       </div>
       <DialogsWrapper

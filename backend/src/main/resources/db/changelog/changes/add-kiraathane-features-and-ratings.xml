@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
+
+    <changeSet id="20250512 01:22" author="belkiz.ozbek">
+        <!-- Kiraathane tablosuna yeni alanlar ekleme -->
+        <addColumn tableName="kiraathanes">
+            <column name="opening_time" type="time"/>
+            <column name="closing_time" type="time"/>
+            <column name="featured_photo_url" type="varchar(255)"/>
+            <column name="book_count" type="int"/>
+            <column name="average_rating" type="double" defaultValue="0.0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="total_ratings" type="int" defaultValue="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="total_rating_sum" type="double" defaultValue="0.0">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+
+        <!-- workingHours ve imageUrl alanlarını silme -->
+        <dropColumn tableName="kiraathanes" columnName="working_hours"/>
+        <dropColumn tableName="kiraathanes" columnName="image_url"/>
+
+        <!-- Kiraathane özellikleri için yeni tablo -->
+        <createTable tableName="kiraathane_features">
+            <column name="kiraathane_id" type="bigint">
+                <constraints nullable="false"
+                           foreignKeyName="fk_kiraathane_features_kiraathane"
+                           references="kiraathanes(id)"
+                           deleteCascade="true"/>
+            </column>
+            <column name="features" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <!-- Kiraathane puanlamaları için yeni tablo -->
+        <createTable tableName="kiraathane_ratings">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="kiraathane_id" type="bigint">
+                <constraints nullable="false"
+                           foreignKeyName="fk_kiraathane_ratings_kiraathane"
+                           references="kiraathanes(id)"
+                           deleteCascade="true"/>
+            </column>
+            <column name="user_id" type="bigint">
+                <constraints nullable="false"
+                           foreignKeyName="fk_kiraathane_ratings_user"
+                           references="users(id)"
+                           deleteCascade="true"/>
+            </column>
+            <column name="rating" type="double">
+                <constraints nullable="false"/>
+            </column>
+            <column name="comment" type="varchar(1000)"/>
+            <column name="created_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <!-- Tekil puanlama kontrolü için unique index -->
+        <createIndex tableName="kiraathane_ratings" indexName="idx_unique_user_kiraathane_rating" unique="true">
+            <column name="kiraathane_id"/>
+            <column name="user_id"/>
+        </createIndex>
+
+        <!-- Performans için indeksler -->
+        <createIndex tableName="kiraathane_ratings" indexName="idx_kiraathane_ratings_kiraathane_id">
+            <column name="kiraathane_id"/>
+        </createIndex>
+
+        <createIndex tableName="kiraathane_ratings" indexName="idx_kiraathane_ratings_user_id">
+            <column name="user_id"/>
+        </createIndex>
+
+        <createIndex tableName="kiraathane_features" indexName="idx_kiraathane_features_kiraathane_id">
+            <column name="kiraathane_id"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- Örnek veri ekleme -->
+    <changeSet id="20240320-2" author="belkizozbek" context="dev">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM kiraathanes WHERE name = 'Saimekadın Millet Kıraathanesi'
+            </sqlCheck>
+        </preConditions>
+        
+        <insert tableName="kiraathanes">
+            <column name="id" valueComputed="(SELECT COALESCE(MAX(id), 0) + 1 FROM kiraathanes)"/>
+            <column name="name" value="Saimekadın Millet Kıraathanesi"/>
+            <column name="address" value="Mamak, Ankara"/>
+            <column name="description" value="Geniş kitap koleksiyonu ve ferah çalışma alanlarıyla hizmet veren modern bir kıraathane."/>
+            <column name="city" value="Ankara"/>
+            <column name="district" value="Mamak"/>
+            <column name="opening_time" value="09:00:00"/>
+            <column name="closing_time" value="22:00:00"/>
+            <column name="book_count" value="15000"/>
+            <column name="average_rating" value="4.7"/>
+            <column name="total_ratings" value="100"/>
+            <column name="total_rating_sum" value="470"/>
+        </insert>
+
+        <!-- Örnek özellikler ekleme -->
+        <insert tableName="kiraathane_features">
+            <column name="kiraathane_id" valueComputed="(SELECT id FROM kiraathanes WHERE name = 'Saimekadın Millet Kıraathanesi')"/>
+            <column name="features" value="UCRETSIZ_WIFI"/>
+        </insert>
+        <insert tableName="kiraathane_features">
+            <column name="kiraathane_id" valueComputed="(SELECT id FROM kiraathanes WHERE name = 'Saimekadın Millet Kıraathanesi')"/>
+            <column name="features" value="CAY_KAHVE"/>
+        </insert>
+        <insert tableName="kiraathane_features">
+            <column name="kiraathane_id" valueComputed="(SELECT id FROM kiraathanes WHERE name = 'Saimekadın Millet Kıraathanesi')"/>
+            <column name="features" value="CALISMA_ALANLARI"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog> 

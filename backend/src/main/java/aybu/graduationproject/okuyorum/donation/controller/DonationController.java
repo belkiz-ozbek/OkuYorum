@@ -14,7 +14,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/donations")
 @CrossOrigin(origins = "http://localhost:3000")
-@PreAuthorize("hasRole('USER')")
+@PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN')")
 public class DonationController {
     private final DonationService donationService;
 
@@ -40,6 +40,7 @@ public class DonationController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<?> getAllDonations() {
         try {
             List<DonationDto> donations = donationService.getAllDonations();
@@ -112,7 +113,7 @@ public class DonationController {
      * Bağış durumunu günceller
      */
     @PutMapping("/{id}/status")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<?> updateDonationStatus(
             @PathVariable Long id,
             @RequestBody Map<String, Object> statusUpdate) {
@@ -151,7 +152,7 @@ public class DonationController {
      * Bağış takip bilgilerini günceller
      */
     @PutMapping("/{id}/tracking")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<?> updateDonationTracking(
             @PathVariable Long id,
             @RequestBody DonationDto trackingInfo) {

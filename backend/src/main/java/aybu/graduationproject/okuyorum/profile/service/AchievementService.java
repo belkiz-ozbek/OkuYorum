@@ -32,8 +32,8 @@ public class AchievementService {
     }
 
     public Achievement getAchievement(Long userId, AchievementType type) {
-        return achievementRepository.findByUserIdAndType(userId, type)
-                .orElse(null);
+        List<Achievement> achievements = achievementRepository.findByUserIdAndType(userId, type);
+        return achievements.isEmpty() ? null : achievements.get(0);
     }
 
     @Transactional
@@ -95,15 +95,17 @@ public class AchievementService {
     }
 
     private Achievement getOrCreateAchievement(Long userId, AchievementType type) {
-        return achievementRepository.findByUserIdAndType(userId, type)
-                .orElseGet(() -> {
-                    Achievement newAchievement = new Achievement();
-                    newAchievement.setUserId(userId);
-                    newAchievement.setType(type);
-                    newAchievement.setEarned(false);
-                    newAchievement.setProgress(0);
-                    return achievementRepository.save(newAchievement);
-                });
+        List<Achievement> achievements = achievementRepository.findByUserIdAndType(userId, type);
+        if (!achievements.isEmpty()) {
+            return achievements.get(0);
+        } else {
+            Achievement newAchievement = new Achievement();
+            newAchievement.setUserId(userId);
+            newAchievement.setType(type);
+            newAchievement.setEarned(false);
+            newAchievement.setProgress(0);
+            return achievementRepository.save(newAchievement);
+        }
     }
 
     private void updateAchievementProgress(Achievement achievement, int progress) {
