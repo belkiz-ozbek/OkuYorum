@@ -122,6 +122,24 @@ public class BookController {
         return ResponseEntity.ok(bookService.getFavoriteBooks(userId));
     }
 
+    @PostMapping("/{id}/library")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    public ResponseEntity<?> addBookToLibrary(@PathVariable Long id, @AuthenticationPrincipal UserDetails userDetails) {
+        String username = userDetails.getUsername();
+        Long userId = userService.getUserIdByUsername(username);
+        bookService.addBookToUserLibrary(id, userId);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/{id}/library")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    public ResponseEntity<?> removeBookFromLibrary(@PathVariable Long id, @AuthenticationPrincipal UserDetails userDetails) {
+        String username = userDetails.getUsername();
+        Long userId = userService.getUserIdByUsername(username);
+        bookService.removeBookFromUserLibrary(id, userId);
+        return ResponseEntity.ok().build();
+    }
+
     static class StatusUpdateRequest {
         private String status;
 

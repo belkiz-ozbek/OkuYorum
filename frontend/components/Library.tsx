@@ -124,7 +124,7 @@ const Library = ({ activeTab = 'all' }: LibraryProps): JSX.Element => {
   }, [borrowedBooks, isClient]);
 
   const filteredBooks = useMemo(() => books.filter(book => {
-    if (activeTab === 'all') return true;
+    if (activeTab === 'all') return book.status !== undefined && book.status !== null;
     return book.status === activeTab;
   }), [books, activeTab, favoriteBooks, readBooks, toReadBooks, borrowedBooks]);
 

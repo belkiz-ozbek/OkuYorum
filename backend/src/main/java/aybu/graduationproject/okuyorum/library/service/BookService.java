@@ -255,6 +255,23 @@ public class BookService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
+    public void addBookToUserLibrary(Long bookId, Long userId) {
+        if (userBookRepository.findByUserIdAndBookId(userId, bookId).isEmpty()) {
+            UserBook userBook = new UserBook();
+            userBook.setUser(userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found")));
+            userBook.setBook(bookRepository.findById(bookId).orElseThrow(() -> new EntityNotFoundException("Book not found")));
+            userBook.setStatus(UserBook.ReadingStatus.WILL_READ); // veya default bir status
+            userBookRepository.save(userBook);
+        }
+    }
+
+    @Transactional
+    public void removeBookFromUserLibrary(Long bookId, Long userId) {
+        userBookRepository.findByUserIdAndBookId(userId, bookId)
+            .ifPresent(userBookRepository::delete);
+    }
+
     private BookDto convertToDto(Book book) {
         return convertToDto(book, null);
     }
