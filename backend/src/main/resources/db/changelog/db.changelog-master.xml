@@ -20,6 +20,5 @@
 
     <!-- Veri değişikliklerini buraya include edeceğiz -->
     <include file="db/changelog/data/data-master.xml"/>
-    <include file="db/changelog/data/update-kiraathane-features.xml"/>
 
 </databaseChangeLog>

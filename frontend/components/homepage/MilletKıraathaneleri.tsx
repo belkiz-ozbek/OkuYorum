@@ -17,10 +17,10 @@ const getFeatureIcon = (feature: KiraathaneFeature) => {
     CALISMA_ALANLARI: <BookOpen className="w-3 h-3" />,
     SEMINER_SALONU: <Users className="w-3 h-3" />,
     COCUK_BOLUMU: <BookMarked className="w-3 h-3" />,
-    ENGELLI_ERISIMI: <Users className="w-3 h-3" />,
-    OTOPARK: <MapPin className="w-3 h-3" />,
-    GRUP_CALISMA: <Users className="w-3 h-3" />,
-    SESSIZ_CALISMA: <BookOpen className="w-3 h-3" />
+    BAHCE_ALANI: <MapPin className="w-3 h-3" />,
+    SESSIZ_OKUMA_BOLUMU: <BookOpen className="w-3 h-3" />,
+    GRUP_CALISMA_ALANLARI: <Users className="w-3 h-3" />,
+    ETKINLIK_ALANI: <Users className="w-3 h-3" />
   }
   return icons[feature] || <BookOpen className="w-3 h-3" />
 }
@@ -32,10 +32,10 @@ const getFeatureLabel = (feature: KiraathaneFeature): string => {
     CALISMA_ALANLARI: "Çalışma Alanları",
     SEMINER_SALONU: "Seminer Salonu",
     COCUK_BOLUMU: "Çocuk Bölümü",
-    ENGELLI_ERISIMI: "Engelli Erişimi",
-    OTOPARK: "Otopark",
-    GRUP_CALISMA: "Grup Çalışma",
-    SESSIZ_CALISMA: "Sessiz Çalışma"
+    BAHCE_ALANI: "Bahçe Alanı",
+    SESSIZ_OKUMA_BOLUMU: "Sessiz Okuma Bölümü",
+    GRUP_CALISMA_ALANLARI: "Grup Çalışma Alanları",
+    ETKINLIK_ALANI: "Etkinlik Alanı"
   }
   return labels[feature] || feature
 }
@@ -91,8 +91,10 @@ export function MilletKiraathaneleri() {
     )
   }
 
-  // Featured kiraathanes are those with high ratings (4.5 or above)
-  const featuredKiraathanes = kiraathanes.filter(k => k.averageRating >= 4.5)
+  // Saimekadın Millet Kıraathanesi should always be featured
+  const featuredKiraathane = kiraathanes.find(k => k.name === 'Saimekadın Millet Kıraathanesi')
+  // Other kiraathanes
+  const otherKiraathanes = kiraathanes.filter(k => k.name !== 'Saimekadın Millet Kıraathanesi')
 
   return (
     <section className="py-12">
@@ -120,8 +122,8 @@ export function MilletKiraathaneleri() {
           </motion.p>
         </div>
 
-        {/* Öne Çıkan Kıraathane */}
-        {featuredKiraathanes.length > 0 && (
+        {/* Öne Çıkan Kıraathane - Saimekadın */}
+        {featuredKiraathane && (
           <motion.div
             className="relative rounded-xl overflow-hidden shadow-lg mb-8"
             initial={{ scale: 0.98, opacity: 0 }}
@@ -129,28 +131,28 @@ export function MilletKiraathaneleri() {
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.3 }}
           >
-            <div className="relative h-[300px]">
+            <div className="relative h-[400px]"> {/* Increased height */}
               <img
-                src={featuredKiraathanes[0].photoUrls[0] || "/placeholder.svg"}
-                alt={featuredKiraathanes[0].name}
+                src={featuredKiraathane.featuredPhotoUrl || featuredKiraathane.photoUrls[0] || "/placeholder.svg"}
+                alt={featuredKiraathane.name}
                 className="w-full h-full object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-end p-6">
                 <Badge className="mb-2 bg-purple-600 hover:bg-purple-700 w-fit">Öne Çıkan</Badge>
-                <h3 className="text-xl md:text-2xl font-bold text-white mb-2">{featuredKiraathanes[0].name}</h3>
+                <h3 className="text-xl md:text-2xl font-bold text-white mb-2">{featuredKiraathane.name}</h3>
                 <div className="flex items-center text-white/90 mb-2">
                   <MapPin className="w-4 h-4 mr-1" />
                   <span className="text-sm">
-                    {featuredKiraathanes[0].district}, {featuredKiraathanes[0].city}
+                    {featuredKiraathane.district}, {featuredKiraathane.city}
                   </span>
                   <span className="mx-2">•</span>
                   <div className="flex items-center">
                     <Star className="w-4 h-4 text-yellow-400 mr-1" />
-                    <span>{featuredKiraathanes[0].averageRating.toFixed(1)}</span>
+                    <span>{featuredKiraathane.averageRating.toFixed(1)}</span>
                   </div>
                 </div>
-                <p className="text-white/80 mb-3 max-w-2xl line-clamp-2">{featuredKiraathanes[0].description}</p>
-                <Link href={`/features/millet-kiraathanesi/${featuredKiraathanes[0].id}`}>
+                <p className="text-white/80 mb-3 max-w-2xl line-clamp-2">{featuredKiraathane.description}</p>
+                <Link href={`/features/millet-kiraathanesi/${featuredKiraathane.id}`}>
                   <Button size="sm" className="w-fit bg-purple-600 hover:bg-purple-700">
                     Detayları Görüntüle
                     <ExternalLink className="ml-2 h-4 w-4" />
@@ -161,11 +163,11 @@ export function MilletKiraathaneleri() {
           </motion.div>
         )}
 
-        {/* Kıraathaneler Yatay Kaydırmalı Liste */}
+        {/* Diğer Kıraathaneler Yatay Kaydırmalı Liste */}
         <div className="relative">
           <div className="overflow-x-auto pb-4 hide-scrollbar">
             <div className="flex gap-4 min-w-full">
-              {kiraathanes.map((kiraathane, index) => (
+              {otherKiraathanes.map((kiraathane, index) => (
                 <motion.div
                   key={kiraathane.id}
                   initial={{ opacity: 0, y: 20 }}
@@ -250,50 +252,41 @@ export function MilletKiraathaneleri() {
                           </span>
                         </div>
 
-                        <p className="text-gray-600 dark:text-gray-400 text-sm mb-3 line-clamp-2">
-                          {kiraathane.description}
-                        </p>
-
-                        <div className="grid grid-cols-2 gap-2 mb-3">
-                          <div className="flex items-center text-gray-600 dark:text-gray-400 text-sm">
-                            <Clock className="w-4 h-4 mr-1 text-purple-600 dark:text-purple-400" />
-                            <span>
-                              {kiraathane.openingTime && kiraathane.closingTime
-                                ? `${kiraathane.openingTime.substring(0, 5)} - ${kiraathane.closingTime.substring(0, 5)}`
-                                : "Çalışma saatleri belirtilmemiş"}
-                            </span>
-                          </div>
-                          <div className="flex items-center text-gray-600 dark:text-gray-400 text-sm">
-                            <BookOpen className="w-4 h-4 mr-1 text-purple-600 dark:text-purple-400" />
-                            <span>{kiraathane.bookCount?.toLocaleString() || 0}+ Kitap</span>
-                          </div>
+                        <div className="flex items-center text-gray-600 dark:text-gray-400 mb-4">
+                          <Clock className="w-4 h-4 mr-1 text-purple-600 dark:text-purple-400" />
+                          <span className="text-sm">
+                            {kiraathane.openingTime} - {kiraathane.closingTime}
+                          </span>
+                          <span className="mx-2">•</span>
+                          <BookOpen className="w-4 h-4 mr-1 text-purple-600 dark:text-purple-400" />
+                          <span className="text-sm">{kiraathane.bookCount ? kiraathane.bookCount.toLocaleString() : '0'}+ Kitap</span>
                         </div>
 
-                        <div className="flex flex-wrap gap-1">
-                          {kiraathane.features.slice(0, 3).map((feature) => (
-                            <Badge key={feature} variant="outline" className="flex items-center gap-1">
-                              {getFeatureIcon(feature as KiraathaneFeature)}
-                              <span className="text-xs">{getFeatureLabel(feature as KiraathaneFeature)}</span>
+                        <div className="flex flex-wrap gap-2">
+                          {kiraathane.features?.map((feature, featureIndex) => (
+                            <Badge
+                              key={featureIndex}
+                              variant="outline"
+                              className="flex items-center gap-1 text-xs bg-purple-50 dark:bg-purple-900/20"
+                            >
+                              {getFeatureIcon(feature)}
+                              {getFeatureLabel(feature)}
                             </Badge>
                           ))}
-                          {kiraathane.features.length > 3 && (
-                            <Badge variant="outline" className="text-xs">
-                              +{kiraathane.features.length - 3}
-                            </Badge>
-                          )}
                         </div>
                       </CardContent>
-                    </Link>
 
-                    <CardFooter className="p-4 pt-0">
-                      <Link
-                        href={`/features/millet-kiraathanesi/${kiraathane.id}`}
-                        className="inline-flex items-center text-sm text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300"
-                      >
-                        Detayları Gör
-                        <ExternalLink className="w-4 h-4 ml-1" />
-                      </Link>
-                    </CardFooter>
+                      <CardFooter className="p-4 pt-0">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-full hover:bg-purple-50 dark:hover:bg-purple-900/20"
+                        >
+                          Detayları Görüntüle
+                          <ExternalLink className="ml-2 h-4 w-4" />
+                        </Button>
+                      </CardFooter>
+                    </Link>
                   </Card>
                 </motion.div>
               ))}

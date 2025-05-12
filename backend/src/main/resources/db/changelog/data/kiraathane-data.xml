@@ -8,7 +8,7 @@
     <!-- Millet Kiraathaneleri örnek verileri -->
     <changeSet id="20250511 00:36" author="belkiz.ozbek" context="dev">
         <insert tableName="kiraathanes">
-            <column name="id">1</column>
+            <column name="id">11</column>
             <column name="name">Mamak Millet Kıraathanesi</column>
             <column name="address">Mamak Kültür Merkezi, Abidinpaşa Cad. No:15, Mamak</column>
             <column name="description">Mamak ilçesinde bulunan Millet Kıraathanesi, kitap okuma ve kültür etkinlikleri için uygun bir ortam sunar.</column>
@@ -16,11 +16,12 @@
             <column name="district">Mamak</column>
             <column name="phone_number">0312 123 4567</column>
             <column name="email">mamak.kiraathane@example.com</column>
-            <column name="working_hours">Pazartesi-Cumartesi: 09:00-21:00, Pazar: 10:00-19:00</column>
+            <column name="opening_time">09:00</column>
+            <column name="closing_time">21:00</column>
         </insert>
         
         <insert tableName="kiraathanes">
-            <column name="id">2</column>
+            <column name="id">12</column>
             <column name="name">Sincan Millet Kıraathanesi</column>
             <column name="address">Sincan Belediye Binası Yanı, Atatürk Cad. No:45, Sincan</column>
             <column name="description">Sincan'da yer alan kıraathane, kitap okuma ve kültürel etkinlikler için hizmet vermektedir.</column>
@@ -28,11 +29,12 @@
             <column name="district">Sincan</column>
             <column name="phone_number">0312 987 6543</column>
             <column name="email">sincan.kiraathane@example.com</column>
-            <column name="working_hours">Pazartesi-Cumartesi: 09:00-21:00, Pazar: 10:00-18:00</column>
+            <column name="opening_time">09:00</column>
+            <column name="closing_time">21:00</column>
         </insert>
         
         <insert tableName="kiraathanes">
-            <column name="id">3</column>
+            <column name="id">13</column>
             <column name="name">Şişli Kültür Evi</column>
             <column name="address">Şişli Merkez, Halaskargazi Cad. No:111, Şişli</column>
             <column name="description">Şişli'nin merkezi konumunda bulunan kültür evi, okuma ve çeşitli kültürel etkinlikler için hizmet veriyor.</column>
@@ -40,11 +42,12 @@
             <column name="district">Şişli</column>
             <column name="phone_number">0212 455 6677</column>
             <column name="email">sisli.kulturevi@example.com</column>
-            <column name="working_hours">Hafta içi: 09:00-22:00, Hafta sonu: 10:00-20:00</column>
+            <column name="opening_time">09:00</column>
+            <column name="closing_time">22:00</column>
         </insert>
         
         <insert tableName="kiraathanes">
-            <column name="id">4</column>
+            <column name="id">14</column>
             <column name="name">Bakırköy Kıraathanesi</column>
             <column name="address">Bakırköy Meydanı, Özgürlük Cad. No:23, Bakırköy</column>
             <column name="description">Bakırköy'ün merkezinde bulunan kıraathane, geniş kitap koleksiyonu ve etkinlik alanlarıyla hizmet vermektedir.</column>
@@ -52,7 +55,8 @@
             <column name="district">Bakırköy</column>
             <column name="phone_number">0212 345 8899</column>
             <column name="email">bakirkoy.kiraathane@example.com</column>
-            <column name="working_hours">Her gün: 09:00-22:00</column>
+            <column name="opening_time">09:00</column>
+            <column name="closing_time">22:00</column>
         </insert>
     </changeSet>
     
@@ -69,7 +73,7 @@
             <column name="capacity">30</column>
             <column name="registered_attendees">15</column>
             <column name="is_active">true</column>
-            <column name="kiraathane_id">1</column>
+            <column name="kiraathane_id">11</column>
         </insert>
         
         <!-- Etkinlik 2 -->
@@ -83,7 +87,7 @@
             <column name="capacity">25</column>
             <column name="registered_attendees">20</column>
             <column name="is_active">true</column>
-            <column name="kiraathane_id">2</column>
+            <column name="kiraathane_id">12</column>
         </insert>
         
         <!-- Etkinlik 3 -->
@@ -97,7 +101,7 @@
             <column name="capacity">20</column>
             <column name="registered_attendees">10</column>
             <column name="is_active">true</column>
-            <column name="kiraathane_id">3</column>
+            <column name="kiraathane_id">13</column>
         </insert>
         
         <!-- Etkinlik 4 -->
@@ -111,7 +115,7 @@
             <column name="capacity">40</column>
             <column name="registered_attendees">25</column>
             <column name="is_active">true</column>
-            <column name="kiraathane_id">4</column>
+            <column name="kiraathane_id">14</column>
         </insert>
     </changeSet>
 
