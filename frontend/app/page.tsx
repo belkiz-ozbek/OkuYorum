@@ -8,6 +8,7 @@ import {useRouter} from 'next/navigation'
 import {ArrowRight, Bookmark, BookMarked, BookOpen, BookOpenCheck, Lock, User, Eye, EyeOff} from 'lucide-react'
 import {AnimatePresence, motion} from 'framer-motion'
 import {useToast} from "@/components/ui/feedback/use-toast";
+import { api } from '@/services/api';
 
 export default function LoginPage() {
     const {toast} = useToast()
@@ -54,50 +55,53 @@ export default function LoginPage() {
         setIsLoading(true)
 
         try {
-            // Doğrudan API çağrısı yapalım
-            const response = await fetch('http://localhost:8080/api/auth/login', {
-                method: 'POST',
+            const response = await api.post('/api/auth/login', {
+                username: formData.identifier,
+                password: formData.password,
+            }, {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({
-                    username: formData.identifier,
-                    password: formData.password,
-                }),
+                withCredentials: true
             });
 
-            if (!response.ok) {
-                throw new Error('Kullanıcı adı veya şifre hatalı');
-            }
-
-            const data = await response.json();
-            console.log('Login response:', data);
+            const data = response.data;
 
             if (!data?.token) {
-                throw new Error('Kullanıcı adı veya şifre hatalı')
+                throw new Error('Geçersiz yanıt: Token bulunamadı');
             }
 
+            // Token ve userId'yi localStorage'a kaydet
+            localStorage.setItem('token', data.token);
+            if (data.userId) {
+                localStorage.setItem('userId', data.userId.toString());
+            }
+
+            // Başarılı giriş mesajı göster
             toast({
                 title: "Başarılı!",
                 description: "Giriş başarılı. Yönlendiriliyorsunuz...",
                 duration: 3000,
             })
             setShowSuccess(true)
-            localStorage.setItem('token', data.token)
 
+            // Kısa bir gecikme ile yönlendirme yap
             setTimeout(() => {
                 router.push('/features/homepage')
             }, 1500)
 
         } catch (error: unknown) {
             console.error('Login error:', error);
+            const errorMessage = error instanceof Error ? error.message : 'Giriş yapılırken bir hata oluştu';
+            
+            // Hata mesajını göster
             toast({
                 variant: "destructive",
                 title: "Hata!",
-                description: "Kullanıcı adı veya şifre hatalı",
-                duration: 3000,
+                description: errorMessage,
+                duration: 5000,
             })
-            setError('Kullanıcı adı veya şifre hatalı')
+            setError(errorMessage)
             setShowSuccess(false)
         } finally {
             setIsLoading(false)
