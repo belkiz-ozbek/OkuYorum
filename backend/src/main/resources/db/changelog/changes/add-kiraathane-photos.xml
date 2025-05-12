@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
+
+    <changeSet id="20250512 03:12" author="belkiz.ozbek">
+        <!-- Kiraathane fotoğrafları için yeni tablo -->
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="kiraathane_photos"/>
+            </not>
+        </preConditions>
+        
+        <createTable tableName="kiraathane_photos">
+            <column name="kiraathane_id" type="bigint">
+                <constraints nullable="false"
+                           foreignKeyName="fk_kiraathane_photos_kiraathane"
+                           references="kiraathanes(id)"
+                           deleteCascade="true"/>
+            </column>
+            <column name="photo_url" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <!-- Performans için indeks -->
+        <createIndex tableName="kiraathane_photos" indexName="idx_kiraathane_photos_kiraathane_id">
+            <column name="kiraathane_id"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog> 

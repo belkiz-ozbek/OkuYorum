@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
+
+    <changeSet id="20240512-05:02" author="belkiz.ozbek">
+        <!-- Delete the Saimekadin Kiraathanesi without photos -->
+        <delete tableName="kiraathanes">
+            <where>name = 'Saimekadın Millet Kıraathanesi' AND featured_photo_url IS NULL</where>
+        </delete>
+
+        <!-- Update Saimekadin Millet Kiraathanesi -->
+        <update tableName="kiraathanes">
+            <column name="features" value="{UCRETSIZ_WIFI,CAY_KAHVE,CALISMA_ALANLARI}"/>
+            <column name="book_count" value="15000"/>
+            <column name="opening_time" value="09:00"/>
+            <column name="closing_time" value="22:00"/>
+            <column name="is_featured" valueBoolean="true"/>
+            <column name="featured_photo_url" value="/images/kiraathanes/saimekadin-featured.jpg"/>
+            <where>name = 'Saimekadın Millet Kıraathanesi'</where>
+        </update>
+
+        <!-- Update Dede Bahçesi Millet Kiraathanesi -->
+        <update tableName="kiraathanes">
+            <column name="features" value="{BAHCE_ALANI,CAY_KAHVE,SESSIZ_OKUMA_BOLUMU}"/>
+            <column name="book_count" value="12000"/>
+            <column name="opening_time" value="08:30"/>
+            <column name="closing_time" value="21:00"/>
+            <column name="is_featured" valueBoolean="true"/>
+            <column name="featured_photo_url" value="/images/kiraathanes/dede-bahcesi-featured.jpg"/>
+            <where>name = 'Dede Bahçesi Millet Kıraathanesi'</where>
+        </update>
+
+        <!-- Update Merkezefendi Millet Kiraathanesi -->
+        <update tableName="kiraathanes">
+            <column name="features" value="{UCRETSIZ_WIFI,CAY_KAHVE,ETKINLIK_ALANI,COCUK_BOLUMU}"/>
+            <column name="book_count" value="25000"/>
+            <column name="opening_time" value="09:00"/>
+            <column name="closing_time" value="23:00"/>
+            <column name="is_featured" valueBoolean="true"/>
+            <column name="featured_photo_url" value="/images/kiraathanes/merkezefendi-featured.jpg"/>
+            <where>name = 'Merkezefendi Millet Kıraathanesi'</where>
+        </update>
+
+        <!-- Update Karesi Millet Kiraathanesi -->
+        <update tableName="kiraathanes">
+            <column name="features" value="{UCRETSIZ_WIFI,CAY_KAHVE,GRUP_CALISMA_ALANLARI}"/>
+            <column name="book_count" value="10000"/>
+            <column name="opening_time" value="09:30"/>
+            <column name="closing_time" value="21:30"/>
+            <column name="is_featured" valueBoolean="false"/>
+            <column name="featured_photo_url" value="/images/kiraathanes/karesi-featured.jpg"/>
+            <where>name = 'Karesi Millet Kıraathanesi'</where>
+        </update>
+
+        <!-- Update Beştelsiz Millet Kiraathanesi -->
+        <update tableName="kiraathanes">
+            <column name="features" value="{UCRETSIZ_WIFI,CAY_KAHVE,SESSIZ_OKUMA_BOLUMU,SEMINER_SALONU}"/>
+            <column name="book_count" value="18000"/>
+            <column name="opening_time" value="08:00"/>
+            <column name="closing_time" value="22:30"/>
+            <column name="is_featured" valueBoolean="true"/>
+            <column name="featured_photo_url" value="/images/kiraathanes/bestelsiz-featured.jpg"/>
+            <where>name = 'Beştelsiz Millet Kıraathanesi'</where>
+        </update>
+    </changeSet>
+
+</databaseChangeLog> 

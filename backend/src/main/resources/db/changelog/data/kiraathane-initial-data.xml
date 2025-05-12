@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
+
+    <!-- Örnek veri ekleme -->
+    <changeSet id="20240320-2" author="belkizozbek" context="dev">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM kiraathanes WHERE name = 'Saimekadın Millet Kıraathanesi'
+            </sqlCheck>
+        </preConditions>
+        
+        <insert tableName="kiraathanes">
+            <column name="id" valueComputed="(SELECT COALESCE(MAX(id), 0) + 1 FROM kiraathanes)"/>
+            <column name="name" value="Saimekadın Millet Kıraathanesi"/>
+            <column name="address" value="Mamak, Ankara"/>
+            <column name="description" value="Geniş kitap koleksiyonu ve ferah çalışma alanlarıyla hizmet veren modern bir kıraathane."/>
+            <column name="city" value="Ankara"/>
+            <column name="district" value="Mamak"/>
+            <column name="opening_time" value="09:00:00"/>
+            <column name="closing_time" value="22:00:00"/>
+            <column name="book_count" value="15000"/>
+            <column name="average_rating" value="4.7"/>
+            <column name="total_ratings" value="100"/>
+            <column name="total_rating_sum" value="470"/>
+        </insert>
+
+        <!-- Örnek özellikler ekleme -->
+        <insert tableName="kiraathane_features">
+            <column name="kiraathane_id" valueComputed="(SELECT id FROM kiraathanes WHERE name = 'Saimekadın Millet Kıraathanesi')"/>
+            <column name="features" value="UCRETSIZ_WIFI"/>
+        </insert>
+        <insert tableName="kiraathane_features">
+            <column name="kiraathane_id" valueComputed="(SELECT id FROM kiraathanes WHERE name = 'Saimekadın Millet Kıraathanesi')"/>
+            <column name="features" value="CAY_KAHVE"/>
+        </insert>
+        <insert tableName="kiraathane_features">
+            <column name="kiraathane_id" valueComputed="(SELECT id FROM kiraathanes WHERE name = 'Saimekadın Millet Kıraathanesi')"/>
+            <column name="features" value="CALISMA_ALANLARI"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog> 

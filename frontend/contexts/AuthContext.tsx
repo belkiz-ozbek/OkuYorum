@@ -14,26 +14,31 @@ interface User {
     profileImage?: string;
     createdAt: string;
     updatedAt: string;
+    role?: string;
 }
 
 interface AuthContextType {
     user: User | null;
+    token: string | null;
     loading: boolean;
     error: string | null;
     isAuthenticated: boolean;
     login: (token: string) => void;
     logout: () => void;
     setUser: (user: User | null) => void;
+    getAuthHeader: () => { Authorization?: string };
 }
 
 const AuthContext = createContext<AuthContextType>({
     user: null,
+    token: null,
     loading: true,
     error: null,
     isAuthenticated: false,
     login: () => {},
     logout: () => {},
     setUser: () => {},
+    getAuthHeader: () => ({}),
 });
 
 export const useAuth = () => {
@@ -50,6 +55,7 @@ interface AuthProviderProps {
 
 export function AuthProvider({ children }: AuthProviderProps) {
     const [user, setUser] = useState<User | null>(null);
+    const [token, setToken] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -77,37 +83,83 @@ export function AuthProvider({ children }: AuthProviderProps) {
         }
     };
 
-    const login = (token: string) => {
-        localStorage.setItem('token', token);
-        api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-        fetchUser();
+    const getAuthHeader = () => {
+        return token ? { Authorization: `Bearer ${token}` } : {};
+    };
+
+    const login = (newToken: string) => {
+        try {
+            // Token formatını kontrol et
+            const parts = newToken.split('.');
+            if (parts.length !== 3) {
+                throw new Error('Invalid token format');
+            }
+
+            // Token'ı decode et ve kontrol et
+            const payload = JSON.parse(atob(parts[1]));
+            console.log('Token payload:', payload);
+
+            // Token'ı sakla
+            localStorage.setItem('token', newToken);
+            setToken(newToken);
+            
+            // API headers'a ekle
+            api.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
+            console.log('Token set in headers:', api.defaults.headers.common['Authorization']);
+
+            // Kullanıcı bilgilerini getir
+            fetchUser();
+        } catch (error) {
+            console.error('Login error:', error);
+            logout();
+            throw new Error('Invalid token format or authentication failed');
+        }
     };
 
     const logout = () => {
+        console.log('Logging out...');
         localStorage.removeItem('token');
-        delete api.defaults.headers.common['Authorization'];
+        sessionStorage.removeItem('token');
+        setToken(null);
         setUser(null);
         setError(null);
+        delete api.defaults.headers.common['Authorization'];
+        console.log('Auth headers after logout:', api.defaults.headers.common);
     };
 
     useEffect(() => {
-        const token = localStorage.getItem('token');
-        if (token) {
-            api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-            fetchUser();
-        } else {
-            setLoading(false);
-        }
+        const initializeAuth = async () => {
+            const storedToken = localStorage.getItem('token');
+            console.log('Stored token found:', !!storedToken);
+
+            if (storedToken) {
+                try {
+                    setToken(storedToken);
+                    api.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
+                    console.log('Token set in headers on init:', api.defaults.headers.common['Authorization']);
+                    await fetchUser();
+                } catch (error) {
+                    console.error('Auth initialization error:', error);
+                    logout();
+                }
+            } else {
+                setLoading(false);
+            }
+        };
+
+        initializeAuth();
     }, []);
 
     const value = {
         user,
+        token,
         loading,
         error,
-        isAuthenticated: !!user,
+        isAuthenticated: !!user && !!token,
         login,
         logout,
         setUser,
+        getAuthHeader,
     };
 
     return (

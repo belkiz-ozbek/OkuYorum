@@ -1,5 +1,5 @@
 // app/features/discover/components/DiscoverContentGrid.tsx
-import React from 'react'
+import React, { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Loader2, XCircle } from 'lucide-react'
 import type { Content } from '@/types/content'
@@ -8,14 +8,87 @@ import { QuoteCard } from '@/components/quotes/QuoteCard'
 import { ReviewCard } from '@/components/reviews/ReviewCard'
 import PostCard from '@/components/PostCard'
 import { InfiniteData } from '@tanstack/react-query'
+import { quoteService } from '@/services/quoteService'
+import type { Quote } from '@/types/quote'
+import { useQueryClient } from '@tanstack/react-query'
+import { reviewService } from '@/services/reviewService'
 
 interface DiscoverContentGridProps {
   data?: InfiniteData<PageResponse<Content>>
   status: 'loading' | 'error' | 'success'
   lastRef: (node: HTMLDivElement | null) => void
+  filters: Record<string, unknown>
+  searchQuery: string
 }
 
-export const DiscoverContentGrid: React.FC<DiscoverContentGridProps> = ({ data, status, lastRef }) => {
+export const DiscoverContentGrid: React.FC<DiscoverContentGridProps> = ({ data, status, lastRef, filters, searchQuery }) => {
+  const [quotes, setQuotes] = useState<{ [id: string]: Quote }>({})
+  const [reviews, setReviews] = useState<{ [id: string]: any }>({})
+  const queryClient = useQueryClient();
+
+  const handleLike = async (id: string | number) => {
+    const stringId = id.toString();
+    try {
+      const updatedQuote = await quoteService.likeQuote(stringId)
+      setQuotes(prev => ({ ...prev, [stringId]: updatedQuote }))
+      queryClient.setQueryData<InfiniteData<PageResponse<Content>>>(['discover', filters, searchQuery], (oldData) => {
+        if (!oldData) return oldData;
+        return {
+          ...oldData,
+          pages: oldData.pages.map((page) => ({
+            ...page,
+            content: page.content.map((item) => {
+              if (item.type === 'quote' && item.id === stringId) {
+                return {
+                  ...item,
+                  ...updatedQuote,
+                  id: stringId,
+                  userId: updatedQuote.userId?.toString?.() ?? '',
+                  bookId: updatedQuote.bookId?.toString?.() ?? '',
+                };
+              }
+              return item;
+            }),
+          })),
+        };
+      });
+    } catch {
+      // Hata yönetimi
+    }
+  }
+
+  const handleReviewLike = async (id: string | number) => {
+    const stringId = id.toString();
+    try {
+      const updatedReview = await reviewService.likeReview(stringId);
+      setReviews(prev => ({ ...prev, [stringId]: updatedReview }));
+      queryClient.setQueryData<InfiniteData<PageResponse<Content>>>(['discover', filters, searchQuery], (oldData) => {
+        if (!oldData) return oldData;
+        return {
+          ...oldData,
+          pages: oldData.pages.map((page) => ({
+            ...page,
+            content: page.content.map((item) => {
+              if (item.type === 'review' && item.id === stringId) {
+                return {
+                  ...item,
+                  ...updatedReview,
+                  id: stringId,
+                  userId: updatedReview.userId?.toString?.() ?? '',
+                  bookId: updatedReview.bookId?.toString?.() ?? '',
+                };
+              }
+              return item;
+            }),
+          })),
+        };
+      });
+      return updatedReview;
+    } catch {
+      return reviews[stringId];
+    }
+  }
+
   if (status === 'loading') {
     return (
       <div className="col-span-full flex items-center justify-center py-8">
@@ -56,13 +129,13 @@ export const DiscoverContentGrid: React.FC<DiscoverContentGridProps> = ({ data, 
               >
                 {item.type === 'quote' ? (
                   <QuoteCard
-                    quote={{
-                      id: item.id,
+                    quote={quotes[String(item.id)] || {
+                      id: item.id.toString(),
                       content: item.content,
-                      userId: item.userId,
+                      userId: item.userId.toString(),
                       username: item.user.name,
                       userAvatar: item.user.avatar,
-                      bookId: item.bookId || '',
+                      bookId: item.bookId ? item.bookId.toString() : '',
                       bookTitle: item.book?.title || '',
                       bookAuthor: item.book?.author || '',
                       bookCoverImage: item.book?.coverImage,
@@ -72,16 +145,17 @@ export const DiscoverContentGrid: React.FC<DiscoverContentGridProps> = ({ data, 
                       isSaved: item.isSaved || false,
                       createdAt: item.createdAt
                     }}
+                    onLike={handleLike}
                   />
                 ) : item.type === 'review' ? (
                   <ReviewCard
-                    review={{
-                      id: parseInt(item.id),
+                    review={reviews[String(item.id)] || {
+                      id: item.id.toString(),
                       content: item.content,
-                      userId: parseInt(item.userId),
+                      userId: item.userId.toString(),
                       username: item.user.name,
                       userAvatar: item.user.avatar || '',
-                      bookId: item.bookId ? parseInt(item.bookId) : 0,
+                      bookId: item.bookId ? item.bookId.toString() : '',
                       bookTitle: item.book?.title || '',
                       bookAuthor: item.book?.author || '',
                       bookCoverImage: item.book?.coverImage || '',
@@ -92,14 +166,15 @@ export const DiscoverContentGrid: React.FC<DiscoverContentGridProps> = ({ data, 
                       createdAt: item.createdAt,
                       updatedAt: item.createdAt
                     }}
+                    onLike={handleReviewLike}
                   />
                 ) : (
                   <PostCard
                     post={{
-                      id: parseInt(item.id),
+                      id: item.id.toString(),
                       title: item.title || '',
                       content: item.content,
-                      userId: parseInt(item.userId),
+                      userId: item.userId.toString(),
                       username: item.user.name,
                       nameSurname: item.user.name,
                       profileImage: item.user.avatar || null,
@@ -111,7 +186,7 @@ export const DiscoverContentGrid: React.FC<DiscoverContentGridProps> = ({ data, 
                       isLiked: item.isLiked || false,
                       isSaved: item.isSaved || false,
                       book: item.book ? {
-                        id: parseInt(item.book.id),
+                        id: item.book.id.toString(),
                         title: item.book.title,
                         author: item.book.author || '',
                         cover: item.book.coverImage || ''

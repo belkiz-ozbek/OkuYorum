@@ -31,6 +31,8 @@ public class MessageService {
         // Get current authenticated user
         String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
         User currentUser = userRepository.findByUsername(currentUsername)
+                .stream()
+                .findFirst()
                 .orElseThrow(() -> new IllegalStateException("Oturum açmış kullanıcı bulunamadı"));
 
         // Verify that the sender is the current user

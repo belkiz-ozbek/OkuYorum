@@ -122,7 +122,7 @@ export default function SignupPage() {
 
       setShowSuccess(true)
       setTimeout(() => {
-        router.push(`/auth/verify?tokenId=${data.tempToken}`)
+        router.push(`/features/auth/verify?tokenId=${data.tempToken}`)
       }, 2000)
 
     } catch (err: unknown) {
@@ -181,7 +181,7 @@ export default function SignupPage() {
   ]
 
   return (
-      <div className="min-h-screen flex items-center justify-center bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-purple-50/80 via-rose-50/80 to-pink-50/80 relative overflow-hidden py-8">
+      <div className="min-h-screen flex items-center justify-center bg-background relative overflow-hidden py-8">
         {/* Enhanced Background Elements */}
         <div className="absolute inset-0 w-full h-full opacity-30">
           <div className="absolute w-[800px] h-[800px] rounded-full bg-purple-100/40 blur-3xl -top-40 -left-20 animate-pulse" />

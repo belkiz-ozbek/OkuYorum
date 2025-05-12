@@ -60,8 +60,8 @@ export const reviewService = {
         await api.delete(`/api/reviews/${reviewId}`);
     },
 
-    likeReview: async (reviewId: number): Promise<Review> => {
-        const response = await api.post(`/api/reviews/${reviewId}/like`);
+    likeReview: async (reviewId: string | number): Promise<Review> => {
+        const response = await api.post(`/api/reviews/${reviewId.toString()}/like`);
         return response.data;
     },
 

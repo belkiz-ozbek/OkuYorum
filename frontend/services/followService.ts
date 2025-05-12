@@ -20,8 +20,8 @@ export const followService = {
 
             // Eğer currentUserId verilmişse, o kullanıcının takip durumunu kontrol et
             const checkUrl = currentUserId
-                ? `${API_URL}/users/${currentUserId}/is-following/${targetUserId}`
-                : `${API_URL}/users/${targetUserId}/is-following`;
+                ? `${API_URL}/api/users/${currentUserId}/is-following/${targetUserId}`
+                : `${API_URL}/api/users/${targetUserId}/is-following`;
 
             const response = await fetch(checkUrl, {
                 headers: {
@@ -63,7 +63,7 @@ export const followService = {
                 };
             }
 
-            const response = await fetch(`${API_URL}/users/${targetUserId}/follow`, {
+            const response = await fetch(`${API_URL}/api/users/${targetUserId}/follow`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -115,7 +115,7 @@ export const followService = {
                 };
             }
 
-            const response = await fetch(`${API_URL}/users/${targetUserId}/unfollow`, {
+            const response = await fetch(`${API_URL}/api/users/${targetUserId}/unfollow`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -153,7 +153,7 @@ export const followService = {
             const token = localStorage.getItem('token');
             if (!token) return [];
 
-            const response = await fetch(`${API_URL}/users/${userId}/followers`, {
+            const response = await fetch(`${API_URL}/api/users/${userId}/followers`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
@@ -178,7 +178,7 @@ export const followService = {
             const token = localStorage.getItem('token');
             if (!token) return [];
 
-            const response = await fetch(`${API_URL}/users/${userId}/following`, {
+            const response = await fetch(`${API_URL}/api/users/${userId}/following`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'

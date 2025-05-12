@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.4.xsd">
+
+    <changeSet id="20250511 21:26" author="belkiz.ozbek">
+        <!-- Add new status column -->
+        <addColumn tableName="event_registrations">
+            <column name="attendance_status" type="varchar(20)" defaultValue="REGISTERED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="attendance_notes" type="text"/>
+            <column name="checked_in_at" type="timestamp"/>
+            <column name="checked_in_by" type="varchar(100)"/>
+            <column name="no_show_reason" type="text"/>
+        </addColumn>
+
+        <!-- Create index for faster status queries -->
+        <createIndex indexName="idx_event_registrations_status"
+                    tableName="event_registrations">
+            <column name="attendance_status"/>
+        </createIndex>
+
+        <!-- Update existing records -->
+        <sql>
+            UPDATE event_registrations 
+            SET attendance_status = CASE 
+                WHEN attended = true THEN 'ATTENDED'
+                ELSE 'REGISTERED'
+            END;
+        </sql>
+    </changeSet>
+
+</databaseChangeLog> 

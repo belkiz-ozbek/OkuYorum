@@ -36,7 +36,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         final String jwt;
         final String username;
 
+        System.out.println("JWT Filter - Request URL: " + request.getRequestURL());
+        System.out.println("JWT Filter - Request Method: " + request.getMethod());
+        System.out.println("JWT Filter - Auth Header: " + authHeader);
+
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            System.out.println("JWT Filter - No valid auth header, proceeding with chain");
             filterChain.doFilter(request, response);
             return;
         }
@@ -44,10 +49,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         jwt = authHeader.substring(7);
         username = jwtService.findUsername(jwt);
 
+        System.out.println("JWT Filter - Username from token: " + username);
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        System.out.println("JWT Filter - Current authentication: " + (authentication != null ? authentication.getName() : "null"));
+        System.out.println("JWT Filter - Current authorities: " + (authentication != null ? authentication.getAuthorities() : "null"));
+
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
             
-            if (jwtService.tokenControl(jwt, userDetails)) {
+            boolean isTokenValid = jwtService.tokenControl(jwt, userDetails);
+            System.out.println("JWT Filter - Token validation: " + (isTokenValid ? "valid" : "invalid"));
+            System.out.println("JWT Filter - User authorities from userDetails: " + userDetails.getAuthorities());
+            
+            if (isTokenValid) {
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                     userDetails,
                     null,
@@ -55,8 +69,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 );
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
+                System.out.println("JWT Filter - Authentication set in context with authorities: " + authToken.getAuthorities());
+            } else {
+                System.out.println("JWT Filter - Token validation failed");
             }
+        } else {
+            System.out.println("JWT Filter - No authentication needed or already authenticated");
         }
+        
         filterChain.doFilter(request, response);
     }
 } 

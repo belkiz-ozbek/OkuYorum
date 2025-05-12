@@ -55,5 +55,52 @@
             <column name="status">ACTIVE</column>
         </insert>
 
+        <insert tableName="users">
+            <column name="name_surname">Merve Halaç</column>
+            <column name="username">halacmerve</column>
+            <!-- BCrypt ile şifrelenmiş "admin123" şifresi -->
+            <column name="password">$2a$10$umxp5DLJRsrVpFaeBBkcpuGto0LNy6EliUoUE16FZ332/0zoNLBUq</column>
+            <column name="role">ADMIN</column>
+            <column name="enabled">true</column>
+            <column name="email">foomail3.okuyorum@gmail.com</column>
+            <column name="created_at">2025-05-12 15:28:00</column>
+            <column name="status">ACTIVE</column>
+        </insert>
+
+        <insert tableName="users">
+            <column name="name_surname">Nuran Kocabey</column>
+            <column name="username">kocabeynuran</column>
+            <!-- BCrypt ile şifrelenmiş "admin123" şifresi -->
+            <column name="password">$2a$10$umxp5DLJRsrVpFaeBBkcpuGto0LNy6EliUoUE16FZ332/0zoNLBUq</column>
+            <column name="role">ADMIN</column>
+            <column name="enabled">true</column>
+            <column name="email">foomail4.okuyorum@gmail.com</column>
+            <column name="created_at">2025-05-12 15:28:00</column>
+            <column name="status">ACTIVE</column>
+        </insert>
+
+        <insert tableName="users">
+            <column name="name_surname">Beyza Karakurt</column>
+            <column name="username">karakurtbeyza</column>
+            <!-- BCrypt ile şifrelenmiş "admin123" şifresi -->
+            <column name="password">$2a$10$umxp5DLJRsrVpFaeBBkcpuGto0LNy6EliUoUE16FZ332/0zoNLBUq</column>
+            <column name="role">ADMIN</column>
+            <column name="enabled">true</column>
+            <column name="email">foomail5.okuyorum@gmail.com</column>
+            <column name="created_at">2025-05-12 15:28:00</column>
+            <column name="status">ACTIVE</column>
+        </insert>
+
+        <insert tableName="users">
+            <column name="name_surname">Betül Orhan</column>
+            <column name="username">betul.orhan</column>
+            <!-- BCrypt ile şifrelenmiş "admin123" şifresi -->
+            <column name="password">$2a$10$umxp5DLJRsrVpFaeBBkcpuGto0LNy6EliUoUE16FZ332/0zoNLBUq</column>
+            <column name="role">ADMIN</column>
+            <column name="enabled">true</column>
+            <column name="email">foomail6.okuyorum@gmail.com</column>
+            <column name="created_at">2025-05-12 16:52:00</column>
+            <column name="status">ACTIVE</column>
+        </insert>
     </changeSet>
 </databaseChangeLog>

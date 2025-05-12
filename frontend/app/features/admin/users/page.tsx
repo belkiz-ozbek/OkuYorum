@@ -57,6 +57,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
+import { api } from "@/services/api"
 
 // Define types for user data
 interface User {
@@ -104,6 +105,17 @@ export default function AdminUsersPage() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [newUserData, setNewUserData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    username: "",
+    password: "",
+    role: "USER"
+  })
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
+  const [tempTokenId, setTempTokenId] = useState<string | null>(null)
+  const [verificationCode, setVerificationCode] = useState("")
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -118,59 +130,38 @@ export default function AdminUsersPage() {
   })
 
   useEffect(() => {
-    const checkAdmin = async () => {
+    async function checkAdmin() {
       try {
-        const isUserAdmin = await UserService.isAdmin()
-        setIsAdmin(isUserAdmin)
+        const isAdminUser = await UserService.isAdmin()
+        setIsAdmin(isAdminUser)
         
-        if (!isUserAdmin) {
-          toast({
-            title: "Yetkisiz Erişim",
-            description: "Bu sayfaya erişim yetkiniz bulunmamaktadır.",
-            variant: "destructive"
-          })
-          router.push('/')
+        if (isAdminUser) {
+          fetchUsers()
+        } else {
+          setError("Bu sayfaya erişim izniniz yok")
+          router.push("/features/home")
         }
-      } catch (err: unknown) {
-        const errorMessage = err instanceof Error ? err.message : "Unknown error"
-        console.error("Admin kontrolü yapılırken hata oluştu:", errorMessage)
-        toast({
-          title: "Hata",
-          description: "Yetki kontrolü yapılırken bir hata oluştu. Ana sayfaya yönlendiriliyorsunuz.",
-          variant: "destructive"
-        })
-        router.push('/')
-      }
-    }
-    
-    checkAdmin()
-  }, [router, toast])
-
-  useEffect(() => {
-    const fetchUsers = async () => {
-      if (!isAdmin) return
-      
-      try {
-        setLoading(true)
-        const response = await UserService.getAllUsers()
-        console.log("Fetched users:", response.data)
-        setUsers(response.data)
-      } catch (err: unknown) {
-        const errorMessage = err instanceof Error ? err.message : "Unknown error"
-        console.error("Error fetching users:", errorMessage)
-        setError("Kullanıcılar yüklenirken bir hata oluştu.")
-        toast({
-          title: "Hata",
-          description: "Kullanıcı bilgileri yüklenirken bir hata oluştu.",
-          variant: "destructive"
-        })
+      } catch {
+        setError("Yetkilendirme hatası")
+        router.push("/features/home")
       } finally {
         setLoading(false)
       }
     }
-
-    fetchUsers()
-  }, [isAdmin, toast])
+    
+    checkAdmin()
+  }, [router])
+  
+  // Function to fetch all users
+  const fetchUsers = async () => {
+    try {
+      const response = await UserService.getAllUsers()
+      setUsers(response.data)
+    } catch (error) {
+      console.error('Error fetching users:', error)
+      setError("Kullanıcılar yüklenirken bir hata oluştu")
+    }
+  }
 
   const filteredUsers = users.filter(user => {
     const nameToSearch = user.nameSurname || `${user.firstName || ''} ${user.lastName || ''}`.trim()
@@ -248,10 +239,10 @@ export default function AdminUsersPage() {
       setUsers(response.data)
       
       setIsEditDialogOpen(false)
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: "Hata",
-        description: error.message || "Kullanıcı güncellenirken bir hata oluştu.",
+        description: error instanceof Error ? error.message : "Kullanıcı güncellenirken bir hata oluştu.",
         variant: "destructive"
       })
     }
@@ -271,10 +262,10 @@ export default function AdminUsersPage() {
       setUsers(response.data)
       
       setIsDeleteDialogOpen(false)
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: "Hata",
-        description: error.message || "Kullanıcı silinirken bir hata oluştu.",
+        description: error instanceof Error ? error.message : "Kullanıcı silinirken bir hata oluştu.",
         variant: "destructive"
       })
     }
@@ -305,6 +296,116 @@ export default function AdminUsersPage() {
         return <Badge className="bg-red-100 text-red-800 border-red-300">Yasaklı</Badge>
       default:
         return <Badge className="bg-gray-100 text-gray-800 border-gray-300">Bilinmiyor</Badge>
+    }
+  }
+
+  const handleCreateUser = async (e: React.FormEvent) => {
+    e.preventDefault()
+    console.log("Form submitted", newUserData)
+    
+    // Eğer doğrulama token'ımız ve kodumuz varsa, doğrulama aşamasına geç
+    if (tempTokenId && verificationCode) {
+      try {
+        // Verification step
+        console.log("Sending verification with tokenId:", tempTokenId, "and code:", verificationCode)
+        const verifyResponse = await api.post('/api/auth/verify-and-register', {
+          verificationCode,
+          tokenId: tempTokenId
+        })
+        
+        console.log("Verification response:", verifyResponse.data)
+        
+        toast({
+          title: "Başarılı",
+          description: "Kullanıcı başarıyla oluşturuldu",
+        })
+        
+        // Reset form and temp token
+        setNewUserData({
+          firstName: "",
+          lastName: "",
+          email: "",
+          username: "",
+          password: "",
+          role: "USER"
+        })
+        setTempTokenId(null)
+        setVerificationCode("")
+        
+        // Kullanıcı listesini yenile
+        fetchUsers()
+        
+        // Modal'ı kapat
+        setIsCreateDialogOpen(false)
+        
+      } catch (error) {
+        console.error("Error in verification step:", error)
+        let errorMessage = "Doğrulama işleminde hata oluştu"
+        if (typeof error === 'object' && error && 'response' in error && (error as any).response?.data?.message) {
+          errorMessage = (error as any).response.data.message
+        }
+        toast({
+          title: "Hata",
+          description: errorMessage,
+          variant: "destructive"
+        })
+      }
+      return
+    }
+    
+    // Basic validation
+    if (!newUserData.username || !newUserData.email || !newUserData.password) {
+      console.log("Validation failed - missing required fields")
+      toast({
+        title: "Hata",
+        description: "Lütfen tüm zorunlu alanları doldurun",
+        variant: "destructive"
+      })
+      return
+    }
+    
+    try {
+      // İlk adım: ön kayıt işlemi
+      const preRegisterData = {
+        username: newUserData.username,
+        email: newUserData.email,
+        password: newUserData.password,
+        nameSurname: `${newUserData.firstName || ''} ${newUserData.lastName || ''}`.trim()
+      }
+      
+      console.log("Sending pre-register request:", preRegisterData)
+      const preRegisterResponse = await api.post('/api/auth/pre-register', preRegisterData)
+      
+      if (preRegisterResponse.data && preRegisterResponse.data.tempToken) {
+        // Token'ı sakla ve kullanıcıya göster
+        setTempTokenId(preRegisterResponse.data.tempToken)
+        
+        toast({
+          title: "Doğrulama Gerekli",
+          description: `E-posta doğrulama kodu ${preRegisterData.email} adresine gönderildi. Doğrulama kodunu girin.`,
+        })
+      } else {
+        throw new Error("Doğrulama token'ı alınamadı")
+      }
+    } catch (error) {
+      console.error("Error creating user:", error)
+      let errorMessage = "Kullanıcı oluşturulurken bir hata oluştu"
+      if (typeof error === 'object' && error && 'response' in error && (error as any).response) {
+        if ((error as any).response.data && (error as any).response.data.message) {
+          errorMessage = (error as any).response.data.message
+        } else if ((error as any).response.status === 403) {
+          errorMessage = "Bu işlemi yapmak için yetkiniz yok. Admin hesabıyla giriş yaptığınızdan emin olun."
+        } else if ((error as any).response.status === 405) {
+          errorMessage = "API endpoint'i desteklenmiyor. Backend yapılandırmasını kontrol edin."
+        }
+      } else if (error instanceof Error && error.message) {
+        errorMessage = error.message
+      }
+      toast({
+        title: "Hata",
+        description: errorMessage,
+        variant: "destructive"
+      })
     }
   }
 
@@ -364,7 +465,7 @@ export default function AdminUsersPage() {
               Yönetim Paneline Dön
             </Link>
           </Button>
-          <Dialog>
+          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
             <DialogTrigger asChild>
               <Button>
                 <UserPlus className="mr-2 h-4 w-4" />
@@ -378,45 +479,113 @@ export default function AdminUsersPage() {
                   Yeni bir kullanıcı hesabı oluşturun. Tüm bilgileri doldurduktan sonra Kaydet butonuna tıklayın.
                 </DialogDescription>
               </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="firstName">Ad</Label>
-                    <Input id="firstName" />
+              <form onSubmit={handleCreateUser} className="grid gap-4 py-4">
+                {tempTokenId ? (
+                  // Doğrulama formu göster
+                  <div className="space-y-4">
+                    <p className="text-sm text-gray-500">
+                      Doğrulama kodu e-posta adresinize gönderildi. Lütfen doğrulama kodunu girin.
+                    </p>
+                    <div className="space-y-2">
+                      <Label htmlFor="verificationCode">Doğrulama Kodu</Label>
+                      <Input 
+                        id="verificationCode" 
+                        value={verificationCode}
+                        onChange={(e) => setVerificationCode(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div className="p-3 bg-amber-50 border border-amber-200 rounded-md">
+                      <p className="text-xs text-amber-800">
+                        Token ID: {tempTokenId}
+                      </p>
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="lastName">Soyad</Label>
-                    <Input id="lastName" />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email">E-posta</Label>
-                  <Input id="email" type="email" />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="username">Kullanıcı Adı</Label>
-                  <Input id="username" />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="password">Şifre</Label>
-                  <Input id="password" type="password" />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="role">Rol</Label>
-                  <Select defaultValue="USER">
-                    <SelectTrigger>
-                      <SelectValue placeholder="Rol seçin" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="USER">Kullanıcı</SelectItem>
-                      <SelectItem value="ADMIN">Yönetici</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <DialogFooter>
-                <Button type="submit">Kullanıcı Oluştur</Button>
-              </DialogFooter>
+                ) : (
+                  // Normal kayıt formu göster
+                  <>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="firstName">Ad</Label>
+                        <Input 
+                          id="firstName" 
+                          value={newUserData.firstName}
+                          onChange={(e) => setNewUserData({...newUserData, firstName: e.target.value})}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="lastName">Soyad</Label>
+                        <Input 
+                          id="lastName" 
+                          value={newUserData.lastName}
+                          onChange={(e) => setNewUserData({...newUserData, lastName: e.target.value})}
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="email">E-posta</Label>
+                      <Input 
+                        id="email" 
+                        type="email" 
+                        value={newUserData.email}
+                        onChange={(e) => setNewUserData({...newUserData, email: e.target.value})}
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="username">Kullanıcı Adı</Label>
+                      <Input 
+                        id="username" 
+                        value={newUserData.username}
+                        onChange={(e) => setNewUserData({...newUserData, username: e.target.value})}
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="password">Şifre</Label>
+                      <Input 
+                        id="password" 
+                        type="password" 
+                        value={newUserData.password}
+                        onChange={(e) => setNewUserData({...newUserData, password: e.target.value})}
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="role">Rol</Label>
+                      <Select 
+                        value={newUserData.role}
+                        onValueChange={(value) => setNewUserData({...newUserData, role: value})}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Rol seçin" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="USER">Kullanıcı</SelectItem>
+                          <SelectItem value="ADMIN">Yönetici</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </>
+                )}
+                <DialogFooter>
+                  {tempTokenId && (
+                    <Button 
+                      type="button" 
+                      variant="outline"
+                      onClick={() => {
+                        setTempTokenId(null)
+                        setVerificationCode("")
+                      }}
+                    >
+                      Geri
+                    </Button>
+                  )}
+                  <Button type="submit">
+                    {tempTokenId ? 'Doğrula ve Oluştur' : 'Kullanıcı Oluştur'}
+                  </Button>
+                </DialogFooter>
+              </form>
             </DialogContent>
           </Dialog>
         </div>

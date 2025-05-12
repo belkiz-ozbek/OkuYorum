@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
+
+    <changeSet id="20250512 03:09" author="belkiz.ozbek">
+        <!-- Merkezefendi Millet Kıraathanesi (ID: 6) -->
+        <insert tableName="kiraathane_photos">
+            <column name="kiraathane_id" value="6"/>
+            <column name="photo_url" value="/images/kiraathanes/merkezefendi-millet-kiraathanesi-01.jpg"/>
+        </insert>
+        <insert tableName="kiraathane_photos">
+            <column name="kiraathane_id" value="6"/>
+            <column name="photo_url" value="/images/kiraathanes/merkezefendi-millet-kiraathanesi-03.jpg"/>
+        </insert>
+        <insert tableName="kiraathane_photos">
+            <column name="kiraathane_id" value="6"/>
+            <column name="photo_url" value="/images/kiraathanes/merkezefendi-millet-kiraathanesi-13.jpg"/>
+        </insert>
+
+        <!-- Saimekadın Millet Kıraathanesi (ID: 7) -->
+        <insert tableName="kiraathane_photos">
+            <column name="kiraathane_id" value="7"/>
+            <column name="photo_url" value="/images/kiraathanes/saime-1.jpg"/>
+        </insert>
+        <insert tableName="kiraathane_photos">
+            <column name="kiraathane_id" value="7"/>
+            <column name="photo_url" value="/images/kiraathanes/saime-2.jpg"/>
+        </insert>
+        <insert tableName="kiraathane_photos">
+            <column name="kiraathane_id" value="7"/>
+            <column name="photo_url" value="/images/kiraathanes/saime-3.jpg"/>
+        </insert>
+
+        <!-- Karesi Millet Kıraathanesi (ID: 8) -->
+        <insert tableName="kiraathane_photos">
+            <column name="kiraathane_id" value="8"/>
+            <column name="photo_url" value="/images/kiraathanes/karesi-1.jpg"/>
+        </insert>
+        <insert tableName="kiraathane_photos">
+            <column name="kiraathane_id" value="8"/>
+            <column name="photo_url" value="/images/kiraathanes/karesi-2.jpg"/>
+        </insert>
+        <insert tableName="kiraathane_photos">
+            <column name="kiraathane_id" value="8"/>
+            <column name="photo_url" value="/images/kiraathanes/karesi-3.jpg"/>
+        </insert>
+
+        <!-- Dede Millet Kıraathanesi (ID: 9) -->
+        <insert tableName="kiraathane_photos">
+            <column name="kiraathane_id" value="9"/>
+            <column name="photo_url" value="/images/kiraathanes/dede-1.jpg"/>
+        </insert>
+        <insert tableName="kiraathane_photos">
+            <column name="kiraathane_id" value="9"/>
+            <column name="photo_url" value="/images/kiraathanes/dede-2.jpg"/>
+        </insert>
+        <insert tableName="kiraathane_photos">
+            <column name="kiraathane_id" value="9"/>
+            <column name="photo_url" value="/images/kiraathanes/dede-3.jpg"/>
+        </insert>
+
+        <!-- Beştelsiz Millet Kıraathanesi (ID: 10) -->
+        <insert tableName="kiraathane_photos">
+            <column name="kiraathane_id" value="10"/>
+            <column name="photo_url" value="/images/kiraathanes/beştelsiz-1.jpeg"/>
+        </insert>
+        <insert tableName="kiraathane_photos">
+            <column name="kiraathane_id" value="10"/>
+            <column name="photo_url" value="/images/kiraathanes/beştelsiz-2.jpg"/>
+        </insert>
+        <insert tableName="kiraathane_photos">
+            <column name="kiraathane_id" value="10"/>
+            <column name="photo_url" value="/images/kiraathanes/beştelsiz-3.jpg"/>
+        </insert>
+
+        <!-- Set featured photos -->
+        <update tableName="kiraathanes">
+            <column name="featured_photo_url" value="/images/kiraathanes/merkezefendi-millet-kiraathanesi-01.jpg"/>
+            <where>id = 6</where>
+        </update>
+        <update tableName="kiraathanes">
+            <column name="featured_photo_url" value="/images/kiraathanes/saime-1.jpg"/>
+            <where>id = 7</where>
+        </update>
+        <update tableName="kiraathanes">
+            <column name="featured_photo_url" value="/images/kiraathanes/karesi-1.jpg"/>
+            <where>id = 8</where>
+        </update>
+        <update tableName="kiraathanes">
+            <column name="featured_photo_url" value="/images/kiraathanes/dede-1.jpg"/>
+            <where>id = 9</where>
+        </update>
+        <update tableName="kiraathanes">
+            <column name="featured_photo_url" value="/images/kiraathanes/beştelsiz-1.jpeg"/>
+            <where>id = 10</where>
+        </update>
+    </changeSet>
+</databaseChangeLog> 

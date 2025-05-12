@@ -197,7 +197,7 @@ export function Comment({ comment, onCommentCreated }: CommentProps) {
                     className="flex items-center gap-1 hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
                 >
                     <MessageCircle className="h-4 w-4" />
-                    <span>{comment.replyCount > 0 ? `${comment.replyCount} yanıt` : "Yanıtla"}</span>
+                    <span>{(comment.replyCount ?? 0) > 0 ? `${comment.replyCount} yanıt` : "Yanıtla"}</span>
                 </button>
             </div>
 

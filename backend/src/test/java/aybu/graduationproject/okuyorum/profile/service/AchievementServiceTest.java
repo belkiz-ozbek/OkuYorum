@@ -10,7 +10,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Optional;
+import java.util.List;
+import java.util.Collections;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -43,7 +44,7 @@ public class AchievementServiceTest {
     void updateBookWormProgress_WhenProgressReaches100_ShouldEarnAchievement() {
         // Arrange
         when(achievementRepository.findByUserIdAndType(userId, AchievementType.BOOK_WORM))
-                .thenReturn(Optional.of(existingAchievement));
+                .thenReturn(Collections.singletonList(existingAchievement));
         when(achievementRepository.save(any(Achievement.class)))
                 .thenReturn(existingAchievement);
 
@@ -60,7 +61,7 @@ public class AchievementServiceTest {
     void updateSocialReaderProgress_WhenProgressReaches100_ShouldEarnAchievement() {
         // Arrange
         when(achievementRepository.findByUserIdAndType(userId, AchievementType.SOCIAL_READER))
-                .thenReturn(Optional.of(existingAchievement));
+                .thenReturn(Collections.singletonList(existingAchievement));
         when(achievementRepository.save(any(Achievement.class)))
                 .thenReturn(existingAchievement);
 
@@ -77,7 +78,7 @@ public class AchievementServiceTest {
     void updateQuoteMasterProgress_WhenProgressReaches100_ShouldEarnAchievement() {
         // Arrange
         when(achievementRepository.findByUserIdAndType(userId, AchievementType.QUOTE_MASTER))
-                .thenReturn(Optional.of(existingAchievement));
+                .thenReturn(Collections.singletonList(existingAchievement));
         when(achievementRepository.save(any(Achievement.class)))
                 .thenReturn(existingAchievement);
 
@@ -94,7 +95,7 @@ public class AchievementServiceTest {
     void updateMarathonReaderProgress_WhenProgressReaches100_ShouldEarnAchievement() {
         // Arrange
         when(achievementRepository.findByUserIdAndType(userId, AchievementType.MARATHON_READER))
-                .thenReturn(Optional.of(existingAchievement));
+                .thenReturn(Collections.singletonList(existingAchievement));
         when(achievementRepository.save(any(Achievement.class)))
                 .thenReturn(existingAchievement);
 
@@ -111,7 +112,7 @@ public class AchievementServiceTest {
     void updateProgress_WhenAchievementNotFound_ShouldCreateNewAchievement() {
         // Arrange
         when(achievementRepository.findByUserIdAndType(userId, AchievementType.BOOK_WORM))
-                .thenReturn(Optional.empty());
+                .thenReturn(Collections.emptyList());
         when(achievementRepository.save(any(Achievement.class)))
                 .thenReturn(existingAchievement);
 
@@ -128,7 +129,7 @@ public class AchievementServiceTest {
     void updateProgress_WhenProgressDoesNotReach100_ShouldNotEarnAchievement() {
         // Arrange
         when(achievementRepository.findByUserIdAndType(userId, AchievementType.BOOK_WORM))
-                .thenReturn(Optional.of(existingAchievement));
+                .thenReturn(Collections.singletonList(existingAchievement));
         when(achievementRepository.save(any(Achievement.class)))
                 .thenReturn(existingAchievement);
 

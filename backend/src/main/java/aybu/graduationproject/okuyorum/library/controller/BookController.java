@@ -68,9 +68,16 @@ public class BookController {
 
     @GetMapping("/search")
     public ResponseEntity<Page<BookDto>> searchBooks(
-            @RequestParam String query,
+            @RequestParam(required = false) String query,
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) String author,
             @PageableDefault(size = 20) Pageable pageable) {
-        return ResponseEntity.ok(bookService.searchBooks(query, pageable));
+        String searchQuery = query;
+        if (searchQuery == null && (title != null || author != null)) {
+            searchQuery = (title != null ? title : "") + " " + (author != null ? author : "");
+            searchQuery = searchQuery.trim();
+        }
+        return ResponseEntity.ok(bookService.searchBooks(searchQuery, pageable));
     }
 
     @GetMapping("/quick-search")
