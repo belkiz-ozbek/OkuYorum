@@ -1,6 +1,6 @@
 "use client"
 
-import { BookOpen, Quote, Calendar, BookText, Heart, Share2, Bookmark, BookmarkCheck, MessageCircle, Sparkles, Award } from 'lucide-react'
+import { BookOpen, Quote, Calendar, BookText, Heart, Share2, Bookmark, BookmarkCheck, MessageCircle, Sparkles, Award, Library, X } from 'lucide-react'
 import Image from 'next/image'
 import { useEffect, useState } from 'react'
 import { use } from 'react'
@@ -18,6 +18,7 @@ import { api } from '@/lib/api'
 import { AnimatePresence, motion } from 'framer-motion'
 import { reviewService } from "@/services/reviewService"
 import { emit } from "@/lib/bookEventEmitter"
+import { Library as LibraryIcon } from 'lucide-react'
 
 type PageProps = {
     params: Promise<{ id: string }>
@@ -55,6 +56,8 @@ export default function BookPage({ params }: PageProps) {
     const [showQuoteModal, setShowQuoteModal] = useState(false)
     const [showReviewModal, setShowReviewModal] = useState(false)
     const [activeTab, setActiveTab] = useState('quotes')
+    const [isInLibrary, setIsInLibrary] = useState<boolean>(false)
+    const [updatingLibrary, setUpdatingLibrary] = useState(false)
 
     useEffect(() => {
         const fetchBook = async () => {
@@ -91,6 +94,7 @@ export default function BookPage({ params }: PageProps) {
                     ...data,
                     isFavorite: data.favorite
                 })
+                setIsInLibrary(!!data.inLibrary)
 
                 // Genre'yi kontrol et
                 console.log('Genre after setting book:', data.genre)
@@ -135,6 +139,30 @@ export default function BookPage({ params }: PageProps) {
         };
 
         fetchReviews();
+    }, [resolvedParams.id]);
+
+    useEffect(() => {
+        const checkLibraryStatus = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) return;
+
+                const response = await fetch(`http://localhost:8080/api/books/${resolvedParams.id}/library`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    setIsInLibrary(data.inLibrary);
+                }
+            } catch (error) {
+                console.error('Kitaplık durumu kontrol edilemedi:', error);
+            }
+        };
+
+        checkLibraryStatus();
     }, [resolvedParams.id]);
 
     const handleStatusChange = async (newStatus: Book['status']) => {
@@ -391,6 +419,46 @@ export default function BookPage({ params }: PageProps) {
         }
     };
 
+    const handleLibraryToggle = async () => {
+        if (!book) return;
+
+        try {
+            setUpdatingLibrary(true);
+            const token = localStorage.getItem('token');
+            if (!token) {
+                throw new Error('Oturum bulunamadı');
+            }
+
+            const method = isInLibrary ? 'DELETE' : 'POST';
+            const response = await fetch(`http://localhost:8080/api/books/${book.id}/library`, {
+                method,
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(isInLibrary ? 'Kitap kitaplıktan çıkarılamadı' : 'Kitap kitaplığa eklenemedi');
+            }
+
+            setIsInLibrary(!isInLibrary);
+            toast({
+                title: "Başarılı!",
+                description: isInLibrary ? "Kitap kitaplıktan çıkarıldı." : "Kitap kitaplığa eklendi.",
+            });
+        } catch (err) {
+            console.error('Kitaplık işlemi hatası:', err);
+            toast({
+                title: "Hata!",
+                description: err instanceof Error ? err.message : 'İşlem sırasında bir hata oluştu',
+                variant: "destructive",
+            });
+        } finally {
+            setUpdatingLibrary(false);
+        }
+    };
+
     if (loading) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-pink-50 via-rose-50 to-pink-100">
@@ -548,7 +616,7 @@ export default function BookPage({ params }: PageProps) {
                                     )}
                                 </div>
 
-                                <div className="flex gap-4 mb-8">
+                                <div className="flex gap-4 flex-wrap md:flex-nowrap mb-8">
                                     <motion.div
                                         whileHover={{ scale: 1.02 }}
                                         whileTap={{ scale: 0.98 }}
@@ -615,22 +683,38 @@ export default function BookPage({ params }: PageProps) {
                                         <Button 
                                             onClick={() => handleStatusChange("WILL_READ")}
                                             className="relative flex items-center gap-3 px-6 py-3 bg-white dark:bg-gray-900 hover:bg-purple-50 dark:hover:bg-gray-800 border border-purple-100 dark:border-purple-800/30 rounded-lg shadow-xl shadow-purple-500/10 hover:shadow-purple-500/20 transition-all duration-300">
-                                            <div className="relative">
+                                            <span className="flex items-center">
                                                 {book?.status === "WILL_READ" ? (
-                                                    <BookmarkCheck className="w-5 h-5 text-purple-500 dark:text-purple-400 group-hover:text-purple-600 dark:group-hover:text-purple-300 transition-colors duration-300" />
+                                                    <X className="w-5 h-5 text-red-500 dark:text-red-400 group-hover:text-red-600 dark:group-hover:text-red-300 transition-colors duration-300" />
                                                 ) : (
                                                     <Bookmark className="w-5 h-5 text-purple-500 dark:text-purple-400 group-hover:text-purple-600 dark:group-hover:text-purple-300 transition-colors duration-300" />
                                                 )}
+                                            </span>
+                                            <span className="font-medium text-gray-700 dark:text-gray-300 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors duration-300">
+                                                {book?.status === "WILL_READ" ? "Okuma Listemde" : "Okuma Listeme Ekle"}
+                                            </span>
+                                        </Button>
+                                    </motion.div>
+
+                                    <motion.div
+                                        whileHover={{ scale: 1.02 }}
+                                        whileTap={{ scale: 0.98 }}
+                                        className="relative group"
+                                    >
+                                        <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 via-pink-500 to-purple-600 rounded-xl blur opacity-0 group-hover:opacity-25 transition duration-1000 group-hover:duration-300"></div>
+                                        <Button
+                                            onClick={() => handleStatusChange("READING")}
+                                            className={`relative flex items-center gap-3 px-6 py-3 bg-white dark:bg-gray-900 hover:bg-purple-50 dark:hover:bg-gray-800 border border-purple-100 dark:border-purple-800/30 rounded-lg shadow-xl shadow-purple-500/10 hover:shadow-purple-500/20 transition-all duration-300`}
+                                            disabled={book?.status === "READING"}
+                                        >
+                                            <div className="relative">
+                                                <Library className={`w-5 h-5 ${book?.status === "READING" ? "text-green-500" : "text-purple-500 dark:text-purple-400 group-hover:text-purple-600 dark:group-hover:text-purple-300"} transition-colors duration-300`} />
                                                 <div className="absolute inset-0 animate-pulse opacity-30 text-purple-500 group-hover:opacity-50">
-                                                    {book?.status === "WILL_READ" ? (
-                                                        <BookmarkCheck className="w-5 h-5" />
-                                                    ) : (
-                                                        <Bookmark className="w-5 h-5" />
-                                                    )}
+                                                    <Library className="w-5 h-5" />
                                                 </div>
                                             </div>
                                             <span className="font-medium text-gray-700 dark:text-gray-300 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors duration-300">
-                                                {book?.status === "WILL_READ" ? "Okuma Listemde" : "Okuma Listeme Ekle"}
+                                                {book?.status === "READING" ? "Kitaplıkta" : "Kitaplığıma Ekle"}
                                             </span>
                                         </Button>
                                     </motion.div>
@@ -651,6 +735,30 @@ export default function BookPage({ params }: PageProps) {
                                                 </div>
                                             </div>
                                             <span className="font-medium text-gray-700 dark:text-gray-300 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors duration-300">Paylaş</span>
+                                        </Button>
+                                    </motion.div>
+
+                                    <motion.div
+                                        whileHover={{ scale: 1.02 }}
+                                        whileTap={{ scale: 0.98 }}
+                                        className="relative group"
+                                    >
+                                        <div className="absolute -inset-1 bg-gradient-to-r from-green-400 via-blue-400 to-green-400 rounded-xl blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-300"></div>
+                                        <Button
+                                            onClick={handleLibraryToggle}
+                                            disabled={updatingLibrary}
+                                            className="relative flex items-center gap-3 px-6 py-3 bg-white dark:bg-gray-900 hover:bg-purple-50 dark:hover:bg-gray-800 border border-purple-100 dark:border-purple-800/30 rounded-lg shadow-xl shadow-purple-500/10 hover:shadow-purple-500/20 transition-all duration-300"
+                                        >
+                                            <div className="relative">
+                                                {isInLibrary ? (
+                                                    <X className="w-5 h-5 text-red-500 dark:text-red-400 group-hover:text-red-600 dark:group-hover:text-red-300 transition-colors duration-300" />
+                                                ) : (
+                                                    <LibraryIcon className="w-5 h-5 text-purple-500 dark:text-purple-400 group-hover:text-purple-600 dark:group-hover:text-purple-300 transition-colors duration-300" />
+                                                )}
+                                            </div>
+                                            <span className="font-medium text-gray-700 dark:text-gray-300 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors duration-300">
+                                                {isInLibrary ? "Kitaplıktan Çıkar" : "Kitaplığa Ekle"}
+                                            </span>
                                         </Button>
                                     </motion.div>
                                 </div>

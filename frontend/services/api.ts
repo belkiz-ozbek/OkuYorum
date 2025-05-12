@@ -10,6 +10,7 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true // CORS için önemli
 })
 
 // İstek interceptor'ı
@@ -17,7 +18,9 @@ api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token')
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`
+      // Token'ı temizle
+      const cleanToken = token.replace(/^"(.*)"$/, '$1').trim()
+      config.headers.Authorization = `Bearer ${cleanToken}`
     }
     return config
   },
@@ -29,11 +32,11 @@ api.interceptors.request.use(
 // Yanıt interceptor'ı
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      // Handle unauthorized error (e.g., redirect to login)
+  async (error) => {
+    if (error.response?.status === 401 || error.response?.status === 403) {
+      // Sadece token'ı temizle ama yönlendirme yapma
       localStorage.removeItem('token')
-      window.location.href = '/'
+      localStorage.removeItem('userId')
     }
     return Promise.reject(error)
   }
@@ -41,7 +44,7 @@ api.interceptors.response.use(
 
 export const fetchUserReviews = async (userId: number): Promise<Review[]> => {
   try {
-    const response = await axios.get(`${baseURL}/reviews/user/${userId}`);
+    const response = await api.get(`/reviews/user/${userId}`);
     return response.data;
   } catch (error) {
     console.error('Error fetching user reviews:', error);
