@@ -64,6 +64,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
             const response = await UserService.getCurrentUser();
             setUser(response.data);
             setError(null);
+            localStorage.setItem('userId', response.data.id.toString());
         } catch (err) {
             console.error('Failed to fetch user:', err);
             if (err instanceof Error && err.message === 'No authentication token found') {
