@@ -98,6 +98,13 @@ export function MilletKiraathaneleri() {
     }
   }
 
+  // Check if features are in database
+  useEffect(() => {
+    if (kiraathanes.length > 0) {
+      console.log('Sample kiraathane features:', kiraathanes[0].features);
+    }
+  }, [kiraathanes]);
+
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
@@ -117,7 +124,7 @@ export function MilletKiraathaneleri() {
   })
 
   return (
-    <section className="py-12">
+    <section className="py-12 bg-white">
       <div className="container mx-auto px-4">
         {/* Section Header */}
         <div className="text-center mb-8">
@@ -206,51 +213,64 @@ export function MilletKiraathaneleri() {
                   transition={{ duration: 0.3, delay: index * 0.1 }}
                   className="flex-shrink-0 w-[280px]"
                 >
-                  <Card className="h-full flex flex-col">
-                    <div className="relative aspect-[4/3]">
+                  <Card className="h-full flex flex-col shadow-md rounded-xl overflow-hidden border-0">
+                    <div className="relative aspect-[4/3] overflow-hidden">
                       <img
-                        src={kiraathane.photoUrls[0]}
+                        src={kiraathane.photoUrls?.[0]}
                         alt={kiraathane.name}
                         className="w-full h-full object-cover"
                       />
-                      <div className="absolute top-2 right-2 bg-white rounded-full px-2 py-0.5 flex items-center gap-1 shadow">
-                        <Star className="w-3 h-3 text-yellow-400" />
-                        <span className="text-sm font-medium">{kiraathane.averageRating?.toFixed(1)}</span>
+                      <div className="absolute bottom-0 left-0 right-0">
+                        <div className="flex justify-between items-center p-3">
+                          <div className="flex space-x-1">
+                            {Array.from({ length: 5 }).map((_, i) => (
+                              <div key={i} className="w-2 h-2 rounded-full bg-white/70"></div>
+                            ))}
+                          </div>
+                          <div className="bg-white rounded-full px-2 py-0.5 flex items-center gap-1 shadow-sm">
+                            <Star className="w-3 h-3 text-yellow-400" />
+                            <span className="text-sm font-medium">{kiraathane.averageRating?.toFixed(1)}</span>
+                          </div>
+                        </div>
                       </div>
                     </div>
 
                     <CardContent className="flex-1 p-4">
-                      <h3 className="font-semibold text-lg mb-1">{kiraathane.name}</h3>
-                      <div className="flex items-center text-gray-600 mb-2">
-                        <MapPin className="w-4 h-4 mr-1" />
+                      <h3 className="font-bold text-xl mb-1">{kiraathane.name}</h3>
+                      <div className="flex items-center text-gray-500 mb-2">
+                        <MapPin className="w-4 h-4 mr-1 text-purple-500" />
                         <span className="text-sm">{kiraathane.district}, {kiraathane.city}</span>
                       </div>
                       <p className="text-gray-600 text-sm mb-4 line-clamp-2">{kiraathane.description}</p>
                       
                       <div className="flex items-center text-gray-600 text-sm mb-3">
-                        <Clock className="w-4 h-4 mr-1" />
+                        <Clock className="w-4 h-4 mr-1 text-purple-500" />
                         <span>{kiraathane.openingTime} - {kiraathane.closingTime}</span>
                         <span className="mx-2">•</span>
-                        <BookOpen className="w-4 h-4 mr-1" />
+                        <BookOpen className="w-4 h-4 mr-1 text-purple-500" />
                         <span>{kiraathane.bookCount?.toLocaleString()}+</span>
                       </div>
 
-                      <div className="flex flex-wrap gap-1">
-                        {kiraathane.features?.slice(0, 3).map((feature, i) => (
-                          <Badge
-                            key={i}
-                            variant="outline"
-                            className="text-xs bg-purple-50 text-purple-700 border-purple-200"
-                          >
-                            {getFeatureIcon(feature)}
-                            <span className="ml-1">{getFeatureLabel(feature)}</span>
-                          </Badge>
-                        ))}
+                      <div className="flex flex-wrap gap-1 mb-2">
+                        {kiraathane.features && kiraathane.features.length > 0 ? (
+                          kiraathane.features.slice(0, 3).map((feature, i) => (
+                            <Badge
+                              key={i}
+                              variant="outline"
+                              className="text-xs bg-purple-50 text-purple-700 border-purple-200 px-2 py-1 rounded-full"
+                            >
+                              {getFeatureIcon(feature)}
+                              <span className="ml-1">{getFeatureLabel(feature)}</span>
+                            </Badge>
+                          ))
+                        ) : (
+                          <div className="text-xs text-gray-500">Özellikler yükleniyor...</div>
+                        )}
                       </div>
                     </CardContent>
 
-                    <CardFooter className="p-4 pt-0">
-                      <Button asChild variant="outline" className="w-full">
+                    <CardFooter className="p-4 pt-0 mt-auto">
+                      <Button asChild variant="outline" className="w-full border-purple-200 text-purple-700 hover:bg-purple-50">
                         <Link href={`/features/millet-kiraathanesi/${kiraathane.id}`}>
                           Detayları Görüntüle
                         </Link>
