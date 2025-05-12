@@ -81,8 +81,15 @@ export default function VerifyPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-pink-50 via-rose-50 to-pink-100">
-      <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-md">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-background relative overflow-hidden">
+      {/* Background Elements */}
+      <div className="absolute inset-0 w-full h-full opacity-30">
+        <div className="absolute w-[800px] h-[800px] rounded-full bg-purple-100/40 blur-3xl -top-40 -left-20 animate-pulse" />
+        <div className="absolute w-[600px] h-[600px] rounded-full bg-rose-100/30 blur-3xl bottom-0 right-0 animate-pulse delay-700" />
+        <div className="absolute w-[300px] h-[300px] rounded-full bg-pink-100/30 blur-3xl top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 animate-pulse delay-1000" />
+        <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-5" />
+      </div>
+      <div className="w-full max-w-md p-8 bg-white/80 backdrop-blur-sm rounded-lg shadow-md relative z-10">
         <h2 className="text-2xl font-bold mb-6 text-gray-800">E-posta Doğrulama</h2>
         
         {error && (

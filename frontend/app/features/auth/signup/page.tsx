@@ -122,7 +122,7 @@ export default function SignupPage() {
 
       setShowSuccess(true)
       setTimeout(() => {
-        router.push(`/auth/verify?tokenId=${data.tempToken}`)
+        router.push(`/features/auth/verify?tokenId=${data.tempToken}`)
       }, 2000)
 
     } catch (err: unknown) {
