@@ -50,7 +50,7 @@ const questions: Question[] = [
   }
 ];
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api/recommendations/books";
+const API_URL = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080") + "/api/recommendations/books";
 
 export default function RecommendationsPage() {
   const { user } = useAuth();
@@ -66,6 +66,12 @@ export default function RecommendationsPage() {
   };
 
   const handleSave = async () => {
+    // Check if user is logged in
+    if (!user || !localStorage.getItem("token")) {
+      setWarning("Bu özelliği kullanmak için giriş yapmanız gerekmektedir.");
+      return;
+    }
+
     // Check if all questions are answered
     const unanswered = questions.find(q => !answers[q.id]);
     if (unanswered) {
@@ -77,6 +83,16 @@ export default function RecommendationsPage() {
     setWarning("");
 
     try {
+      console.log('Making request to:', API_URL);
+      console.log('Request body:', {
+        genre: answers.genre,
+        expectation: answers.expectation,
+        readingTime: answers.duration,
+        canFocus: answers.focus === "Evet",
+        userId: user?.id
+      });
+      console.log('Token:', localStorage.getItem("token"));
+
       const response = await fetch(API_URL, {
         method: "POST",
         headers: {
@@ -87,13 +103,19 @@ export default function RecommendationsPage() {
           genre: answers.genre,
           expectation: answers.expectation,
           readingTime: answers.duration,
-          canFocus: answers.focus === "Evet"
-        }),
-        credentials: "include"
+          canFocus: answers.focus === "Evet",
+          userId: user?.id
+        })
       });
 
+      if (response.status === 403) {
+        setWarning("Bu işlem için giriş yapmanız gerekmektedir.");
+        return;
+      }
+
       if (!response.ok) {
-        throw new Error("Öneri alınırken bir hata oluştu.");
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.message || "Öneri alınırken bir hata oluştu.");
       }
 
       const data = await response.json();
