@@ -10,6 +10,8 @@ import { ScratchToReveal } from "@/components/ui/scratch-to-reveal";
 import { useRouter } from "next/navigation";
 import { bookService, ReadingStatus } from "@/services/bookService";
 import { toast } from "@/components/ui/use-toast";
+import Image from "next/image";
+import { StatusBadge } from "@/components/ui/status-badge";
 
 interface Book {
   id: number;
@@ -420,23 +422,6 @@ const Library = ({ activeTab = 'all' }: LibraryProps): JSX.Element => {
             </Link>
 
             <Link
-              href="/features/library/read"
-              className={`flex items-center gap-2 px-4 py-3 transition-all duration-300 border-l-4 ${
-                activeTab === 'read'
-                  ? 'bg-primary/10 border-primary text-primary'
-                  : 'border-transparent text-muted-foreground hover:bg-primary/5 hover:border-primary/50'
-              }`}
-            >
-              <CheckCircle className="w-5 h-5 flex-shrink-0" />
-              <div className={`transition-all duration-300 ${isSidebarOpen ? 'opacity-100' : 'opacity-0 w-0'}`}>
-                <span className="font-medium text-sm">Okunanlar</span>
-                <span className="ml-auto text-xs bg-primary/20 px-2 py-0.5 rounded-full">
-                  {getTabCount('read')}
-                </span>
-              </div>
-            </Link>
-
-            <Link
               href="/features/lending"
               className={`flex items-center gap-2 px-4 py-3 transition-all duration-300 border-l-4 ${
                 activeTab === 'lending'
@@ -487,89 +472,29 @@ const Library = ({ activeTab = 'all' }: LibraryProps): JSX.Element => {
                         {filteredBooks.slice(shelf * 8, (shelf + 1) * 8).map((book) => (
                           <motion.div
                             key={book.id}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            whileHover={{
-                              y: -12,
-                              scale: 1.1,
-                              transition: { duration: 0.2 },
-                              zIndex: 20
-                            }}
-                            className="transform origin-bottom"
+                            className="group relative flex flex-col"
+                            whileHover={{ y: -5 }}
+                            transition={{ duration: 0.2 }}
                           >
-                            <div className="relative group">
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setReadBooks(prevReadBooks => {
-                                    const newReadBooks = new Set(prevReadBooks);
-                                    if (newReadBooks.has(book.id)) {
-                                      newReadBooks.delete(book.id);
-                                    } else {
-                                      newReadBooks.add(book.id);
-                                      setToReadBooks(prevToReadBooks => {
-                                        const newToReadBooks = new Set(prevToReadBooks);
-                                        newToReadBooks.delete(book.id);
-                                        return newToReadBooks;
-                                      });
-                                    }
-                                    console.log(`Toggled read for book ID: ${book.id}`);
-                                    return newReadBooks;
-                                  });
-                                }}
-                                className="absolute top-2 right-2 z-10 p-1.5 bg-black/40 rounded-full text-white/70 hover:text-green-500 hover:bg-black/60 transition-all duration-200 opacity-0 group-hover:opacity-100"
-                                aria-label={readBooks.has(book.id) ? "Okundu listesinden çıkar" : "Okundu listesine ekle"}
-                              >
-                                <Check
-                                  className={`w-4 h-4 transition-colors duration-200 ${
-                                    readBooks.has(book.id) ? 'fill-green-500 text-green-500' : 'text-white/70'
-                                  }`}
-                                />
-                              </button>
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setToReadBooks(prevToReadBooks => {
-                                    const newToReadBooks = new Set(prevToReadBooks);
-                                    if (newToReadBooks.has(book.id)) {
-                                      newToReadBooks.delete(book.id);
-                                    } else {
-                                      newToReadBooks.add(book.id);
-                                      setReadBooks(prevReadBooks => {
-                                        const newReadBooks = new Set(prevReadBooks);
-                                        newReadBooks.delete(book.id);
-                                        return newReadBooks;
-                                      });
-                                    }
-                                    console.log(`Toggled to-read for book ID: ${book.id}`);
-                                    return newToReadBooks;
-                                  });
-                                }}
-                                className="absolute top-2 right-10 z-10 p-1.5 bg-black/40 rounded-full text-white/70 hover:text-blue-500 hover:bg-black/60 transition-all duration-200 opacity-0 group-hover:opacity-100"
-                                aria-label={toReadBooks.has(book.id) ? "Okunacaklar listesinden çıkar" : "Okunacaklar listesine ekle"}
-                              >
-                                <Bookmark
-                                  className={`w-4 h-4 transition-colors duration-200 ${
-                                    toReadBooks.has(book.id) ? 'fill-blue-500 text-blue-500' : 'text-white/70'
-                                  }`}
-                                />
-                              </button>
-                              <Card 
-                                className="relative h-[240px] bg-white border-none shadow-xl hover:shadow-2xl transition-all duration-300 rounded-lg overflow-hidden cursor-pointer"
-                                onClick={() => handleBookClick(book)}
-                              >
-                                <img
-                                  src={book.imageUrl}
+                            <Link href={`/features/book/${book.id}`}>
+                              <div className="relative aspect-[2/3] w-full overflow-hidden rounded-xl shadow-lg transition-all duration-300 group-hover:shadow-xl">
+                                <Image
+                                  src={book.imageUrl ?? "/placeholder.svg"}
                                   alt={book.title}
-                                  className="w-full h-full object-cover"
+                                  fill
+                                  className="object-cover transition-transform duration-300 group-hover:scale-105"
                                 />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                              </Card>
-                              <div className="mt-3 text-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                <p className="font-semibold text-white text-sm mb-1 truncate">{book.title}</p>
-                                <p className="text-white/80 text-xs mb-2 truncate">{book.author}</p>
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                
+                                <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-full transition-transform duration-300 group-hover:translate-y-0">
+                                  <p className="text-white font-medium line-clamp-2 text-sm">{book.title}</p>
+                                  <p className="text-white/80 text-xs mt-1">{book.author}</p>
+                                </div>
+
+                                {/* Status Badge */}
+                                <StatusBadge status={book.status?.toUpperCase() as 'READING' | 'READ' | 'WILL_READ' | 'DROPPED' | null} />
                               </div>
-                            </div>
+                            </Link>
                           </motion.div>
                         ))}
                       </div>
