@@ -200,7 +200,7 @@ export function EventsCalendar({ className }: EventsCalendarProps) {
             <p className="text-red-700">{error}</p>
             {error.includes('giriş yapmanız gerekiyor') && (
               <button
-                onClick={() => window.location.href = '/auth/login'}
+                onClick={() => window.location.href = '/'}
                 className="mt-2 px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
               >
                 Giriş Yap

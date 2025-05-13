@@ -1,6 +1,6 @@
 "use client"
 
-import { BookOpen, Quote, Calendar, BookText, Heart, Share2, Bookmark, BookmarkCheck, MessageCircle, Sparkles, Award } from 'lucide-react'
+import { BookOpen, Quote, Calendar, BookText, Heart, Share2, Bookmark, BookmarkCheck, MessageCircle, Sparkles, Award, Library, X, Check } from 'lucide-react'
 import Image from 'next/image'
 import { useEffect, useState } from 'react'
 import { use } from 'react'
@@ -18,6 +18,7 @@ import { api } from '@/lib/api'
 import { AnimatePresence, motion } from 'framer-motion'
 import { reviewService } from "@/services/reviewService"
 import { emit } from "@/lib/bookEventEmitter"
+import { Library as LibraryIcon } from 'lucide-react'
 
 type PageProps = {
     params: Promise<{ id: string }>
@@ -55,6 +56,8 @@ export default function BookPage({ params }: PageProps) {
     const [showQuoteModal, setShowQuoteModal] = useState(false)
     const [showReviewModal, setShowReviewModal] = useState(false)
     const [activeTab, setActiveTab] = useState('quotes')
+    const [isInLibrary, setIsInLibrary] = useState<boolean>(false)
+    const [updatingLibrary, setUpdatingLibrary] = useState(false)
 
     useEffect(() => {
         const fetchBook = async () => {
@@ -91,6 +94,7 @@ export default function BookPage({ params }: PageProps) {
                     ...data,
                     isFavorite: data.favorite
                 })
+                setIsInLibrary(!!data.inLibrary)
 
                 // Genre'yi kontrol et
                 console.log('Genre after setting book:', data.genre)
@@ -137,20 +141,56 @@ export default function BookPage({ params }: PageProps) {
         fetchReviews();
     }, [resolvedParams.id]);
 
+    useEffect(() => {
+        const checkLibraryStatus = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                const userId = localStorage.getItem('userId');
+
+                if (!token || !userId || !book) return;
+
+                const response = await fetch(`http://localhost:8080/api/books/library/${userId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Kitaplık durumu kontrol edilemedi');
+                }
+
+                const libraryBooks = await response.json();
+                const isBookInLibrary = libraryBooks.some((libraryBook: any) => libraryBook.id === book.id);
+                setIsInLibrary(isBookInLibrary);
+            } catch (error) {
+                console.error('Kitaplık durumu kontrol hatası:', error);
+            }
+        };
+
+        checkLibraryStatus();
+    }, [book]);
+
     const handleStatusChange = async (newStatus: Book['status']) => {
         if (!book) return
 
         try {
             setUpdatingStatus(true)
             const token = localStorage.getItem('token')
+            const userId = localStorage.getItem('userId')
             if (!token) {
                 throw new Error('Oturum bulunamadı')
             }
+            if (!userId) {
+                throw new Error('Kullanıcı bilgisi bulunamadı')
+            }
+
+            // Eğer mevcut durum ile yeni durum aynıysa, durumu sıfırla
+            const statusToUpdate = book.status === newStatus ? null : newStatus
 
             console.log('Durum güncelleme isteği:', {
                 bookId: book.id,
                 currentStatus: book.status,
-                newStatus: newStatus
+                newStatus: statusToUpdate
             })
 
             const response = await fetch(`http://localhost:8080/api/books/${book.id}/status`, {
@@ -159,7 +199,10 @@ export default function BookPage({ params }: PageProps) {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ status: newStatus })
+                body: JSON.stringify({ 
+                    userId, // userId'yi body'de gönder
+                    status: statusToUpdate 
+                })
             })
 
             if (!response.ok) {
@@ -197,7 +240,7 @@ export default function BookPage({ params }: PageProps) {
             
             toast({
                 title: "Başarılı!",
-                description: "Okuma durumu güncellendi.",
+                description: statusToUpdate ? "Okuma durumu güncellendi." : "Okuma durumu kaldırıldı.",
             })
         } catch (err) {
             console.error('Durum güncelleme hatası:', err)
@@ -391,6 +434,48 @@ export default function BookPage({ params }: PageProps) {
         }
     };
 
+    const handleLibraryToggle = async () => {
+        if (!book) return;
+
+        try {
+            setUpdatingLibrary(true);
+            const token = localStorage.getItem('token');
+            const userId = localStorage.getItem('userId');
+
+            if (!token || !userId) {
+                throw new Error('Oturum bulunamadı');
+            }
+
+            const method = isInLibrary ? 'DELETE' : 'POST';
+            const response = await fetch(`http://localhost:8080/api/books/${book.id}/library${method === 'POST' ? `?userId=${userId}` : ''}`, {
+                method,
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(isInLibrary ? 'Kitap kitaplıktan çıkarılamadı' : 'Kitap kitaplığa eklenemedi');
+            }
+
+            setIsInLibrary(!isInLibrary);
+            toast({
+                title: "Başarılı!",
+                description: isInLibrary ? "Kitap kitaplıktan çıkarıldı." : "Kitap kitaplığa eklendi.",
+            });
+        } catch (err) {
+            console.error('Kitaplık işlemi hatası:', err);
+            toast({
+                title: "Hata!",
+                description: err instanceof Error ? err.message : 'İşlem sırasında bir hata oluştu',
+                variant: "destructive",
+            });
+        } finally {
+            setUpdatingLibrary(false);
+        }
+    };
+
     if (loading) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-pink-50 via-rose-50 to-pink-100">
@@ -457,35 +542,61 @@ export default function BookPage({ params }: PageProps) {
                                 </div>
 
                                 {/* Kitap Detayları - Daha ferah */}
-                                <div className="w-full mt-6 bg-white/80 backdrop-blur-sm rounded-2xl p-8
-                  shadow-[0_8px_30px_rgb(0,0,0,0.04)] space-y-6">
-                                    <h3 className="font-medium text-gray-700 mb-6">Kitap Detayları</h3>
-                                    <div className="space-y-4 text-sm">
-                                        {book.publisher && (
-                                            <div className="flex justify-between">
-                                                <span className="text-gray-500">Yayınevi:</span>
-                                                <span className="text-gray-900">{book.publisher}</span>
-                                            </div>
-                                        )}
-                                        {book.language && (
-                                            <div className="flex justify-between">
-                                                <span className="text-gray-500">Dil:</span>
-                                                <span className="text-gray-900">{book.language}</span>
-                                            </div>
-                                        )}
-                                        {book.isbn && (
-                                            <div className="flex justify-between">
-                                                <span className="text-gray-500">ISBN:</span>
-                                                <span className="text-gray-900">{book.isbn}</span>
-                                            </div>
-                                        )}
-                                        {book.firstPublishDate && (
-                                            <div className="flex justify-between">
-                                                <span className="text-gray-500">İlk Basım:</span>
-                                                <span className="text-gray-900">{book.firstPublishDate}</span>
-                                            </div>
-                                        )}
-                                    </div>
+                                <div className="space-y-4 text-sm w-full mt-6">
+                                    {book.publisher && (
+                                        <div className="flex justify-between">
+                                            <span className="text-gray-500">Yayınevi:</span>
+                                            <span className="text-gray-900">{book.publisher}</span>
+                                        </div>
+                                    )}
+                                    {book.language && (
+                                        <div className="flex justify-between">
+                                            <span className="text-gray-500">Dil:</span>
+                                            <span className="text-gray-900">{book.language}</span>
+                                        </div>
+                                    )}
+                                    {book.isbn && (
+                                        <div className="flex justify-between">
+                                            <span className="text-gray-500">ISBN:</span>
+                                            <span className="text-gray-900">{book.isbn}</span>
+                                        </div>
+                                    )}
+                                    {book.firstPublishDate && (
+                                        <div className="flex justify-between">
+                                            <span className="text-gray-500">İlk Basım:</span>
+                                            <span className="text-gray-900">{book.firstPublishDate}</span>
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="flex justify-center mt-3">
+                                    <motion.div
+                                        whileHover={{ scale: 1.04 }}
+                                        whileTap={{ scale: 0.98 }}
+                                        className="w-full"
+                                    >
+                                        <Button
+                                            className="
+                                                relative flex items-center justify-center gap-3 w-full py-4 px-8
+                                                text-base font-semibold rounded-2xl
+                                                bg-gradient-to-r from-purple-500 via-purple-400 to-pink-400
+                                                text-white shadow-lg shadow-purple-400/30
+                                                transition-all duration-300
+                                                hover:from-pink-500 hover:to-purple-600 hover:shadow-xl hover:scale-[1.03]
+                                                focus:outline-none focus:ring-2 focus:ring-purple-300
+                                                border-0
+                                            "
+                                            onClick={handleLibraryToggle}
+                                            disabled={updatingFavorite}
+                                            style={{ minHeight: '56px', minWidth: '200px', letterSpacing: '0.01em' }}
+                                        >
+                                            <span className="flex items-center justify-center">
+                                                <LibraryIcon className={`w-6 h-6 mr-2 ${isInLibrary ? 'text-white' : 'text-purple-100'} transition-colors duration-300`} />
+                                            </span>
+                                            <span className="tracking-wide drop-shadow-sm">
+                                                {isInLibrary ? "Kitaplıktan Çıkar" : "Kitaplığıma Ekle"}
+                                            </span>
+                                        </Button>
+                                    </motion.div>
                                 </div>
 
                                 {/* İstatistikler - Daha minimal */}
@@ -557,7 +668,7 @@ export default function BookPage({ params }: PageProps) {
                                     )}
                                 </div>
 
-                                <div className="flex gap-4 mb-8">
+                                <div className="flex gap-4 flex-wrap md:flex-nowrap mb-8">
                                     <motion.div
                                         whileHover={{ scale: 1.02 }}
                                         whileTap={{ scale: 0.98 }}
@@ -622,22 +733,15 @@ export default function BookPage({ params }: PageProps) {
                                     >
                                         <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 via-pink-500 to-purple-600 rounded-xl blur opacity-0 group-hover:opacity-25 transition duration-1000 group-hover:duration-300"></div>
                                         <Button 
-                                            onClick={() => handleStatusChange("WILL_READ")}
+                                            onClick={() => handleStatusChange(book.status === "WILL_READ" ? null : "WILL_READ")}
                                             className="relative flex items-center gap-3 px-6 py-3 bg-white dark:bg-gray-900 hover:bg-purple-50 dark:hover:bg-gray-800 border border-purple-100 dark:border-purple-800/30 rounded-lg shadow-xl shadow-purple-500/10 hover:shadow-purple-500/20 transition-all duration-300">
-                                            <div className="relative">
+                                            <span className="flex items-center">
                                                 {book?.status === "WILL_READ" ? (
-                                                    <BookmarkCheck className="w-5 h-5 text-purple-500 dark:text-purple-400 group-hover:text-purple-600 dark:group-hover:text-purple-300 transition-colors duration-300" />
+                                                    <BookmarkCheck className="w-5 h-5 text-green-500 dark:text-green-400 group-hover:text-green-600 dark:group-hover:text-green-300 transition-colors duration-300" />
                                                 ) : (
                                                     <Bookmark className="w-5 h-5 text-purple-500 dark:text-purple-400 group-hover:text-purple-600 dark:group-hover:text-purple-300 transition-colors duration-300" />
                                                 )}
-                                                <div className="absolute inset-0 animate-pulse opacity-30 text-purple-500 group-hover:opacity-50">
-                                                    {book?.status === "WILL_READ" ? (
-                                                        <BookmarkCheck className="w-5 h-5" />
-                                                    ) : (
-                                                        <Bookmark className="w-5 h-5" />
-                                                    )}
-                                                </div>
-                                            </div>
+                                            </span>
                                             <span className="font-medium text-gray-700 dark:text-gray-300 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors duration-300">
                                                 {book?.status === "WILL_READ" ? "Okuma Listemde" : "Okuma Listeme Ekle"}
                                             </span>
@@ -838,7 +942,7 @@ export default function BookPage({ params }: PageProps) {
                                                             <QuoteCard
                                                                 key={quote.id}
                                                                 quote={quote}
-                                                                onLike={handleQuoteLike}
+                                                                onLike={(id) => handleQuoteLike(Number(id))}
                                                                 onSave={handleQuoteCreated}
                                                                 onShare={() => handleShareQuote(quote.id)}
                                                             />

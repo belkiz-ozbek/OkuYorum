@@ -9,6 +9,9 @@ import {BookOpen, CheckCircle, Clock, Star, Library as LibraryIcon, Compass, Use
 import { ScratchToReveal } from "@/components/ui/scratch-to-reveal";
 import { useRouter } from "next/navigation";
 import { bookService, ReadingStatus } from "@/services/bookService";
+import { toast } from "@/components/ui/use-toast";
+import Image from "next/image";
+import { StatusBadge } from "@/components/ui/status-badge";
 
 interface Book {
   id: number;
@@ -35,7 +38,7 @@ interface User {
 }
 
 interface LibraryProps {
-  activeTab?: 'all' | 'favorites' | 'to-read' | 'read' | 'borrowed' | 'lending' | 'recommendations';
+  activeTab?: 'all' | 'read' | 'to-read' | 'reading' | 'dropped' | 'borrowed' | 'favorites' | 'lending' | 'recommendations';
 }
 
 const Library = ({ activeTab = 'all' }: LibraryProps): JSX.Element => {
@@ -72,25 +75,74 @@ const Library = ({ activeTab = 'all' }: LibraryProps): JSX.Element => {
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   
+  const fetchBooks = async () => {
+    setLoading(true);
+    try {
+      const userId = localStorage.getItem('userId');
+      const token = localStorage.getItem('token');
+      
+      if (!userId || !token) {
+        setError('Oturum bilgisi bulunamadı');
+        return;
+      }
+
+      const response = await fetch(`http://localhost:8080/api/books/library/${userId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Kitaplar yüklenirken bir hata oluştu');
+      }
+
+      const data = await response.json();
+      setBooks(data);
+      
+      // Kitap durumlarını set'lere ekle
+      const newFavoriteBooks = new Set<number>();
+      const newReadBooks = new Set<number>();
+      const newToReadBooks = new Set<number>();
+      const newBorrowedBooks = new Set<number>();
+
+      data.forEach((book: Book) => {
+        if (book.status === 'favorite') newFavoriteBooks.add(book.id);
+        if (book.status === 'read') newReadBooks.add(book.id);
+        if (book.status === 'will_read') newToReadBooks.add(book.id);
+        if (book.status === 'borrowed') newBorrowedBooks.add(book.id);
+      });
+
+      setFavoriteBooks(newFavoriteBooks);
+      setReadBooks(newReadBooks);
+      setToReadBooks(newToReadBooks);
+      setBorrowedBooks(newBorrowedBooks);
+
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Bir hata oluştu');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     setIsClient(true);
-    setLoading(true);
-    const userId = typeof window !== 'undefined' ? localStorage.getItem('userId') : null;
-    if (!userId) {
-      setError('Kullanıcı bulunamadı');
-      setLoading(false);
-      return;
-    }
-    bookService.getBooks(userId)
-      .then((data) => {
-        setBooks(data);
-        setTotalPages(1);
-        setLoading(false);
-      })
-      .catch((err) => {
-        setError(err.message || "Kitaplar yüklenemedi");
-        setLoading(false);
-      });
+    fetchBooks();
+  }, []);
+
+  useEffect(() => {
+    const handleBookUpdate = () => {
+      fetchBooks();
+    };
+
+    // bookService'den gelen olayları dinle
+    bookService.bookEventEmitter.on('bookStatusUpdated', handleBookUpdate);
+    bookService.bookEventEmitter.on('favoriteUpdated', handleBookUpdate);
+
+    return () => {
+      // Cleanup
+      bookService.bookEventEmitter.off('bookStatusUpdated', handleBookUpdate);
+      bookService.bookEventEmitter.off('favoriteUpdated', handleBookUpdate);
+    };
   }, []);
 
   useEffect(() => {
@@ -123,10 +175,27 @@ const Library = ({ activeTab = 'all' }: LibraryProps): JSX.Element => {
     }
   }, [borrowedBooks, isClient]);
 
-  const filteredBooks = useMemo(() => books.filter(book => {
-    if (activeTab === 'all') return true;
-    return book.status === activeTab;
-  }), [books, activeTab, favoriteBooks, readBooks, toReadBooks, borrowedBooks]);
+  const filteredBooks = useMemo(() => {
+    if (!books) return [];
+    
+    switch (activeTab) {
+      case 'all':
+        // Sadece kitaplığa eklenmiş kitapları göster
+        return books;
+      case 'read':
+        return books.filter(book => book.status === 'read');
+      case 'to-read':
+        return books.filter(book => book.status === 'will_read');
+      case 'reading':
+        return books.filter(book => book.status === 'reading');
+      case 'dropped':
+        return books.filter(book => book.status === 'dropped');
+      case 'borrowed':
+        return books.filter(book => book.status === 'borrowed');
+      default:
+        return books;
+    }
+  }, [books, activeTab]);
 
    
   const renderStars = (rating: number = 0) => {
@@ -180,41 +249,41 @@ const Library = ({ activeTab = 'all' }: LibraryProps): JSX.Element => {
   }, [books, revealedBook]);
 
   const handleBookClick = (book: Book) => {
-    setSelectedBook(book);
-    if (activeTab === 'all') {
-      setShowLendModal(true);
-    } else if (activeTab === 'borrowed') {
-      setShowBorrowerModal(true);
-    }
+    router.push(`/features/book/${book.id}`);
   };
 
-  const handleLendBook = () => {
+  const handleLendBook = async () => {
     if (!selectedUser || !selectedBook) {
       alert('Lütfen bir kullanıcı seçin');
       return;
     }
 
-    const selectedUserData = users.find(user => user.nameSurname === selectedUser);
-    
-    const updatedBooks = books.map((b) => {
-      if (b.id === selectedBook.id) {
-        return {
-          ...b,
-          status: "borrowed" as const,
-          borrowedBy: selectedUser,
-          borrower: {
-            id: selectedUserData?.id || 0,
-            name: selectedUser
-          }
-        };
-      }
-      return b;
-    });
+    try {
+      const selectedUserData = users.find(user => user.nameSurname === selectedUser);
+      
+      const response = await fetch(`http://localhost:8080/api/books/${selectedBook.id}/lend`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          borrowerId: selectedUserData?.id,
+          borrowerName: selectedUser
+        })
+      });
 
-    setBooks(updatedBooks);
-    localStorage.setItem('books', JSON.stringify(updatedBooks));
-    setSelectedUser('');
-    setShowLendModal(false);
+      if (!response.ok) {
+        throw new Error('Kitap ödünç verme işlemi başarısız oldu');
+      }
+
+      await fetchBooks(); // Kitapları yeniden yükle
+      setSelectedUser('');
+      setShowLendModal(false);
+    } catch (error) {
+      console.error('Ödünç verme hatası:', error);
+      alert('Kitap ödünç verme işlemi sırasında bir hata oluştu');
+    }
   };
 
   const handleSubmitFeedback = () => {
@@ -283,6 +352,43 @@ const Library = ({ activeTab = 'all' }: LibraryProps): JSX.Element => {
     );
   };
 
+  const handleStatusChange = async (bookId: number, status: ReadingStatus) => {
+    try {
+      const token = localStorage.getItem('token');
+      const userId = localStorage.getItem('userId');
+
+      if (!token || !userId) {
+        throw new Error('Oturum bilgisi bulunamadı');
+      }
+
+      const response = await fetch(`http://localhost:8080/api/books/${bookId}/status`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          userId: parseInt(userId),
+          status
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Kitap durumu güncellenirken bir hata oluştu');
+      }
+
+      // Kitapları yeniden yükle
+      await fetchBooks();
+    } catch (error) {
+      console.error('Status güncelleme hatası:', error);
+      toast({
+        title: 'Hata',
+        description: error instanceof Error ? error.message : 'Bir hata oluştu',
+        variant: 'destructive'
+      });
+    }
+  };
+
   if (loading) return <div>Kitaplar yükleniyor...</div>;
   if (error) return <div>Hata: {error}</div>;
 
@@ -316,23 +422,6 @@ const Library = ({ activeTab = 'all' }: LibraryProps): JSX.Element => {
             </Link>
 
             <Link
-              href="/features/library/read"
-              className={`flex items-center gap-2 px-4 py-3 transition-all duration-300 border-l-4 ${
-                activeTab === 'read'
-                  ? 'bg-primary/10 border-primary text-primary'
-                  : 'border-transparent text-muted-foreground hover:bg-primary/5 hover:border-primary/50'
-              }`}
-            >
-              <CheckCircle className="w-5 h-5 flex-shrink-0" />
-              <div className={`transition-all duration-300 ${isSidebarOpen ? 'opacity-100' : 'opacity-0 w-0'}`}>
-                <span className="font-medium text-sm">Okunanlar</span>
-                <span className="ml-auto text-xs bg-primary/20 px-2 py-0.5 rounded-full">
-                  {getTabCount('read')}
-                </span>
-              </div>
-            </Link>
-
-            <Link
               href="/features/lending"
               className={`flex items-center gap-2 px-4 py-3 transition-all duration-300 border-l-4 ${
                 activeTab === 'lending'
@@ -347,7 +436,7 @@ const Library = ({ activeTab = 'all' }: LibraryProps): JSX.Element => {
             </Link>
 
             <Link
-              href="/features/book-recommendations"
+              href="/features/recommendations"
               className={`flex items-center gap-2 px-4 py-3 transition-all duration-300 border-l-4 ${
                 activeTab === 'recommendations'
                   ? 'bg-primary/10 border-primary text-primary'
@@ -383,89 +472,29 @@ const Library = ({ activeTab = 'all' }: LibraryProps): JSX.Element => {
                         {filteredBooks.slice(shelf * 8, (shelf + 1) * 8).map((book) => (
                           <motion.div
                             key={book.id}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            whileHover={{
-                              y: -12,
-                              scale: 1.1,
-                              transition: { duration: 0.2 },
-                              zIndex: 20
-                            }}
-                            className="transform origin-bottom"
+                            className="group relative flex flex-col"
+                            whileHover={{ y: -5 }}
+                            transition={{ duration: 0.2 }}
                           >
-                            <div className="relative group">
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setReadBooks(prevReadBooks => {
-                                    const newReadBooks = new Set(prevReadBooks);
-                                    if (newReadBooks.has(book.id)) {
-                                      newReadBooks.delete(book.id);
-                                    } else {
-                                      newReadBooks.add(book.id);
-                                      setToReadBooks(prevToReadBooks => {
-                                        const newToReadBooks = new Set(prevToReadBooks);
-                                        newToReadBooks.delete(book.id);
-                                        return newToReadBooks;
-                                      });
-                                    }
-                                    console.log(`Toggled read for book ID: ${book.id}`);
-                                    return newReadBooks;
-                                  });
-                                }}
-                                className="absolute top-2 right-2 z-10 p-1.5 bg-black/40 rounded-full text-white/70 hover:text-green-500 hover:bg-black/60 transition-all duration-200 opacity-0 group-hover:opacity-100"
-                                aria-label={readBooks.has(book.id) ? "Okundu listesinden çıkar" : "Okundu listesine ekle"}
-                              >
-                                <Check
-                                  className={`w-4 h-4 transition-colors duration-200 ${
-                                    readBooks.has(book.id) ? 'fill-green-500 text-green-500' : 'text-white/70'
-                                  }`}
-                                />
-                              </button>
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setToReadBooks(prevToReadBooks => {
-                                    const newToReadBooks = new Set(prevToReadBooks);
-                                    if (newToReadBooks.has(book.id)) {
-                                      newToReadBooks.delete(book.id);
-                                    } else {
-                                      newToReadBooks.add(book.id);
-                                      setReadBooks(prevReadBooks => {
-                                        const newReadBooks = new Set(prevReadBooks);
-                                        newReadBooks.delete(book.id);
-                                        return newReadBooks;
-                                      });
-                                    }
-                                    console.log(`Toggled to-read for book ID: ${book.id}`);
-                                    return newToReadBooks;
-                                  });
-                                }}
-                                className="absolute top-2 right-10 z-10 p-1.5 bg-black/40 rounded-full text-white/70 hover:text-blue-500 hover:bg-black/60 transition-all duration-200 opacity-0 group-hover:opacity-100"
-                                aria-label={toReadBooks.has(book.id) ? "Okunacaklar listesinden çıkar" : "Okunacaklar listesine ekle"}
-                              >
-                                <Bookmark
-                                  className={`w-4 h-4 transition-colors duration-200 ${
-                                    toReadBooks.has(book.id) ? 'fill-blue-500 text-blue-500' : 'text-white/70'
-                                  }`}
-                                />
-                              </button>
-                              <Card 
-                                className="relative h-[240px] bg-white border-none shadow-xl hover:shadow-2xl transition-all duration-300 rounded-lg overflow-hidden cursor-pointer"
-                                onClick={() => handleBookClick(book)}
-                              >
-                                <img
-                                  src={book.imageUrl}
+                            <Link href={`/features/book/${book.id}`}>
+                              <div className="relative aspect-[2/3] w-full overflow-hidden rounded-xl shadow-lg transition-all duration-300 group-hover:shadow-xl">
+                                <Image
+                                  src={book.imageUrl ?? "/placeholder.svg"}
                                   alt={book.title}
-                                  className="w-full h-full object-cover"
+                                  fill
+                                  className="object-cover transition-transform duration-300 group-hover:scale-105"
                                 />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                              </Card>
-                              <div className="mt-3 text-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                <p className="font-semibold text-white text-sm mb-1 truncate">{book.title}</p>
-                                <p className="text-white/80 text-xs mb-2 truncate">{book.author}</p>
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                
+                                <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-full transition-transform duration-300 group-hover:translate-y-0">
+                                  <p className="text-white font-medium line-clamp-2 text-sm">{book.title}</p>
+                                  <p className="text-white/80 text-xs mt-1">{book.author}</p>
+                                </div>
+
+                                {/* Status Badge */}
+                                <StatusBadge status={book.status?.toUpperCase() as 'READING' | 'READ' | 'WILL_READ' | 'DROPPED' | null} />
                               </div>
-                            </div>
+                            </Link>
                           </motion.div>
                         ))}
                       </div>

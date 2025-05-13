@@ -18,7 +18,6 @@ import { reviewService } from "@/services/reviewService"
 import { postService } from "@/services/postService"
 import { toast } from "sonner"
 import { BookSearch } from "@/components/ui/book-search"
-import { useQueryClient } from "@tanstack/react-query"
 
 type BookInfo = {
   title: string
@@ -61,7 +60,6 @@ export function CreateContentDialog({ open, onOpenChange }: CreateContentDialogP
       content: "",
     }
   })
-  const queryClient = useQueryClient()
 
   const handleInputChange = (tab: string, field: string, value: string | number) => {
     setFormData((prev) => ({
@@ -119,9 +117,6 @@ export function CreateContentDialog({ open, onOpenChange }: CreateContentDialogP
           
           console.log("Alıntı başarıyla oluşturuldu");
           toast.success("Alıntı başarıyla paylaşıldı")
-          
-          // Invalidate related queries
-          queryClient.invalidateQueries({ queryKey: ['discover'] })
         } catch (error: unknown) {
           console.error("Alıntı oluşturulurken hata:", error);
           toast.error(`Alıntı oluşturulamadı: ${getErrorMessage(error)}`);
@@ -150,9 +145,6 @@ export function CreateContentDialog({ open, onOpenChange }: CreateContentDialogP
           
           console.log("İnceleme başarıyla oluşturuldu");
           toast.success("İnceleme başarıyla paylaşıldı")
-          
-          // Invalidate related queries
-          queryClient.invalidateQueries({ queryKey: ['discover'] })
         } catch (error: unknown) {
           console.error("İnceleme oluşturulurken hata:", error);
           toast.error(`İnceleme oluşturulamadı: ${getErrorMessage(error)}`);
@@ -179,9 +171,6 @@ export function CreateContentDialog({ open, onOpenChange }: CreateContentDialogP
           
           console.log("İleti başarıyla oluşturuldu");
           toast.success("İleti başarıyla paylaşıldı")
-          
-          // Invalidate related queries
-          queryClient.invalidateQueries({ queryKey: ['discover'] })
         } catch (error: unknown) {
           console.error("İleti oluşturulurken hata:", error);
           toast.error(`İleti oluşturulamadı: ${getErrorMessage(error)}`);

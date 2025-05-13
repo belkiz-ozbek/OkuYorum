@@ -10,7 +10,8 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json; charset=utf-8',
   },
-  timeout: 15000, // 15 saniye zaman aşımı
+  withCredentials: true, // CORS için önemli
+  timeout: 60000, // 60 saniye zaman aşımı
   timeoutErrorMessage: 'İstek zaman aşımına uğradı, lütfen daha sonra tekrar deneyin.'
 })
 
@@ -63,14 +64,15 @@ api.interceptors.response.use(
         responseData: error.response?.data,
         headers: error.config?.headers
       };
-      
+
       console.error('API Error Details:', errorData);
-      
+
       switch (error.response.status) {
         case 401:
           console.error('Yetkilendirme hatası: Oturum süresi dolmuş olabilir')
           if (typeof window !== 'undefined') {
             localStorage.removeItem('token')
+            localStorage.removeItem('userId')
             // window.location.href = '/'
           }
           break
@@ -80,6 +82,8 @@ api.interceptors.response.use(
             headers: error.config?.headers,
             data: error.config?.data
           })
+            localStorage.removeItem('token')
+            localStorage.removeItem('userId')
           break
         case 404:
           console.error('İstenen kaynak bulunamadı')
@@ -97,7 +101,7 @@ api.interceptors.response.use(
       // İstek oluşturulurken bir şeyler yanlış gitti
       console.error('İstek hatası:', error.message)
     }
-    
+
     return Promise.reject(error)
   }
 )

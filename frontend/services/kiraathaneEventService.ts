@@ -150,7 +150,7 @@ const kiraathaneEventService = {
             if (error.response?.status === 401) {
                 // Token geçersiz veya eksik, kullanıcıyı logout yap
                 localStorage.removeItem('token');
-                window.location.href = '/login';
+                window.location.href = '/';
                 throw new Error('Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.');
             }
             if (error.response?.status === 409) {

@@ -1,0 +1,346 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="add-new-books-2025" author="belkiz.ozbek">
+        <insert tableName="books">
+            <column name="title" value="Atomik Alışkanlıklar"/>
+            <column name="author" value="James Clear"/>
+            <column name="summary" value="Küçük değişikliklerle büyük sonuçlar elde etmenin bilimsel yöntemleri."/>
+            <column name="genre" value="Kişisel Gelişim"/>
+            <column name="created_at" value="2025-05-13 00:00:00.000000"/>
+            <column name="updated_at" value="2025-05-13 00:00:00.000000"/>
+            <column name="google_books_id" value="atomic_habits_01"/>
+            <column name="image_url" value="https://r2.1k-cdn.com/sig/size:96/plain/https%3A%2F%2F1k-cdn.com%2Fresimler%2Fkitaplar%2F568685_46d4d_1588932191.jpg"/>
+            <column name="published_date" value="2018-01-01"/>
+            <column name="page_count" value="320"/>
+        </insert>
+
+        <insert tableName="books">
+            <column name="title" value="Dijital Minimalizm"/>
+            <column name="author" value="Cal Newport"/>
+            <column name="summary" value="Teknoloji çağında sade ve odaklı bir yaşam sürmek için pratik öneriler."/>
+            <column name="genre" value="Kişisel Gelişim"/>
+            <column name="created_at" value="2025-05-13 00:00:00.000000"/>
+            <column name="updated_at" value="2025-05-13 00:00:00.000000"/>
+            <column name="google_books_id" value="digital_min_01"/>
+            <column name="image_url" value="https://r2.1k-cdn.com/sig/size:96/plain/https%3A%2F%2F1k-cdn.com%2Fresimler%2Fkitaplar%2F27823_1709455067_LgVS1.jpg"/>
+            <column name="published_date" value="2019-01-01"/>
+            <column name="page_count" value="284"/>
+        </insert>
+
+        <insert tableName="books">
+            <column name="title" value="Kendine İyi Davran Güzel Düşün"/>
+            <column name="author" value="Beyhan Budak"/>
+            <column name="summary" value="Günlük hayatta karşılaşılan psikolojik zorlukları aşmak için pratik öneriler."/>
+            <column name="genre" value="Psikoloji"/>
+            <column name="created_at" value="2025-05-13 00:00:00.000000"/>
+            <column name="updated_at" value="2025-05-13 00:00:00.000000"/>
+            <column name="google_books_id" value="kendine_iyi_01"/>
+            <column name="image_url" value="https://r2.1k-cdn.com/sig/size:96/plain/https%3A%2F%2F1k-cdn.com%2Fresimler%2Fkitaplar%2F27823_1721919603_AuhLf.jpg"/>
+            <column name="published_date" value="2021-01-01"/>
+            <column name="page_count" value="208"/>
+        </insert>
+
+        <insert tableName="books">
+            <column name="title" value="Yapay Zeka"/>
+            <column name="author" value="Meltem Dinçer"/>
+            <column name="summary" value="Yapay zekanın temellerini ve günlük hayatımıza etkilerini anlatan kapsamlı bir rehber."/>
+            <column name="genre" value="Bilim"/>
+            <column name="created_at" value="2025-05-13 00:00:00.000000"/>
+            <column name="updated_at" value="2025-05-13 00:00:00.000000"/>
+            <column name="google_books_id" value="ai_basics_01"/>
+            <column name="image_url" value="https://r2.1k-cdn.com/sig/size:96/plain/https%3A%2F%2F1k-cdn.com%2Fresimler%2Fkitaplar%2F27823_2906d_1608143858.jpg"/>
+            <column name="published_date" value="2023-01-01"/>
+            <column name="page_count" value="256"/>
+        </insert>
+
+        <insert tableName="books">
+            <column name="title" value="Beyin: Senin Hikayen"/>
+            <column name="author" value="David Eagleman"/>
+            <column name="summary" value="İnsan beyninin gizemlerini ve çalışma prensiplerini anlatan sürükleyici bir bilim kitabı."/>
+            <column name="genre" value="Bilim"/>
+            <column name="created_at" value="2025-05-13 00:00:00.000000"/>
+            <column name="updated_at" value="2025-05-13 00:00:00.000000"/>
+            <column name="google_books_id" value="brain_story_01"/>
+            <column name="image_url" value="https://r2.1k-cdn.com/sig/size:96/plain/https%3A%2F%2F1k-cdn.com%2Fresimler%2Fkitaplar%2F27823_1708166890_2xbNH.jpg"/>
+            <column name="published_date" value="2020-01-01"/>
+            <column name="page_count" value="352"/>
+        </insert>
+
+        <insert tableName="books">
+            <column name="title" value="Metaverse"/>
+            <column name="author" value="Matthew Ball"/>
+            <column name="summary" value="Sanal gerçeklik ve artırılmış gerçeklik teknolojilerinin geleceğini anlatan kapsamlı bir inceleme."/>
+            <column name="genre" value="Teknoloji"/>
+            <column name="created_at" value="2025-05-13 00:00:00.000000"/>
+            <column name="updated_at" value="2025-05-13 00:00:00.000000"/>
+            <column name="google_books_id" value="metaverse_01"/>
+            <column name="image_url" value="https://r2.1k-cdn.com/sig/size:96/plain/https%3A%2F%2F1k-cdn.com%2Fresimler%2Fkitaplar%2F27823_1720352639_Zeblw.jpg"/>
+            <column name="published_date" value="2022-01-01"/>
+            <column name="page_count" value="352"/>
+        </insert>
+
+        <insert tableName="books">
+            <column name="title" value="Sıfır Atık Yaşam"/>
+            <column name="author" value="Bea Johnson"/>
+            <column name="summary" value="Sürdürülebilir bir yaşam için pratik öneriler ve deneyimler."/>
+            <column name="genre" value="Yaşam"/>
+            <column name="created_at" value="2025-05-13 00:00:00.000000"/>
+            <column name="updated_at" value="2025-05-13 00:00:00.000000"/>
+            <column name="google_books_id" value="zero_waste_01"/>
+            <column name="image_url" value="https://r2.1k-cdn.com/sig/size:96/plain/https%3A%2F%2F1k-cdn.com%2Fresimler%2Fkitaplar%2F27823_1709455067_LgVS1.jpg"/>
+            <column name="published_date" value="2021-01-01"/>
+            <column name="page_count" value="304"/>
+        </insert>
+
+        <insert tableName="books">
+            <column name="title" value="Sessizliğin Gücü"/>
+            <column name="author" value="Susan Cain"/>
+            <column name="summary" value="İçe dönük kişiliğin avantajlarını ve toplumsal önemini anlatan çarpıcı bir araştırma."/>
+            <column name="genre" value="Psikoloji"/>
+            <column name="created_at" value="2025-05-13 00:00:00.000000"/>
+            <column name="updated_at" value="2025-05-13 00:00:00.000000"/>
+            <column name="google_books_id" value="quiet_power_01"/>
+            <column name="image_url" value="https://r2.1k-cdn.com/sig/size:96/plain/https%3A%2F%2F1k-cdn.com%2Fresimler%2Fkitaplar%2F27823_1721919603_AuhLf.jpg"/>
+            <column name="published_date" value="2012-01-01"/>
+            <column name="page_count" value="352"/>
+        </insert>
+
+        <insert tableName="books">
+            <column name="title" value="Duygusal Zeka"/>
+            <column name="author" value="Daniel Goleman"/>
+            <column name="summary" value="Duygusal zekanın önemi ve geliştirme yöntemleri üzerine klasikleşmiş bir eser."/>
+            <column name="genre" value="Psikoloji"/>
+            <column name="created_at" value="2025-05-13 00:00:00.000000"/>
+            <column name="updated_at" value="2025-05-13 00:00:00.000000"/>
+            <column name="google_books_id" value="emotional_iq_01"/>
+            <column name="image_url" value="https://r2.1k-cdn.com/sig/size:96/plain/https%3A%2F%2F1k-cdn.com%2Fresimler%2Fkitaplar%2F27823_2906d_1608143858.jpg"/>
+            <column name="published_date" value="1995-01-01"/>
+            <column name="page_count" value="368"/>
+        </insert>
+
+        <insert tableName="books">
+            <column name="title" value="Evrenin Kısa Tarihi"/>
+            <column name="author" value="Carlo Rovelli"/>
+            <column name="summary" value="Modern fiziğin temel kavramlarını herkesin anlayabileceği şekilde açıklayan popüler bilim kitabı."/>
+            <column name="genre" value="Bilim"/>
+            <column name="created_at" value="2025-05-13 00:00:00.000000"/>
+            <column name="updated_at" value="2025-05-13 00:00:00.000000"/>
+            <column name="google_books_id" value="universe_short_01"/>
+            <column name="image_url" value="https://r2.1k-cdn.com/sig/size:96/plain/https%3A%2F%2F1k-cdn.com%2Fresimler%2Fkitaplar%2F27823_1708166890_2xbNH.jpg"/>
+            <column name="published_date" value="2016-01-01"/>
+            <column name="page_count" value="96"/>
+        </insert>
+
+        <insert tableName="books">
+            <column name="title" value="Hayvanlardan Tanrılara: Sapiens"/>
+            <column name="author" value="Yuval Noah Harari"/>
+            <column name="summary" value="İnsanlığın evrimsel yolculuğunu ve medeniyetin gelişimini anlatan çığır açıcı bir eser."/>
+            <column name="genre" value="Tarih"/>
+            <column name="created_at" value="2025-05-13 00:00:00.000000"/>
+            <column name="updated_at" value="2025-05-13 00:00:00.000000"/>
+            <column name="google_books_id" value="sapiens_01"/>
+            <column name="image_url" value="https://r2.1k-cdn.com/sig/size:96/plain/https%3A%2F%2F1k-cdn.com%2Fresimler%2Fkitaplar%2F27823_1708166890_2xbNH.jpg"/>
+            <column name="published_date" value="2011-01-01"/>
+            <column name="page_count" value="544"/>
+        </insert>
+
+        <insert tableName="books">
+            <column name="title" value="Mindset: Yeni Bir Psikoloji"/>
+            <column name="author" value="Carol S. Dweck"/>
+            <column name="summary" value="Başarı ve mutluluğun sırrının düşünce yapımızda yattığını anlatan, bilimsel araştırmalara dayalı bir kişisel gelişim kitabı."/>
+            <column name="genre" value="Psikoloji"/>
+            <column name="created_at" value="2025-05-13 00:00:00.000000"/>
+            <column name="updated_at" value="2025-05-13 00:00:00.000000"/>
+            <column name="google_books_id" value="mindset_01"/>
+            <column name="image_url" value="https://r2.1k-cdn.com/sig/size:96/plain/https%3A%2F%2F1k-cdn.com%2Fresimler%2Fkitaplar%2F27823_1709455067_LgVS1.jpg"/>
+            <column name="published_date" value="2006-01-01"/>
+            <column name="page_count" value="288"/>
+        </insert>
+
+        <insert tableName="books">
+            <column name="title" value="Fahrenheit 451"/>
+            <column name="author" value="Ray Bradbury"/>
+            <column name="summary" value="Kitapların yasaklandığı ve yakıldığı distopik bir gelecekte geçen, düşünce özgürlüğünü savunan klasik bir roman."/>
+            <column name="genre" value="Bilim Kurgu"/>
+            <column name="created_at" value="2025-05-13 00:00:00.000000"/>
+            <column name="updated_at" value="2025-05-13 00:00:00.000000"/>
+            <column name="google_books_id" value="fahrenheit_01"/>
+            <column name="image_url" value="https://r2.1k-cdn.com/sig/size:96/plain/https%3A%2F%2F1k-cdn.com%2Fresimler%2Fkitaplar%2F27823_1721919603_AuhLf.jpg"/>
+            <column name="published_date" value="1953-01-01"/>
+            <column name="page_count" value="256"/>
+        </insert>
+
+        <insert tableName="books">
+            <column name="title" value="Cesur Yeni Dünya"/>
+            <column name="author" value="Aldous Huxley"/>
+            <column name="summary" value="Teknolojinin ve toplumsal kontrolün doruk noktasına ulaştığı bir gelecekte geçen, modern toplumu eleştiren distopik roman."/>
+            <column name="genre" value="Bilim Kurgu"/>
+            <column name="created_at" value="2025-05-13 00:00:00.000000"/>
+            <column name="updated_at" value="2025-05-13 00:00:00.000000"/>
+            <column name="google_books_id" value="brave_new_world_01"/>
+            <column name="image_url" value="https://r2.1k-cdn.com/sig/size:96/plain/https%3A%2F%2F1k-cdn.com%2Fresimler%2Fkitaplar%2F27823_1720352639_Zeblw.jpg"/>
+            <column name="published_date" value="1932-01-01"/>
+            <column name="page_count" value="288"/>
+        </insert>
+
+        <insert tableName="books">
+            <column name="title" value="Siddhartha"/>
+            <column name="author" value="Hermann Hesse"/>
+            <column name="summary" value="Genç bir Brahman'ın aydınlanma arayışını anlatan, Doğu felsefesini Batı edebiyatıyla buluşturan spiritüel bir roman."/>
+            <column name="genre" value="Roman"/>
+            <column name="created_at" value="2025-05-13 00:00:00.000000"/>
+            <column name="updated_at" value="2025-05-13 00:00:00.000000"/>
+            <column name="google_books_id" value="siddhartha_01"/>
+            <column name="image_url" value="https://r2.1k-cdn.com/sig/size:96/plain/https%3A%2F%2F1k-cdn.com%2Fresimler%2Fkitaplar%2F27823_2906d_1608143858.jpg"/>
+            <column name="published_date" value="1922-01-01"/>
+            <column name="page_count" value="152"/>
+        </insert>
+
+        <insert tableName="books">
+            <column name="title" value="Saatleri Ayarlama Enstitüsü"/>
+            <column name="author" value="Ahmet Hamdi Tanpınar"/>
+            <column name="summary" value="Modern Türk toplumunun Doğu-Batı çatışmasını ve değişim sürecini ironik bir dille anlatan başyapıt."/>
+            <column name="genre" value="Roman"/>
+            <column name="created_at" value="2025-05-13 00:00:00.000000"/>
+            <column name="updated_at" value="2025-05-13 00:00:00.000000"/>
+            <column name="google_books_id" value="saatleri_ayarlama_01"/>
+            <column name="image_url" value="https://r2.1k-cdn.com/sig/size:96/plain/https%3A%2F%2F1k-cdn.com%2Fresimler%2Fkitaplar%2F27823_saatleri_ayarlama_1588932191.jpg"/>
+            <column name="published_date" value="1961-01-01"/>
+            <column name="page_count" value="382"/>
+        </insert>
+
+        <insert tableName="books">
+            <column name="title" value="Dune"/>
+            <column name="author" value="Frank Herbert"/>
+            <column name="summary" value="Uzak bir gelecekte geçen, politika, din ve ekolojiyi harmanlayan epik bilim kurgu klasiği."/>
+            <column name="genre" value="Bilim Kurgu"/>
+            <column name="created_at" value="2025-05-13 00:00:00.000000"/>
+            <column name="updated_at" value="2025-05-13 00:00:00.000000"/>
+            <column name="google_books_id" value="dune_01"/>
+            <column name="image_url" value="https://r2.1k-cdn.com/sig/size:96/plain/https%3A%2F%2F1k-cdn.com%2Fresimler%2Fkitaplar%2F27823_dune_1588932191.jpg"/>
+            <column name="published_date" value="1965-01-01"/>
+            <column name="page_count" value="412"/>
+        </insert>
+
+        <insert tableName="books">
+            <column name="title" value="Beyaz Diş"/>
+            <column name="author" value="Jack London"/>
+            <column name="summary" value="Vahşi doğada bir kurt köpeğinin hayatta kalma mücadelesini ve evcilleşme sürecini anlatan klasik."/>
+            <column name="genre" value="Macera"/>
+            <column name="created_at" value="2025-05-13 00:00:00.000000"/>
+            <column name="updated_at" value="2025-05-13 00:00:00.000000"/>
+            <column name="google_books_id" value="beyaz_dis_01"/>
+            <column name="image_url" value="https://r2.1k-cdn.com/sig/size:96/plain/https%3A%2F%2F1k-cdn.com%2Fresimler%2Fkitaplar%2F27823_beyaz_dis_1588932191.jpg"/>
+            <column name="published_date" value="1906-01-01"/>
+            <column name="page_count" value="298"/>
+        </insert>
+
+        <insert tableName="books">
+            <column name="title" value="Sherlock Holmes: Dörtlerin İmzası"/>
+            <column name="author" value="Arthur Conan Doyle"/>
+            <column name="summary" value="Ünlü dedektif Sherlock Holmes'un en etkileyici vakalarından biri olan gizemli bir cinayetin çözümü."/>
+            <column name="genre" value="Polisiye"/>
+            <column name="created_at" value="2025-05-13 00:00:00.000000"/>
+            <column name="updated_at" value="2025-05-13 00:00:00.000000"/>
+            <column name="google_books_id" value="sherlock_dortler_01"/>
+            <column name="image_url" value="https://r2.1k-cdn.com/sig/size:96/plain/https%3A%2F%2F1k-cdn.com%2Fresimler%2Fkitaplar%2F27823_sherlock_1588932191.jpg"/>
+            <column name="published_date" value="1890-01-01"/>
+            <column name="page_count" value="156"/>
+        </insert>
+
+        <insert tableName="books">
+            <column name="title" value="Otomatik Portakal"/>
+            <column name="author" value="Anthony Burgess"/>
+            <column name="summary" value="Şiddet, özgür irade ve toplumsal kontrol temalarını işleyen, distopik bir gelecekte geçen kült roman."/>
+            <column name="genre" value="Distopya"/>
+            <column name="created_at" value="2025-05-13 00:00:00.000000"/>
+            <column name="updated_at" value="2025-05-13 00:00:00.000000"/>
+            <column name="google_books_id" value="otomatik_portakal_01"/>
+            <column name="image_url" value="https://r2.1k-cdn.com/sig/size:96/plain/https%3A%2F%2F1k-cdn.com%2Fresimler%2Fkitaplar%2F27823_otomatik_portakal_1588932191.jpg"/>
+            <column name="published_date" value="1962-01-01"/>
+            <column name="page_count" value="192"/>
+        </insert>
+
+        <insert tableName="books">
+            <column name="title" value="İnce Memed"/>
+            <column name="author" value="Yaşar Kemal"/>
+            <column name="summary" value="Toroslar'da bir eşkıyanın adaleti sağlama mücadelesini anlatan, Türk edebiyatının başyapıtlarından."/>
+            <column name="genre" value="Roman"/>
+            <column name="created_at" value="2025-05-13 00:00:00.000000"/>
+            <column name="updated_at" value="2025-05-13 00:00:00.000000"/>
+            <column name="google_books_id" value="ince_memed_01"/>
+            <column name="image_url" value="https://r2.1k-cdn.com/sig/size:96/plain/https%3A%2F%2F1k-cdn.com%2Fresimler%2Fkitaplar%2F27823_ince_memed_1588932191.jpg"/>
+            <column name="published_date" value="1955-01-01"/>
+            <column name="page_count" value="404"/>
+        </insert>
+
+        <insert tableName="books">
+            <column name="title" value="Sineklerin Tanrısı"/>
+            <column name="author" value="William Golding"/>
+            <column name="summary" value="Issız bir adada mahsur kalan çocukların medeniyet ve vahşet arasındaki ince çizgideki mücadelesi."/>
+            <column name="genre" value="Roman"/>
+            <column name="created_at" value="2025-05-13 00:00:00.000000"/>
+            <column name="updated_at" value="2025-05-13 00:00:00.000000"/>
+            <column name="google_books_id" value="sineklerin_tanrisi_01"/>
+            <column name="image_url" value="https://r2.1k-cdn.com/sig/size:96/plain/https%3A%2F%2F1k-cdn.com%2Fresimler%2Fkitaplar%2F27823_sineklerin_tanrisi_1588932191.jpg"/>
+            <column name="published_date" value="1954-01-01"/>
+            <column name="page_count" value="262"/>
+        </insert>
+
+        <insert tableName="books">
+            <column name="title" value="Puslu Kıtalar Atlası"/>
+            <column name="author" value="İhsan Oktay Anar"/>
+            <column name="summary" value="17. yüzyıl İstanbul'unda geçen, gerçeklik ve hayal gücünün iç içe geçtiği büyülü bir roman."/>
+            <column name="genre" value="Roman"/>
+            <column name="created_at" value="2025-05-13 00:00:00.000000"/>
+            <column name="updated_at" value="2025-05-13 00:00:00.000000"/>
+            <column name="google_books_id" value="puslu_kitalar_01"/>
+            <column name="image_url" value="https://r2.1k-cdn.com/sig/size:96/plain/https%3A%2F%2F1k-cdn.com%2Fresimler%2Fkitaplar%2F27823_puslu_kitalar_1588932191.jpg"/>
+            <column name="published_date" value="1995-01-01"/>
+            <column name="page_count" value="238"/>
+        </insert>
+
+        <insert tableName="books">
+            <column name="title" value="Yüzyıllık Yalnızlık"/>
+            <column name="author" value="Gabriel García Márquez"/>
+            <column name="summary" value="Buendia ailesinin yedi kuşak boyunca süren destansı hikayesi ve büyülü gerçekçiliğin başyapıtı."/>
+            <column name="genre" value="Roman"/>
+            <column name="created_at" value="2025-05-13 00:00:00.000000"/>
+            <column name="updated_at" value="2025-05-13 00:00:00.000000"/>
+            <column name="google_books_id" value="yuzyillik_yalnizlik_01"/>
+            <column name="image_url" value="https://r2.1k-cdn.com/sig/size:96/plain/https%3A%2F%2F1k-cdn.com%2Fresimler%2Fkitaplar%2F27823_yuzyillik_yalnizlik_1588932191.jpg"/>
+            <column name="published_date" value="1967-01-01"/>
+            <column name="page_count" value="464"/>
+        </insert>
+
+        <insert tableName="books">
+            <column name="title" value="Momo"/>
+            <column name="author" value="Michael Ende"/>
+            <column name="summary" value="Zamanı çalan gri adamlara karşı küçük bir kızın mücadelesini anlatan felsefi bir masal."/>
+            <column name="genre" value="Roman"/>
+            <column name="created_at" value="2025-05-13 00:00:00.000000"/>
+            <column name="updated_at" value="2025-05-13 00:00:00.000000"/>
+            <column name="google_books_id" value="momo_01"/>
+            <column name="image_url" value="https://r2.1k-cdn.com/sig/size:96/plain/https%3A%2F%2F1k-cdn.com%2Fresimler%2Fkitaplar%2F27823_momo_1588932191.jpg"/>
+            <column name="published_date" value="1973-01-01"/>
+            <column name="page_count" value="304"/>
+        </insert>
+
+        <insert tableName="books">
+            <column name="title" value="Bülbülü Öldürmek"/>
+            <column name="author" value="Harper Lee"/>
+            <column name="summary" value="1930'ların Amerika'sında ırkçılık ve adaletsizliğe karşı bir babanın ve kızının hikayesi."/>
+            <column name="genre" value="Roman"/>
+            <column name="created_at" value="2025-05-13 00:00:00.000000"/>
+            <column name="updated_at" value="2025-05-13 00:00:00.000000"/>
+            <column name="google_books_id" value="bulbulu_oldurmek_01"/>
+            <column name="image_url" value="https://r2.1k-cdn.com/sig/size:96/plain/https%3A%2F%2F1k-cdn.com%2Fresimler%2Fkitaplar%2F27823_bulbulu_oldurmek_1588932191.jpg"/>
+            <column name="published_date" value="1960-01-01"/>
+            <column name="page_count" value="360"/>
+        </insert>
+    </changeSet>
+</databaseChangeLog> 

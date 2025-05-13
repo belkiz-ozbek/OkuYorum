@@ -17,6 +17,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import java.util.Map;
 
 
 @RestController
@@ -89,17 +90,15 @@ public class BookController {
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<BookDto> updateBookStatus(
             @PathVariable Long bookId,
-            @RequestBody StatusUpdateRequest request,
-            @AuthenticationPrincipal UserDetails userDetails) {
-        String username = userDetails.getUsername();
-        Long userId = userService.getUserIdByUsername(username);
-        
+            @RequestBody Map<String, String> request) {
+        Long userId = Long.parseLong(request.get("userId"));
+        String statusStr = request.get("status");
         UserBook.ReadingStatus status = null;
-        if (request.getStatus() != null) {
-            status = UserBook.ReadingStatus.valueOf(request.getStatus());
+        if (statusStr != null) {
+            status = UserBook.ReadingStatus.valueOf(statusStr);
         }
-        
-        return ResponseEntity.ok(bookService.updateBookStatus(bookId, status, userId));
+        BookDto updatedBook = bookService.updateBookStatus(bookId, status, userId);
+        return ResponseEntity.ok(updatedBook);
     }
 
     @PutMapping("/{bookId}/favorite")
@@ -122,15 +121,29 @@ public class BookController {
         return ResponseEntity.ok(bookService.getFavoriteBooks(userId));
     }
 
-    static class StatusUpdateRequest {
-        private String status;
+    @GetMapping("/library/{userId}")
+    public ResponseEntity<List<BookDto>> getUserLibrary(@PathVariable Long userId) {
+        List<BookDto> books = bookService.getUserBooks(userId);
+        return ResponseEntity.ok(books);
+    }
 
-        public String getStatus() {
-            return status;
+    @PostMapping("/{bookId}/library")
+    public ResponseEntity<Void> addToLibrary(
+            @PathVariable Long bookId,
+            @RequestParam(required = false) Long userId) {
+        if (userId == null) {
+            return ResponseEntity.badRequest().build();
         }
+        bookService.addBookToUserLibrary(bookId, userId);
+        return ResponseEntity.ok().build();
+    }
 
-        public void setStatus(String status) {
-            this.status = status;
-        }
+    @DeleteMapping("/{id}/library")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    public ResponseEntity<?> removeBookFromLibrary(@PathVariable Long id, @AuthenticationPrincipal UserDetails userDetails) {
+        String username = userDetails.getUsername();
+        Long userId = userService.getUserIdByUsername(username);
+        bookService.removeBookFromUserLibrary(id, userId);
+        return ResponseEntity.ok().build();
     }
 } 

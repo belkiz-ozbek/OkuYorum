@@ -18,6 +18,7 @@
     <include file="db/changelog/changes/add-kiraathane-photos.xml"/>
     <include file="db/changelog/changes/add-kiraathane-features-column.xml"/>
     <include file="db/changelog/changes/add-kiraathane-is-featured.xml"/>
+    <include file="db/changelog/changes/add-owned-to-user-books.xml"/>
 
     <!-- Veri değişikliklerini buraya include edeceğiz -->
     <include file="db/changelog/data/data-master.xml"/>

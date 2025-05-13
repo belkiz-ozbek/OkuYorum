@@ -38,6 +38,9 @@ public class UserBook {
 
     private boolean isFavorite = false;
 
+    @Column(name = "owned", nullable = false)
+    private boolean owned = false;
+
     public enum ReadingStatus {
         READING,
         READ,
@@ -92,5 +95,13 @@ public class UserBook {
 
     public void setFavorite(boolean favorite) {
         isFavorite = favorite;
+    }
+
+    public boolean isOwned() {
+        return owned;
+    }
+
+    public void setOwned(boolean owned) {
+        this.owned = owned;
     }
 } 

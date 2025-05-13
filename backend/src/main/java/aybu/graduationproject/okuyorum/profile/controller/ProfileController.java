@@ -1,5 +1,7 @@
 package aybu.graduationproject.okuyorum.profile.controller;
 
+import aybu.graduationproject.okuyorum.library.dto.BookDto;
+import aybu.graduationproject.okuyorum.library.service.BookService;
 import aybu.graduationproject.okuyorum.profile.entity.Achievement;
 import aybu.graduationproject.okuyorum.user.entity.ReadingActivity;
 import aybu.graduationproject.okuyorum.user.entity.User;
@@ -43,6 +45,9 @@ public class ProfileController {
 
     @Autowired
     private ReadingActivityService readingActivityService;
+
+    @Autowired
+    private BookService bookService;
 
     @GetMapping
     public ResponseEntity<User> getProfile() {
@@ -221,6 +226,11 @@ public class ProfileController {
             logger.error("Error updating reading activities for user {}: {}", userId, e.getMessage(), e);
             return ResponseEntity.status(500).body("Error updating reading activities: " + e.getMessage());
         }
+    }
+
+    @GetMapping("/books/{userId}")
+    public ResponseEntity<List<BookDto>> getAllUserBooks(@PathVariable Long userId) {
+        return ResponseEntity.ok(bookService.getAllUserBooks(userId));
     }
 
     // Request sınıfı
