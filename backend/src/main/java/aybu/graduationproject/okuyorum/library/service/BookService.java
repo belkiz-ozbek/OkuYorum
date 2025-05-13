@@ -176,16 +176,15 @@ public class BookService {
     @Transactional
     public BookDto updateBookStatus(Long bookId, UserBook.ReadingStatus status, Long userId) {
         UserBook userBook = userBookRepository.findByUserIdAndBookId(userId, bookId)
-                .orElseGet(() -> {
-                    UserBook newUserBook = new UserBook();
-                    newUserBook.setUser(userRepository.findById(userId)
-                            .orElseThrow(() -> new EntityNotFoundException("User not found")));
-                    newUserBook.setBook(bookRepository.findById(bookId)
-                            .orElseThrow(() -> new EntityNotFoundException("Book not found")));
-                    return newUserBook;
-                });
+            .orElseGet(() -> {
+                UserBook newUserBook = new UserBook();
+                newUserBook.setUser(userRepository.findById(userId)
+                    .orElseThrow(() -> new EntityNotFoundException("User not found")));
+                newUserBook.setBook(bookRepository.findById(bookId)
+                    .orElseThrow(() -> new EntityNotFoundException("Book not found")));
+                return newUserBook;
+            });
 
-        // Status null olabilir, direkt olarak set ediyoruz
         userBook.setStatus(status);
         userBook = userBookRepository.save(userBook);
 
@@ -213,7 +212,7 @@ public class BookService {
     }
 
     public List<BookDto> getUserBooks(Long userId) {
-        List<UserBook> userBooks = userBookRepository.findByUserId(userId);
+        List<UserBook> userBooks = userBookRepository.findByUserIdAndOwnedTrue(userId);
         return userBooks.stream()
                 .map(userBook -> convertToDto(userBook.getBook(), userBook))
                 .collect(Collectors.toList());
@@ -257,19 +256,45 @@ public class BookService {
 
     @Transactional
     public void addBookToUserLibrary(Long bookId, Long userId) {
+        // Önce kitabın zaten kullanıcının kitaplığında olup olmadığını kontrol et
         if (userBookRepository.findByUserIdAndBookId(userId, bookId).isEmpty()) {
             UserBook userBook = new UserBook();
-            userBook.setUser(userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found")));
-            userBook.setBook(bookRepository.findById(bookId).orElseThrow(() -> new EntityNotFoundException("Book not found")));
-            userBook.setStatus(UserBook.ReadingStatus.WILL_READ); // veya default bir status
+            userBook.setUser(userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found")));
+            userBook.setBook(bookRepository.findById(bookId)
+                .orElseThrow(() -> new EntityNotFoundException("Book not found")));
+            userBook.setOwned(true);
+            // Kitap eklendiğinde herhangi bir status belirleme
             userBookRepository.save(userBook);
+        } else {
+            // Zaten varsa, owned=true yap
+            UserBook userBook = userBookRepository.findByUserIdAndBookId(userId, bookId).get();
+            if (!userBook.isOwned()) {
+                userBook.setOwned(true);
+                userBookRepository.save(userBook);
+            }
         }
+    }
+
+    @Transactional
+    public void updateBookStatus(Long bookId, Long userId, UserBook.ReadingStatus status) {
+        UserBook userBook = userBookRepository.findByUserIdAndBookId(userId, bookId)
+            .orElseThrow(() -> new EntityNotFoundException("Book not found in user's library"));
+        userBook.setStatus(status);
+        userBookRepository.save(userBook);
     }
 
     @Transactional
     public void removeBookFromUserLibrary(Long bookId, Long userId) {
         userBookRepository.findByUserIdAndBookId(userId, bookId)
             .ifPresent(userBookRepository::delete);
+    }
+
+    public List<BookDto> getAllUserBooks(Long userId) {
+        List<UserBook> userBooks = userBookRepository.findByUserId(userId);
+        return userBooks.stream()
+                .map(userBook -> convertToDto(userBook.getBook(), userBook))
+                .collect(Collectors.toList());
     }
 
     private BookDto convertToDto(Book book) {

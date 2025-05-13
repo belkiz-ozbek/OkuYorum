@@ -201,7 +201,7 @@ export function Header() {
           ) : (
             <Link 
               className="flex items-center gap-2.5 text-muted-foreground hover:text-primary transition-colors duration-300" 
-              href="/login"
+              href="/"
             >
               <User className="h-5 w-5" />
               <span className="text-sm">Giriş Yap</span>

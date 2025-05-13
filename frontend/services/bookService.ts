@@ -2,13 +2,13 @@ import { api } from './api';
 import { EventEmitter } from 'events';
 import { AxiosError } from 'axios';
 
-export type ReadingStatus = 'reading' | 'read' | 'will_read' | 'dropped' | null;
+export type ReadingStatus = 'will_read' | 'reading' | 'read' | 'dropped';
 
 export interface Book {
   id: number;
   title: string;
   author: string;
-  summary: string;
+  summary?: string;
   imageUrl?: string;
   publishedDate?: string;
   pageCount?: number;
@@ -19,6 +19,11 @@ export interface Book {
   updatedAt?: string;
   isFavorite?: boolean;
   genre?: string;
+  feedback?: string;
+  borrower?: {
+    name: string;
+    returnDate?: string;
+  };
 }
 
 export interface Review {
@@ -55,6 +60,12 @@ const handleError = (error: unknown) => {
 };
 
 class BookService {
+  bookEventEmitter: EventEmitter;
+
+  constructor() {
+    this.bookEventEmitter = new EventEmitter();
+  }
+
   async getBooks(userId: string): Promise<Book[]> {
     const response = await api.get(`/api/books/user/${userId}`);
     return response.data;
@@ -168,6 +179,11 @@ class BookService {
     } catch {
       return null;
     }
+  }
+
+  async getProfileBooks(userId: string): Promise<Book[]> {
+    const response = await api.get(`/api/profile/books/${userId}`);
+    return response.data;
   }
 }
 

@@ -115,7 +115,7 @@ const handleError = (error: unknown) => {
     });
     if (error.response?.status === 403 || error.response?.status === 401) {
       localStorage.removeItem('token');
-      window.location.href = '/login';
+      window.location.href = '/';
       throw new Error('Oturum süresi doldu. Lütfen tekrar giriş yapın.');
     }
     throw new Error(error.response?.data?.message || 'Bir hata oluştu.');

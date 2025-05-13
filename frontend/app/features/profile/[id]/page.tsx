@@ -185,7 +185,7 @@ export default function ProfilePage() {
       // Her veri türü için ayrı ayrı Promise oluşturalım
       const achievementsPromise = profileService.getUserAchievements(id);
       const readingActivityPromise = profileService.getUserReadingActivity(id);
-      const booksPromise = bookService.getBooks(id);
+      const booksPromise = bookService.getProfileBooks(id);
       const statsPromise = profileService.getReadingStats(id);
       
       // Promise'leri çalıştıralım

@@ -145,25 +145,30 @@ export default function BookPage({ params }: PageProps) {
         const checkLibraryStatus = async () => {
             try {
                 const token = localStorage.getItem('token');
-                if (!token) return;
+                const userId = localStorage.getItem('userId');
 
-                const response = await fetch(`http://localhost:8080/api/books/${resolvedParams.id}/library`, {
+                if (!token || !userId || !book) return;
+
+                const response = await fetch(`http://localhost:8080/api/books/library/${userId}`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
                 });
 
-                if (response.ok) {
-                    const data = await response.json();
-                    setIsInLibrary(data.inLibrary);
+                if (!response.ok) {
+                    throw new Error('Kitaplık durumu kontrol edilemedi');
                 }
+
+                const libraryBooks = await response.json();
+                const isBookInLibrary = libraryBooks.some((libraryBook: any) => libraryBook.id === book.id);
+                setIsInLibrary(isBookInLibrary);
             } catch (error) {
-                console.error('Kitaplık durumu kontrol edilemedi:', error);
+                console.error('Kitaplık durumu kontrol hatası:', error);
             }
         };
 
         checkLibraryStatus();
-    }, [resolvedParams.id]);
+    }, [book]);
 
     const handleStatusChange = async (newStatus: Book['status']) => {
         if (!book) return
@@ -171,8 +176,12 @@ export default function BookPage({ params }: PageProps) {
         try {
             setUpdatingStatus(true)
             const token = localStorage.getItem('token')
+            const userId = localStorage.getItem('userId')
             if (!token) {
                 throw new Error('Oturum bulunamadı')
+            }
+            if (!userId) {
+                throw new Error('Kullanıcı bilgisi bulunamadı')
             }
 
             // Eğer mevcut durum ile yeni durum aynıysa, durumu sıfırla
@@ -190,7 +199,10 @@ export default function BookPage({ params }: PageProps) {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ status: statusToUpdate })
+                body: JSON.stringify({ 
+                    userId, // userId'yi body'de gönder
+                    status: statusToUpdate 
+                })
             })
 
             if (!response.ok) {
@@ -428,12 +440,14 @@ export default function BookPage({ params }: PageProps) {
         try {
             setUpdatingLibrary(true);
             const token = localStorage.getItem('token');
-            if (!token) {
+            const userId = localStorage.getItem('userId');
+
+            if (!token || !userId) {
                 throw new Error('Oturum bulunamadı');
             }
 
             const method = isInLibrary ? 'DELETE' : 'POST';
-            const response = await fetch(`http://localhost:8080/api/books/${book.id}/library`, {
+            const response = await fetch(`http://localhost:8080/api/books/${book.id}/library${method === 'POST' ? `?userId=${userId}` : ''}`, {
                 method,
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -719,7 +733,7 @@ export default function BookPage({ params }: PageProps) {
                                     >
                                         <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 via-pink-500 to-purple-600 rounded-xl blur opacity-0 group-hover:opacity-25 transition duration-1000 group-hover:duration-300"></div>
                                         <Button 
-                                            onClick={() => handleStatusChange("WILL_READ")}
+                                            onClick={() => handleStatusChange(book.status === "WILL_READ" ? null : "WILL_READ")}
                                             className="relative flex items-center gap-3 px-6 py-3 bg-white dark:bg-gray-900 hover:bg-purple-50 dark:hover:bg-gray-800 border border-purple-100 dark:border-purple-800/30 rounded-lg shadow-xl shadow-purple-500/10 hover:shadow-purple-500/20 transition-all duration-300">
                                             <span className="flex items-center">
                                                 {book?.status === "WILL_READ" ? (

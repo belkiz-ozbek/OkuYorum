@@ -18,7 +18,6 @@ export function AddBookModal({ isOpen, onClose, onSuccess }: AddBookModalProps) 
   const [searchQuery, setSearchQuery] = useState("")
   const [searchResults, setSearchResults] = useState<Book[]>([])
   const [selectedBook, setSelectedBook] = useState<Book | null>(null)
-  const [readingStatus, setReadingStatus] = useState<ReadingStatus>("will_read")
   const [isLoading, setIsLoading] = useState(false)
   const { toast } = useToast()
 
@@ -51,29 +50,39 @@ export function AddBookModal({ isOpen, onClose, onSuccess }: AddBookModalProps) 
 
     setIsLoading(true)
     try {
-      const bookToAdd: Partial<Book> = {
-        title: selectedBook.title,
-        author: selectedBook.author,
-        summary: selectedBook.summary,
-        imageUrl: selectedBook.imageUrl,
-        status: readingStatus,
+      const userId = localStorage.getItem('userId')
+      const token = localStorage.getItem('token')
+
+      if (!userId || !token) {
+        throw new Error('Oturum bilgisi bulunamadı')
       }
 
-      await bookService.createBook(bookToAdd)
+      // Sadece kitaplığa ekleme işlemi yap
+      const response = await fetch(`http://localhost:8080/api/books/${selectedBook.id}/library`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Kitap eklenirken bir hata oluştu')
+      }
       
       toast({
         title: "Başarılı",
-        description: "Kitap başarıyla eklendi.",
+        description: "Kitap başarıyla kitaplığınıza eklendi.",
       })
       
       setSelectedBook(null)
-      setReadingStatus("will_read")
       onClose()
+      // Kitaplık sayfasını yenilemek için onSuccess callback'ini çağır
       onSuccess()
-    } catch {
+    } catch (error) {
       toast({
         title: "Hata",
-        description: "Kitap eklenirken bir hata oluştu.",
+        description: error instanceof Error ? error.message : "Kitap eklenirken bir hata oluştu.",
         variant: "destructive",
       })
     } finally {
@@ -83,12 +92,9 @@ export function AddBookModal({ isOpen, onClose, onSuccess }: AddBookModalProps) 
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogTrigger asChild>
-        <Button variant="outline">Kitap Ekle</Button>
-      </DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Kitap Ekle</DialogTitle>
+          <DialogTitle>Kitaplığıma Ekle</DialogTitle>
         </DialogHeader>
         
         <div className="space-y-4 py-4">
@@ -136,24 +142,6 @@ export function AddBookModal({ isOpen, onClose, onSuccess }: AddBookModalProps) 
                 </CardContent>
               </Card>
 
-              <div className="space-y-2">
-                <Label>Okuma Durumu</Label>
-                <Select
-                  value={readingStatus}
-                  onValueChange={(value: ReadingStatus) => setReadingStatus(value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="will_read">Okumak İstiyorum</SelectItem>
-                    <SelectItem value="reading">Okuyorum</SelectItem>
-                    <SelectItem value="read">Okudum</SelectItem>
-                    <SelectItem value="dropped">Bıraktım</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
               <div className="flex justify-end gap-2">
                 <Button
                   variant="outline"
@@ -166,7 +154,7 @@ export function AddBookModal({ isOpen, onClose, onSuccess }: AddBookModalProps) 
                   onClick={handleAddBook}
                   disabled={isLoading}
                 >
-                  {isLoading ? "Ekleniyor..." : "Ekle"}
+                  {isLoading ? "Ekleniyor..." : "Kitaplığıma Ekle"}
                 </Button>
               </div>
             </div>

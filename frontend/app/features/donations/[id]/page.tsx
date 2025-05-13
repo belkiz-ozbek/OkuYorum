@@ -81,7 +81,7 @@ export default function DonationDetailPage() {
             errorMessage = "Bu işlemi gerçekleştirmek için giriş yapmanız gerekmektedir."
             // Kullanıcıyı login sayfasına yönlendir
             setTimeout(() => {
-              router.push('/auth/login')
+              router.push('/')
             }, 2000)
           } else if (err.response.status === 403) {
             errorMessage = "Bu bağışı görüntüleme yetkiniz bulunmamaktadır."

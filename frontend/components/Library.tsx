@@ -9,6 +9,7 @@ import {BookOpen, CheckCircle, Clock, Star, Library as LibraryIcon, Compass, Use
 import { ScratchToReveal } from "@/components/ui/scratch-to-reveal";
 import { useRouter } from "next/navigation";
 import { bookService, ReadingStatus } from "@/services/bookService";
+import { toast } from "@/components/ui/use-toast";
 
 interface Book {
   id: number;
@@ -35,7 +36,7 @@ interface User {
 }
 
 interface LibraryProps {
-  activeTab?: 'all' | 'favorites' | 'to-read' | 'read' | 'borrowed' | 'lending' | 'recommendations';
+  activeTab?: 'all' | 'read' | 'to-read' | 'reading' | 'dropped' | 'borrowed' | 'favorites' | 'lending' | 'recommendations';
 }
 
 const Library = ({ activeTab = 'all' }: LibraryProps): JSX.Element => {
@@ -72,25 +73,74 @@ const Library = ({ activeTab = 'all' }: LibraryProps): JSX.Element => {
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   
+  const fetchBooks = async () => {
+    setLoading(true);
+    try {
+      const userId = localStorage.getItem('userId');
+      const token = localStorage.getItem('token');
+      
+      if (!userId || !token) {
+        setError('Oturum bilgisi bulunamadı');
+        return;
+      }
+
+      const response = await fetch(`http://localhost:8080/api/books/library/${userId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Kitaplar yüklenirken bir hata oluştu');
+      }
+
+      const data = await response.json();
+      setBooks(data);
+      
+      // Kitap durumlarını set'lere ekle
+      const newFavoriteBooks = new Set<number>();
+      const newReadBooks = new Set<number>();
+      const newToReadBooks = new Set<number>();
+      const newBorrowedBooks = new Set<number>();
+
+      data.forEach((book: Book) => {
+        if (book.status === 'favorite') newFavoriteBooks.add(book.id);
+        if (book.status === 'read') newReadBooks.add(book.id);
+        if (book.status === 'will_read') newToReadBooks.add(book.id);
+        if (book.status === 'borrowed') newBorrowedBooks.add(book.id);
+      });
+
+      setFavoriteBooks(newFavoriteBooks);
+      setReadBooks(newReadBooks);
+      setToReadBooks(newToReadBooks);
+      setBorrowedBooks(newBorrowedBooks);
+
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Bir hata oluştu');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     setIsClient(true);
-    setLoading(true);
-    const userId = typeof window !== 'undefined' ? localStorage.getItem('userId') : null;
-    if (!userId) {
-      setError('Kullanıcı bulunamadı');
-      setLoading(false);
-      return;
-    }
-    bookService.getBooks(userId)
-      .then((data) => {
-        setBooks(data);
-        setTotalPages(1);
-        setLoading(false);
-      })
-      .catch((err) => {
-        setError(err.message || "Kitaplar yüklenemedi");
-        setLoading(false);
-      });
+    fetchBooks();
+  }, []);
+
+  useEffect(() => {
+    const handleBookUpdate = () => {
+      fetchBooks();
+    };
+
+    // bookService'den gelen olayları dinle
+    bookService.bookEventEmitter.on('bookStatusUpdated', handleBookUpdate);
+    bookService.bookEventEmitter.on('favoriteUpdated', handleBookUpdate);
+
+    return () => {
+      // Cleanup
+      bookService.bookEventEmitter.off('bookStatusUpdated', handleBookUpdate);
+      bookService.bookEventEmitter.off('favoriteUpdated', handleBookUpdate);
+    };
   }, []);
 
   useEffect(() => {
@@ -123,10 +173,27 @@ const Library = ({ activeTab = 'all' }: LibraryProps): JSX.Element => {
     }
   }, [borrowedBooks, isClient]);
 
-  const filteredBooks = useMemo(() => books.filter(book => {
-    if (activeTab === 'all') return book.status !== undefined && book.status !== null;
-    return book.status === activeTab;
-  }), [books, activeTab, favoriteBooks, readBooks, toReadBooks, borrowedBooks]);
+  const filteredBooks = useMemo(() => {
+    if (!books) return [];
+    
+    switch (activeTab) {
+      case 'all':
+        // Sadece kitaplığa eklenmiş kitapları göster
+        return books;
+      case 'read':
+        return books.filter(book => book.status === 'read');
+      case 'to-read':
+        return books.filter(book => book.status === 'will_read');
+      case 'reading':
+        return books.filter(book => book.status === 'reading');
+      case 'dropped':
+        return books.filter(book => book.status === 'dropped');
+      case 'borrowed':
+        return books.filter(book => book.status === 'borrowed');
+      default:
+        return books;
+    }
+  }, [books, activeTab]);
 
    
   const renderStars = (rating: number = 0) => {
@@ -180,41 +247,41 @@ const Library = ({ activeTab = 'all' }: LibraryProps): JSX.Element => {
   }, [books, revealedBook]);
 
   const handleBookClick = (book: Book) => {
-    setSelectedBook(book);
-    if (activeTab === 'all') {
-      setShowLendModal(true);
-    } else if (activeTab === 'borrowed') {
-      setShowBorrowerModal(true);
-    }
+    router.push(`/features/book/${book.id}`);
   };
 
-  const handleLendBook = () => {
+  const handleLendBook = async () => {
     if (!selectedUser || !selectedBook) {
       alert('Lütfen bir kullanıcı seçin');
       return;
     }
 
-    const selectedUserData = users.find(user => user.nameSurname === selectedUser);
-    
-    const updatedBooks = books.map((b) => {
-      if (b.id === selectedBook.id) {
-        return {
-          ...b,
-          status: "borrowed" as const,
-          borrowedBy: selectedUser,
-          borrower: {
-            id: selectedUserData?.id || 0,
-            name: selectedUser
-          }
-        };
-      }
-      return b;
-    });
+    try {
+      const selectedUserData = users.find(user => user.nameSurname === selectedUser);
+      
+      const response = await fetch(`http://localhost:8080/api/books/${selectedBook.id}/lend`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          borrowerId: selectedUserData?.id,
+          borrowerName: selectedUser
+        })
+      });
 
-    setBooks(updatedBooks);
-    localStorage.setItem('books', JSON.stringify(updatedBooks));
-    setSelectedUser('');
-    setShowLendModal(false);
+      if (!response.ok) {
+        throw new Error('Kitap ödünç verme işlemi başarısız oldu');
+      }
+
+      await fetchBooks(); // Kitapları yeniden yükle
+      setSelectedUser('');
+      setShowLendModal(false);
+    } catch (error) {
+      console.error('Ödünç verme hatası:', error);
+      alert('Kitap ödünç verme işlemi sırasında bir hata oluştu');
+    }
   };
 
   const handleSubmitFeedback = () => {
@@ -281,6 +348,43 @@ const Library = ({ activeTab = 'all' }: LibraryProps): JSX.Element => {
         </button>
       </div>
     );
+  };
+
+  const handleStatusChange = async (bookId: number, status: ReadingStatus) => {
+    try {
+      const token = localStorage.getItem('token');
+      const userId = localStorage.getItem('userId');
+
+      if (!token || !userId) {
+        throw new Error('Oturum bilgisi bulunamadı');
+      }
+
+      const response = await fetch(`http://localhost:8080/api/books/${bookId}/status`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          userId: parseInt(userId),
+          status
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Kitap durumu güncellenirken bir hata oluştu');
+      }
+
+      // Kitapları yeniden yükle
+      await fetchBooks();
+    } catch (error) {
+      console.error('Status güncelleme hatası:', error);
+      toast({
+        title: 'Hata',
+        description: error instanceof Error ? error.message : 'Bir hata oluştu',
+        variant: 'destructive'
+      });
+    }
   };
 
   if (loading) return <div>Kitaplar yükleniyor...</div>;
