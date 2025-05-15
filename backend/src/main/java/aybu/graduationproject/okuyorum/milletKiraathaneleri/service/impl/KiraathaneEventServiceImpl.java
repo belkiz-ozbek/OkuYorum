@@ -89,8 +89,9 @@ public class KiraathaneEventServiceImpl implements KiraathaneEventService {
     @Override
     @Transactional
     public KiraathaneEventDTO createEvent(KiraathaneEventDTO eventDTO) {
+        // Güvenlik: Yeni etkinlik oluşturulurken id null olmalı, varsa yok say!
+        eventDTO.setId(null);
         KiraathaneEvent event = convertToEntity(eventDTO);
-        // Initialize registeredAttendees to 0
         if (event.getRegisteredAttendees() == null) {
             event.setRegisteredAttendees(0);
         }
@@ -158,6 +159,7 @@ public class KiraathaneEventServiceImpl implements KiraathaneEventService {
     @Override
     public KiraathaneEvent convertToEntity(KiraathaneEventDTO eventDTO) {
         KiraathaneEvent event = new KiraathaneEvent();
+        // DİKKAT: Yeni kayıt oluşturulurken id asla set edilmemeli! (eventDTO.getId() kullanılmaz)
         event.setTitle(eventDTO.getTitle());
         event.setDescription(eventDTO.getDescription());
         event.setEventDate(eventDTO.getEventDate());
@@ -167,14 +169,12 @@ public class KiraathaneEventServiceImpl implements KiraathaneEventService {
         event.setCapacity(eventDTO.getCapacity());
         event.setRegisteredAttendees(eventDTO.getRegisteredAttendees());
         event.setIsActive(eventDTO.getIsActive());
-        
         // Set kiraathane reference
         if (eventDTO.getKiraathaneId() != null) {
             Kiraathane kiraathane = kiraathaneRepository.findById(eventDTO.getKiraathaneId())
                     .orElseThrow(() -> new EntityNotFoundException("Kiraathane not found with id: " + eventDTO.getKiraathaneId()));
             event.setKiraathane(kiraathane);
         }
-        
         return event;
     }
 } 
