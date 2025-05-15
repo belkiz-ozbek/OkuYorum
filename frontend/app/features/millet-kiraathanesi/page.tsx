@@ -38,7 +38,7 @@ export default function MilletKiraathanesi() {
         <div className="absolute inset-0 transform scale-110">
           <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/50 to-black/80 z-10" />
           <Image
-            src="/images/kiraathanes/hero-bg.jpg"
+            src="/image4.png"
             alt="Millet Kıraathanesi"
             fill
             className="object-cover object-[center_85%] motion-safe:animate-ken-burns"
