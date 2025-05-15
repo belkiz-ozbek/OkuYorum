@@ -10,9 +10,10 @@ import { useAuth } from "@/contexts/AuthContext" // Auth context'ten import ediy
 
 interface EventsCalendarProps {
   className?: string
+  kiraathaneId?: number
 }
 
-export function EventsCalendar({ className }: EventsCalendarProps) {
+export function EventsCalendar({ className, kiraathaneId }: EventsCalendarProps) {
   const { user, token, getAuthHeader } = useAuth()
   const [events, setEvents] = useState<KiraathaneEvent[]>([])
   const [selectedDate, setSelectedDate] = useState<Date>(new Date())
@@ -68,10 +69,20 @@ export function EventsCalendar({ className }: EventsCalendarProps) {
         setIsLoading(true)
         console.log('Fetching events with auth header:', getAuthHeader())
         
-        const start = format(startOfMonth(selectedDate), "yyyy-MM-dd'T'00:00:00")
-        const end = format(endOfMonth(selectedDate), "yyyy-MM-dd'T'23:59:59")
+        let response;
         
-        const response = await kiraathaneEventService.getEventsBetweenDates(start, end)
+        if (kiraathaneId) {
+          // If kiraathaneId is provided, fetch events for that specific kiraathane
+          console.log(`Fetching events for Kiraathane ID: ${kiraathaneId}`)
+          response = await kiraathaneEventService.getEventsByKiraathaneId(kiraathaneId)
+        } else {
+          // Otherwise fetch all events between selected dates
+          const start = format(startOfMonth(selectedDate), "yyyy-MM-dd'T'00:00:00")
+          const end = format(endOfMonth(selectedDate), "yyyy-MM-dd'T'23:59:59")
+          
+          response = await kiraathaneEventService.getEventsBetweenDates(start, end)
+        }
+        
         console.log('Events response:', response)
         
         setEvents(response)
@@ -84,7 +95,7 @@ export function EventsCalendar({ className }: EventsCalendarProps) {
       }
     }
     fetchEvents()
-  }, [selectedDate, token])
+  }, [selectedDate, token, kiraathaneId])
 
   // Group events by date
   const getEventsByDate = () => {
@@ -143,10 +154,19 @@ export function EventsCalendar({ className }: EventsCalendarProps) {
     const fetchEvents = async () => {
       try {
         setIsLoading(true)
-        const start = format(startOfMonth(selectedDate), "yyyy-MM-dd'T'00:00:00")
-        const end = format(endOfMonth(selectedDate), "yyyy-MM-dd'T'23:59:59")
         
-        const response = await kiraathaneEventService.getEventsBetweenDates(start, end)
+        let response;
+        if (kiraathaneId) {
+          // If kiraathaneId is provided, fetch events for that specific kiraathane
+          response = await kiraathaneEventService.getEventsByKiraathaneId(kiraathaneId)
+        } else {
+          // Otherwise fetch all events between selected dates
+          const start = format(startOfMonth(selectedDate), "yyyy-MM-dd'T'00:00:00")
+          const end = format(endOfMonth(selectedDate), "yyyy-MM-dd'T'23:59:59")
+          
+          response = await kiraathaneEventService.getEventsBetweenDates(start, end)
+        }
+        
         setEvents(response)
         setError(null)
       } catch (err) {
