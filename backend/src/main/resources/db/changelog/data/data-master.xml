@@ -21,5 +21,6 @@
     <include file="db/changelog/data/add-new-books-data.xml"/>
     <include file="db/changelog/data/remove-and-update-kiraathanes.xml"/>
     <include file="db/changelog/data/add-kiraathane-ratings-and-books.xml"/>
+    <include file="db/changelog/data/update-book-images-local.xml"/>
     
 </databaseChangeLog>
