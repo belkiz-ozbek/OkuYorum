@@ -476,7 +476,7 @@ const Library = ({ activeTab = 'all' }: LibraryProps): JSX.Element => {
                           {filteredBooks.slice(shelf * 8, (shelf + 1) * 8).map((book) => (
                               <motion.div
                                   key={book.id}
-                                  className="relative group"
+                                  className="relative group cursor-pointer"
                                   initial={{ y: 0 }}
                                   whileHover={{ y: -10 }}
                                   transition={{ duration: 0.2 }}
@@ -485,21 +485,23 @@ const Library = ({ activeTab = 'all' }: LibraryProps): JSX.Element => {
                                     perspective: '1000px'
                                   }}
                               >
-                                <div className="relative w-[120px] h-[180px] rounded-xl overflow-hidden shadow-lg transition-all duration-300 group-hover:shadow-xl">
-                                  <Image
-                                      src={book.imageUrl || '/placeholder-book.png'}
-                                      alt={book.title}
-                                      fill
-                                      className="object-cover transition-transform duration-300 group-hover:scale-105"
-                                      sizes="120px"
-                                  />
-                                  <StatusBadge status={book.status ? book.status.toUpperCase() as 'READING' | 'READ' | 'WILL_READ' | 'DROPPED' : null} />
-                                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                                  <div className="absolute bottom-0 left-0 right-0 p-2 translate-y-full transition-transform duration-300 group-hover:translate-y-0">
-                                    <p className="text-white font-medium line-clamp-2 text-xs">{book.title}</p>
-                                    <p className="text-white/80 text-[10px] mt-1">{book.author}</p>
+                                <Link href={`/features/book/${book.id}`} className="block">
+                                  <div className="relative w-[120px] h-[180px] rounded-xl overflow-hidden shadow-lg transition-all duration-300 group-hover:shadow-xl">
+                                    <Image
+                                        src={book.imageUrl || '/placeholder-book.png'}
+                                        alt={book.title}
+                                        fill
+                                        className="object-cover transition-transform duration-300 group-hover:scale-105"
+                                        sizes="120px"
+                                    />
+                                    <StatusBadge status={book.status ? book.status.toUpperCase() as 'READING' | 'READ' | 'WILL_READ' | 'DROPPED' : null} />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                    <div className="absolute bottom-0 left-0 right-0 p-2 translate-y-full transition-transform duration-300 group-hover:translate-y-0">
+                                      <p className="text-white font-medium line-clamp-2 text-xs">{book.title}</p>
+                                      <p className="text-white/80 text-[10px] mt-1">{book.author}</p>
+                                    </div>
                                   </div>
-                                </div>
+                                </Link>
                                 {/* Kitap gölgesi */}
                                 <div
                                     className="absolute bottom-[-20px] left-1/2 w-[80%] h-4 -translate-x-1/2"
