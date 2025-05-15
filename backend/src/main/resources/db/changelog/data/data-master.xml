@@ -19,5 +19,7 @@
     <include file="db/changelog/data/insert-kiraathane-features.xml"/>
     <include file="db/changelog/data/insert-user-content-data.xml"/>
     <include file="db/changelog/data/add-new-books-data.xml"/>
+    <include file="db/changelog/data/remove-and-update-kiraathanes.xml"/>
+    <include file="db/changelog/data/add-kiraathane-ratings-and-books.xml"/>
     
 </databaseChangeLog>

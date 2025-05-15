@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
+
+    <!-- Delete Mamak Kıraathanesi and Şişli Kültür Evi, and add photos for Bakırköy and Sincan -->
+    <changeSet id="20250511-16:11" author="belkiz.ozbek">
+        <!-- Delete event registrations first to avoid foreign key constraint violations -->
+        <delete tableName="event_registrations">
+            <where>event_id IN (SELECT id FROM kiraathane_events WHERE kiraathane_id = 11)</where>
+        </delete>
+        
+        <delete tableName="event_registrations">
+            <where>event_id IN (SELECT id FROM kiraathane_events WHERE kiraathane_id = 13)</where>
+        </delete>
+        
+        <!-- Now delete events related to the kiraathanes being removed -->
+        <delete tableName="kiraathane_events">
+            <where>kiraathane_id = 11</where>
+        </delete>
+        
+        <delete tableName="kiraathane_events">
+            <where>kiraathane_id = 13</where>
+        </delete>
+        
+        <!-- Delete any possible photos related to the kiraathanes -->
+        <delete tableName="kiraathane_photos">
+            <where>kiraathane_id = 11</where>
+        </delete>
+        
+        <delete tableName="kiraathane_photos">
+            <where>kiraathane_id = 13</where>
+        </delete>
+        
+        <!-- Delete the kiraathanes -->
+        <delete tableName="kiraathanes">
+            <where>id = 11</where> <!-- Mamak Kıraathanesi -->
+        </delete>
+        
+        <delete tableName="kiraathanes">
+            <where>id = 13</where> <!-- Şişli Kültür Evi -->
+        </delete>
+        
+        <!-- Add photos for Bakırköy and Sincan -->
+        <insert tableName="kiraathane_photos">
+            <column name="kiraathane_id" value="14"/> <!-- Bakırköy Kıraathanesi -->
+            <column name="photo_url" value="/images/kiraathanes/bakırköy.jpg"/>
+        </insert>
+        
+        <insert tableName="kiraathane_photos">
+            <column name="kiraathane_id" value="12"/> <!-- Sincan Millet Kıraathanesi -->
+            <column name="photo_url" value="/images/kiraathanes/sincan.jpg"/>
+        </insert>
+        
+        <!-- Set featured photos -->
+        <update tableName="kiraathanes">
+            <column name="featured_photo_url" value="/images/kiraathanes/bakırköy.jpg"/>
+            <where>id = 14</where>
+        </update>
+        
+        <update tableName="kiraathanes">
+            <column name="featured_photo_url" value="/images/kiraathanes/sincan.jpg"/>
+            <where>id = 12</where>
+        </update>
+    </changeSet>
+</databaseChangeLog> 
