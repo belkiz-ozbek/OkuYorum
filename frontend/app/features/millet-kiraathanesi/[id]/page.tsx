@@ -87,10 +87,11 @@ export default function KiraathaneDetailPage() {
       CALISMA_ALANLARI: "Çalışma Alanları",
       SEMINER_SALONU: "Seminer Salonu",
       COCUK_BOLUMU: "Çocuk Bölümü",
-      ENGELLI_ERISIMI: "Engelli Erişimi",
-      OTOPARK: "Otopark",
-      GRUP_CALISMA: "Grup Çalışma",
-      SESSIZ_CALISMA: "Sessiz Çalışma"
+      BAHCE_ALANI: "Bahçe Alanı",
+      SESSIZ_OKUMA_BOLUMU: "Sessiz Okuma Bölümü",
+      GRUP_CALISMA_ALANLARI: "Grup Çalışma Alanları",
+      ETKINLIK_ALANI: "Etkinlik Alanı",
+      SESLI_CALISMA_ALANI: "Sesli Çalışma Alanı"
     }
     return labels[feature] || feature
   }
@@ -204,7 +205,7 @@ export default function KiraathaneDetailPage() {
               <h2 className="text-xl font-semibold mb-4">Etkinlik Takvimi</h2>
               <Card>
                 <CardContent className="p-4">
-                  <EventsCalendar />
+                  <EventsCalendar kiraathaneId={Number(params.id)} />
                 </CardContent>
               </Card>
             </div>
