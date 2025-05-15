@@ -140,7 +140,7 @@ export function MilletKiraathaneleri() {
 
         {/* Featured Kiraathane */}
         {featuredKiraathane && (
-          <div className="mb-12 rounded-2xl overflow-hidden shadow-lg relative">
+          <div className="mb-12 rounded-2xl overflow-hidden shadow-lg relative w-full max-w-7xl mx-auto">
             <div className="relative h-[400px]">
               {(featuredKiraathane.photoUrls?.length > 0 || featuredKiraathane.featuredPhotoUrl) ? (
                 <img
@@ -180,7 +180,7 @@ export function MilletKiraathaneleri() {
         )}
 
         {/* Horizontal Scrollable Kiraathanes */}
-        <div className="relative mx-5">
+        <div className="relative w-full max-w-7xl mx-auto">
           {/* Left Arrow */}
           <button 
             onClick={scrollLeft}
