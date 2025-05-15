@@ -1003,7 +1003,7 @@ export default function ProfilePage() {
                 {/* Profile Info and Achievements */}
                 <div className="flex flex-col gap-4">
                   <div className="flex flex-col mb-4">
-                    <h2 className="text-2xl font-bold text-white mb-1">
+                    {/* <h2 className="text-2xl font-bold text-white mb-1">
                       {profile.nameSurname}
                     </h2>
                     <div className="flex items-center text-white/80">
@@ -1011,7 +1011,7 @@ export default function ProfilePage() {
                       <span className="text-sm">
                         Katılma: {new Date(profile.createdAt).toLocaleDateString()}
                       </span>
-                    </div>
+                    </div> */}
                   </div>
                 </div>
               </div>
