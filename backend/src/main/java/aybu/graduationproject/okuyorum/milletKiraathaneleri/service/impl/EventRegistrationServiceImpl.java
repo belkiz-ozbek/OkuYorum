@@ -96,9 +96,14 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
     @Override
     @Transactional
     public EventRegistrationDTO registerUserForEvent(Long eventId, Long userId) {
+        // Etkinlik tarihi geçmişse kayıt olma!
+        KiraathaneEvent event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new EntityNotFoundException("Etkinlik bulunamadı"));
+        if (event.getEventDate().isBefore(LocalDateTime.now())) {
+            throw new IllegalStateException("Etkinliğin tarihi geçtiği için kayıt olamazsınız.");
+        }
         // Önce iptal edilmiş bir kayıt var mı kontrol et
         Optional<EventRegistration> existingRegistration = registrationRepository.findByEventIdAndUserId(eventId, userId);
-        
         if (existingRegistration.isPresent()) {
             EventRegistration registration = existingRegistration.get();
             if (registration.getAttendanceStatus() == AttendanceStatus.CANCELLED) {
@@ -106,19 +111,14 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
                 registration.setAttendanceStatus(AttendanceStatus.REGISTERED);
                 registration.setRegisteredAt(LocalDateTime.now());
                 registration.setAttended(false);
-                
                 // Etkinlik kapasitesini kontrol et
-                KiraathaneEvent event = registration.getEvent();
                 if (event.getCapacity() != null && event.getRegisteredAttendees() >= event.getCapacity()) {
                     throw new IllegalStateException("Etkinlik kapasitesi dolu");
                 }
-                
                 // Katılımcı sayısını artır
                 event.setRegisteredAttendees(event.getRegisteredAttendees() + 1);
                 eventRepository.save(event);
-                
                 EventRegistration updatedRegistration = registrationRepository.save(registration);
-                
                 // Bildirim gönder
                 notificationService.sendEventRegistrationStatusUpdate(
                     registration.getUser(),
@@ -127,35 +127,25 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
                     AttendanceStatus.REGISTERED,
                     "Etkinliğe başarıyla kayıt oldunuz."
                 );
-                
                 return convertToDTO(updatedRegistration);
-            } else if (registration.getAttendanceStatus() != AttendanceStatus.CANCELLED) {
+            } else {
                 throw new IllegalStateException("Bu etkinliğe zaten kayıtlısınız");
             }
         }
-
         // Yeni kayıt oluştur
-        KiraathaneEvent event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new EntityNotFoundException("Etkinlik bulunamadı"));
-
         if (event.getCapacity() != null && event.getRegisteredAttendees() >= event.getCapacity()) {
             throw new IllegalStateException("Etkinlik kapasitesi dolu");
         }
-
         User user = userService.getUserById(userId);
-
         EventRegistration registration = new EventRegistration();
         registration.setEvent(event);
         registration.setUser(user);
         registration.setRegisteredAt(LocalDateTime.now());
         registration.setAttended(false);
         registration.setAttendanceStatus(AttendanceStatus.REGISTERED);
-
         event.setRegisteredAttendees(event.getRegisteredAttendees() + 1);
         eventRepository.save(event);
-
         EventRegistration savedRegistration = registrationRepository.save(registration);
-        
         // Bildirim gönder
         notificationService.sendEventRegistrationStatusUpdate(
             user,
@@ -164,7 +154,6 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
             AttendanceStatus.REGISTERED,
             "Etkinliğe başarıyla kayıt oldunuz."
         );
-
         return convertToDTO(savedRegistration);
     }
 
