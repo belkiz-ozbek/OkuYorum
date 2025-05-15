@@ -290,6 +290,25 @@ export function MilletKiraathaneleri() {
               .card-visible {
                 animation: fadeInUp 0.5s ease-out forwards;
               }
+
+              .elegant-detail-btn {
+                background: var(--primary-gradient);
+                color: var(--primary-foreground) !important;
+                font-weight: 600;
+                border: none !important;
+                border-radius: 9999px;
+                box-shadow: 0 2px 12px 0 rgba(142,45,226,0.10);
+                letter-spacing: 0.02em;
+                transition: box-shadow 0.2s, transform 0.2s, background 0.2s;
+                min-height: 48px;
+                font-size: 1rem;
+                padding: 0.75rem 1.5rem;
+              }
+              .elegant-detail-btn:hover, .elegant-detail-btn:focus {
+                background: linear-gradient(135deg, #4A00E0, #8E2DE2);
+                box-shadow: 0 4px 24px 0 rgba(74,0,224,0.13);
+                transform: translateY(-2px) scale(1.03);
+              }
             `}</style>
             <div className="flex gap-6">
               {otherKiraathanes.map((kiraathane, index) => (
@@ -403,9 +422,17 @@ export function MilletKiraathaneleri() {
                         viewport={{ once: true }}
                         className="w-full"
                       >
-                        <Button asChild variant="outline" className="w-full border-purple-200 text-purple-700 hover:bg-purple-50">
+                        <Button asChild variant="outline" className="elegant-detail-btn w-full flex items-center justify-center gap-2">
                           <Link href={`/features/millet-kiraathanesi/${kiraathane.id}`}>
-                            Detayları Görüntüle
+                            <span>Detayları Görüntüle</span>
+                            <motion.span
+                              initial={{ x: 0 }}
+                              whileHover={{ x: 6 }}
+                              transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                              className="inline-block"
+                            >
+                              <ExternalLink className="w-4 h-4 ml-1" />
+                            </motion.span>
                           </Link>
                         </Button>
                       </motion.div>
