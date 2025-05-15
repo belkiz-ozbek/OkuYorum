@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
+
+    <!-- Kitap görselleri local path ile güncelleniyor -->
+    <changeSet id="20250515-17:20" author="belkiz.ozbek">
+        <update tableName="books">
+            <column name="image_url" value="/images/books/bilinmeyen bir kadının mektubu.jpg"/>
+            <where>title = 'Bilinmeyen Bir Kadının Mektubu'</where>
+        </update>
+        <update tableName="books">
+            <column name="image_url" value="/images/books/suç ve ceza.jpg"/>
+            <where>title = 'Suç ve Ceza'</where>
+        </update>
+        <update tableName="books">
+            <column name="image_url" value="/images/books/sefiller.jpg"/>
+            <where>title = 'Sefiller'</where>
+        </update>
+        <update tableName="books">
+            <column name="image_url" value="/images/books/şah ve sultan.jpg"/>
+            <where>title = 'Şah ve Sultan'</where>
+        </update>
+        <update tableName="books">
+            <column name="image_url" value="/images/books/monte kristo kontu.jpg"/>
+            <where>title = 'Monte Cristo Kontu'</where>
+        </update>
+        <update tableName="books">
+            <column name="image_url" value="/images/books/kafamda bir tuhaflık.jpg"/>
+            <where>title = 'Kafamda Bir Tuhaflık'</where>
+        </update>
+        <update tableName="books">
+            <column name="image_url" value="/images/books/huzursuzluk.jpg"/>
+            <where>title = 'Huzursuzluk'</where>
+        </update>
+        <update tableName="books">
+            <column name="image_url" value="/images/books/yer demir gök bakır.jpg"/>
+            <where>title = 'Yer Demir Gök Bakır'</where>
+        </update>
+        <update tableName="books">
+            <column name="image_url" value="/images/books/şeker portakalı.jpg"/>
+            <where>title = 'Şeker Portakalı'</where>
+        </update>
+        <update tableName="books">
+            <column name="image_url" value="/images/books/bülbülü öldürmek.jpg"/>
+            <where>title = 'Bülbülü Öldürmek'</where>
+        </update>
+        <update tableName="books">
+            <column name="image_url" value="/images/books/insan ne ile yaşar.jpg"/>
+            <where>title = 'İnsan Ne İle Yaşar'</where>
+        </update>
+        <update tableName="books">
+            <column name="image_url" value="/images/books/satranç.png"/>
+            <where>title = 'Satranç'</where>
+        </update>
+        <update tableName="books">
+            <column name="image_url" value="/images/books/simyacı.jpg"/>
+            <where>title = 'Simyacı'</where>
+        </update>
+        <update tableName="books">
+            <column name="image_url" value="/images/books/şato.jpg"/>
+            <where>title = 'Şato'</where>
+        </update>
+        <update tableName="books">
+            <column name="image_url" value="/images/books/küçük prens.jpg"/>
+            <where>title = 'Küçük Prens'</where>
+        </update>
+        <update tableName="books">
+            <column name="image_url" value="/images/books/beyaz zambaklar ülkesinde.jpg"/>
+            <where>title = 'Beyaz Zambaklar Ülkesinde'</where>
+        </update>
+        <update tableName="books">
+            <column name="image_url" value="/images/books/sofinin dünyası.jpg"/>
+            <where>title = 'Sofie''nin Dünyası'</where>
+        </update>
+        <update tableName="books">
+            <column name="image_url" value="/images/books/kürk mantolu madonna.jpg"/>
+            <where>title = 'Kürk Mantolu Madonna'</where>
+        </update>
+        <update tableName="books">
+            <column name="image_url" value="/images/books/kuyucaklı yusuf.jpg"/>
+            <where>title = 'Kuyucaklı Yusuf'</where>
+        </update>
+        <update tableName="books">
+            <column name="image_url" value="/images/books/dava.jpg"/>
+            <where>title = 'Dava'</where>
+        </update>
+        <update tableName="books">
+            <column name="image_url" value="/images/books/fareler ve insanlar.jpg"/>
+            <where>title = 'Fareler ve İnsanlar'</where>
+        </update>
+        <update tableName="books">
+            <column name="image_url" value="/images/books/baba ve pic.jpg"/>
+            <where>title = 'Baba ve Piç'</where>
+        </update>
+        <update tableName="books">
+            <column name="image_url" value="/images/books/kırmızı ve siyah.jpg"/>
+            <where>title = 'Kırmızı ve Siyah'</where>
+        </update>
+        <update tableName="books">
+            <column name="image_url" value="/images/books/zamanın kısa tarihi.jpg"/>
+            <where>title = 'Zamanın Kısa Tarihi'</where>
+        </update>
+        <update tableName="books">
+            <column name="image_url" value="/images/books/başlangıç.jpg"/>
+            <where>title = 'Başlangıç'</where>
+        </update>
+        <update tableName="books">
+            <column name="image_url" value="/images/books/beyoğlu rapsodisi.jpg"/>
+            <where>title = 'Beyoğlu Rapsodisi'</where>
+        </update>
+        <update tableName="books">
+            <column name="image_url" value="/images/books/olasılıksız.jpg"/>
+            <where>title = 'Olasılıksız'</where>
+        </update>
+        <update tableName="books">
+            <column name="image_url" value="/images/books/harryPotter.png"/>
+            <where>title like 'Harry Potter%'</where>
+        </update>
+        <update tableName="books">
+            <column name="image_url" value="/images/books/19844.jpg"/>
+            <where>title = '1984'</where>
+        </update>
+        <update tableName="books">
+            <column name="image_url" value="/images/books/bir idam mahkumunun son günü.jpg"/>
+            <where>title = 'Bir İdam Mahkumunun Son Günü'</where>
+        </update>
+        <update tableName="books">
+            <column name="image_url" value="/images/books/bir kadının yaşamından 24 saat.jpg"/>
+            <where>title = 'Bir Kadının Yaşamından 24 Saat'</where>
+        </update>
+        <update tableName="books">
+            <column name="image_url" value="/images/books/cankaya.png"/>
+            <where>title = 'Çankaya'</where>
+        </update>
+        <update tableName="books">
+            <column name="image_url" value="/images/books/olağanüstü bir gece.jpg"/>
+            <where>title = 'Olağanüstü Bir Gece'</where>
+        </update>
+        <update tableName="books">
+            <column name="image_url" value="/images/books/serenad.jpg"/>
+            <where>title = 'Serenad'</where>
+        </update>
+        <update tableName="books">
+            <column name="image_url" value="/images/books/uçurtma avcısı.jpg"/>
+            <where>title = 'Uçurtma Avcısı'</where>
+        </update>
+        <update tableName="books">
+            <column name="image_url" value="/images/books/yeraltından notlar.jpg"/>
+            <where>title = 'Yeraltından Notlar'</where>
+        </update>
+    </changeSet>
+</databaseChangeLog> 
