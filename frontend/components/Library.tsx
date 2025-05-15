@@ -454,74 +454,106 @@ const Library = ({ activeTab = 'all' }: LibraryProps): JSX.Element => {
         <div className={`transition-all duration-300 ${isSidebarOpen ? 'ml-48' : 'ml-12'}`}>
           <div className="max-w-7xl mx-auto px-6 pb-12">
             <div className="relative bg-[#6B4423] dark:bg-[#523018] rounded-3xl p-8 shadow-2xl">
-              <div className="absolute inset-0 opacity-30 rounded-3xl" style={{
-                backgroundImage: `repeating-linear-gradient(
-                  90deg,
-                  #000 0px,
-                  #000 2px,
-                  transparent 2px,
-                  transparent 20px
-                )`
-              }}></div>
+              {/* Arka plan çizgileri */}
+              <div 
+                className="absolute inset-0 opacity-40 rounded-3xl" 
+                style={{
+                  backgroundImage: `repeating-linear-gradient(
+                    90deg,
+                    #000 0px,
+                    #000 2px,
+                    transparent 2px,
+                    transparent 20px
+                  )`
+                }}
+              />
 
               <div className="relative space-y-12">
                 {[0, 1, 2].map((shelf) => (
-                  <div key={shelf} className="relative">
-                    <div className="relative min-h-[280px]">
-                      <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-x-6 gap-y-12 items-end">
-                        {filteredBooks.slice(shelf * 8, (shelf + 1) * 8).map((book) => (
-                          <motion.div
-                            key={book.id}
-                            className="group relative flex flex-col"
-                            whileHover={{ y: -5 }}
-                            transition={{ duration: 0.2 }}
+                  <div key={shelf} className="relative mb-16">
+                    {/* Kitaplar */}
+                    <div className="relative z-10 min-h-[220px] flex items-end gap-4 px-4 pb-6">
+                      {filteredBooks.slice(shelf * 8, (shelf + 1) * 8).map((book) => (
+                        <motion.div
+                          key={book.id}
+                          className="relative group"
+                          initial={{ y: 0 }}
+                          whileHover={{ 
+                            y: -24,
+                            rotateY: 5,
+                            transition: { duration: 0.3 }
+                          }}
+                          style={{
+                            transformStyle: 'preserve-3d',
+                            perspective: '1000px'
+                          }}
+                        >
+                          <div 
+                            className="relative w-[120px] h-[180px] rounded-lg overflow-hidden transition-transform duration-300"
+                            style={{
+                              transformOrigin: 'bottom',
+                              boxShadow: `
+                                0 4px 6px -1px rgba(0, 0, 0, 0.2),
+                                0 2px 4px -1px rgba(0, 0, 0, 0.1),
+                                -5px 5px 15px rgba(0, 0, 0, 0.2)
+                              `
+                            }}
                           >
-                            <Link href={`/features/book/${book.id}`}>
-                              <div className="relative aspect-[2/3] w-full overflow-hidden rounded-xl shadow-lg transition-all duration-300 group-hover:shadow-xl">
-                                <Image
-                                  src={book.imageUrl ?? "/placeholder.svg"}
-                                  alt={book.title}
-                                  fill
-                                  className="object-cover transition-transform duration-300 group-hover:scale-105"
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                                
-                                <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-full transition-transform duration-300 group-hover:translate-y-0">
-                                  <p className="text-white font-medium line-clamp-2 text-sm">{book.title}</p>
-                                  <p className="text-white/80 text-xs mt-1">{book.author}</p>
-                                </div>
+                            {/* Kitap kapağı */}
+                            <Image
+                              src={book.imageUrl || '/placeholder-book.png'}
+                              alt={book.title}
+                              fill
+                              className="object-cover rounded-lg"
+                              sizes="120px"
+                            />
+                            
+                            {/* Kitap alt gölgesi */}
+                            <div 
+                              className="absolute bottom-0 left-0 right-0 h-12"
+                              style={{
+                                background: 'linear-gradient(to top, rgba(0,0,0,0.4) 0%, transparent 100%)'
+                              }}
+                            />
+                          </div>
 
-                                {/* Status Badge */}
-                                <StatusBadge status={book.status?.toUpperCase() as 'READING' | 'READ' | 'WILL_READ' | 'DROPPED' | null} />
-                              </div>
-                            </Link>
-                          </motion.div>
-                        ))}
-                      </div>
+                          {/* Kitap gölgesi */}
+                          <div 
+                            className="absolute bottom-[-20px] left-1/2 w-[80%] h-4 -translate-x-1/2"
+                            style={{
+                              background: 'radial-gradient(ellipse at center, rgba(0,0,0,0.25) 0%, transparent 80%)',
+                              transform: 'rotateX(60deg)'
+                            }}
+                          />
+
+                          {/* Kitap bilgileri tooltip */}
+                          <div className="absolute -top-20 left-1/2 -translate-x-1/2 bg-white dark:bg-gray-800 p-2 rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 w-48 z-20">
+                            <p className="font-medium text-sm truncate">{book.title}</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{book.author}</p>
+                          </div>
+                        </motion.div>
+                      ))}
                     </div>
 
-                    <div className="absolute bottom-0 left-0 right-0 h-10 pointer-events-none">
-                      <div className="h-4 bg-[#8B5E3C] dark:bg-[#6B4423] rounded-t-sm shadow-inner">
-                        <div className="absolute inset-0 opacity-20" style={{
-                          backgroundImage: `repeating-linear-gradient(
-                            90deg,
-                            #000 0px,
-                            #000 1px,
-                            transparent 1px,
-                            transparent 10px
-                          )`
-                        }}></div>
-                      </div>
-                      <div className="h-6 bg-gradient-to-b from-[#6B4423] to-[#523018] transform -skew-y-1 rounded-b-sm">
-                        <div className="absolute inset-0 opacity-10" style={{
-                          backgroundImage: `repeating-linear-gradient(
-                            90deg,
-                            #000 0px,
-                            #000 1px,
-                            transparent 1px,
-                            transparent 10px
-                          )`
-                        }}></div>
+                    {/* Raf */}
+                    <div className="absolute bottom-0 left-0 right-0">
+                      {/* Tek parça raf */}
+                      <div className="h-4 bg-[#3D2813] dark:bg-[#2B1C0E]">
+                        {/* Hafif üst gölge */}
+                        <div 
+                          className="absolute top-0 left-0 right-0 h-[1px]"
+                          style={{
+                            background: 'rgba(0,0,0,0.2)'
+                          }}
+                        />
+                        
+                        {/* Alt gölge */}
+                        <div 
+                          className="absolute -bottom-2 left-0 right-0 h-2"
+                          style={{
+                            background: 'linear-gradient(180deg, rgba(0,0,0,0.15) 0%, transparent 100%)'
+                          }}
+                        />
                       </div>
                     </div>
                   </div>
