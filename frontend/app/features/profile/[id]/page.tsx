@@ -959,18 +959,22 @@ export default function ProfilePage() {
         {deleteConfirmModal}
         {/* Profile Header */}
         <div className="relative h-64 rounded-lg mb-24">
-          <div className="absolute inset-0 bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600">
+          <div className="absolute inset-0">
             {profile.headerImage ? (
               <Image
                 src={profile.headerImage}
                 alt="Header"
                 fill
-                className="object-cover mix-blend-overlay"
+                className="object-cover"
               />
             ) : (
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600" />
+              <Image
+                src="/images/header.png"
+                alt="Header Default"
+                fill
+                className="object-cover"
+              />
             )}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
           </div>
 
           {/* Profile Image and Buttons Container */}
