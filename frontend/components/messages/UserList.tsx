@@ -25,6 +25,7 @@ export function UserList({ onSelectUser, selectedUserId, searchQuery }: UserList
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [unreadMessages, setUnreadMessages] = useState<Message[]>([]);
+  const [visibleCount, setVisibleCount] = useState(6); // Başlangıçta 6 kullanıcı göster
 
   // Rastgele bir renk döndüren yardımcı fonksiyon
   const getRandomColor = (name: string) => {
@@ -101,6 +102,7 @@ export function UserList({ onSelectUser, selectedUserId, searchQuery }: UserList
   // Arama terimi değiştiğinde kullanıcıları yeniden yükle
   useEffect(() => {
     loadUsers();
+    setVisibleCount(6); // Arama değişince başa dön
   }, [searchQuery, unreadMessages]);
 
   // Seçili kullanıcı değiştiğinde veya her 5 saniyede bir okunmamış mesajları kontrol et
@@ -125,7 +127,7 @@ export function UserList({ onSelectUser, selectedUserId, searchQuery }: UserList
 
   return (
     <div className="space-y-2">
-      {users.map((user) => {
+      {users.slice(0, visibleCount).map((user) => {
         const userColor = getRandomColor(user.nameSurname);
         const avatarUrl = `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`;
         return (
@@ -190,6 +192,16 @@ export function UserList({ onSelectUser, selectedUserId, searchQuery }: UserList
           </button>
         );
       })}
+      {users.length > visibleCount && (
+        <div className="flex justify-center mt-2">
+          <button
+            onClick={() => setVisibleCount((prev) => prev + 6)}
+            className="px-4 py-2 rounded-lg bg-purple-100 text-purple-700 hover:bg-purple-200 transition-colors text-sm font-medium shadow"
+          >
+            Daha fazla göster
+          </button>
+        </div>
+      )}
       {users.length === 0 && (
         <div className="text-center py-8 text-gray-500 dark:text-gray-400 animate-fadeIn">
           <p className="text-lg mb-2">Kullanıcı bulunamadı</p>

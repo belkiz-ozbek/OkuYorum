@@ -250,86 +250,98 @@ export default function MessagesPage() {
           </Card>
 
           {/* Sağ Panel - Mesajlaşma Alanı */}
-          <Card className="glass-card neumorphic md:col-span-2 overflow-hidden">
+          <Card className="glass-card neumorphic md:col-span-2 overflow-hidden flex flex-col h-[calc(100vh-8rem)]">
             {selectedUser ? (
-              <div className="flex flex-col h-[calc(100vh-8rem)]">
+              <>
                 <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar">
-                  {messages.map((message) => {
-                    const isOwn = message.sender && message.sender.id === currentUser?.id;
-                    const userColor = getRandomColor(message.sender?.nameSurname || message.sender?.username || '');
-                    const avatarUrl = `https://api.dicebear.com/7.x/avataaars/svg?seed=${message.sender?.username}`;
-                    return (
-                      <div
-                        key={getUniqueMessageKey(message)}
-                        className={`flex items-end gap-3 ${isOwn ? 'justify-end' : 'justify-start'} group animate-fadeIn`}
-                      >
-                        {!isOwn && (
-                          <Avatar className="h-10 w-10 ring-2 ring-white/30 shadow-xl transition-transform hover:scale-110">
-                            <AvatarImage 
-                              src={avatarUrl}
-                              alt={message.sender?.username}
-                              className="object-cover"
-                            />
-                            <AvatarFallback className={`${userColor} text-white font-medium`}>
-                              {(message.sender?.nameSurname || message.sender?.username || '')
-                                .split(' ')
-                                .map((n) => n[0])
-                                .join('')}
-                            </AvatarFallback>
-                          </Avatar>
-                        )}
-                        <div
-                          className={`message-bubble relative max-w-[70%] group ${
-                            isOwn
-                              ? 'bg-gradient-to-br from-purple-500 to-indigo-600 text-white'
-                              : 'bg-white/90 dark:bg-gray-800/90'
-                          } rounded-2xl px-6 py-3 shadow-lg`}
-                        >
-                          <p className="text-[15px] leading-relaxed mb-2">{message.content}</p>
-                          <div className={`flex items-center gap-2 text-xs ${isOwn ? 'text-purple-200' : 'text-gray-400'}`}>
-                            <span>{format(new Date(message.createdAt), 'HH:mm', { locale: tr })}</span>
-                            {isOwn && (
-                              <span className="flex items-center">
-                                {message.isRead ? (
-                                  <CheckCheck className="h-4 w-4" />
-                                ) : (
-                                  <Check className="h-4 w-4" />
+                  {messages.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center h-full text-center animate-fadeIn">
+                      <div className="w-20 h-20 mb-4 rounded-full bg-gradient-to-br from-purple-400/30 to-indigo-400/30 flex items-center justify-center">
+                        <Send className="h-10 w-10 text-purple-400/70 transform -rotate-45 animate-pulse" />
+                      </div>
+                      <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-2">Henüz mesaj yok</h3>
+                      <p className="text-base text-gray-500 dark:text-gray-400">İlk mesajı yazmak için aşağıdaki kutucuğu kullanabilirsiniz.</p>
+                    </div>
+                  ) : (
+                    <>
+                      {messages.map((message) => {
+                        const isOwn = message.sender && message.sender.id === currentUser?.id;
+                        const userColor = getRandomColor(message.sender?.nameSurname || message.sender?.username || '');
+                        const avatarUrl = `https://api.dicebear.com/7.x/avataaars/svg?seed=${message.sender?.username}`;
+                        return (
+                          <div
+                            key={getUniqueMessageKey(message)}
+                            className={`flex items-end gap-3 ${isOwn ? 'justify-end' : 'justify-start'} group animate-fadeIn`}
+                          >
+                            {!isOwn && (
+                              <Avatar className="h-10 w-10 ring-2 ring-white/30 shadow-xl transition-transform hover:scale-110">
+                                <AvatarImage 
+                                  src={avatarUrl}
+                                  alt={message.sender?.username}
+                                  className="object-cover"
+                                />
+                                <AvatarFallback className={`${userColor} text-white font-medium`}>
+                                  {(message.sender?.nameSurname || message.sender?.username || '')
+                                    .split(' ')
+                                    .map((n) => n[0])
+                                    .join('')}
+                                </AvatarFallback>
+                              </Avatar>
+                            )}
+                            <div
+                              className={`message-bubble relative max-w-[70%] group ${
+                                isOwn
+                                  ? 'bg-gradient-to-br from-purple-500 to-indigo-600 text-white'
+                                  : 'bg-white/90 dark:bg-gray-800/90'
+                              } rounded-2xl px-6 py-3 shadow-lg`}
+                            >
+                              <p className="text-[15px] leading-relaxed mb-2">{message.content}</p>
+                              <div className={`flex items-center gap-2 text-xs ${isOwn ? 'text-purple-200' : 'text-gray-400'}`}>
+                                <span>{format(new Date(message.createdAt), 'HH:mm', { locale: tr })}</span>
+                                {isOwn && (
+                                  <span className="flex items-center">
+                                    {message.isRead ? (
+                                      <CheckCheck className="h-4 w-4" />
+                                    ) : (
+                                      <Check className="h-4 w-4" />
+                                    )}
+                                  </span>
                                 )}
-                              </span>
+                              </div>
+                              {isOwn && (
+                                <button
+                                  onClick={() => message.id && handleDeleteMessage(message.id)}
+                                  className="absolute right-0 top-0 -mt-2 -mr-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform hover:scale-110"
+                                >
+                                  <div className="bg-red-500/90 backdrop-blur-sm rounded-full p-1.5 shadow-lg hover:bg-red-600 transition-colors">
+                                    <Trash2 className="h-3.5 w-3.5 text-white" />
+                                  </div>
+                                </button>
+                              )}
+                            </div>
+                            {isOwn && (
+                              <Avatar className="h-10 w-10 ring-2 ring-white/30 shadow-xl transition-transform hover:scale-110">
+                                <AvatarImage 
+                                  src={avatarUrl}
+                                  alt={message.sender?.username}
+                                  className="object-cover"
+                                />
+                                <AvatarFallback className={`${userColor} text-white font-medium`}>
+                                  {(message.sender?.nameSurname || message.sender?.username || '')
+                                    .split(' ')
+                                    .map((n) => n[0])
+                                    .join('')}
+                                </AvatarFallback>
+                              </Avatar>
                             )}
                           </div>
-                          {isOwn && (
-                            <button
-                              onClick={() => message.id && handleDeleteMessage(message.id)}
-                              className="absolute right-0 top-0 -mt-2 -mr-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform hover:scale-110"
-                            >
-                              <div className="bg-red-500/90 backdrop-blur-sm rounded-full p-1.5 shadow-lg hover:bg-red-600 transition-colors">
-                                <Trash2 className="h-3.5 w-3.5 text-white" />
-                              </div>
-                            </button>
-                          )}
-                        </div>
-                        {isOwn && (
-                          <Avatar className="h-10 w-10 ring-2 ring-white/30 shadow-xl transition-transform hover:scale-110">
-                            <AvatarImage 
-                              src={avatarUrl}
-                              alt={message.sender?.username}
-                              className="object-cover"
-                            />
-                            <AvatarFallback className={`${userColor} text-white font-medium`}>
-                              {(message.sender?.nameSurname || message.sender?.username || '')
-                                .split(' ')
-                                .map((n) => n[0])
-                                .join('')}
-                            </AvatarFallback>
-                          </Avatar>
-                        )}
-                      </div>
-                    );
-                  })}
-                  <div ref={messagesEndRef} />
+                        );
+                      })}
+                      <div ref={messagesEndRef} />
+                    </>
+                  )}
                 </div>
-                <div className="sticky bottom-0 p-6 bg-white/30 dark:bg-gray-800/30 backdrop-blur-xl border-t border-white/10">
+                <div className="mt-auto p-6 bg-white/30 dark:bg-gray-800/30 backdrop-blur-xl border-t border-white/10">
                   <div className="relative flex items-center gap-3">
                     <Input
                       type="text"
@@ -348,7 +360,7 @@ export default function MessagesPage() {
                     </Button>
                   </div>
                 </div>
-              </div>
+              </>
             ) : (
               <div className="flex flex-col items-center justify-center h-[calc(100vh-8rem)] text-center p-8">
                 <div className="w-24 h-24 mb-6 rounded-full bg-gradient-to-br from-purple-400/30 to-indigo-400/30 flex items-center justify-center animate-float">
