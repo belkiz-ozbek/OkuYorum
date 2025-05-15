@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
+
+    <!-- Add book counts and ratings for kiraathanes -->
+    <changeSet id="20240601-kiraathane-ratings-and-books" author="belkiz.ozbek">
+        <!-- Add book counts for Bakırköy and Sincan kiraathanes -->
+        <update tableName="kiraathanes">
+            <column name="book_count" valueNumeric="3500"/>
+            <where>id = 14</where> <!-- Bakırköy Kıraathanesi -->
+        </update>
+        
+        <update tableName="kiraathanes">
+            <column name="book_count" valueNumeric="2800"/>
+            <where>id = 12</where> <!-- Sincan Millet Kıraathanesi -->
+        </update>
+        
+        <!-- Add ratings for all kiraathanes that might not have them -->
+        <!-- Existing kiraathanes -->
+        <update tableName="kiraathanes">
+            <column name="average_rating" valueNumeric="4.7"/>
+            <where>id = 6 AND average_rating = 0</where> <!-- Merkezefendi Millet Kıraathanesi -->
+        </update>
+        
+        <update tableName="kiraathanes">
+            <column name="average_rating" valueNumeric="4.5"/>
+            <where>id = 7 AND average_rating = 0</where> <!-- Saimekadın Millet Kıraathanesi -->
+        </update>
+        
+        <update tableName="kiraathanes">
+            <column name="average_rating" valueNumeric="4.8"/>
+            <where>id = 8 AND average_rating = 0</where> <!-- Karesi Millet Kıraathanesi -->
+        </update>
+        
+        <update tableName="kiraathanes">
+            <column name="average_rating" valueNumeric="4.6"/>
+            <where>id = 9 AND average_rating = 0</where> <!-- Dede Millet Kıraathanesi -->
+        </update>
+        
+        <update tableName="kiraathanes">
+            <column name="average_rating" valueNumeric="4.4"/>
+            <where>id = 10 AND average_rating = 0</where> <!-- Beştelsiz Millet Kıraathanesi -->
+        </update>
+        
+        <!-- Add ratings for Bakırköy and Sincan kiraathanes -->
+        <update tableName="kiraathanes">
+            <column name="average_rating" valueNumeric="4.9"/>
+            <where>id = 14</where> <!-- Bakırköy Kıraathanesi -->
+        </update>
+        
+        <update tableName="kiraathanes">
+            <column name="average_rating" valueNumeric="4.6"/>
+            <where>id = 12</where> <!-- Sincan Millet Kıraathanesi -->
+        </update>
+        
+        <!-- Add rating count for all kiraathanes -->
+        <update tableName="kiraathanes">
+            <column name="total_ratings" valueNumeric="125"/>
+            <where>id = 6 AND total_ratings = 0</where>
+        </update>
+        
+        <update tableName="kiraathanes">
+            <column name="total_ratings" valueNumeric="98"/>
+            <where>id = 7 AND total_ratings = 0</where>
+        </update>
+        
+        <update tableName="kiraathanes">
+            <column name="total_ratings" valueNumeric="156"/>
+            <where>id = 8 AND total_ratings = 0</where>
+        </update>
+        
+        <update tableName="kiraathanes">
+            <column name="total_ratings" valueNumeric="87"/>
+            <where>id = 9 AND total_ratings = 0</where>
+        </update>
+        
+        <update tableName="kiraathanes">
+            <column name="total_ratings" valueNumeric="112"/>
+            <where>id = 10 AND total_ratings = 0</where>
+        </update>
+        
+        <update tableName="kiraathanes">
+            <column name="total_ratings" valueNumeric="178"/>
+            <where>id = 14</where> <!-- Bakırköy Kıraathanesi -->
+        </update>
+        
+        <update tableName="kiraathanes">
+            <column name="total_ratings" valueNumeric="145"/>
+            <where>id = 12</where> <!-- Sincan Millet Kıraathanesi -->
+        </update>
+        
+        <!-- Add total_rating_sum for calculations -->
+        <update tableName="kiraathanes">
+            <column name="total_rating_sum" valueComputed="average_rating * total_ratings"/>
+            <where>id = 6 AND total_rating_sum = 0</where>
+        </update>
+        
+        <update tableName="kiraathanes">
+            <column name="total_rating_sum" valueComputed="average_rating * total_ratings"/>
+            <where>id = 7 AND total_rating_sum = 0</where>
+        </update>
+        
+        <update tableName="kiraathanes">
+            <column name="total_rating_sum" valueComputed="average_rating * total_ratings"/>
+            <where>id = 8 AND total_rating_sum = 0</where>
+        </update>
+        
+        <update tableName="kiraathanes">
+            <column name="total_rating_sum" valueComputed="average_rating * total_ratings"/>
+            <where>id = 9 AND total_rating_sum = 0</where>
+        </update>
+        
+        <update tableName="kiraathanes">
+            <column name="total_rating_sum" valueComputed="average_rating * total_ratings"/>
+            <where>id = 10 AND total_rating_sum = 0</where>
+        </update>
+        
+        <update tableName="kiraathanes">
+            <column name="total_rating_sum" valueNumeric="872.2"/>
+            <where>id = 14</where> <!-- Bakırköy Kıraathanesi (4.9 * 178) -->
+        </update>
+        
+        <update tableName="kiraathanes">
+            <column name="total_rating_sum" valueNumeric="667.0"/>
+            <where>id = 12</where> <!-- Sincan Millet Kıraathanesi (4.6 * 145) -->
+        </update>
+    </changeSet>
+</databaseChangeLog>
