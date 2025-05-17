@@ -60,7 +60,7 @@ export const DiscoverFilters: React.FC<DiscoverFiltersProps> = ({
           className={cn(
             "rounded-full px-4 transition-all duration-300",
             sort === 'recent'
-              ? "bg-purple-500/90 hover:bg-purple-600 text-white shadow-lg shadow-purple-500/20"
+              ? "bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white shadow-lg shadow-purple-500/20"
               : "hover:bg-purple-500/10 hover:text-purple-600"
           )}
           onClick={() => onSortChange('recent')}

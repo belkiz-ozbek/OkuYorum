@@ -44,7 +44,7 @@ export const DiscoverHeader: React.FC<DiscoverHeaderProps> = ({
 
         <Button
           variant="default"
-          className="rounded-full bg-purple-500/90 hover:bg-purple-600 text-white shadow-lg shadow-purple-500/20 transition-all duration-300"
+          className="rounded-full bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white shadow-lg shadow-purple-500/20 transition-all duration-300"
           onClick={onOpenCreate}
         >
           <PlusCircle className="h-4 w-4 mr-2" />
